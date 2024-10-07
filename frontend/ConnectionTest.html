@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<script>
+    const socket = new WebSocket("ws://localhost:8080");
+
+    // Connection opened
+    socket.addEventListener("open", (event) => {
+        socket.send(JSON.stringify({
+            method: "CardScan",
+            id_ucznia: prompt("Id ucznia"),
+            timestamp: String(prompt("Time stamp"))
+        }))
+    });
+
+    // Listen for messages
+    socket.addEventListener("message", (event) => {
+        console.log("Message incoming from the server: ", event.data);
+    });
+</script>
+</body>
+</html>
