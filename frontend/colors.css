@@ -1,0 +1,20 @@
+@font-face {
+    font-family: 'Inter';
+    src: url("fonts/Inter-Medium.woff2") format("woff2");
+    font-style: normal;
+    font-weight: normal;
+}
+@font-face {
+    font-family: 'Inter Light';
+    src: url("fonts/Inter-Light.woff2") format("woff2");
+    font-style: normal;
+    font-weight: normal;
+}
+:root {
+    --background-color: #fffdfb;
+    --primary-color: #cfd5e3;
+    --secondary-color: #a1aab9;
+    --accent-color: #666a8f;
+    --border-color: #525876;
+    --text-color: #212121;
+}
