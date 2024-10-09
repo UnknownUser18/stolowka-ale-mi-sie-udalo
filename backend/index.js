@@ -45,14 +45,16 @@ wss.on('connection', function connection(ws) {
     });
 
 });
-const password = process.argv.slice(2,4)[0]
-const dbpassword = process.argv.slice(2,4)[1]
+const password = process.argv.slice(2,6)[0]
+const dbpassword = process.argv.slice(2,6)[1]
+const dbhost = process.argv.slice(2,6)[2]
+const dbport = process.argv.slice(2,6)[3]
 
 const database = mysql.createConnection({
-    host: "kejpa.duckdns.org",
+    host: dbhost.toString(),
+    port: parseInt(dbport),
     user: "root",
-    password: dbpassword,
-    database: "kapa"
+    password: dbpassword.toString(),
 })
 function CardScan(id_karty, timestamp)
 {
