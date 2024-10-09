@@ -1,0 +1,122 @@
+body {
+    padding: 0;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+}
+nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 15%;
+    height: 100%;
+    background-color: var(--primary-color);
+}
+h1 {
+    font-size: 3em;
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+}
+main {
+    width: calc(85% - 20px);
+    padding: 10px;
+    margin-left: 15%;
+}
+section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+nav div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+nav button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1.618em;
+    margin: 10px 0;
+    color: var(--text-color);
+    border: none;
+    cursor: pointer;
+    transition: 150ms ease-in-out all;
+}
+nav button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+#nav_header {
+    text-align: center;
+}
+#strona_glowna > article {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    background-color: var(--secondary-color);
+    padding: 10px;
+    border-radius: 10px;
+    width: 80%;
+    height: 80%;
+    margin: 10px auto;
+    border: 2px solid var(--border-color);
+}
+#strona_glowna > article button {
+    height: fit-content;
+    font-family: 'Inter', sans-serif;
+    font-size: 2em;
+    transition: 150ms ease-in-out all;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    padding: 5px 10px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#strona_glowna > article button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+#l_uczniow h2 {
+    font-size: 2.8em;
+    text-align: center;
+}
+#l_uczniow article {
+    background-color: var(--primary-color);
+    padding: 10px;
+    border-radius: 10px;
+    width: 50%;
+    margin: 10px auto;
+    border: 2px solid var(--border-color);
+}
+#l_uczniow .uczen {
+    padding: 10px;
+    margin: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#l_uczniow article span {
+    font-size: 2em;
+    margin: 5px;
+}
+#l_uczniow button {
+    transition: 150ms ease-in-out all;
+    border: 2px var(--accent-color) solid;
+    margin: 5px;
+    padding: 5px 10px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 1.5em;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#l_uczniow button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}

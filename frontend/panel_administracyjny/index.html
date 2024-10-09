@@ -1,10 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../colors.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Panel Administracyjny</title>
 </head>
 <body>
-
+    <nav>
+        <h2 id="nav_header">Strona Główna</h2>
+        <div>
+            <button>Edytuj</button><button>Kalendarz</button><button>Raport</button><button>Usuń</button>
+        </div>
+    </nav>
+    <main>
+        <section id="strona_glowna">
+            <h1>Panel Administracyjny</h1>
+            <article>
+                <button id="lista_uczniow">Lista Uczniów</button>
+            </article>
+        </section>
+        <section id="l_uczniow">
+            <h2>Lista Uczniów</h2>
+            <article>
+                <div class="uczen">
+                    <span>Jacek Blaterek</span><button>Zaznacz</button>
+                    <span>Dżacek Gyatterek</span><button>Zaznacz</button>
+                </div>
+            </article>
+        </section>
+        <script src="script.js"></script>
+    </main>
 </body>
 </html>
