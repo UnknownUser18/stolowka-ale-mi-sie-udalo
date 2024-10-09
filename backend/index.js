@@ -25,6 +25,7 @@ const wss = new ws.WebSocketServer({
 });
 
 wss.on('connection', function connection(ws) {
+
     ws.send("Succesfully connected to the server")
 
     ws.on('error', console.error);
@@ -36,22 +37,40 @@ wss.on('connection', function connection(ws) {
                 case "CardScan":
                     CardScan(object.id_ucznia, object.timestamp);
                     break;
+                case "AnyQuery":
+                    QueryExecute(object.query, object.password);
+                    break;
             }
         }
     });
 
 });
-
+const password = process.argv.slice(2,4)[0]
+const dbpassword = process.argv.slice(2,4)[1]
 
 const database = mysql.createConnection({
     host: "kejpa.duckdns.org",
     user: "root",
-    password: "kapa1Gkf!!jfFg",
+    password: dbpassword,
     database: "kapa"
 })
 function CardScan(id_karty, timestamp)
 {
     let query = "INSERT INTO skan (id_karty, time) VALUES(" + id_karty + ",'" + timestamp +"')"
-    return database.query(query, (err, res) => {console.log(err)
-    console.log(res)})
+    return database.query(query, (err, res) => {
+        console.log(err); console.log(res)
+        return err;})
+}
+
+function QueryExecute(query, pass) {
+    if(password === pass)
+    {
+        database.query(query, (err, res) => {
+            console.log(err); console.log(res)
+            return err;
+        })
+    }
+    else{
+        return -1;
+    }
 }
