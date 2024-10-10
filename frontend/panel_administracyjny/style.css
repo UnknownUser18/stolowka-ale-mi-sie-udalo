@@ -6,6 +6,7 @@ body {
     font-family: 'Inter', sans-serif;
 }
 nav {
+    z-index: 5;
     position: absolute;
     top: 0;
     left: 0;
@@ -50,7 +51,67 @@ nav button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
-#nav_header {
+.kalendarz {
+    width: 70%;
+    background-color: var(--primary-color);
+    padding: 10px;
+    border-radius: 10px;
+    margin-left: 15%;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.5);
+}
+.week {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 10px 0;
+    background-color: var(--secondary-color);
+    padding: 10px;
+    border-radius: 10px;
+}
+.day {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--primary-color);
+    padding: 10px;
+    border-radius: 10px;
+    width: 70px;
+    height: 70px;
+    margin: 5px;
+    border: 2px solid var(--border-color);
+    font-size: 1.618em;
+}
+div.day {
+    background-color: inherit;
+    border: 0;
+    cursor: default;
+    padding: 0;
+}
+#kalendarz_dni {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    width: 100%;
+}
+#kalendarz_background {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+#header {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+#nav_header, #current_date {
     text-align: center;
 }
 #strona_glowna > article {
