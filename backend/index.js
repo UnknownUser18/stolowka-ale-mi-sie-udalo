@@ -23,14 +23,14 @@ const wss = new ws.WebSocketServer({
         // should not be compressed if context takeover is disabled.
     }
 });
-
+console.log("Waiting for connection...");
 wss.on('connection', function connection(ws) {
 
     ws.send("Succesfully connected to the server")
 
     ws.on('error', console.error);
 
-    ws.on('message', function message(data) {
+    ws.on('message', function message(data, callback) {
         if(typeof data == 'object') {
             let object = JSON.parse(data.toString())
             switch (object.method) {
@@ -39,6 +39,9 @@ wss.on('connection', function connection(ws) {
                     break;
                 case "AnyQuery":
                     QueryExecute(object.query, object.password);
+                    break;
+                case "StudentList":
+                    StudentList(ws ,object.condition);
                     break;
             }
         }
@@ -51,28 +54,58 @@ const dbhost = process.argv.slice(2,6)[2]
 const dbport = process.argv.slice(2,6)[3]
 
 const database = mysql.createConnection({
-    host: dbhost.toString(),
-    port: parseInt(dbport),
+    host: "7.tcp.eu.ngrok.io",
+    port: 14363,
     user: "root",
-    password: dbpassword.toString(),
+    password: "niger",
+    database: "stolowka"
 })
 function CardScan(id_karty, timestamp)
 {
     let query = "INSERT INTO skan (id_karty, time) VALUES(" + id_karty + ",'" + timestamp +"')"
     return database.query(query, (err, res) => {
-        console.log(err); console.log(res)
-        return err;})
+        console.log("Error of " + query + " - :" +err);
+        console.log(res);
+        return res;
+    })
 }
 
-function QueryExecute(query, pass) {
-    if(password === pass)
-    {
-        database.query(query, (err, res) => {
-            console.log(err); console.log(res)
-            return err;
-        })
-    }
-    else{
-        return -1;
-    }
+function QueryExecute(websocketClient,query, pass, responseBool, variable) {
+    if(password !== pass)
+        return -1
+    database.query(query, (err, result) => {
+        console.log("Error of " + query + " - :" +err);
+        console.log("Result of " + query + " - :" +result);
+        if(!responseBool)
+            return result;
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: variable,
+                    value: result
+                }
+            }))
+    })
+}
+function StudentList(websocketClient ,condition)
+{
+    let query = "SELECT * FROM uczniowie";
+    if(condition!=="")
+        query += " WHERE " + condition;
+    query+= ";"
+    database.query(query, function (err, result) {
+        if (err) throw err;
+
+        console.log(result);
+        websocketClient.send(
+            JSON.stringify(
+            {
+            action: "response",
+            params: {
+                variable: "StudentList",
+                value: result
+            }
+        }))
+    });
 }
