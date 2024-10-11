@@ -22,11 +22,24 @@
     })
     let CalendarStudent = {};
     const kalendarz = JSON.stringify({
-        method: "CalendarStudent",
-        id_ucznia: 1,
-        relationBool: true,
-        isAll: true
+        action: "request",
+        params: {
+            method: "CalendarStudent",
+            id_ucznia: 1,
+            relationBool: true,
+            isAll: true
+        }
     })
+    let StudentMeal;
+    const posilek = JSON.stringify(
+        {
+            action: "request",
+            params: {
+                method: "StudentMeal",
+                id_ucznia: 1
+            }
+        }
+    )
     // const any = JSON.stringify({
     //     method: "AnyQuery",
     //     query: "Select * FROM tabela",
@@ -34,7 +47,7 @@
     // })
     // Connection opened
     socket.addEventListener("open", (event) => {
-        socket.send(kalendarz);
+        socket.send(posilek);
     });
     let lastValue;
     // Listen for messages
@@ -48,6 +61,9 @@
                 break;
             case "CalendarStudent":
                 CalendarStudent = lastValue.params.value;
+                break;
+            case "StudentMeal":
+                StudentMeal = lastValue.params.value;
                 break;
         }
     });

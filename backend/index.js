@@ -32,23 +32,30 @@ wss.on('connection', function connection(ws) {
     ws.on('error', console.error);
 
     ws.on('message', function message(data) {
-        if(typeof data == 'object') {
-            let object = JSON.parse(data.toString())
-            switch (object.method) {
-                case "CardScan":
-                    CardScan(object.id_ucznia, object.timestamp);
-                    break;
-                case "AnyQuery":
-                    QueryExecute(object.query, object.password);
-                    break;
-                case "StudentList":
-                    StudentList(ws ,object.condition);
-                    break;
-                case "CalendarStudent":
-                    CalendarStudent(ws,  object.id_ucznia, object.relationBool, object.isAll);
-                    break;
-            }
+        if(typeof data != 'object')
+            return -1;
+        let object = JSON.parse(data)
+        if(object.action !== "request")
+            return -1;
+        let parameters = object.params;
+        switch (parameters.method) {
+            case "CardScan":
+                CardScan(parameters.id_ucznia, parameters.timestamp);
+                break;
+            case "AnyQuery":
+                QueryExecute(parameters.query, parameters.password, parameters.query, parameters.password, parameters.responseBool, parameters.variable);
+                break;
+            case "StudentList":
+                StudentList(ws ,parameters.condition);
+                break;
+            case "CalendarStudent":
+                CalendarStudent(ws,  parameters.id_ucznia, parameters.relationBool, parameters.isAll);
+                break;
+            case "StudentMeal":
+                StudentMeal(ws, parameters.id_ucznia);
+                break;
         }
+
     });
 });
 
@@ -59,12 +66,13 @@ const dbHost = process.argv.slice(2,6)[2]
 const dbPort = process.argv.slice(2,6)[3]
 
 const database = mysql.createConnection({
-    host: "7.tcp.eu.ngrok.io",
-    port: 14363,
+    host: dbHost,
+    port: dbPort,
     user: "root",
-    password: "niger",
+    password: dbPassword,
     database: "stolowka"
 })
+
 function CardScan(cardId, timestamp)
 {
     let query = "INSERT INTO skan (id_karty, time) VALUES(" + cardId + ",'" + timestamp +"')"
@@ -131,6 +139,26 @@ function CalendarStudent(websocketClient, studentId, relationBool, isAll)
                     action: "response",
                     params: {
                         variable: "CalendarStudent",
+                        value: result
+                    }
+                }
+            )
+        )
+    })
+}
+
+function StudentMeal(websocketClient, studentId)
+{
+    let query = "SELECT id_posilki FROM uczniowie WHERE id = " + studentId + ";";
+    database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "StudentMeal",
                         value: result
                     }
                 }
