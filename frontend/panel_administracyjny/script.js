@@ -34,17 +34,20 @@ const getDays = (year, month) => {
 }
 // console.log(firstDay.getDay()) //returns 0-6 (0 is sunday)
 // console.log(lastDay.getDay()) //returns 0-6 (0 is sunday)
-let currentMonth = 0
+// let currentMonth = new Date().getMonth()
+// let year = new Date().getFullYear()
+let date = new Date()
 function change_month(change) {
-    currentMonth += change
+    date = new Date(date.getFullYear(),date.getMonth() + change,date.getDay())
     generate_calendar()
 }
 let dni = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz']
 function generate_calendar() {
-    let date = new Date()
-    let firstDay = new Date(date.getFullYear(), date.getMonth() + currentMonth, 1)
-    let lastDay = new Date(date.getFullYear(), date.getMonth() + currentMonth, 0)
-
+    let year = date.getFullYear()
+    let currentMonth = date.getMonth()
+    let firstDay = new Date(year, currentMonth, 1)
+    let lastDay = new Date(year, currentMonth, 0)
+    console.log(currentMonth, year)
     kalendarz.innerHTML = ''
     document.getElementById('kalendarz_dni').innerHTML = ''
     document.getElementById('current_date').innerHTML = firstDay.toLocaleString('default', { month: 'long' }) + ' ' + firstDay.getFullYear()
@@ -61,12 +64,13 @@ function generate_calendar() {
         if (i < 7) {
             document.getElementById('kalendarz_dni').innerHTML += `<div>` + dni[i] + `</div>`
         }
-
+        console.log("first day "  + (firstDay.getDay() + i))
+        console.log("last day "  + (lastDay.getDay()))
+        console.log((firstDay.getDay() + i) % 7 === (firstDay.getDay()) + 1)
         if ((firstDay.getDay() + i) % 7 === (firstDay.getDay()) + 1) {
             kalendarz.innerHTML += `<div class="week"></div>`
             weekcount++
         }
-
         let week = document.getElementsByClassName('week')[weekcount]
         if (i < firstDay.getDay()) {
             week.innerHTML += `<div class="day"></div>`
@@ -83,11 +87,8 @@ function generate_calendar() {
 
         }
     }
-    let divs = []
-    let week = document.getElementsByClassName('week')[0]
-    week.querySelectorAll('div').forEach((div) => {
-        divs.push(div)
-    })
+    const week = document.getElementsByClassName('week')[0]
+    const divs = Array.from(week.querySelectorAll('div'))
     if(divs.length === 7) {
         document.getElementsByClassName('week')[0].remove()
     }
