@@ -67,7 +67,7 @@ function generate_calendar() {
         console.log("first day "  + (firstDay.getDay() + i))
         console.log("last day "  + (lastDay.getDay()))
         console.log((firstDay.getDay() + i) % 7 === (firstDay.getDay()) + 1)
-        if ((firstDay.getDay() + i) % 7 === (firstDay.getDay()) + 1) {
+        if ((firstDay.getDay() + i) % 7 === ((firstDay.getDay()) + 1) % 7){
             kalendarz.innerHTML += `<div class="week"></div>`
             weekcount++
         }
