@@ -25,7 +25,6 @@ document.getElementById('kalendarz').addEventListener('click', () => {
     else if(style === 'none') {
         document.getElementById('kalendarz_background').style.display = 'flex'
         change_month(0)
-        generate_calendar()
     }
 })
 let kalendarz = document.getElementById('kalendarz_content')
@@ -36,9 +35,72 @@ function change_month(change) {
     date = new Date(date.getFullYear(), date.getMonth() + change, 1) // Set day to 1 to avoid skipping months
     let date_next = new Date(date.getFullYear(), date.getMonth() + 1, 1)
     let date_back = new Date(date.getFullYear(), date.getMonth() - 1, 1)
-    document.getElementById('miesiac_nast').innerHTML = date_next.toLocaleString('default', {month : 'long' , year : 'numeric'}) + `<img src="arrow_forward.svg" alt="dalej">`
-    document.getElementById('miesiac_przed').innerHTML = `<img src="arrow_back.svg" alt="wstecz">` + date_back.toLocaleString('default', {month : 'long' , year : 'numeric'})
+    document.getElementById('miesiac_nast').innerHTML = date_next.toLocaleString('default', {month : 'long' , year : 'numeric'}) + `<img src="assets/arrow_forward.svg" alt="dalej">`
+    document.getElementById('miesiac_przed').innerHTML = `<img src="assets/arrow_back.svg" alt="wstecz">` + date_back.toLocaleString('default', {month : 'long' , year : 'numeric'})
     generate_calendar()
+    zaznacz()
+}
+let i = 0
+function zaznacz() {
+    document.getElementById('zaznacz').innerHTML = ''
+    const ilosc = document.getElementsByClassName('week').length
+    for(let i = 0; i < ilosc ; i++) {
+        document.getElementById('zaznacz').innerHTML += `<button onclick="zaznacz_wiersz(${i})">Zaznacz</button>`
+    }
+}
+let selected = []
+let selected_rows = []
+function zaznacz_wiersz(number) {
+    const week = document.getElementsByClassName('week')[number]
+    for(let i = 0; i < week.children.length; i++) {
+        if(!(week.children[i].classList.contains('empty')) && !(week.children[i].classList.contains('selected_row'))) {
+            week.children[i].classList.toggle('selected_row')
+            for(let j = 0 ; j < week.children.length; j++) {
+                if(!(week.children[j].classList.contains('empty'))) {
+                    week.children[j].classList.toggle('select')
+                }
+            }
+            selected_rows[`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`] = 1
+            for (let i = 0; i < week.children.length; i++) {
+                if(week.children[i].classList.contains('selected')) {
+                    week.children[i].classList.remove('selected')
+                    selected.splice(selected.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`), 1)
+                }
+            }
+            return
+        }
+        else if(week.children[i].classList.contains('selected_row')) {
+            week.children[i].classList.remove('selected_row')
+            for(let j = 0 ; j < week.children.length; j++) {
+                if(!(week.children[j].classList.contains('empty'))) {
+                    week.children[j].classList.toggle('select')
+                }
+            }
+            delete selected_rows[`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`]
+            return
+        }
+    }
+
+}
+function select(element) {
+    const week = element.parentElement
+    for (let i = 0; i < week.children.length; i++) {
+        if(week.children[i].classList.contains('selected_row')) {
+            return
+        }
+    }
+    element.classList.toggle('selected')
+    if(selected.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${element.innerText}`)) {
+        element.classList.remove('selected')
+        selected.splice(selected.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${element.innerText}`), 1)
+    }
+    else if (element.classList.contains('selected')) {
+        selected.push(`${date.getFullYear()}-${date.getMonth() + 1}-${element.innerText}`)
+        console.log(selected)
+    }
+}
+function close_kalendarz() {
+    document.getElementById('kalendarz_background').style.display = 'none'
 }
 let dni = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz']
 function generate_calendar() {
@@ -67,13 +129,13 @@ function generate_calendar() {
             weekcount++
         }
         let week = document.getElementsByClassName('week')[weekcount]
-        console.log(i - firstDay.getDay() + 1)
+
         if (i < firstDay.getDay()) {
             week.innerHTML += `<button class="day empty"></button>`
         } else if (i > lastDay.getDay() && i > lastDay.getDate() + 10) {
             week.innerHTML += `<button class="day empty"></button>`
         } else {
-            week.innerHTML += `<button class="day">${i - firstDay.getDay() + 1}</button>`
+            week.innerHTML += `<button class="day" onclick="select(this)">${i - firstDay.getDay() + 1}</button>`
         }
     }
     if (document.getElementsByClassName('week')[weekcount].children.length < 7) {

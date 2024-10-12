@@ -39,7 +39,7 @@
             <section>
                 <div>
                     <h2 id="panel_header"></h2>
-                    <img src="x.svg" alt="zamknij okno" id="panel_close" onclick="close_panel()">
+                    <img src="assets/x.svg" alt="zamknij okno" id="panel_close" onclick="close_panel()">
                 </div>
                 <section>
                         <button>Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button>Usuń</button>
@@ -51,10 +51,13 @@
                     <div id="header">
                         <span id="miesiac_przed" onclick="change_month(-1)"></span><span id="miesiac_nast" onclick="change_month(1)"></span>
                     </div>
+                    <img src="assets/x.svg" alt="zamknij okno" id="kalendarz_close" onclick="close_kalendarz()">
                     <div id="current_date"></div>
                     <div id="kalendarz_dni"></div>
-                    <div id="kalendarz_content">
-                    </div>
+                    <section>
+                        <div id="zaznacz"></div>
+                        <section id="kalendarz_content"></section>
+                    </section>
                 </article>
             </div>
         </section>
