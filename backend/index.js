@@ -53,6 +53,9 @@ wss.on('connection', function connection(ws) {
             case "StudentMeal":
                 StudentMeal(ws, parameters.id_ucznia);
                 break;
+            case "CalendarAdd":
+                CalendarAdd(ws, parameters.id_ucznia, parameters.data, parameters.mealId)
+                break;
         }
 
     });
@@ -164,5 +167,13 @@ function StudentMeal(websocketClient, studentId)
                 }
             )
         )
+    })
+}
+function CalendarAdd(websocketClient, studentId, date, mealId)
+{
+    let query = "INSERT INTO kalendarz (id_uczniowie, dzien_wypisania, typ_posilku) VALUES("+studentId+", '"+date+"', "+mealId+")";
+    database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
     })
 }
