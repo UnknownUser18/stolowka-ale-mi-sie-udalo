@@ -14,6 +14,7 @@ socket.addEventListener("message", (event) => {
             break;
         case "CalendarStudent":
             CalendarStudent = lastValue.params.value;
+            changeDateCalendar()
             break;
         case "StudentMeal":
             StudentMeal = lastValue.params.value;
@@ -54,6 +55,8 @@ document.getElementById('lista_uczniow').addEventListener('click', () => {
 function show(element) {
     document.getElementById('panel').style.display = 'flex'
     document.getElementById('panel_header').innerHTML = element.previousElementSibling.innerText
+    selected_rows = []
+    selected = []
     for(let i = 0; i < StudentList.length ; i++)
     {
         if((StudentList[i].imie+ " " +StudentList[i].nazwisko ) === element.previousElementSibling.innerText)
@@ -69,6 +72,14 @@ function show(element) {
         }
     })
     socket.send(getCalendar)
+}
+function changeDateCalendar()
+{
+    for(let i = 0; i < CalendarStudent.length ; i++)
+    {
+        let currentDate = new Date(CalendarStudent[i].dzien_wypisania)
+        CalendarStudent[i].dzien_wypisania = currentDate.getFullYear() + '-' + (currentDate.getMonth()+1) + '-' + currentDate.getDate();
+    }
 }
 function close_panel() {
     document.getElementById('panel').style.display = 'none'
@@ -196,12 +207,12 @@ function generate_calendar() {
             let day = i - firstDay.getDay() + 1
             let dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${day}`
             let classes = 'day'
-            let isIncludedInDB = false;
+            console.log(dateStr)
             for(let i = 0; i < CalendarStudent.length; i++) {
                 if(CalendarStudent[i].dzien_wypisania.split("T")[0] === dateStr)
-                    isIncludedInDB = true;
+                    selected.push(CalendarStudent[i].dzien_wypisania.split("T")[0]);
             }
-            if (selected.includes(dateStr) || isIncludedInDB) {
+            if (selected.includes(dateStr)) {
                 classes += ' selected'
             }
             if (selected_rows[dateStr]) {

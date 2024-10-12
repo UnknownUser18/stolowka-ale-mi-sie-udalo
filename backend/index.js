@@ -135,7 +135,6 @@ function CalendarStudent(websocketClient, studentId, relationBool, isAll)
     query += ";";
     database.query(query, function (err, result) {
         if (err) throw err;
-        console.log(result)
         websocketClient.send(
             JSON.stringify(
                 {
