@@ -169,6 +169,7 @@ function StudentMeal(websocketClient, studentId)
         )
     })
 }
+
 function CalendarAdd(websocketClient, studentId, date, mealId)
 {
     let query = "INSERT INTO kalendarz (id_uczniowie, dzien_wypisania, typ_posilku) VALUES("+studentId+", '"+date+"', "+mealId+")";

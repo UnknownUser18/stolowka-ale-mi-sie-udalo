@@ -1,3 +1,47 @@
+const socket = new WebSocket("ws://localhost:8080");
+let StudentList = null, CalendarStudent, StudentMeal;
+let currentStudent = 1;
+let getCalendar;
+let lastValue;
+socket.addEventListener("message", (event) => {
+    console.log("Message incoming from the server: ", event.data);
+    lastValue = JSON.parse(event.data);
+    switch (lastValue.params.variable)
+    {
+        case "StudentList":
+            StudentList = lastValue.params.value;
+            RenderStudentList(StudentList);
+            break;
+        case "CalendarStudent":
+            CalendarStudent = lastValue.params.value;
+            break;
+        case "StudentMeal":
+            StudentMeal = lastValue.params.value;
+            break;
+    }
+});
+const uczniowie = JSON.stringify({
+    action: "request",
+    params: {
+        method: "StudentList",
+        condition: ""
+    }
+})
+setTimeout(function () {
+    socket.send(uczniowie)
+}, 100)
+function getStudent(Name) {
+    return '<div class="uczen"> <span>'+Name+'</span><button onClick="show(this)">Panel Administracyjny</button></div>'
+}
+function RenderStudentList(students) {
+    let generatedHTML = '';
+    for(let i = 0; i < students.length ; i++)
+    {
+        generatedHTML += getStudent(students[i].imie +" " + students[i].nazwisko);
+    }
+    document.getElementById('l_uczniow').children[1].innerHTML = generatedHTML;
+}
+
 let header_nav = document.getElementById('nav_header')
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('l_uczniow').style.display = 'none'
@@ -10,6 +54,21 @@ document.getElementById('lista_uczniow').addEventListener('click', () => {
 function show(element) {
     document.getElementById('panel').style.display = 'flex'
     document.getElementById('panel_header').innerHTML = element.previousElementSibling.innerText
+    for(let i = 0; i < StudentList.length ; i++)
+    {
+        if((StudentList[i].imie+ " " +StudentList[i].nazwisko ) === element.previousElementSibling.innerText)
+            currentStudent = StudentList[i].id
+    }
+    getCalendar = JSON.stringify({
+        action: "request",
+        params: {
+            method: "CalendarStudent",
+            id_ucznia: currentStudent,
+            relationBool: false,
+            isAll: false
+        }
+    })
+    socket.send(getCalendar)
 }
 function close_panel() {
     document.getElementById('panel').style.display = 'none'
@@ -137,15 +196,19 @@ function generate_calendar() {
             let day = i - firstDay.getDay() + 1
             let dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${day}`
             let classes = 'day'
-            if (selected.includes(dateStr)) {
+            let isIncludedInDB = false;
+            for(let i = 0; i < CalendarStudent.length; i++) {
+                if(CalendarStudent[i].dzien_wypisania.split("T")[0] === dateStr)
+                    isIncludedInDB = true;
+            }
+            if (selected.includes(dateStr) || isIncludedInDB) {
                 classes += ' selected'
             }
             if (selected_rows[dateStr]) {
                 classes += ' selected_row'
             }
             week.innerHTML += `<button class="${classes}" onclick="select(this)">${day}</button>`
-        }
-    }
+    }}
     if (document.getElementsByClassName('week')[weekcount].children.length < 7) {
         for (let i = document.getElementsByClassName('week')[weekcount].children.length; i < 7; i++) {
             document.getElementsByClassName('week')[weekcount].innerHTML += `<button class="day empty"></button>`
@@ -171,3 +234,4 @@ function generate_calendar() {
         }
     }
 }
+
