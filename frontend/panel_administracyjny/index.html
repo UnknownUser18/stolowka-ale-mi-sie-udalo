@@ -10,9 +10,6 @@
 <body>
     <nav>
         <h2 id="nav_header">Strona Główna</h2>
-        <div>
-            <button>Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button>Usuń</button>
-        </div>
     </nav>
     <main>
         <section id="strona_glowna">
@@ -25,32 +22,42 @@
             <h2>Lista Uczniów</h2>
             <article>
                 <div class="uczen">
-                    <span>Jacek Blaterek</span><button onclick="show(this)">Zaznacz</button>
+                    <span>Jacek Blaterek</span><button onclick="show(this)">Panel Administracyjny</button>
                 </div>
                 <div class="uczen">
-                    <span>Dżacek Gyatterek</span><button onclick="show(this)">Zaznacz</button>
+                    <span>Dżacek Gyatterek</span><button onclick="show(this)">Panel Administracyjny</button>
                 </div>
                 <div class="uczen">
-                    <span>Freaky Kamil</span><button onclick="show(this)">Zaznacz</button>
+                    <span>Freaky Kamil</span><button onclick="show(this)">Panel Administracyjny</button>
                 </div>
                 <div class="uczen">
-                    <span>Gyatt Kamila</span><button onclick="show(this)">Zaznacz</button>
+                    <span>Gyatt Kamila</span><button onclick="show(this)">Panel Administracyjny</button>
                 </div>
             </article>
         </section>
-        <div id="kalendarz_background">
-            <article class="kalendarz">
-                <div id="header">
-                    <span id="miesiac_przed" onclick="change_month(-1)">Gyatt</span><h2 id="kalendarz_header">Edge till it hurts</h2><span id="miesiac_nast" onclick="change_month(1)">Licznik do rowerów</span>
+        <section id="panel">
+            <section>
+                <div>
+                    <h2 id="panel_header"></h2>
+                    <img src="x.svg" alt="zamknij okno" id="panel_close" onclick="close_panel()">
                 </div>
-                <div id="current_date"></div>
-                <div id="kalendarz_dni"></div>
-                <div id="kalendarz_content">
+                <section>
+                        <button>Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button>Usuń</button>
+                </section>
+            </section>
 
-                </div>
-            </article>
-        </div>
-
+            <div id="kalendarz_background">
+                <article class="kalendarz">
+                    <div id="header">
+                        <span id="miesiac_przed" onclick="change_month(-1)"></span><span id="miesiac_nast" onclick="change_month(1)"></span>
+                    </div>
+                    <div id="current_date"></div>
+                    <div id="kalendarz_dni"></div>
+                    <div id="kalendarz_content">
+                    </div>
+                </article>
+            </div>
+        </section>
         <script src="script.js"></script>
     </main>
 </body>

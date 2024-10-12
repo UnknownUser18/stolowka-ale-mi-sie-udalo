@@ -6,7 +6,6 @@ body {
     font-family: 'Inter', sans-serif;
 }
 nav {
-    z-index: 5;
     position: absolute;
     top: 0;
     left: 0;
@@ -52,7 +51,7 @@ nav button:hover {
     color: var(--primary-color);
 }
 .kalendarz {
-    width: 70%;
+    width: 80%;
     background-color: var(--primary-color);
     padding: 10px;
     border-radius: 10px;
@@ -83,11 +82,77 @@ nav button:hover {
     border: 2px solid var(--border-color);
     font-size: 1.618em;
 }
-div.day {
+button.day.empty {
     background-color: inherit;
-    border: 0;
-    cursor: default;
+    border: 0 !important;
+    cursor: default !important;
     padding: 0;
+}
+button.day.empty:hover {
+    background-color: inherit !important;
+}
+#panel {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+#panel > section {
+    width: 30%;
+    height: 30%;
+    background-color: var(--primary-color);
+    padding: 10px;
+    border-radius: 10px;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.5);
+}
+#panel > section > div {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 10px 0;
+    height: 50px;
+}
+#panel button {
+    padding: 10px;
+    font-size: 1.618em;
+    margin: 10px 0;
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 150ms ease-in-out all;
+}
+#panel button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+#panel > section > section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin: 10px 0;
+}
+#panel > section > div h2 {
+    font-size: 2em;
+    margin: 10px;
+}
+#panel > section > div img {
+    height: 100%;
+    cursor: pointer;
 }
 #kalendarz_dni {
     display: flex;
@@ -106,6 +171,11 @@ div.day {
     left: 0;
     background-color: rgba(0, 0, 0, 0.3);
 }
+#miesiac_przed , #miesiac_nast {
+    cursor: pointer;
+    font-size: 1.618em;
+    margin: 10px;
+}
 #header {
     display: flex;
     align-items: center;
@@ -113,6 +183,10 @@ div.day {
 }
 #nav_header, #current_date {
     text-align: center;
+}
+#current_date {
+    font-size: 1.618em;
+    margin-bottom: 20px;
 }
 #strona_glowna > article {
     display: flex;
