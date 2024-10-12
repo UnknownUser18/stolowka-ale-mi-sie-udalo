@@ -26,7 +26,6 @@ const wss = new ws.WebSocketServer({
 
 console.log("Waiting for connection...");
 wss.on('connection', function connection(ws) {
-
     ws.send("Succesfully connected to the server")
 
     ws.on('error', console.error);
@@ -101,6 +100,7 @@ function QueryExecute(websocketClient, query, pass, responseBool, variable) {
             }))
     })
 }
+
 function StudentList(websocketClient ,condition)
 {
     let query = "SELECT * FROM uczniowie";
