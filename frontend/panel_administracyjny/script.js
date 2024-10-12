@@ -96,7 +96,6 @@ function select(element) {
     }
     else if (element.classList.contains('selected')) {
         selected.push(`${date.getFullYear()}-${date.getMonth() + 1}-${element.innerText}`)
-        console.log(selected)
     }
 }
 function close_kalendarz() {
@@ -124,7 +123,7 @@ function generate_calendar() {
         if (i < 7) {
             document.getElementById('kalendarz_dni').innerHTML += `<div>` + dni[i] + `</div>`
         }
-        if ((firstDay.getDay() + i) % 7 === ((firstDay.getDay()) + 1) % 7){
+        if ((firstDay.getDay() + i) % 7 === ((firstDay.getDay()) + 1) % 7) {
             kalendarz.innerHTML += `<div class="week"></div>`
             weekcount++
         }
@@ -135,20 +134,40 @@ function generate_calendar() {
         } else if (i > lastDay.getDay() && i > lastDay.getDate() + 10) {
             week.innerHTML += `<button class="day empty"></button>`
         } else {
-            week.innerHTML += `<button class="day" onclick="select(this)">${i - firstDay.getDay() + 1}</button>`
+            let day = i - firstDay.getDay() + 1
+            let dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${day}`
+            let classes = 'day'
+            if (selected.includes(dateStr)) {
+                classes += ' selected'
+            }
+            if (selected_rows[dateStr]) {
+                classes += ' selected_row'
+            }
+            week.innerHTML += `<button class="${classes}" onclick="select(this)">${day}</button>`
         }
     }
     if (document.getElementsByClassName('week')[weekcount].children.length < 7) {
         for (let i = document.getElementsByClassName('week')[weekcount].children.length; i < 7; i++) {
             document.getElementsByClassName('week')[weekcount].innerHTML += `<button class="day empty"></button>`
-
+        }
+    }
+    for (let i = 0; i < document.getElementsByClassName('week').length; i++) {
+        const week = document.getElementsByClassName('week')[i]
+        const divs = Array.from(week.querySelectorAll('button.day.empty'))
+        if (divs.length === 7) {
+            document.getElementsByClassName('week')[i].remove()
         }
     }
     for(let i = 0 ; i < document.getElementsByClassName('week').length; i++) {
         const week = document.getElementsByClassName('week')[i]
-        const divs = Array.from(week.querySelectorAll('button.day.empty'))
-        if(divs.length === 7) {
-            document.getElementsByClassName('week')[i].remove()
+        for(let j = 0 ; j < week.children.length; j++) {
+            if(week.children[j].classList.contains('selected_row')) {
+                for(let k = 0 ; k < week.children.length; k++) {
+                    if(!(week.children[k].classList.contains('empty'))) {
+                        week.children[k].classList.toggle('select')
+                    }
+                }
+            }
         }
     }
 }

@@ -30,6 +30,7 @@ section {
     justify-content: center;
 }
 .kalendarz {
+    position: relative;
     width: 60%;
     background-color: var(--primary-color);
     padding: 10px;
@@ -47,13 +48,20 @@ section {
     width: 12%;
     display: grid;
 }
+#zaznacz {
+    place-items: center;
+}
+#zaznacz > button {
+    font-size: 1.2em !important;
+    height: fit-content;
+}
 .week {
     display: flex;
     justify-content: space-around;
     align-items: center;
     margin: 10px 0;
     background-color: var(--secondary-color);
-    padding: 10px;
+    padding: 5px;
     border-radius: 10px;
 }
 .day {
@@ -65,8 +73,8 @@ section {
     background-color: var(--primary-color);
     padding: 10px;
     border-radius: 10px;
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
     margin: 5px;
     border: 2px solid var(--border-color);
     font-size: 1.618em;
@@ -186,9 +194,9 @@ button.day.empty:hover {
 }
 #kalendarz_close {
     position: absolute;
-    top: 10%;
-    right: 12%;
     width: 50px;
+    top: 2vh;
+    right: 2vw;
     cursor: pointer;
 }
 #header {
@@ -269,4 +277,10 @@ button.day.empty:hover {
 #l_uczniow button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
+}
+@media (max-width: 1280px) {
+    .kalendarz {
+        width: 80%;
+        margin-left: 0;
+    }
 }
