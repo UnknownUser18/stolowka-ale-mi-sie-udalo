@@ -283,4 +283,7 @@ button.day.empty:hover {
         width: 80%;
         margin-left: 0;
     }
+    #l_uczniow article {
+        width: 80%;
+    }
 }

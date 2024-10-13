@@ -170,6 +170,7 @@ function select(element) {
 }
 function close_kalendarz() {
     document.getElementById('kalendarz_background').style.display = 'none'
+    date = new Date()
 }
 let dni = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz']
 function generate_calendar() {
@@ -207,7 +208,7 @@ function generate_calendar() {
             let day = i - firstDay.getDay() + 1
             let dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${day}`
             let classes = 'day'
-            console.log(dateStr)
+            // console.log(dateStr)  -- żydon za duzo spamu
             for(let i = 0; i < CalendarStudent.length; i++) {
                 if(CalendarStudent[i].dzien_wypisania.split("T")[0] === dateStr)
                     selected.push(CalendarStudent[i].dzien_wypisania.split("T")[0]);
