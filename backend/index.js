@@ -174,7 +174,7 @@ function StudentMeal(websocketClient, studentId)
 
 function CalendarAdd(websocketClient, studentId, date, mealId)
 {
-    let query = "INSERT INTO kalendarz (id_uczniowie, dzien_wypisania, typ_posilku) VALUES("+studentId+", '"+date+"', "+mealId+")";
+    let query = "INSERT INTO kalendarz Values("+studentId+", '"+date+"', " + mealId + ");";
     database.query(query, function (err, result) {
         if (err) throw err;
         console.log(result);
@@ -183,7 +183,7 @@ function CalendarAdd(websocketClient, studentId, date, mealId)
 
 function CalendarDelete(websocketClient, studentId, date, mealId)
 {
-    let query = "DELETE FROM kalendarz WHERE (kalendarz.id_uczniowie, kalendarz.dzien_wypisania, kalendarz.typ_posilku) IN (SELECT "+studentId+", '"+date+"', id FROM posilki WHERE posilki.posilek LIKE '"+mealId+"')";
+    let query = "DELETE FROM kalendarz WHERE id_uczniowie = "+studentId+" AND dzien_wypisania Like '"+date+"' AND typ_posilku = "+mealId;
     database.query(query, function (err, result) {
         if (err) throw err;
         console.log(result);

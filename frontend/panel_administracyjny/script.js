@@ -295,39 +295,66 @@ document.forms['posilek'].addEventListener('submit', (event) => {
         })
     }
     else {
-        console.log('else')
-        selected.forEach((element) => {
-            let obiekt = {
-                id_uczniowie: currentStudent,
-                dzien_wypisania: element,
-                typ_posilku: posilek
-            }
-            if(!(CalendarStudent.includes(obiekt))) {
-                console.log('dodawanie', CalendarStudent, obiekt)
-            }
-        })
-        CalendarStudent.forEach((element) => {
-            let lista = selected
-            for(let i = 0; i < lista.length ; i++) {
-                lista[i] = {
-                    id_uczniowie: currentStudent,
-                    dzien_wypisania: lista[i],
-                    typ_posilku: posilek
+        lista = new Array(selected.length);
+        for (let i = 0; i < selected.length; i++) {
+            lista[i] = JSON.parse(JSON.stringify(CalendarStudent[0]))
+            lista[i].dzien_wypisania = selected[i]
+            lista[i].typ_posilku = posilek;
+            lista[i].id_uczniowie = currentStudent;
+        }
+        lista.forEach((element) => {
+            for (let i = 0; i < CalendarStudent.length; i++) {
+                let elementCal = JSON.parse(JSON.stringify(CalendarStudent[i]))
+                if (!(elementCal.id_uczniowie === element.id_uczniowie && elementCal.dzien_wypisania === element.dzien_wypisania && elementCal.typ_posilku === element.typ_posilku)) {
+                    console.log('dodawanie', element, elementCal)
                 }
             }
-            if(!(lista.includes(element))) {
-                console.log('usuwanie', lista, element)
+        })
+        for (let i = 0; i < lista.length; i++) {
+            lista[i] = JSON.stringify(lista[i])
+        }
+        CalendarStudent.forEach(element => {
+            if(!lista.includes(JSON.stringify(element))){
+                console.log("usuwanie", element, lista)
             }
         })
-    }
-    getCalendar = JSON.stringify({
-        action: "request",
-        params: {
-            method: "CalendarStudent",
-            id_ucznia: currentStudent,
-            relationBool: false,
-            isAll: false
+        for (let i = 0; i < lista.length; i++) {
+            lista[i] = JSON.parse(lista[i])
         }
-    })
-    socket.send(getCalendar)
+        // let data = {
+        //     action: "request",
+        //     params: {
+        //         method: "CalendarAdd",
+        //         id_ucznia: currentStudent,
+        //         data: element.dzien_wypisania,
+        //         mealId: posilek
+        //     }
+        // }
+        // socket.send(JSON.stringify(data))
+        // CalendarStudent.forEach((element) => {
+        //     if(!(lista.includes(element))) {
+        //         console.log('usuwanie', lista, element)
+        //         let data = {
+        //             action: "request",
+        //             params: {
+        //                 method: "CalendarDelete",
+        //                 id_ucznia: currentStudent,
+        //                 data: element.dzien_wypisania,
+        //                 mealId: posilek
+        //             }
+        //         }
+        //         socket.send(JSON.stringify(data))
+        //     }
+        // })
+        getCalendar = JSON.stringify({
+            action: "request",
+            params: {
+                method: "CalendarStudent",
+                id_ucznia: currentStudent,
+                relationBool: false,
+                isAll: false
+            }
+        })
+        socket.send(getCalendar)
+    }
 })
