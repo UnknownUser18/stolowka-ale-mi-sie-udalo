@@ -280,4 +280,54 @@ document.forms['posilek'].addEventListener('submit', (event) => {
             posilek = 7
             break
     }
+    if(CalendarStudent.length === 0) {
+        selected.forEach((element) => {
+            let data = {
+                action: "request",
+                params: {
+                    method: "CalendarAdd",
+                    id_ucznia: currentStudent,
+                    data: element,
+                    mealId: posilek
+                }
+            }
+            socket.send(JSON.stringify(data))
+        })
+    }
+    else {
+        console.log('else')
+        selected.forEach((element) => {
+            let obiekt = {
+                id_uczniowie: currentStudent,
+                dzien_wypisania: element,
+                typ_posilku: posilek
+            }
+            if(!(CalendarStudent.includes(obiekt))) {
+                console.log('dodawanie', CalendarStudent, obiekt)
+            }
+        })
+        CalendarStudent.forEach((element) => {
+            let lista = selected
+            for(let i = 0; i < lista.length ; i++) {
+                lista[i] = {
+                    id_uczniowie: currentStudent,
+                    dzien_wypisania: lista[i],
+                    typ_posilku: posilek
+                }
+            }
+            if(!(lista.includes(element))) {
+                console.log('usuwanie', lista, element)
+            }
+        })
+    }
+    getCalendar = JSON.stringify({
+        action: "request",
+        params: {
+            method: "CalendarStudent",
+            id_ucznia: currentStudent,
+            relationBool: false,
+            isAll: false
+        }
+    })
+    socket.send(getCalendar)
 })
