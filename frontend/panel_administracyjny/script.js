@@ -257,43 +257,27 @@ document.forms['posilek'].addEventListener('submit', (event) => {
     console.log(selected)
     console.log(selected_rows)
     console.log(currentStudent)
-    selected.forEach((element) => {
-        for(let i = 0 ; i < CalendarStudent.length ; i++) {
-            if(CalendarStudent[i].dzien_wypisania !== element && posilek !== posilek) {
-                let data = JSON.stringify({
-                    action: "request",
-                    params: {
-                        method: "CalendarAdd",
-                        id_ucznia: currentStudent,
-                        dzien: element,
-                        typ_posilku: posilek
-                    }
-                })
-                socket.send(data)
-            }
-        }
-    })
-    CalendarStudent.forEach((element) => {
-        if(!(selected.includes(element.dzien_wypisania)) && posilek !== element.typ_posilku) {
-            let data = JSON.stringify({
-                action: "request",
-                params: {
-                    method: "CalendarDelete",
-                    id_ucznia: currentStudent,
-                    dzien: element.dzien_wypisania,
-                    typ_posilku: posilek
-                }
-            })
-            socket.send(data)
-        }
-    })
-    let data = JSON.stringify({
-        action: "request",
-        params: {
-            method: "CalendarAdd",
-            id_ucznia: currentStudent,
-            dzien: selected,
-            typ_posilku: posilek
-        }
-    })
+    switch (posilek) {
+        case 'śniadanie':
+            posilek = 1
+            break
+        case 'obiad':
+            posilek = 2
+            break
+        case 'kolacja':
+            posilek = 3
+            break
+        case 'śniadanie_obiad':
+            posilek = 4
+            break
+        case 'śniadanie_kolacja':
+            posilek = 5
+            break
+        case 'śniadanie_obiad_kolacja':
+            posilek = 6
+            break
+        case 'obiad_kolacja':
+            posilek = 7
+            break
+    }
 })
