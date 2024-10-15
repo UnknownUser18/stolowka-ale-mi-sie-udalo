@@ -18,22 +18,13 @@
                 <button id="lista_uczniow">Lista Uczniów</button>
             </article>
         </section>
+        <div id="loader_background">
+            <div class="loader"></div>
+        </div>
         <section id="l_uczniow">
+
             <h2>Lista Uczniów</h2>
-            <article>
-<!--                <div class="uczen">-->
-<!--                    <span>Jacek Blaterek</span><button onclick="show(this)">Panel Administracyjny</button>-->
-<!--                </div>-->
-<!--                <div class="uczen">-->
-<!--                    <span>Dżacek Gyatterek</span><button onclick="show(this)">Panel Administracyjny</button>-->
-<!--                </div>-->
-<!--                <div class="uczen">-->
-<!--                    <span>Freaky Kamil</span><button onclick="show(this)">Panel Administracyjny</button>-->
-<!--                </div>-->
-<!--                <div class="uczen">-->
-<!--                    <span>Gyatt Kamila</span><button onclick="show(this)">Panel Administracyjny</button>-->
-<!--                </div>-->
-            </article>
+            <article></article>
         </section>
         <section id="panel">
             <section>
@@ -59,6 +50,18 @@
                         <section id="kalendarz_content"></section>
                     </section>
                     <button onclick="shows()">Wyswietl wartości</button>
+                    <form name="posilek">
+                        <label>Typ Posiłku:<select name="typ_posilku">
+                            <option value="obiad">Obiad</option>
+                            <option value="śniadanie">Śniadanie</option>
+                            <option value="kolacja">Kolacja</option>
+                            <option value="śniadanie_obiad">Śniadanie & Obiad</option>
+                            <option value="śniadanie_kolacja">Śniadanie & Kolacja</option>
+                            <option value="obiad_kolacja">Obiad & Kolacja</option>
+                            <option value="śniadanie_obiad_kolacja">Śniadanie & Obiad & Kolacja</option>
+                        </select></label>
+                        <label><input type="submit" value="Prześlij"></label>
+                    </form>
                 </article>
             </div>
         </section>

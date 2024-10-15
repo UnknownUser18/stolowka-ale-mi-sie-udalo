@@ -49,7 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 document.getElementById('lista_uczniow').addEventListener('click', () => {
     document.getElementById('strona_glowna').style.display = 'none'
-    document.getElementById('l_uczniow').style.display = 'block'
+    document.getElementById('loader_background').style.display = 'flex'
+    setTimeout(function () {
+        document.getElementById('l_uczniow').style.display = 'block'
+        document.getElementById('loader_background').style.display = 'none'
+    }, 300)
     header_nav.innerHTML = 'Lista uczniów'
 })
 function show(element) {
@@ -246,4 +250,35 @@ function generate_calendar() {
         }
     }
 }
-
+document.forms['posilek'].addEventListener('submit', (event) => {
+    event.preventDefault()
+    let posilek = document.forms['posilek']['typ_posilku'].value
+    console.log(posilek)
+    console.log(selected)
+    console.log(selected_rows)
+    console.log(currentStudent)
+    selected.forEach((element) => {
+        for(let i = 0 ; i < CalendarStudent.length ; i++) {
+            if(CalendarStudent[i].dzien_wypisania !== element && posilek !== posilek) {
+                let data = JSON.stringify({
+                    action: "request",
+                    params: {
+                        method: "CalendarAdd",
+                        id_ucznia: currentStudent,
+                        dzien: element,
+                        typ_posilku: posilek
+                    }
+                })
+            }
+        }
+    })
+    let data = JSON.stringify({
+        action: "request",
+        params: {
+            method: "CalendarAdd",
+            id_ucznia: currentStudent,
+            dzien: selected,
+            typ_posilku: posilek
+        }
+    })
+})
