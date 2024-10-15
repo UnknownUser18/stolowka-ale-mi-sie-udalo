@@ -269,7 +269,22 @@ document.forms['posilek'].addEventListener('submit', (event) => {
                         typ_posilku: posilek
                     }
                 })
+                socket.send(data)
             }
+        }
+    })
+    CalendarStudent.forEach((element) => {
+        if(!(selected.includes(element.dzien_wypisania)) && posilek !== element.typ_posilku) {
+            let data = JSON.stringify({
+                action: "request",
+                params: {
+                    method: "CalendarDelete",
+                    id_ucznia: currentStudent,
+                    dzien: element.dzien_wypisania,
+                    typ_posilku: posilek
+                }
+            })
+            socket.send(data)
         }
     })
     let data = JSON.stringify({
