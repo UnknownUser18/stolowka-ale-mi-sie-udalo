@@ -224,7 +224,7 @@ function generate_calendar() {
                 classes += ' selected_row'
             }
             week.innerHTML += `<button class="${classes}" onclick="select(this)">${day}</button>`
-    }}
+        }}
     if (document.getElementsByClassName('week')[weekcount].children.length < 7) {
         for (let i = document.getElementsByClassName('week')[weekcount].children.length; i < 7; i++) {
             document.getElementsByClassName('week')[weekcount].innerHTML += `<button class="day empty"></button>`
@@ -280,20 +280,11 @@ document.forms['posilek'].addEventListener('submit', (event) => {
                 params: {
                     method: "CalendarDelete",
                     id_ucznia: currentStudent,
-                    dzien: element.dzien_wypisania,
-                    typ_posilku: posilek
+                    data: element.dzien_wypisania,
+                    mealId: posilek
                 }
             })
             socket.send(data)
-        }
-    })
-    let data = JSON.stringify({
-        action: "request",
-        params: {
-            method: "CalendarAdd",
-            id_ucznia: currentStudent,
-            dzien: selected,
-            typ_posilku: posilek
         }
     })
 })

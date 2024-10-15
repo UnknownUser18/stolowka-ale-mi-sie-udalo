@@ -57,7 +57,7 @@ wss.on('connection', function connection(ws) {
                 CalendarAdd(ws, parameters.id_ucznia, parameters.data, parameters.mealId)
                 break;
             case "CalendarDelete":
-                CalendarAdd(ws, parameters.id_ucznia, parameters.data, parameters.mealId)
+                CalendarDelete(ws, parameters.id_ucznia, parameters.data, parameters.mealId)
                 break;
         }
 
@@ -183,7 +183,7 @@ function CalendarAdd(websocketClient, studentId, date, mealId)
 
 function CalendarDelete(websocketClient, studentId, date, mealId)
 {
-    let query = "DELETE FROM kalendarz WHERE id_uczniowie = " + studentId + " AND dzien_wypisania Like "  + date + " AND typ_posilku = "+mealId+" ;";
+    let query = "DELETE FROM kalendarz WHERE (kalendarz.id_uczniowie, kalendarz.dzien_wypisania, kalendarz.typ_posilku) IN (SELECT "+studentId+", '"+date+"', id FROM posilki WHERE posilki.posilek LIKE '"+mealId+"')";
     database.query(query, function (err, result) {
         if (err) throw err;
         console.log(result);
