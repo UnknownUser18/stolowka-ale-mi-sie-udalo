@@ -33,7 +33,7 @@
                     <img src="assets/x.svg" alt="zamknij okno" id="panel_close" onclick="close_panel()">
                 </div>
                 <section>
-                        <button id="edytuj">Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button>Usuń</button>
+                        <button id="edytuj">Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button id="usun">Usuń</button>
                 </section>
             </section>
 
@@ -73,6 +73,13 @@
                         <label>Posiłek: <select name="posilek"></select></label>
                         <label><input type="submit" value="Prześlij"></label>
                     </form>
+                </article>
+            </div>
+            <div id="delete_background">
+                <article class="delete">
+                    <img src="assets/x.svg" alt="zamknij okno" id="delete_close" onclick="close_delete()">
+                    <h2>Czy na pewno chcesz usunąć ucznia?</h2>
+                    <button onclick="delete_student()">Tak</button><button onclick="close_delete()">Nie</button>
                 </article>
             </div>
         </section>

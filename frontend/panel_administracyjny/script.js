@@ -426,3 +426,21 @@ document.forms['edytuj_form'].addEventListener('submit', (event) => {
 function close_edytuj() {
     document.getElementById('edytuj_background').style.display = 'none'
 }
+function close_delete() {
+    document.getElementById('delete_background').style.display = 'none'
+}
+document.getElementById('usun').addEventListener('click', () => {
+    let element = document.getElementById('delete_background')
+    let styl = window.getComputedStyle(element)
+    let style = styl.getPropertyValue('display')
+    if(style === 'flex') {
+        document.getElementById('delete_background').style.display = 'none'
+    }
+    else if(style === 'none') {
+        document.getElementById('delete_background').style.display = 'flex'
+        alert("Czy na pewno chcesz usunąć ucznia?") // - jutro zrobic okienko, gdzie imie i nazwisko ucznia trzeba
+        // wpisac i potwierdzic usuniecie
+    }
+})
+function delete_student() {
+}
