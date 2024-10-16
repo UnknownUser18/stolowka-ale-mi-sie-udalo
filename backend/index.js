@@ -193,7 +193,7 @@ function CalendarDelete(websocketClient, studentId, date, mealId)
 }
 function UpdateStudent(websocketClient, studentId, name, surname, mealId)
 {
-    let query = "UPDATE uczniowie SET imie = " + name + ", nazwisko = " + surname + ", id_posilki = " + mealId + " WHERE id = " + studentId + ";";
+    let query = "UPDATE uczniowie SET imie = '" + name + "', nazwisko = '" + surname + "', id_posilki = " + mealId + " WHERE id = " + studentId + ";";
     database.query(query, function (err, result) {
         if (err) throw err;
         console.log(result);

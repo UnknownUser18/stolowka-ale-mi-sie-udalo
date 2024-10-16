@@ -404,34 +404,24 @@ document.getElementById('edytuj').addEventListener('click', () => {
 })
 document.forms['edytuj_form'].addEventListener('submit', (event) => {
     event.preventDefault()
-    let imie = document.forms['edytuj_form']['imie'].value
-    let nazwisko = document.forms['edytuj_form']['nazwisko'].value
-    let posilek = document.forms['edytuj_form']['posilek'].value
+    let imie = document.forms['edytuj_form']['imie'].value || StudentList[currentStudentIndex].imie
+    let nazwisko = document.forms['edytuj_form']['nazwisko'].value || StudentList[currentStudentIndex].nazwisko
+    let posilek = getMeal(document.forms['edytuj_form']['posilek'].value) || StudentList[currentStudentIndex].id_posilki
     let data = {
         action: "request",
         params: {
-            method: "StudentEdit",
-            id: currentStudent,
-            imie: imie,
-            nazwisko: nazwisko,
-            posilek: posilek
+            method: "UpdateStudent",
+            studentId: currentStudent,
+            name: imie,
+            surname: nazwisko,
+            mealId: posilek
         }
     }
-    socket.send(JSON.stringify(data))
-    StudentList[currentStudentIndex].imie = imie
-    StudentList[currentStudentIndex].nazwisko = nazwisko
-    StudentList[currentStudentIndex].id_posilki = posilek
-    getCalendar = JSON.stringify({
-        action: "request",
-        params: {
-            method: "CalendarStudent",
-            id_ucznia: currentStudent,
-            relationBool: false,
-            isAll: false
-        }
-    })
-    socket.send(getCalendar)
+    socket.send(JSON.stringify(data));
+    socket.send(uczniowie);
+
     close_edytuj()
+    close_panel()
 })
 function close_edytuj() {
     document.getElementById('edytuj_background').style.display = 'none'
