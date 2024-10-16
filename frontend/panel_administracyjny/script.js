@@ -402,6 +402,37 @@ document.getElementById('edytuj').addEventListener('click', () => {
     }
     document.forms['edytuj_form'].posilek.value = getMeal(StudentList[currentStudentIndex].id_posilki, false)
 })
+document.forms['edytuj_form'].addEventListener('submit', (event) => {
+    event.preventDefault()
+    let imie = document.forms['edytuj_form']['imie'].value
+    let nazwisko = document.forms['edytuj_form']['nazwisko'].value
+    let posilek = document.forms['edytuj_form']['posilek'].value
+    let data = {
+        action: "request",
+        params: {
+            method: "StudentEdit",
+            id: currentStudent,
+            imie: imie,
+            nazwisko: nazwisko,
+            posilek: posilek
+        }
+    }
+    socket.send(JSON.stringify(data))
+    StudentList[currentStudentIndex].imie = imie
+    StudentList[currentStudentIndex].nazwisko = nazwisko
+    StudentList[currentStudentIndex].id_posilki = posilek
+    getCalendar = JSON.stringify({
+        action: "request",
+        params: {
+            method: "CalendarStudent",
+            id_ucznia: currentStudent,
+            relationBool: false,
+            isAll: false
+        }
+    })
+    socket.send(getCalendar)
+    close_edytuj()
+})
 function close_edytuj() {
     document.getElementById('edytuj_background').style.display = 'none'
 }
