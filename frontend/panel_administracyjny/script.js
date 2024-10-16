@@ -1,9 +1,41 @@
 const socket = new WebSocket("ws://localhost:8080");
 let StudentList = null, CalendarStudent, StudentMeal;
-let currentStudent = 1;
+let currentStudent = 1
 let getCalendar;
 let lastValue;
-let currentStudentIndex = 0;
+let currentStudentIndex = 0
+function getMeal(meal) {
+    switch (meal) {
+        case 1:
+            return 'śniadanie'
+        case 2:
+            return 'obiad'
+        case 3:
+            return 'kolacja'
+        case 4:
+            return 'śniadanie_obiad'
+        case 5:
+            return 'śniadanie_kolacja'
+        case 6:
+            return 'śniadanie_obiad_kolacja'
+        case 7:
+            return 'obiad_kolacja'
+        case 'śniadanie':
+            return  1
+        case 'obiad':
+            return 2
+        case 'kolacja':
+            return 3
+        case 'śniadanie_obiad':
+            return 4
+        case 'śniadanie_kolacja':
+            return 5
+        case 'śniadanie_obiad_kolacja':
+            return 6
+        case 'obiad_kolacja':
+            return 7
+    }
+}
 socket.addEventListener("message", (event) => {
     console.log("Message incoming from the server: ", event.data);
     lastValue = JSON.parse(event.data);
@@ -261,29 +293,7 @@ document.forms['posilek'].addEventListener('submit', (event) => {
     console.log(selected)
     console.log(selected_rows)
     console.log(currentStudent)
-    switch (posilek) {
-        case 'śniadanie':
-            posilek = 1
-            break
-        case 'obiad':
-            posilek = 2
-            break
-        case 'kolacja':
-            posilek = 3
-            break
-        case 'śniadanie_obiad':
-            posilek = 4
-            break
-        case 'śniadanie_kolacja':
-            posilek = 5
-            break
-        case 'śniadanie_obiad_kolacja':
-            posilek = 6
-            break
-        case 'obiad_kolacja':
-            posilek = 7
-            break
-    }
+    posilek = getMeal(posilek)
     if(CalendarStudent.length === 0) {
         selected.forEach((element) => {
             console.log("Dodaje: ", element, posilek)
@@ -361,3 +371,24 @@ document.forms['posilek'].addEventListener('submit', (event) => {
         socket.send(getCalendar)
     }
 })
+document.getElementById('edytuj').addEventListener('click', () => {
+    let element = document.getElementById('edytuj_background')
+    let styl = window.getComputedStyle(element)
+    let style = styl.getPropertyValue('display')
+    if(style === 'flex') {
+        document.getElementById('edytuj_background').style.display = 'none'
+    }
+    else if(style === 'none') {
+        document.getElementById('edytuj_background').style.display = 'flex'
+    }
+    document.forms['edytuj_form']['imie'].value = StudentList[currentStudentIndex].imie
+    document.forms['edytuj_form']['nazwisko'].value = StudentList[currentStudentIndex].nazwisko
+    for(let i = 1; i <= 7; i++) {
+        let meal = getMeal(i)
+        document.forms['edytuj_form'].posilek.innerHTML += `<option value="${i}">${meal}</option>`
+    }
+    document.forms['edytuj_form'].posilek.value = getMeal(StudentList[currentStudentIndex].typ_posilku)
+})
+function close_edytuj() {
+    document.getElementById('edytuj_background').style.display = 'none'
+}

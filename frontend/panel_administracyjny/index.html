@@ -33,7 +33,7 @@
                     <img src="assets/x.svg" alt="zamknij okno" id="panel_close" onclick="close_panel()">
                 </div>
                 <section>
-                        <button>Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button>Usuń</button>
+                        <button id="edytuj">Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button>Usuń</button>
                 </section>
             </section>
 
@@ -61,6 +61,16 @@
                             <option value="śniadanie_obiad_kolacja">Śniadanie & Obiad & Kolacja</option>
                         </select></label>
                         <label><input type="submit" value="Prześlij"></label>
+                    </form>
+                </article>
+            </div>
+            <div id="edytuj_background">
+                <article class="edytuj">
+                    <img src="assets/x.svg" alt="zamknij okno" id="edytuj_close" onclick="close_edytuj()">
+                    <form name="edytuj_form">
+                        <label>Imię: <input type="text" name="imie"></label>
+                        <label>Nazwisko: <input type="text" name="nazwisko"></label>
+                        <label>Posiłek: <select name="posilek"></select></label>
                     </form>
                 </article>
             </div>
