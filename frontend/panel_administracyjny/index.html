@@ -51,14 +51,14 @@
                     </section>
                     <button onclick="shows()">Wyswietl wartości</button>
                     <form name="posilek">
-                        <label>Typ Posiłku:<select name="typ_posilku">
-                            <option value="obiad">Obiad</option>
+                        <label>Typ Posiłku:<select name="typ_posilku" onchange="generate_calendar()">
                             <option value="śniadanie">Śniadanie</option>
+                            <option value="obiad">Obiad</option>
                             <option value="kolacja">Kolacja</option>
-                            <option value="śniadanie_obiad">Śniadanie & Obiad</option>
-                            <option value="śniadanie_kolacja">Śniadanie & Kolacja</option>
-                            <option value="obiad_kolacja">Obiad & Kolacja</option>
-                            <option value="śniadanie_obiad_kolacja">Śniadanie & Obiad & Kolacja</option>
+                            <option value="śniadanie_obiad">Śniadanie i Obiad</option>
+                            <option value="śniadanie_kolacja">Śniadanie i Kolacja</option>
+                            <option value="śniadanie_obiad_kolacja">Śniadanie, Obiad i Kolacja</option>
+                            <option value="obiad_kolacja">Obiad i Kolacja</option>
                         </select></label>
                         <label><input type="submit" value="Prześlij"></label>
                     </form>

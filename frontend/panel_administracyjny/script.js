@@ -68,6 +68,19 @@ socket.addEventListener("message", (event) => {
             break;
     }
 });
+function getCalendarStudent()
+{
+    getCalendar = JSON.stringify({
+        action: "request",
+        params: {
+            method: "CalendarStudent",
+            id_ucznia: currentStudent,
+            relationBool: false,
+            isAll: false
+        }
+    })
+    socket.send(getCalendar)
+}
 const uczniowie = JSON.stringify({
     action: "request",
     params: {
@@ -116,16 +129,7 @@ function show(element) {
             currentStudentIndex = i;
         }
     }
-    getCalendar = JSON.stringify({
-        action: "request",
-        params: {
-            method: "CalendarStudent",
-            id_ucznia: currentStudent,
-            relationBool: false,
-            isAll: false
-        }
-    })
-    socket.send(getCalendar)
+    getCalendarStudent()
 }
 function changeDateCalendar()
 {
@@ -353,17 +357,16 @@ document.forms['posilek'].addEventListener('submit', (event) => {
         })
         CalendarStudent.forEach((elementCalendar)=>{
             if(!(lista.includes(elementCalendar))) {
-                console.log("Usuń: ", elementCalendar, posilek)
+                console.log("Usuń: ", JSON.parse(elementCalendar).dzien_wypisania, JSON.parse(elementCalendar).typ_posilku)
                 let data = {
                     action: "request",
                     params: {
                         method: "CalendarDelete",
-                        id_ucznia: currentStudent,
+                        studentId: currentStudent,
                         data: JSON.parse(elementCalendar).dzien_wypisania,
                         mealId: JSON.parse(elementCalendar).typ_posilku
                     }
                 }
-                console.log("")
                 socket.send(JSON.stringify(data))
             }
         })
@@ -373,17 +376,9 @@ document.forms['posilek'].addEventListener('submit', (event) => {
         for(let i = 0; i < CalendarStudent.length; i++) {
             CalendarStudent[i] = JSON.parse(CalendarStudent[i]);
         }
-        getCalendar = JSON.stringify({
-            action: "request",
-            params: {
-                method: "CalendarStudent",
-                id_ucznia: currentStudent,
-                relationBool: false,
-                isAll: false
-            }
-        })
-        socket.send(getCalendar)
+
     }
+    getCalendarStudent()
 })
 document.getElementById('edytuj').addEventListener('click', () => {
     let element = document.getElementById('edytuj_background')
@@ -397,9 +392,11 @@ document.getElementById('edytuj').addEventListener('click', () => {
     }
     document.forms['edytuj_form']['imie'].value = StudentList[currentStudentIndex].imie
     document.forms['edytuj_form']['nazwisko'].value = StudentList[currentStudentIndex].nazwisko
+    let srodek = "";
     for(let i = 1; i <= 7; i++) {
-        document.forms['edytuj_form'].posilek.innerHTML += `<option value="${getMeal(i, false)}">${getMeal(i, true)}</option>`
+        srodek += `<option value="${getMeal(i, false)}">${getMeal(i, true)}</option>`
     }
+    document.forms['edytuj_form'].posilek.innerHTML
     document.forms['edytuj_form'].posilek.value = getMeal(StudentList[currentStudentIndex].id_posilki, false)
 })
 document.forms['edytuj_form'].addEventListener('submit', (event) => {
@@ -438,9 +435,20 @@ document.getElementById('usun').addEventListener('click', () => {
     }
     else if(style === 'none') {
         document.getElementById('delete_background').style.display = 'flex'
-        alert("Czy na pewno chcesz usunąć ucznia?") // - jutro zrobic okienko, gdzie imie i nazwisko ucznia trzeba
-        // wpisac i potwierdzic usuniecie
+
     }
 })
 function delete_student() {
+    let czyNapewno = prompt("Czy na pewno chcesz usunąć ucznia?") // - jutro zrobic okienko, gdzie imie i nazwisko ucznia trzeba
+    if(czyNapewno === StudentList[currentStudentIndex].imie + " " + StudentList[currentStudentIndex].nazwisko)
+    {
+        let data = {
+            action: "request",
+            params: {
+                method: "DeleteStudent",
+                studentId: currentStudent
+            }
+        }
+        socket.send(JSON.stringify(data))
+    }
 }

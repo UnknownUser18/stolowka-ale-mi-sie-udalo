@@ -57,10 +57,13 @@ wss.on('connection', function connection(ws) {
                 CalendarAdd(ws, parameters.id_ucznia, parameters.data, parameters.mealId)
                 break;
             case "CalendarDelete":
-                CalendarDelete(ws, parameters.id_ucznia, parameters.data, parameters.mealId)
+                CalendarDelete(ws, parameters.studentId, parameters.data, parameters.mealId)
                 break;
             case "UpdateStudent":
                 UpdateStudent(ws, parameters.studentId, parameters.name, parameters.surname, parameters.mealId);
+                break;
+            case "DeleteStudent":
+                DeleteStudent(ws, parameters.studentId)
                 break;
         }
     });
@@ -185,7 +188,8 @@ function CalendarAdd(websocketClient, studentId, date, mealId)
 
 function CalendarDelete(websocketClient, studentId, date, mealId)
 {
-    let query = "DELETE FROM kalendarz WHERE id_uczniowie = "+studentId+" AND dzien_wypisania Like '"+date+"' AND typ_posilku = "+mealId;
+    let query = "DELETE FROM kalendarz WHERE id_uczniowie = "+studentId+" AND dzien_wypisania = '"+date+"' AND typ_posilku = "+mealId+";";
+    console.log(query);
     database.query(query, function (err, result) {
         if (err) throw err;
         console.log(result);
@@ -197,5 +201,13 @@ function UpdateStudent(websocketClient, studentId, name, surname, mealId)
     database.query(query, function (err, result) {
         if (err) throw err;
         console.log(result);
+    })
+}
+function DeleteStudent(websocketClient, studentId)
+{
+    let query = "DELETE FROM uczniowie WHERE id = " + studentId +";";
+    database.query(query, function (err, result){
+        if(err) throw err;
+        console.log(result)
     })
 }
