@@ -3,6 +3,7 @@ let StudentList = null, CalendarStudent, StudentMeal;
 let currentStudent = 1;
 let getCalendar;
 let lastValue;
+let currentStudentIndex = 0;
 socket.addEventListener("message", (event) => {
     console.log("Message incoming from the server: ", event.data);
     lastValue = JSON.parse(event.data);
@@ -64,7 +65,10 @@ function show(element) {
     for(let i = 0; i < StudentList.length ; i++)
     {
         if((StudentList[i].imie+ " " +StudentList[i].nazwisko ) === element.previousElementSibling.innerText)
+        {
             currentStudent = StudentList[i].id
+            currentStudentIndex = i;
+        }
     }
     getCalendar = JSON.stringify({
         action: "request",
@@ -345,31 +349,6 @@ document.forms['posilek'].addEventListener('submit', (event) => {
         for(let i = 0; i < CalendarStudent.length; i++) {
             CalendarStudent[i] = JSON.parse(CalendarStudent[i]);
         }
-        // let data = {
-        //     action: "request",
-        //     params: {
-        //         method: "CalendarAdd",
-        //         id_ucznia: currentStudent,
-        //         data: element.dzien_wypisania,
-        //         mealId: posilek
-        //     }
-        // }
-        // socket.send(JSON.stringify(data))
-        // CalendarStudent.forEach((element) => {
-        //     if(!(lista.includes(element))) {
-        //         console.log('usuwanie', lista, element)
-        //         let data = {
-        //             action: "request",
-        //             params: {
-        //                 method: "CalendarDelete",
-        //                 id_ucznia: currentStudent,
-        //                 data: element.dzien_wypisania,
-        //                 mealId: posilek
-        //             }
-        //         }
-        //         socket.send(JSON.stringify(data))
-        //     }
-        // })
         getCalendar = JSON.stringify({
             action: "request",
             params: {

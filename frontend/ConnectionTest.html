@@ -52,6 +52,18 @@
             }
         }
     )
+    const updateStudent = JSON.stringify(
+        {
+            action: "request",
+            params: {
+                method: "UpdateStudent",
+                studentId: 1,
+                name: "Jacek",
+                surname: "Dżackowski",
+                mealId: 2
+            }
+        }
+    )
     // const any = JSON.stringify({
     //     method: "AnyQuery",
     //     query: "Select * FROM tabela",
