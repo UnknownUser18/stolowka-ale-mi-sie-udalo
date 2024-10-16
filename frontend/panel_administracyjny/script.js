@@ -4,21 +4,35 @@ let currentStudent = 1
 let getCalendar;
 let lastValue;
 let currentStudentIndex = 0
-function getMeal(meal) {
+function getMeal(meal, fancy) {
     switch (meal) {
         case 1:
+            if(fancy)
+                return 'Śniadanie'
             return 'śniadanie'
         case 2:
+            if(fancy)
+                return 'Obiad'
             return 'obiad'
         case 3:
+            if(fancy)
+                return 'Kolacja'
             return 'kolacja'
         case 4:
+            if(fancy)
+                return 'Śniadanie i Obiad'
             return 'śniadanie_obiad'
         case 5:
+            if(fancy)
+                return 'Śniadanie i Kolacja'
             return 'śniadanie_kolacja'
         case 6:
+            if(fancy)
+                return 'Śniadanie, Obiad i Kolacja'
             return 'śniadanie_obiad_kolacja'
         case 7:
+            if(fancy)
+                return 'Obiad i Kolacja'
             return 'obiad_kolacja'
         case 'śniadanie':
             return  1
@@ -384,10 +398,9 @@ document.getElementById('edytuj').addEventListener('click', () => {
     document.forms['edytuj_form']['imie'].value = StudentList[currentStudentIndex].imie
     document.forms['edytuj_form']['nazwisko'].value = StudentList[currentStudentIndex].nazwisko
     for(let i = 1; i <= 7; i++) {
-        let meal = getMeal(i)
-        document.forms['edytuj_form'].posilek.innerHTML += `<option value="${i}">${meal}</option>`
+        document.forms['edytuj_form'].posilek.innerHTML += `<option value="${getMeal(i, false)}">${getMeal(i, true)}</option>`
     }
-    document.forms['edytuj_form'].posilek.value = getMeal(StudentList[currentStudentIndex].typ_posilku)
+    document.forms['edytuj_form'].posilek.value = getMeal(StudentList[currentStudentIndex].id_posilki, false)
 })
 function close_edytuj() {
     document.getElementById('edytuj_background').style.display = 'none'
