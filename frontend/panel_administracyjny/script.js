@@ -4,6 +4,15 @@ let currentStudent = 1
 let getCalendar;
 let lastValue;
 let currentStudentIndex = 0
+let posilek_array = {
+    'śniadanie': [],
+    'obiad': [],
+    'kolacja': [],
+    'śniadanie_obiad': [],
+    'śniadanie_kolacja': [],
+    'śniadanie_obiad_kolacja': [],
+    'obiad_kolacja': []
+}
 function getMeal(meal, fancy) {
     switch (meal) {
         case 1:
@@ -225,6 +234,8 @@ function select(element) {
     else if (element.classList.contains('selected')) {
         selected.push(`${date.getFullYear()}-${date.getMonth() + 1}-${element.innerText}`)
     }
+    posilek_array[document.forms['posilek']['typ_posilku'].value] = selected
+    console.log(posilek_array)
 }
 function close_kalendarz() {
     document.getElementById('kalendarz_background').style.display = 'none'
@@ -306,7 +317,7 @@ function generate_calendar() {
 }
 function typPosilkuChange()
 {
-    selected = [];
+    selected = posilek_array[document.forms['posilek']['typ_posilku'].value];
     selected_rows = [];
     generate_calendar();
 }
