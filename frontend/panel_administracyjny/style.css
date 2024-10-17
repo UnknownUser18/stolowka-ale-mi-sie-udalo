@@ -44,11 +44,9 @@ section {
     justify-content: start;
     width: 100%;
 }
-.kalendarz #zaznacz {
-    width: 12%;
-    display: grid;
-}
 #zaznacz {
+    width: 6%;
+    display: grid;
     place-items: center;
 }
 #zaznacz > button {
@@ -137,6 +135,22 @@ button.day.empty:hover {
     cursor: pointer;
     transition: 150ms ease-in-out all;
 }
+#zaznacz button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    width: 50px;
+    height: 50px;
+}
+#zaznacz button > img {
+    width: 40px;
+    height: 40px;
+}
+#zaznacz button:hover {
+    background-color: var(--secondary-color) !important;
+}
 #panel button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
@@ -160,7 +174,7 @@ button.day.empty:hover {
     cursor: pointer;
 }
 #kalendarz_dni {
-    margin-left: 16%;
+    margin-left: 11%;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 30px;
@@ -198,6 +212,11 @@ button.day.empty:hover {
     top: 2vh;
     right: 2vw;
     cursor: pointer;
+}
+.kalendarz > :first-child > :nth-child(2) {
+    text-align: center;
+    font-size: 2em;
+    margin: 10px;
 }
 .kalendarz > :first-child {
     display: flex;
@@ -282,6 +301,51 @@ nav > h2, #current_date {
     width: 70%;
     display: flex;
     flex-direction: column;
+}
+form[name="posilek"] {
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--primary-color);
+    height: 50%;
+    width: 15%;
+    z-index: 2;
+    border-radius: 0 10px 10px 0;
+    padding: 10px;
+}
+form[name="posilek"] label {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    font-size: 1.618em;
+    margin: 10px 0;
+}
+form[name="posilek"] > :last-child > input {
+    background-color: var(--accent-color);
+    color: var(--background-color);
+    outline: 0;
+    border: 0;
+    border-radius: 10px;
+    height: 60px;
+    font-family: inherit;
+    font-size: 1.1em;
+    padding: 10px;
+    cursor: pointer;
+    transition: 150ms ease-in-out all;
+}
+form[name="posilek"] > :last-child > input:hover {
+    background-color: var(--border-color);
+}
+form[name="posilek"] select {
+    margin-top: 10px;
+    font-family: inherit;
+    outline: 0;
+    border: 0;
+    font-size: 0.8em;
+    border-radius: 10px;
+    height: 38px;
+    width: fit-content;
+    padding: 0;
 }
 form[name="edytuj_form"] {
     width: 80%;
