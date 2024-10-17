@@ -92,16 +92,16 @@ function getCalendarStudent()
     })
     socket.send(getCalendar)
 }
-const uczniowie = JSON.stringify({
-    action: "request",
-    params: {
-        method: "StudentList",
-        condition: ""
-    }
-})
+
 setTimeout(function () {
-    socket.send(uczniowie)
-}, 100)
+    socket.send(JSON.stringify({
+        action: "request",
+        params: {
+            method: "StudentList",
+            condition: ""
+        }
+    }))
+}, 300)
 function getStudent(Name) {
     return '<div class="uczen"> <span>'+Name+'</span><button onClick="show(this)">Panel Administracyjny</button></div>'
 }
@@ -192,39 +192,35 @@ let selected_rows = []
 function zaznacz_wiersz(number) {
     const week = document.getElementsByClassName('week')[number]
     for(let i = 0; i < week.children.length; i++) {
-        if(!(week.children[i].classList.contains('empty')) && !(week.children[i].classList.contains('selected_row'))) {
-            week.children[i].classList.toggle('selected_row')
-            for(let j = 0 ; j < week.children.length; j++) {
-                if(!(week.children[j].classList.contains('empty'))) {
-                    week.children[j].classList.toggle('select')
+            console.log(week.children[i].innerHTML)
+            if(!(selected_rows.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`))) {
+                for(let j = i ; j < week.children.length; j++) {
+                    if(!(week.children[j].classList.contains('selected')) && !(week.children[j].classList.contains("empty")))
+                    {
+                        week.children[j].classList.add('selected')
+                        selected.push(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`)
+                    }
                 }
+                selected_rows.push(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`)
+                return
             }
-            selected_rows[`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`] = 1
-            for (let i = 0; i < week.children.length; i++) {
-                if(week.children[i].classList.contains('selected')) {
-                    week.children[i].classList.remove('selected')
-                    selected.splice(selected.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`), 1)
+            else if(selected_rows.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`)) {
+                for(let j = i ; j < week.children.length; j++) {
+                    if(week.children[j].classList.contains('selected') && !(week.children[j].classList.contains("empty")))
+                    {
+                        week.children[j].classList.remove('selected')
+                        selected.splice(selected.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`))
+                    }
                 }
+                selected_rows.splice(selected.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`),1);
+                return
             }
-            return
         }
-        else if(week.children[i].classList.contains('selected_row')) {
-            week.children[i].classList.remove('selected_row')
-            for(let j = 0 ; j < week.children.length; j++) {
-                if(!(week.children[j].classList.contains('empty'))) {
-                    week.children[j].classList.toggle('select')
-                }
-            }
-            delete selected_rows[`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`]
-            return
-        }
-    }
-
 }
 function select(element) {
     const week = element.parentElement
     for (let i = 0; i < week.children.length; i++) {
-        if(week.children[i].classList.contains('selected_row')) {
+        if(selected_rows.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`)) {
             return
         }
     }
@@ -237,8 +233,9 @@ function select(element) {
         selected.push(`${date.getFullYear()}-${date.getMonth() + 1}-${element.innerText}`)
     }
     posilek_array[document.forms['posilek']['typ_posilku'].value] = selected
-    console.log(posilek_array)
 }
+let calendarCopy
+let everydayIncluded;
 let dni = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz']
 function generate_calendar() {
     let year = date.getFullYear()
@@ -275,7 +272,6 @@ function generate_calendar() {
             let day = i - firstDay.getDay() + 1
             let dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${day}`
             let classes = 'day'
-            // console.log(dateStr)  -- żydon za duzo spamu
             for(let i = 0; i < CalendarStudent.length; i++) {
                 if(CalendarStudent[i].dzien_wypisania.split("T")[0] === dateStr && !selected.includes(CalendarStudent[i].dzien_wypisania.split("T")[0]) && getMeal(posilek.typ_posilku.value) === CalendarStudent[i].typ_posilku)
                     selected.push(CalendarStudent[i].dzien_wypisania.split("T")[0]);
@@ -312,6 +308,28 @@ function generate_calendar() {
             }
         }
     }
+    for(let i = 0 ; i < document.getElementsByClassName('week').length; i++) {
+        const week = document.getElementsByClassName('week')[i]
+        everydayIncluded = false;
+        calendarCopy = JSON.parse(JSON.stringify(CalendarStudent));
+        for(let j = 0; j < calendarCopy.length; j++) {
+            calendarCopy[j] = (calendarCopy[j].dzien_wypisania)
+        }
+        for(let j = 0 ; j < week.children.length; j++) {
+            if(calendarCopy.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`)===-1)
+                console.log(-1)
+            else if(!(calendarCopy.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`)) && !(week.children[j].classList.contains("empty")) && !(CalendarStudent[calendarCopy.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`)].typ_posilku === getMeal(posilek.typ_posilku.value)))
+            {
+                everydayIncluded = false;
+            }
+            else if(calendarCopy.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`) && CalendarStudent[calendarCopy.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`)].typ_posilku === getMeal(posilek.typ_posilku.value))
+                everydayIncluded = true;
+        }
+        if(everydayIncluded)
+        {
+            zaznacz_wiersz(i)
+        }
+    }
 }
 function typPosilkuChange()
 {
@@ -323,14 +341,10 @@ function typPosilkuChange()
 document.forms['posilek'].addEventListener('submit', (event) => {
     event.preventDefault()
     let posilek = document.forms['posilek']['typ_posilku'].value
-    console.log(posilek)
-    console.log(selected)
-    console.log(selected_rows)
-    console.log(currentStudent)
     posilek = getMeal(posilek)
     if(CalendarStudent.length === 0) {
         selected.forEach((element) => {
-            console.log("Dodaje: ", element, posilek)
+            ("Dodaje: ", element, posilek)
             let data = {
                 action: "request",
                 params: {
@@ -340,6 +354,7 @@ document.forms['posilek'].addEventListener('submit', (event) => {
                     mealId: posilek
                 }
             }
+
             socket.send(JSON.stringify(data))
         })
     }
