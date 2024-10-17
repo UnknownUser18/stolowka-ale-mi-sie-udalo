@@ -268,7 +268,7 @@ function generate_calendar() {
             let classes = 'day'
             // console.log(dateStr)  -- żydon za duzo spamu
             for(let i = 0; i < CalendarStudent.length; i++) {
-                if(CalendarStudent[i].dzien_wypisania.split("T")[0] === dateStr)
+                if(CalendarStudent[i].dzien_wypisania.split("T")[0] === dateStr && !selected.includes(CalendarStudent[i].dzien_wypisania.split("T")[0]))
                     selected.push(CalendarStudent[i].dzien_wypisania.split("T")[0]);
             }
             if (selected.includes(dateStr)) {
@@ -442,7 +442,7 @@ function delete_student() {
     let czyNapewno = prompt("Czy na pewno chcesz usunąć ucznia?") // - jutro zrobic okienko, gdzie imie i nazwisko ucznia trzeba
     if(czyNapewno === StudentList[currentStudentIndex].imie + " " + StudentList[currentStudentIndex].nazwisko)
     {
-        let data = {
+        let datapanel = {
             action: "request",
             params: {
                 method: "DeleteStudent",
