@@ -213,10 +213,11 @@ function zaznacz_wiersz(number, element) {
             }
             else if(selected_rows.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`)) {
                 for(let j = i ; j < week.children.length; j++) {
+                    console.log(week.children[j].classList.contains('selected'))
                     if(week.children[j].classList.contains('selected') && !(week.children[j].classList.contains("empty")))
                     {
                         week.children[j].classList.remove('selected')
-                        selected.splice(selected.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`))
+                        selected.splice(selected.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`),1)
                     }
                 }
                 selected_rows.splice(selected.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`),1);
@@ -313,28 +314,6 @@ function generate_calendar() {
                     }
                 }
             }
-        }
-    }
-    for(let i = 0 ; i < document.getElementsByClassName('week').length; i++) {
-        const week = document.getElementsByClassName('week')[i]
-        everydayIncluded = false;
-        calendarCopy = JSON.parse(JSON.stringify(CalendarStudent));
-        for(let j = 0; j < calendarCopy.length; j++) {
-            calendarCopy[j] = (calendarCopy[j].dzien_wypisania)
-        }
-        for(let j = 0 ; j < week.children.length; j++) {
-            if(calendarCopy.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`)===-1)
-                console.log(-1)
-            else if(!(calendarCopy.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[i].innerHTML}`)) && !(week.children[j].classList.contains("empty")) && !(CalendarStudent[calendarCopy.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`)].typ_posilku === getMeal(posilek.typ_posilku.value)))
-            {
-                everydayIncluded = false;
-            }
-            else if(calendarCopy.includes(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`) && CalendarStudent[calendarCopy.indexOf(`${date.getFullYear()}-${date.getMonth() + 1}-${week.children[j].innerHTML}`)].typ_posilku === getMeal(posilek.typ_posilku.value))
-                everydayIncluded = true;
-        }
-        if(everydayIncluded)
-        {
-            zaznacz_wiersz(i)
         }
     }
 }
