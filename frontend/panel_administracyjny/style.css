@@ -170,7 +170,7 @@ button.day.empty:hover {
 #kalendarz_content {
     flex-direction: column;
 }
-#kalendarz_background, #edytuj_background, #delete_background {
+.background {
     width: 100%;
     height: 100%;
     position: fixed;
@@ -181,7 +181,7 @@ button.day.empty:hover {
     left: 0;
     background-color: rgba(0, 0, 0, 0.3);
 }
-#miesiac_przed , #miesiac_nast {
+.kalendarz > :first-child > span {
     cursor: pointer;
     font-size: 1.618em;
     margin: 10px;
@@ -189,22 +189,22 @@ button.day.empty:hover {
     justify-content: center;
     align-items: center;
 }
-#miesiac_przed:hover, #miesiac_nast:hover {
+.kalendarz > :first-child > span:hover {
     text-decoration: underline;
 }
-#kalendarz_close, #edytuj_close, #delete_close {
+.close {
     position: absolute;
     width: 50px;
     top: 2vh;
     right: 2vw;
     cursor: pointer;
 }
-#header {
+.kalendarz > :first-child {
     display: flex;
     align-items: center;
     justify-content: space-around;
 }
-#nav_header, #current_date {
+nav > h2, #current_date {
     text-align: center;
 }
 #current_date {

@@ -57,6 +57,8 @@ function getMeal(meal, fancy) {
             return 6
         case 'obiad_kolacja':
             return 7
+        default:
+            return "Error while giving meal"
     }
 }
 socket.addEventListener("message", (event) => {
@@ -112,7 +114,7 @@ function RenderStudentList(students) {
     document.getElementById('l_uczniow').children[1].innerHTML = generatedHTML;
 }
 
-let header_nav = document.getElementById('nav_header')
+let header_nav = document.querySelector('nav > h2')
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('l_uczniow').style.display = 'none'
 })
@@ -127,7 +129,7 @@ document.getElementById('lista_uczniow').addEventListener('click', () => {
 })
 function show(element) {
     document.getElementById('panel').style.display = 'flex'
-    document.getElementById('panel_header').innerHTML = element.previousElementSibling.innerText
+    document.querySelector('#panel > section > div > h2').innerHTML = element.previousElementSibling.innerText
     selected_rows = []
     selected = []
     for(let i = 0; i < StudentList.length ; i++)
@@ -153,14 +155,14 @@ function close_panel() {
 }
 let date = new Date()
 document.getElementById('kalendarz').addEventListener('click', () => {
-    let element = document.getElementById('kalendarz_background')
+    let element = document.getElementsByClassName('background')[0]
     let styl = window.getComputedStyle(element)
     let style = styl.getPropertyValue('display')
     if(style === 'flex') {
-        document.getElementById('kalendarz_background').style.display = 'none'
+        document.getElementsByClassName('background')[0].style.display = 'none'
     }
     else if(style === 'none') {
-        document.getElementById('kalendarz_background').style.display = 'flex'
+        document.getElementsByClassName('background')[0].style.display = 'flex'
         change_month(0)
     }
 })
@@ -172,8 +174,8 @@ function change_month(change) {
     date = new Date(date.getFullYear(), date.getMonth() + change, 1) // Set day to 1 to avoid skipping months
     let date_next = new Date(date.getFullYear(), date.getMonth() + 1, 1)
     let date_back = new Date(date.getFullYear(), date.getMonth() - 1, 1)
-    document.getElementById('miesiac_nast').innerHTML = date_next.toLocaleString('default', {month : 'long' , year : 'numeric'}) + `<img src="assets/arrow_forward.svg" alt="dalej">`
-    document.getElementById('miesiac_przed').innerHTML = `<img src="assets/arrow_back.svg" alt="wstecz">` + date_back.toLocaleString('default', {month : 'long' , year : 'numeric'})
+    document.querySelector('.kalendarz > :first-child > :last-child').innerHTML = date_next.toLocaleString('default', {month : 'long' , year : 'numeric'}) + `<img src="assets/arrow_forward.svg" alt="dalej">`
+    document.querySelector('.kalendarz > :first-child > :first-child').innerHTML = `<img src="assets/arrow_back.svg" alt="wstecz">` + date_back.toLocaleString('default', {month : 'long' , year : 'numeric'})
     generate_calendar()
     zaznacz()
 }
@@ -236,10 +238,6 @@ function select(element) {
     }
     posilek_array[document.forms['posilek']['typ_posilku'].value] = selected
     console.log(posilek_array)
-}
-function close_kalendarz() {
-    document.getElementById('kalendarz_background').style.display = 'none'
-    date = new Date()
 }
 let dni = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Niedz']
 function generate_calendar() {
@@ -399,14 +397,14 @@ document.forms['posilek'].addEventListener('submit', (event) => {
     getCalendarStudent()
 })
 document.getElementById('edytuj').addEventListener('click', () => {
-    let element = document.getElementById('edytuj_background')
+    let element = document.getElementsByClassName('background')[1]
     let styl = window.getComputedStyle(element)
     let style = styl.getPropertyValue('display')
     if(style === 'flex') {
-        document.getElementById('edytuj_background').style.display = 'none'
+        document.getElementsByClassName('background')[1].style.display = 'none'
     }
     else if(style === 'none') {
-        document.getElementById('edytuj_background').style.display = 'flex'
+        document.getElementsByClassName('background')[1].style.display = 'flex'
     }
     document.forms['edytuj_form']['imie'].value = StudentList[currentStudentIndex].imie
     document.forms['edytuj_form']['nazwisko'].value = StudentList[currentStudentIndex].nazwisko
@@ -435,24 +433,18 @@ document.forms['edytuj_form'].addEventListener('submit', (event) => {
     socket.send(JSON.stringify(data));
     socket.send(uczniowie);
 
-    close_edytuj()
+    document.getElementsByClassName('background')[1].style.display = 'none'
     close_panel()
 })
-function close_edytuj() {
-    document.getElementById('edytuj_background').style.display = 'none'
-}
-function close_delete() {
-    document.getElementById('delete_background').style.display = 'none'
-}
 document.getElementById('usun').addEventListener('click', () => {
-    let element = document.getElementById('delete_background')
+    let element = document.getElementsByClassName('background')[2]
     let styl = window.getComputedStyle(element)
     let style = styl.getPropertyValue('display')
     if(style === 'flex') {
-        document.getElementById('delete_background').style.display = 'none'
+        document.getElementsByClassName('background')[2].style.display = 'none'
     }
     else if(style === 'none') {
-        document.getElementById('delete_background').style.display = 'flex'
+        document.getElementsByClassName('background')[2].style.display = 'flex'
 
     }
 })
