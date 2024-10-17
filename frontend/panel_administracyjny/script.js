@@ -130,6 +130,7 @@ document.getElementById('lista_uczniow').addEventListener('click', () => {
 function show(element) {
     document.getElementById('panel').style.display = 'flex'
     document.querySelector('#panel > section > div > h2').innerHTML = element.previousElementSibling.innerText
+    document.querySelector('.kalendarz > :first-child > :nth-child(2)').innerHTML = element.previousElementSibling.innerText
     selected_rows = []
     selected = []
     for(let i = 0; i < StudentList.length ; i++)
@@ -184,12 +185,18 @@ function zaznacz() {
     document.getElementById('zaznacz').innerHTML = ''
     const ilosc = document.getElementsByClassName('week').length
     for(let i = 0; i < ilosc ; i++) {
-        document.getElementById('zaznacz').innerHTML += `<button onclick="zaznacz_wiersz(${i})">Zaznacz</button>`
+        document.getElementById('zaznacz').innerHTML += `<button onclick="zaznacz_wiersz(${i},this)"><img src="assets/checkmark.svg" alt="Zaznacz Wiersz ${i+1}"></button>`
     }
 }
 let selected = []
 let selected_rows = []
-function zaznacz_wiersz(number) {
+function zaznacz_wiersz(number, element) {
+    if(element.innerHTML === `<img src="assets/x.svg" alt="Zaznaczony Wiersz ${number+1}">`) {
+        element.innerHTML = `<img src="assets/checkmark.svg" alt="Zaznacz Wiersz ${number+1}">`
+    }
+    else {
+        element.innerHTML = `<img src="assets/x.svg" alt="Zaznaczony Wiersz ${number+1}">`
+    }
     const week = document.getElementsByClassName('week')[number]
     for(let i = 0; i < week.children.length; i++) {
         if(!(week.children[i].classList.contains('empty')) && !(week.children[i].classList.contains('selected_row'))) {
