@@ -268,7 +268,7 @@ function generate_calendar() {
             let classes = 'day'
             // console.log(dateStr)  -- żydon za duzo spamu
             for(let i = 0; i < CalendarStudent.length; i++) {
-                if(CalendarStudent[i].dzien_wypisania.split("T")[0] === dateStr && !selected.includes(CalendarStudent[i].dzien_wypisania.split("T")[0]))
+                if(CalendarStudent[i].dzien_wypisania.split("T")[0] === dateStr && !selected.includes(CalendarStudent[i].dzien_wypisania.split("T")[0]) && getMeal(posilek.typ_posilku.value) === CalendarStudent[i].typ_posilku)
                     selected.push(CalendarStudent[i].dzien_wypisania.split("T")[0]);
             }
             if (selected.includes(dateStr)) {
@@ -304,6 +304,13 @@ function generate_calendar() {
         }
     }
 }
+function typPosilkuChange()
+{
+    selected = [];
+    selected_rows = [];
+    generate_calendar();
+}
+
 document.forms['posilek'].addEventListener('submit', (event) => {
     event.preventDefault()
     let posilek = document.forms['posilek']['typ_posilku'].value
