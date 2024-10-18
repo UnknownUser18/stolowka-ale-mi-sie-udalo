@@ -9,7 +9,7 @@
 </head>
 <body>
     <nav>
-        <h2 id="nav_header">Strona Główna</h2>
+        <h2>Strona Główna</h2>
     </nav>
     <main>
         <section id="strona_glowna">
@@ -18,58 +18,70 @@
                 <button id="lista_uczniow">Lista Uczniów</button>
             </article>
         </section>
+        <div id="loader_background">
+            <div class="loader"></div>
+        </div>
         <section id="l_uczniow">
             <h2>Lista Uczniów</h2>
-            <article>
-                <div class="uczen">
-                    <span>Jacek Blaterek</span><button onclick="show(this)">Panel Administracyjny</button>
-                </div>
-                <div class="uczen">
-                    <span>Dżacek Gyatterek</span><button onclick="show(this)">Panel Administracyjny</button>
-                </div>
-                <div class="uczen">
-                    <span>Freaky Kamil</span><button onclick="show(this)">Panel Administracyjny</button>
-                </div>
-                <div class="uczen">
-                    <span>Gyatt Kamila</span><button onclick="show(this)">Panel Administracyjny</button>
-                </div>
-            </article>
+            <article></article> <!-- Lista uczniów -->
         </section>
         <section id="panel">
             <section>
                 <div>
-                    <h2 id="panel_header"></h2>
-                    <img src="assets/x.svg" alt="zamknij okno" id="panel_close" onclick="close_panel()">
+                    <h2></h2> <!-- Imię i nazwisko ucznia -->
+                    <img src="assets/x.svg" alt="zamknij okno" onclick="close_panel()">
                 </div>
                 <section>
-                        <button>Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button>Usuń</button>
+                        <button id="edytuj">Edytuj</button><button id="kalendarz">Kalendarz</button><button>Raport</button><button id="usun">Usuń</button>
                 </section>
             </section>
 
-            <div id="kalendarz_background">
+            <div class="background">
                 <article class="kalendarz">
-                    <div id="header">
-                        <span id="miesiac_przed" onclick="change_month(-1)"></span><span id="miesiac_nast" onclick="change_month(1)"></span>
+                    <div>
+                        <span onclick="change_month(-1)"></span><div></div><span onclick="change_month(1)"></span>
                     </div>
-                    <img src="assets/x.svg" alt="zamknij okno" id="kalendarz_close" onclick="close_kalendarz()">
+                    <img src="assets/x.svg" alt="zamknij okno" class="close" onclick="document.getElementsByClassName('background')[0].style.display = 'none'">
                     <div id="current_date"></div>
                     <div id="kalendarz_dni"></div>
                     <section>
                         <div id="zaznacz"></div>
                         <section id="kalendarz_content"></section>
                     </section>
-                    <button onclick="shows()">Wyswietl wartości</button>
+                </article>
+                <form name="posilek">
+                    <label>Typ Posiłku:<select name="typ_posilku" onchange="typPosilkuChange()">
+                        <option value="śniadanie">Śniadanie</option>
+                        <option value="obiad">Obiad</option>
+                        <option value="kolacja">Kolacja</option>
+                        <option value="śniadanie_obiad">Śniadanie i Obiad</option>
+                        <option value="śniadanie_kolacja">Śniadanie i Kolacja</option>
+                        <option value="śniadanie_obiad_kolacja">Śniadanie, Obiad i Kolacja</option>
+                        <option value="obiad_kolacja">Obiad i Kolacja</option>
+                    </select></label>
+                    <label><input type="submit" value="Prześlij zmiany"></label>
+                    </form>
+            </div>
+            <div class="background">
+                <article class="edytuj">
+                    <img src="assets/x.svg" alt="zamknij okno" class="close" onclick="document.getElementsByClassName('background')[1].style.display = 'none'">
+                    <form name="edytuj_form">
+                        <label>Imię: <input type="text" name="imie"></label>
+                        <label>Nazwisko: <input type="text" name="nazwisko"></label>
+                        <label>Posiłek: <select name="posilek"></select></label>
+                        <label><input type="submit" value="Prześlij"></label>
+                    </form>
+                </article>
+            </div>
+            <div class="background">
+                <article class="delete">
+                    <img src="assets/x.svg" alt="zamknij okno" class="close" onclick="document.getElementsByClassName('background')[2].style.display = 'none'">
+                    <h2>Czy na pewno chcesz usunąć ucznia?</h2>
+                    <button onclick="delete_student()">Tak</button><button onclick="document.getElementsByClassName('background')[2].style.display = 'none'">Nie</button>
                 </article>
             </div>
         </section>
         <script src="script.js"></script>
-        <script>
-<!-- debug purpouses -->
-            function shows() {
-                console.log(selected)
-                console.log(selected_rows)
-            }
-        </script>
     </main>
 </body>
 </html>

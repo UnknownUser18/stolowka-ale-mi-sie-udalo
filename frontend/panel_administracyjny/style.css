@@ -29,7 +29,7 @@ section {
     flex-direction: column;
     justify-content: center;
 }
-.kalendarz {
+.kalendarz, .edytuj, .delete {
     position: relative;
     width: 60%;
     background-color: var(--primary-color);
@@ -44,11 +44,9 @@ section {
     justify-content: start;
     width: 100%;
 }
-.kalendarz #zaznacz {
-    width: 12%;
-    display: grid;
-}
 #zaznacz {
+    width: 6%;
+    display: grid;
     place-items: center;
 }
 #zaznacz > button {
@@ -137,6 +135,22 @@ button.day.empty:hover {
     cursor: pointer;
     transition: 150ms ease-in-out all;
 }
+#zaznacz button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    width: 50px;
+    height: 50px;
+}
+#zaznacz button > img {
+    width: 40px;
+    height: 40px;
+}
+#zaznacz button:hover {
+    background-color: var(--secondary-color) !important;
+}
 #panel button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
@@ -160,7 +174,7 @@ button.day.empty:hover {
     cursor: pointer;
 }
 #kalendarz_dni {
-    margin-left: 16%;
+    margin-left: 11%;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 30px;
@@ -170,7 +184,7 @@ button.day.empty:hover {
 #kalendarz_content {
     flex-direction: column;
 }
-#kalendarz_background {
+.background {
     width: 100%;
     height: 100%;
     position: fixed;
@@ -181,7 +195,7 @@ button.day.empty:hover {
     left: 0;
     background-color: rgba(0, 0, 0, 0.3);
 }
-#miesiac_przed , #miesiac_nast {
+.kalendarz > :first-child > span {
     cursor: pointer;
     font-size: 1.618em;
     margin: 10px;
@@ -189,22 +203,27 @@ button.day.empty:hover {
     justify-content: center;
     align-items: center;
 }
-#miesiac_przed:hover, #miesiac_nast:hover {
+.kalendarz > :first-child > span:hover {
     text-decoration: underline;
 }
-#kalendarz_close {
+.close {
     position: absolute;
     width: 50px;
     top: 2vh;
     right: 2vw;
     cursor: pointer;
 }
-#header {
+.kalendarz > :first-child > :nth-child(2) {
+    text-align: center;
+    font-size: 2em;
+    margin: 10px;
+}
+.kalendarz > :first-child {
     display: flex;
     align-items: center;
     justify-content: space-around;
 }
-#nav_header, #current_date {
+nav > h2, #current_date {
     text-align: center;
 }
 #current_date {
@@ -278,9 +297,121 @@ button.day.empty:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
+.edytuj {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+}
+form[name="posilek"] {
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--primary-color);
+    height: 50%;
+    width: 15%;
+    z-index: 2;
+    border-radius: 0 10px 10px 0;
+    padding: 10px;
+}
+form[name="posilek"] label {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    font-size: 1.618em;
+    margin: 10px 0;
+}
+form[name="posilek"] > :last-child > input {
+    background-color: var(--accent-color);
+    color: var(--background-color);
+    outline: 0;
+    border: 0;
+    border-radius: 10px;
+    height: 60px;
+    font-family: inherit;
+    font-size: 1.1em;
+    padding: 10px;
+    cursor: pointer;
+    transition: 150ms ease-in-out all;
+}
+form[name="posilek"] > :last-child > input:hover {
+    background-color: var(--border-color);
+}
+form[name="posilek"] select {
+    margin-top: 10px;
+    font-family: inherit;
+    outline: 0;
+    border: 0;
+    font-size: 0.8em;
+    border-radius: 10px;
+    height: 38px;
+    width: fit-content;
+    padding: 0;
+}
+form[name="edytuj_form"] {
+    width: 80%;
+    margin-left: 2%;
+}
+form[name="edytuj_form"] label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.618em;
+    margin: 10px 0;
+}
+form[name="edytuj_form"] input, form[name="edytuj_form"] select {
+    height: 24px;
+    width: 30%;
+    padding: 5px;
+    font-size: 1.1em;
+}
+form[name="edytuj_form"] select {
+    height: 38px;
+    width: 200px;
+    padding: 0;
+}
+form[name="edytuj_form"] input[type="submit"] {
+    width: 30%;
+    height: 40px;
+    font-size: 1em;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 150ms ease-in-out all;
+}
+form[name="edytuj_form"] input[type="submit"]:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
 @media (max-width: 1280px) {
     .kalendarz {
         width: 80%;
         margin-left: 0;
     }
+    #l_uczniow article {
+        width: 80%;
+    }
 }
+#loader_background {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+.loader {
+    width: 100px;
+    padding: 8px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #25b09b;
+    --_m:
+      conic-gradient(#0000 10%,#000),
+      linear-gradient(#000 0 0) content-box;
+    -webkit-mask: var(--_m);
+            mask: var(--_m);
+    -webkit-mask-composite: source-out;
+            mask-composite: subtract;
+    animation: l3 1s infinite linear;
+}
+@keyframes l3 {to{transform: rotate(1turn)}}

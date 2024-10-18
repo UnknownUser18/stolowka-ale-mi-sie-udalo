@@ -8,6 +8,7 @@
     <title>Document</title>
 </head>
 <body>
+    <iframe width="300" height="300" src="https://ptoszek.pl"></iframe>
 <script>
     const socket = new WebSocket("ws://localhost:8080");
     const skan = JSON.stringify({
@@ -48,6 +49,18 @@
                 id_ucznia: 1,
                 data: "2024-10-12",
                 mealId: 1
+            }
+        }
+    )
+    const updateStudent = JSON.stringify(
+        {
+            action: "request",
+            params: {
+                method: "UpdateStudent",
+                studentId: 1,
+                name: "Jacek",
+                surname: "Dżackowski",
+                mealId: 2
             }
         }
     )
