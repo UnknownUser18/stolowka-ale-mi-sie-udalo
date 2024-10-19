@@ -1,0 +1,11 @@
+<nav>
+  <h2>Lista Osób</h2>
+  <ol (click)="show($event)">
+    <li><span>Dżacek</span><button>Otwórz</button></li>
+    <li><span>Wojtek</span> <button>Otwórz</button></li>
+    <li><span>Grzesiek</span><button>Otwórz</button></li>
+  </ol>
+</nav>
+<main>
+  <app-panel [name]="osoba"></app-panel>
+</main>

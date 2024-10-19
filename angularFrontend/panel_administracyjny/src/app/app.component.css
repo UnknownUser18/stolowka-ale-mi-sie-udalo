@@ -1,0 +1,53 @@
+nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25%;
+    height: 100%;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    font-size: 1.618em;
+}
+h2 {
+    text-align: center;
+}
+ol {
+    margin-left: 20px;
+    padding-left: 0;
+    counter-reset: list-counter;
+}
+li {
+    width: 87%;
+    margin: 10px 0;
+    background-color: var(--secondary-color);
+    padding: 10px 10px 10px calc(1.2em + 10px);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    list-style: none;
+}
+li::before {
+    content: counter(list-counter) ". ";
+    counter-increment: list-counter;
+    position: absolute;
+    left: 0;
+    padding-left: 10px;
+    font-size: 1em;
+}
+button {
+    width: fit-content;
+    padding: 5px 10px;
+    font-family: inherit;
+    font-size: 1em;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--primary-color);
+    transition: 150ms ease-in-out all;
+    cursor: pointer;
+}
+button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
