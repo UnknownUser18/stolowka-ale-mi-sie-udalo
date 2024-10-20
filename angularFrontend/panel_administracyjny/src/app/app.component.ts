@@ -10,6 +10,7 @@ import { PanelComponent } from './panel/panel.component';
 })
 export class AppComponent {
   osoba : string | undefined;
+  title: string = 'panel_administracyjny';
   show(event: Event) {
     let target = event.target as HTMLElement;
     if(target.tagName !== 'BUTTON') return;

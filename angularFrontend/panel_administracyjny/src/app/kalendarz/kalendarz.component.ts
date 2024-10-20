@@ -1,27 +1,34 @@
-import { Component, ElementRef, Renderer2, SimpleChanges, OnInit, OnChanges } from '@angular/core';
-import {first} from 'rxjs';
+import { Component, ElementRef, Renderer2} from '@angular/core';
+import {NgOptimizedImage} from '@angular/common';
 
 @Component({
   selector: 'app-kalendarz',
   standalone: true,
-  imports: [],
+  imports: [
+    NgOptimizedImage
+  ],
   templateUrl: './kalendarz.component.html',
   styleUrl: './kalendarz.component.css'
 })
 export class KalendarzComponent {
   currentDate : string | undefined;
+  date : Date = new Date();
+  month_before : string | undefined;
+  month_next : string | undefined;
+  months : Array <string> = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   constructor(private renderer: Renderer2, private el: ElementRef) {};
   show_calendar() {
     this.el.nativeElement.querySelector('.kalendarz').style.display = 'flex';
     const calendar_content = this.el.nativeElement.querySelector('#content');
-
-    const date = new Date();
-    let year = date.getFullYear();
-    let month = date.getMonth()+1;
-    let month_days = new Date(year, month, 0).getDate();
+    calendar_content.innerHTML = '';
+    let year = this.date.getFullYear();
+    let month = this.date.getMonth();
+    let month_days = new Date(year, month+1, 0).getDate();
     let first_day = new Date(year, month, 1).getDate();
-    let first_day_week = new Date(year, month-1, 1).getDay();
-    this.currentDate = `${year}-${month}`;
+    let first_day_week = new Date(year, month, 1).getDay();
+    console.log(month)
+
+    this.currentDate = this.months[month] + ' ' + year;
     console.log(first_day);
     console.log(month_days);
     let weekcount = 0;
@@ -55,5 +62,33 @@ export class KalendarzComponent {
         this.renderer.appendChild(calendar_content, weekDiv);
       }
     }
+    // checking for empty days
+    document.querySelectorAll('.week').forEach((week) => {
+      if(week.children.length < 7) {
+        for(let i = week.children.length ; i < 7 ; i++) {
+          const dayDiv = this.renderer.createElement('div');
+          this.renderer.addClass(dayDiv, 'day');
+          this.renderer.addClass(dayDiv, 'empty');
+          this.renderer.appendChild(week, dayDiv);
+        }
+      }
+    });
+  };
+  // show previous/next month
+  change_month(number: number) {
+    this.date = new Date(this.date.getFullYear(), this.date.getMonth() + number, 1);
+    if(this.date.getMonth() === 11) {
+      this.month_next = this.months[0] + ' ' + (this.date.getFullYear() + 1);
+      this.month_before = this.months[this.date.getMonth()-1] + ' ' + this.date.getFullYear();
+    }
+    else if(this.date.getMonth() === 0) {
+      this.month_before = this.months[11] + ' ' + (this.date.getFullYear() - 1);
+      this.month_next = this.months[this.date.getMonth()+1] + ' ' + this.date.getFullYear();
+    }
+    else {
+      this.month_before = this.months[this.date.getMonth()-1] + ' ' + this.date.getFullYear();
+      this.month_next = this.months[this.date.getMonth()+1] + ' ' + this.date.getFullYear();
+    }
+    this.show_calendar();
   }
 }
