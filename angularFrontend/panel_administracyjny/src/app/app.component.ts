@@ -13,11 +13,8 @@ export class AppComponent {
   title: string = 'panel_administracyjny';
   show(event: Event) {
     let target = event.target as HTMLElement;
-    if(target.tagName !== 'BUTTON') return;
-    else {
-      target = target.parentElement as HTMLElement;
-      this.osoba = target.querySelector('span')?.textContent!;
-      console.log(this.osoba);
+    target = target.parentElement as HTMLElement;
+    this.osoba = target.querySelector('span')?.textContent!;
+    console.log(this.osoba);
     }
   }
-}

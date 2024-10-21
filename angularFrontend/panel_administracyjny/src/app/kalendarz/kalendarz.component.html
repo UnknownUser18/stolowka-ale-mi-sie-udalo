@@ -1,15 +1,12 @@
-<button (click)="show_calendar()" id="kalendarz">Kalendarz</button>
 <section class="kalendarz">
-  <section class="main">
-    <section id="date">
-      <span id="change_month">
-        <span (click)="change_month(-1)"><img ngSrc="assets/arrow_back.svg" alt="miesiąc w tył" height="48" width="48"> {{ month_before }}</span> <!-- żydon napraw zdjecia -->
-        <span id="current_date">{{ currentDate }}</span>
-        <span (click)="change_month(1)"><img ngSrc="assets/arrow_forward.svg" alt="miesiąc w przód" height="48" width="48"> {{ month_next }}</span>
-      </span>
+  <section id="date">
+    <span id="change_month">
+      <!-- <img ngSrc="angularFrontend/panel_administracyjny/src/app/kalendarz/assets/arrow_back.svg" alt="miesiąc w tył" height="48" width="48"> -->
+      <!-- <img ngSrc="angularFrontend/panel_administracyjny/src/app/kalendarz/assets/arrow_forward.svg" alt="miesiąc w przód" height="48" width="48">  -->
+      <span (click)="change_month(-1)"> {{ month_before }}</span>
+      <span id="current_date">{{ currentDate }}</span>
+      <span (click)="change_month(1)"> {{ month_next }}</span>
+    </span>
     </section>
-      <section id="content">
-
-      </section>
-  </section>
+    <section id="content"></section>
 </section>

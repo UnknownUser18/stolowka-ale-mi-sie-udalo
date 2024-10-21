@@ -10,21 +10,15 @@ main > section {
     align-items: center;
     justify-content: space-between;
     padding: 10px;
-    width: 70%;
+    width: 90%;
     background-color: var(--primary-color);
-    height: 50%;
+    height: 70%;
     border-radius: 10px;
     box-shadow: var(--box-shadow);
 }
 h1 {
     font-size: 2.6em;
 }
-main > section > section {
-    width: 60%;
-    margin-bottom: 17%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    row-gap: 20%;
-    column-gap: 10px;
-    justify-items: center;
+app-kalendarz {
+    width: 100%;
 }

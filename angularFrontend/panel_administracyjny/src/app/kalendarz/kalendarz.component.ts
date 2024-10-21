@@ -1,4 +1,4 @@
-import { Component, ElementRef, Renderer2} from '@angular/core';
+import { Component, ElementRef, Renderer2, OnInit} from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
 
 @Component({
@@ -13,12 +13,14 @@ import {NgOptimizedImage} from '@angular/common';
 export class KalendarzComponent {
   currentDate : string | undefined;
   date : Date = new Date();
-  month_before : string | undefined;
-  month_next : string | undefined;
   months : Array <string> = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+  month_before : string = this.months[new Date(new Date().getFullYear(), new Date().getMonth()-1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth()+1, 1).getFullYear();
+  month_next : string = this.months[new Date(new Date().getFullYear(), new Date().getMonth()+1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth()+1, 1).getFullYear();
   constructor(private renderer: Renderer2, private el: ElementRef) {};
+  ngOnInit() {
+    this.show_calendar()
+  }
   show_calendar() {
-    this.el.nativeElement.querySelector('.kalendarz').style.display = 'flex';
     const calendar_content = this.el.nativeElement.querySelector('#content');
     calendar_content.innerHTML = '';
     let year = this.date.getFullYear();
@@ -36,9 +38,7 @@ export class KalendarzComponent {
     const weekDiv = this.renderer.createElement('div');
     this.renderer.addClass(weekDiv, 'week');
     this.renderer.appendChild(calendar_content, weekDiv);
-
     for(let i = 1 ; i <= (month_days + first_day_week-1) ; i++) {
-
       let week = document.getElementsByClassName('week')[weekcount];
       // create day button
       if(i < first_day_week) {
@@ -74,21 +74,13 @@ export class KalendarzComponent {
       }
     });
   };
-  // show previous/next month
+    // show previous/next month
   change_month(number: number) {
     this.date = new Date(this.date.getFullYear(), this.date.getMonth() + number, 1);
-    if(this.date.getMonth() === 11) {
-      this.month_next = this.months[0] + ' ' + (this.date.getFullYear() + 1);
-      this.month_before = this.months[this.date.getMonth()-1] + ' ' + this.date.getFullYear();
-    }
-    else if(this.date.getMonth() === 0) {
-      this.month_before = this.months[11] + ' ' + (this.date.getFullYear() - 1);
-      this.month_next = this.months[this.date.getMonth()+1] + ' ' + this.date.getFullYear();
-    }
-    else {
-      this.month_before = this.months[this.date.getMonth()-1] + ' ' + this.date.getFullYear();
-      this.month_next = this.months[this.date.getMonth()+1] + ' ' + this.date.getFullYear();
-    }
+    console.log(this.date)
+    this.month_next = this.months[new Date(this.date.getFullYear(), this.date.getMonth()+1, 1).getMonth()] + " "  + new Date(this.date.getFullYear(), this.date.getMonth()+1, 1).getFullYear()
+    this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth()-1, 1).getMonth()]  + " " + new Date(this.date.getFullYear(), this.date.getMonth()-1, 1).getFullYear()
     this.show_calendar();
   }
+  
 }
