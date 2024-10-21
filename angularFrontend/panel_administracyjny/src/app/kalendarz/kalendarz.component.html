@@ -4,9 +4,14 @@
       <!-- <img ngSrc="angularFrontend/panel_administracyjny/src/app/kalendarz/assets/arrow_back.svg" alt="miesiąc w tył" height="48" width="48"> -->
       <!-- <img ngSrc="angularFrontend/panel_administracyjny/src/app/kalendarz/assets/arrow_forward.svg" alt="miesiąc w przód" height="48" width="48">  -->
       <span (click)="change_month(-1)"> {{ month_before }}</span>
-      <span id="current_date">{{ currentDate }}</span>
+      <span>{{ currentDate }}</span>
       <span (click)="change_month(1)"> {{ month_next }}</span>
     </span>
+    <span id="dni"></span>
     </section>
-    <section id="content"></section>
+    <section id="content">
+      <div id="zaznacz" (click)="select_row($event)"></div>
+      <section id="kalendarz" (click)="select($event)"></section>
+    </section>
+
 </section>
