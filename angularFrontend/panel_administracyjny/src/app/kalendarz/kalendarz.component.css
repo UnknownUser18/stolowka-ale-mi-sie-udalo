@@ -35,8 +35,49 @@
     background-color: transparent;
     cursor: default;
 }
+.selected {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+.selected:hover {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
 #date {
     width: 100%;
+}
+#zaznacz > label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+#zaznacz > label > input {
+    margin: 0;
+    opacity: 0;
+    width: 50px;
+    height: 50px;
+}
+#zaznacz > label > span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 50px;
+    width: 50px;
+    background-image: url("../../assets/x.svg");
+    background-size: 50px;
+    background-repeat: no-repeat;
+    background-color: var(--background-color);
+    border: 2px solid var(--border-color);
+    border-radius: 7px;
+    transition: 150ms ease-in-out all;
+}
+#zaznacz > label > span:hover {
+    background-color: var(--accent-color);
+}
+#zaznacz > label > input:checked + span {
+    background-image: url("../../assets/checkmark.svg");
 }
 #change_month {
     width: 100%;
@@ -49,6 +90,8 @@
 }
 #change_month > span:not(:nth-child(2)) {
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 #change_month > span:not(:nth-child(2)):hover {
     text-decoration: underline;
@@ -59,14 +102,17 @@
 }
 #zaznacz {
     margin-right: 10px;
-    width: 150px;
+    width: fit-content;
     display: grid;
     justify-items: center;
     align-items: center;
     grid-template-columns: 1fr;
 }
 #zaznacz button {
-    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
     height: 70px;
     padding: 5px 10px;
     font-family: inherit;
@@ -85,7 +131,7 @@
     width: 100%;
 }
 #dni {
-    margin-left: 165px;
+    margin-left: 3.5vw;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     justify-items: center;
