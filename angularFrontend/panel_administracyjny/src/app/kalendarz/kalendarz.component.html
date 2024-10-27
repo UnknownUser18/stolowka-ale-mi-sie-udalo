@@ -11,14 +11,4 @@
       <div id="zaznacz" (click)="select_row($event)"></div>
       <section id="kalendarz" (click)="select($event)"></section>
     </section>
-    <section>
-      <form name="zmiana_posilek">
-        <label for="posilek">Posiłek:
-          <select name="posilek" id="posilek" [(ngModel)]="selectedPosilek" (ngModelChange)="select_posilek()">
-            <option *ngFor="let posilek of posilki" [value]="posilek.id">{{ GetPosilki(posilek) }}</option>
-          </select>
-          {{ selectedPosilek }}
-        </label>
-      </form>
-    </section>
 </section>

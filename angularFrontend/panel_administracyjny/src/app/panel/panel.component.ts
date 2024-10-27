@@ -9,6 +9,7 @@ import {KalendarzComponent} from '../kalendarz/kalendarz.component';
 })
 export class PanelComponent implements OnInit, OnChanges {
   @Input() name: string | undefined;
+  @Input() typ: string | undefined;
 
   constructor(private renderer: Renderer2, private el: ElementRef) {
   }
@@ -23,6 +24,7 @@ export class PanelComponent implements OnInit, OnChanges {
     }
   }
   private updateMainDisplay() {
+
     const main = this.el.nativeElement.querySelector('main');
     if (this.name === undefined) {
       this.renderer.setStyle(main, 'display', 'none');

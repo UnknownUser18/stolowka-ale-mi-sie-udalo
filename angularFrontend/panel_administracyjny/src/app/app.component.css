@@ -12,7 +12,12 @@ h2 {
     text-align: center;
 }
 ol {
-    margin-left: 20px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: 150ms ease-in-out all;
+    width: 95%;
+    margin-left: 10px;
     padding-left: 0;
     counter-reset: list-counter;
 }
@@ -36,16 +41,39 @@ li::before {
     padding-left: 10px;
     font-size: 1em;
 }
+nav > section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+nav > :last-child {
+    margin-top: 10px;
+}
 button {
-    width: fit-content;
-    padding: 5px 10px;
+    width: 90%;
     font-family: inherit;
-    font-size: 1em;
+    padding: 10px;
+    font-size: 1.1em;
     border: 2px solid var(--border-color);
-    border-radius: 12px;
-    background-color: var(--primary-color);
+    border-radius: 7px;
+    background-color: var(--background-color);
     transition: 150ms ease-in-out all;
     cursor: pointer;
+    position: relative;
+}
+button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+.rotate {
+    transform: rotate(-180deg);
+}
+button > img {
+    transition: 125ms ease-in;
+    position: absolute;
+    top: 5px;
+    right: 10px;
 }
 button:hover {
     background-color: var(--accent-color);

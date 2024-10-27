@@ -1,20 +1,16 @@
-import {Component, ElementRef, Renderer2} from '@angular/core';
+import {Component, ElementRef, Input, Renderer2, SimpleChanges, OnChanges } from '@angular/core';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-kalendarz',
   standalone: true,
-  imports: [
-    NgOptimizedImage,
-    FormsModule,
-    NgForOf
-  ],
+  imports: [NgOptimizedImage, FormsModule, NgForOf],
   templateUrl: './kalendarz.component.html',
   styleUrl: './kalendarz.component.css'
 })
 export class KalendarzComponent {
-
+  @Input() typ: string | undefined;
   currentDate: string | undefined;
   date: Date = new Date();
   months: Array<string> = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
@@ -33,9 +29,15 @@ export class KalendarzComponent {
 
   constructor(private renderer: Renderer2, private el: ElementRef) {
   };
-
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['typ']) {
+      this.show_calendar();
+    }
+  }
   ngOnInit() {
-    this.previousPosilek = this.el.nativeElement.querySelector('#posilek').selectedIndex;
+    if(!this.previousPosilek === null) {
+      this.previousPosilek = this.el.nativeElement.querySelector('#posilek').selectedIndex;
+    }
     this.show_calendar()
   }
 
@@ -67,6 +69,20 @@ export class KalendarzComponent {
         this.renderer.setProperty(dayButton, 'innerHTML', (i - first_day_week + 1).toString());
         if (this.selected.includes(`${year}-${month+1}-${i - first_day_week + 1}`)) {
           this.renderer.addClass(dayButton, 'selected');
+        }
+        if(this.typ === 'Internat') {
+          console.log('Internat');
+          const checkboxes = this.renderer.createElement('div');
+          const sniadanie = this.renderer.createElement('input');
+          this.renderer.setAttribute(sniadanie, 'type', 'checkbox');
+          this.renderer.appendChild(checkboxes, sniadanie);
+          const obiad = this.renderer.createElement('input');
+          this.renderer.setAttribute(obiad, 'type', 'checkbox');
+          this.renderer.appendChild(checkboxes, obiad);
+          const kolacja = this.renderer.createElement('input');
+          this.renderer.setAttribute(kolacja, 'type', 'checkbox');
+          this.renderer.appendChild(checkboxes, kolacja);
+          this.renderer.appendChild(dayButton, checkboxes);
         }
         this.renderer.appendChild(week, dayButton);
       }
