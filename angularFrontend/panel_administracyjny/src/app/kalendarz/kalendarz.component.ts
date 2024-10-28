@@ -1,8 +1,6 @@
-import {Component, ElementRef, Input, Renderer2, SimpleChanges, OnChanges } from '@angular/core';
+import {Component, ElementRef, Input, Renderer2, SimpleChanges} from '@angular/core';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import { unlink } from 'node:fs';
-import { Console } from 'node:console';
 
 @Component({
   selector: 'app-kalendarz',
@@ -13,6 +11,7 @@ import { Console } from 'node:console';
 })
 export class KalendarzComponent {
   @Input() typ: string | undefined;
+  @Input() name: string | undefined;
   currentDate: string | undefined;
   date: Date = new Date();
   months: Array<string> = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
@@ -24,17 +23,24 @@ export class KalendarzComponent {
     {id : "obiad", array : []},
     {id : "kolacja", array : []}
   ];
+  numer_week : number = 0;
   constructor(private renderer: Renderer2, private el: ElementRef) {
   };
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['typ']) {
+    if (changes['typ'] || changes['name']) {
+      this.selected = [];
+      this.typy_posilkow.forEach((element) => {
+        element.array = [];
+      });
       this.show_calendar();
     }
-  }  ngOnInit() {
+  }
+  ngOnInit() {
     this.show_calendar()
   }
 
   show_calendar() {
+
     const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
     calendar_content.innerHTML = '';
     let year = this.date.getFullYear();
@@ -72,7 +78,7 @@ export class KalendarzComponent {
             this.renderer.setAttribute(checkbox, 'type', 'checkbox');
             this.renderer.setAttribute(checkbox, 'value', element);
             this.renderer.appendChild(checkboxes,checkbox);
-          })           
+          })
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
@@ -198,42 +204,43 @@ export class KalendarzComponent {
     else if(this.typ === "Internat") {
       if(element.button == 2) {
         element.preventDefault()
-        console.log('skidibi')
-        let target = element.target
+        let target = element.target as HTMLElement
         console.log(target)
-        const div = this.el.nativeElement.querySelector(".internat > div");
-        console.log(div)
-        console.log(div.children)
-        let checked = 0
-        let unchecked = 0
-        Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
-          (dziecko as HTMLInputElement).checked ? checked++ : unchecked++;
-        })
-        console.log('chekced',checked)
-        console.log('unchecked',unchecked)
-        if(checked === 3) {
-          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
-            (dziecko as HTMLInputElement).checked = false;
-          })
+        if(target.tagName === "BUTTON") {
+          if(!target.classList.contains('empty')) {
+            let parent = target.parentElement as HTMLElement;
+            let grandparent = parent.parentElement as HTMLElement;
+            let parent_index = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
+            let target_index = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
+            const div = this.el.nativeElement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
+            let checked = 0
+            let unchecked = 0
+            function getInputElements(parent : HTMLElement, check : boolean) {
+              Array.from(parent.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
+                (dziecko as HTMLInputElement).checked = check;
+              })
+            }
+            Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
+              (dziecko as HTMLInputElement).checked ? checked++ : unchecked++;
+            })
+            if(checked === 3) {
+              getInputElements(div, false);
+            }
+            else if(unchecked === 3) {
+              getInputElements(div, true);
+            }
+            else if(checked < unchecked) {
+              getInputElements(div, false);
+            }
+            else if(checked > unchecked) {
+              getInputElements(div, true);
+            }
+            console.log(this.typy_posilkow)
+          }
         }
-        else if(unchecked === 3) {
-          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
-            (dziecko as HTMLInputElement).checked = true;
-          })
-        }
-        else if(checked < unchecked) {
-          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
-            (dziecko as HTMLInputElement).checked = false;
-          })
-        }
-        else if(checked > unchecked) {
-          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
-            (dziecko as HTMLInputElement).checked = true;
-          })
-        }
+
       }
       else {
-        console.log('not skidibi')
         let target = element.target as HTMLElement;
         console.log(target)
         if(target.tagName === "INPUT") {
@@ -246,32 +253,107 @@ export class KalendarzComponent {
         }
       }
     }
-    
+
     console.log(this.selected);
   }
   select_row(element : MouseEvent) {
-    let target = element.target as HTMLElement;
-    if(target.tagName === 'INPUT') {
-      const week = this.el.nativeElement.getElementsByClassName('week')[Array.from(this.el.nativeElement.querySelectorAll('.zaznacz')).indexOf(target)];
-      if((target as HTMLInputElement).checked) {
-        console.log('checked');
-        for(let i = 0; i < week.children.length; i++) {
-          if(!week.children[i].classList.contains('empty')) {
-            week.children[i].classList.add('selected');
-            this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`);
+    if(this.typ === "ZSTI") {
+      let target = element.target as HTMLElement;
+      if(target.tagName === 'INPUT') {
+        const week = this.el.nativeElement.getElementsByClassName('week')[Array.from(this.el.nativeElement.querySelectorAll('.zaznacz')).indexOf(target)];
+        if((target as HTMLInputElement).checked) {
+          console.log('checked');
+          for(let i = 0; i < week.children.length; i++) {
+            if(!week.children[i].classList.contains('empty')) {
+              week.children[i].classList.add('selected');
+              this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`);
+            }
           }
         }
-      }
-      else {
-        console.log('unchecked');
-        for(let i = 0; i < week.children.length; i++) {
-          if(!week.children[i].classList.contains('empty')) {
-            week.children[i].classList.remove('selected');
-            this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`), 1);
+        else {
+          console.log('unchecked');
+          for(let i = 0; i < week.children.length; i++) {
+            if(!week.children[i].classList.contains('empty')) {
+              week.children[i].classList.remove('selected');
+              this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`), 1);
+            }
           }
         }
+        console.log(this.selected);
       }
-      console.log(this.selected);
+    }
+    else if(this.typ === "Internat") {
+      let target = element.target as HTMLElement;
+      if(target.tagName === 'INPUT') {
+        let parent = target.parentElement as HTMLElement;
+        let grandparent = parent.parentElement as HTMLElement;
+        this.numer_week = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
+        this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'flex';
+      }
     }
   }
+  close() {
+    this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'none';
+  }
+  zmien_posilek($event: MouseEvent) {
+    this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'none';
+    let target = $event.target as HTMLElement;
+    let parent = target.parentElement as HTMLElement;
+    Array.from(parent.children as unknown as NodeListOf<HTMLElement>).forEach((element) => {
+
+      Array.from(element.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
+
+        if(dziecko instanceof HTMLInputElement && dziecko.checked) {
+          let na = this.el.nativeElement.querySelector(`form[name='na']`) as HTMLElement;
+
+          Array.from(na.children as unknown as NodeListOf<HTMLElement>).forEach((na_element) => {
+
+            Array.from(na_element.children as unknown as NodeListOf<HTMLElement>).forEach((na_dziecko) => {
+
+              if(na_dziecko instanceof HTMLInputElement && na_dziecko.checked) {
+                console.log(na_dziecko.value);
+                console.log(dziecko.value);
+                console.log(this.numer_week);
+                let week = this.el.nativeElement.getElementsByClassName('week')[this.numer_week];
+                Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day) => {
+                  if(!day.classList.contains('empty')) {
+                    let div = day.querySelector('div') as HTMLElement;
+                    Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((checkbox) => {
+                      if(checkbox instanceof HTMLInputElement && checkbox.value === dziecko.value) {
+                        switch (na_dziecko.value) {
+                          case 'być':
+                            checkbox.checked = true;
+                            break;
+                          case 'nie_być':
+                            checkbox.checked = false;
+                            break;
+                          default:
+                            console.log("error");
+                            break;
+                        }
+                      }
+                      else if(checkbox instanceof HTMLInputElement && dziecko.value === 'wszystko') {
+                        switch (na_dziecko.value) {
+                          case 'być':
+                            checkbox.checked = true;
+                            break;
+                          case 'nie_być':
+                            checkbox.checked = false;
+                            break;
+                          default:
+                            console.log("error");
+                            break;
+                        }
+                      }
+                    })
+                  }
+                })
+              }
+            })
+          })
+        }
+      })
+    })
+  }
 }
+// ^ fix that mess

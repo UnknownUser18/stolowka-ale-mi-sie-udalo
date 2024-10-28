@@ -9,6 +9,20 @@
     </section>
     <section id="content">
       <div id="zaznacz" (click)="select_row($event)"></div>
-      <section id="kalendarz" (click)="select($event)"(contextmenu)="select($event)"></section>
+      <section id="kalendarz" (click)="select($event)" (contextmenu)="select($event)"></section>
+    </section>
+    <section id="zmiana_posilku">
+      <form name="na">
+        <label><input type="radio" name="na" value="być">Być</label>
+        <label><input type="radio" name="na" value="nie_być">Nie być</label>
+      </form>
+      <form name="zmiana_posilku">
+        <img ngSrc="../../assets/x.svg" alt="zamknij" (click)="close()" width="24" height="24">
+        <label><input type="radio" name="posilek" value="sniadanie">Śniadanie</label>
+        <label><input type="radio" name="posilek" value="obiad">Obiad</label>
+        <label><input type="radio" name="posilek" value="kolacja">Kolacja</label>
+        <label><input type="radio" name="posilek" value="wszystko">Wszystko</label>
+        <button type="submit" (click)="zmien_posilek($event)">Zmień</button>
+      </form>
     </section>
 </section>
