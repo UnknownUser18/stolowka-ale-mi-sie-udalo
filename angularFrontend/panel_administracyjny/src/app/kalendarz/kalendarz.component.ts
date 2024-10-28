@@ -1,6 +1,8 @@
 import {Component, ElementRef, Input, Renderer2, SimpleChanges, OnChanges } from '@angular/core';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import { unlink } from 'node:fs';
+import { Console } from 'node:console';
 
 @Component({
   selector: 'app-kalendarz',
@@ -17,27 +19,18 @@ export class KalendarzComponent {
   month_before: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   month_next: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   selected: Array<string> = [];
-  posilki_cashe: Array<{id: number, array: Array<any>}> = [
-    {id: 1, array: []},
-    {id: 2, array: []},
-    {id: 3, array: []},
-    {id: 4, array: []},
-    {id: 5, array: []},
-    {id: 6, array: []},
-    {id: 7, array: []}
+  typy_posilkow: Array<{id: string, array: Array<any>}> = [
+    {id : "sniadanie", array : []},
+    {id : "obiad", array : []},
+    {id : "kolacja", array : []}
   ];
-
   constructor(private renderer: Renderer2, private el: ElementRef) {
   };
   ngOnChanges(changes: SimpleChanges) {
     if (changes['typ']) {
       this.show_calendar();
     }
-  }
-  ngOnInit() {
-    if(!this.previousPosilek === null) {
-      this.previousPosilek = this.el.nativeElement.querySelector('#posilek').selectedIndex;
-    }
+  }  ngOnInit() {
     this.show_calendar()
   }
 
@@ -72,17 +65,16 @@ export class KalendarzComponent {
         }
         if(this.typ === 'Internat') {
           console.log('Internat');
+          const typy = ['sniadanie','obiad','kolacja']
           const checkboxes = this.renderer.createElement('div');
-          const sniadanie = this.renderer.createElement('input');
-          this.renderer.setAttribute(sniadanie, 'type', 'checkbox');
-          this.renderer.appendChild(checkboxes, sniadanie);
-          const obiad = this.renderer.createElement('input');
-          this.renderer.setAttribute(obiad, 'type', 'checkbox');
-          this.renderer.appendChild(checkboxes, obiad);
-          const kolacja = this.renderer.createElement('input');
-          this.renderer.setAttribute(kolacja, 'type', 'checkbox');
-          this.renderer.appendChild(checkboxes, kolacja);
+          typy.forEach((element) => {
+            const checkbox = this.renderer.createElement('input');
+            this.renderer.setAttribute(checkbox, 'type', 'checkbox');
+            this.renderer.setAttribute(checkbox, 'value', element);
+            this.renderer.appendChild(checkboxes,checkbox);
+          })           
           this.renderer.appendChild(dayButton, checkboxes);
+          this.renderer.addClass(dayButton,'internat');
         }
         this.renderer.appendChild(week, dayButton);
       }
@@ -164,7 +156,9 @@ export class KalendarzComponent {
   }
   // when on click add/remove to selected array
   select(element: MouseEvent) {
-    let target = element.target as HTMLElement;
+    // dla uczniow zsti
+    if(this.typ === "ZSTI") {
+      let target = element.target as HTMLElement;
     if (target.classList.contains('day')) {
       if (target.tagName === 'BUTTON') {
         function isFullWeekSelected(week : HTMLElement) {
@@ -199,6 +193,60 @@ export class KalendarzComponent {
         }
       }
     }
+    }
+    // dla wychowankow Internatu
+    else if(this.typ === "Internat") {
+      if(element.button == 2) {
+        element.preventDefault()
+        console.log('skidibi')
+        let target = element.target
+        console.log(target)
+        const div = this.el.nativeElement.querySelector(".internat > div");
+        console.log(div)
+        console.log(div.children)
+        let checked = 0
+        let unchecked = 0
+        Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
+          (dziecko as HTMLInputElement).checked ? checked++ : unchecked++;
+        })
+        console.log('chekced',checked)
+        console.log('unchecked',unchecked)
+        if(checked === 3) {
+          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
+            (dziecko as HTMLInputElement).checked = false;
+          })
+        }
+        else if(unchecked === 3) {
+          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
+            (dziecko as HTMLInputElement).checked = true;
+          })
+        }
+        else if(checked < unchecked) {
+          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
+            (dziecko as HTMLInputElement).checked = false;
+          })
+        }
+        else if(checked > unchecked) {
+          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
+            (dziecko as HTMLInputElement).checked = true;
+          })
+        }
+      }
+      else {
+        console.log('not skidibi')
+        let target = element.target as HTMLElement;
+        console.log(target)
+        if(target.tagName === "INPUT") {
+          let value = (target as HTMLInputElement).value;
+          const meal = this.typy_posilkow.find(meal => meal.id === value);
+          if (meal) {
+            meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`) // inner html is nan;
+          }
+          console.log(this.typy_posilkow)
+        }
+      }
+    }
+    
     console.log(this.selected);
   }
   select_row(element : MouseEvent) {
@@ -225,41 +273,5 @@ export class KalendarzComponent {
       }
       console.log(this.selected);
     }
-  }
-  // posilki
-  GetPosilki(posilek: {id: number, nazwa: string}): string {
-    const rename: { [key : number] : string} = {
-      0: 'Śniadanie',
-      1: 'Obiad',
-      2: 'Kolacja',
-      3: 'Śniadanie i Obiad',
-      4: 'Śniadanie i Kolacja',
-      5: 'Śniadanie, Obiad i Kolacja',
-      6: 'Obiad i Kolacja'
-    }
-    return rename[posilek.id] || posilek.nazwa;
-  }
-  posilki = [
-    {id : 0, nazwa: "śniadanie"},
-    {id : 1, nazwa: "obiad"},
-    {id : 2, nazwa: "kolacja"},
-    {id : 3, nazwa: "śniadanie_obiad"},
-    {id : 4, nazwa: "śniadanie_kolacja"},
-    {id : 5, nazwa: "śniadanie_obiad_kolacja"},
-    {id : 6, nazwa: "obiad_kolacja"},
-  ]
-  selectedPosilek: number = this.posilki[1].id;
-  previousPosilek : number | undefined;
-
-  select_posilek() {
-    console.log(this.previousPosilek)
-    // @ts-ignore
-    this.posilki_cashe[this.previousPosilek].array = this.selected;
-    this.previousPosilek = this.selectedPosilek;
-    console.log(this.previousPosilek)
-    this.selected = this.posilki_cashe[this.selectedPosilek].array;
-    console.log(this.selected);
-    console.log(this.posilki_cashe);
-    this.show_calendar();
   }
 }

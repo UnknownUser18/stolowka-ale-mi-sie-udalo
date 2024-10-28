@@ -15,7 +15,9 @@ export class AppComponent {
   typ : string | undefined;
   show(event: Event) {
     let target = event.target as HTMLElement;
-    target = target.parentElement as HTMLElement;
+    if(target.tagName == "SPAN") {
+      target = target.parentElement as HTMLElement;
+    }
     this.osoba = target.querySelector('span')?.textContent!;
     target = target.parentElement as HTMLElement;
     target = target.parentElement as HTMLElement;

@@ -9,6 +9,6 @@
     </section>
     <section id="content">
       <div id="zaznacz" (click)="select_row($event)"></div>
-      <section id="kalendarz" (click)="select($event)"></section>
+      <section id="kalendarz" (click)="select($event)"(contextmenu)="select($event)"></section>
     </section>
 </section>
