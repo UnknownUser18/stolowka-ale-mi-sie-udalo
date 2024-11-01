@@ -36,7 +36,15 @@
     transition: 150ms ease-in-out all;
     border-radius: 12px;
 }
-.day:hover {
+.day:not(.empty):disabled {
+    background-color: var(--disabled);
+    color: var(--text-color);
+    cursor: default;
+}
+.day:not(.empty):disabled input {
+    cursor: default;
+}
+.day:not(.empty, :disabled):hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
@@ -48,12 +56,8 @@
     cursor: default;
 }
 .selected {
-    background-color: var(--accent-color);
+    background-color: var(--border-color) !important;
     color: var(--primary-color);
-}
-.selected:hover {
-    background-color: var(--primary-color);
-    color: var(--text-color);
 }
 .internat {
     cursor: default;
@@ -70,6 +74,7 @@
     width: 100%;
 }
 #zaznacz > label {
+    width: 85px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,6 +86,11 @@
     opacity: 0;
     width: 50px;
     height: 50px;
+}
+#zaznacz div {
+    width: 20px;
+    font-size: 1.2em;
+    margin-right: 10px;
 }
 #zaznacz > label > span {
     position: absolute;
@@ -96,13 +106,22 @@
     border-radius: 7px;
     transition: 150ms ease-in-out all;
 }
+.zaznacz {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.zaznacz ~ span {
+    position: static !important;
+}
 #zaznacz > label > .zaznacz_internat {
     background-image: url("../../assets/pencil.svg") !important;
     background-size: 35px !important;
     background-position: center;
     background-repeat: no-repeat;
 }
-#zaznacz > label > span:hover {
+#zaznacz > label:hover > span {
     background-color: var(--accent-color);
 }
 #zaznacz > label > input:checked + span {
@@ -122,8 +141,13 @@
     display: flex;
     align-items: center;
 }
-#change_month > span:not(:nth-child(2)):hover {
+#change_month > span:not(:nth-child(2)):hover, #default_month:hover {
     text-decoration: underline;
+}
+#default_month {
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 5px 10px;
 }
 #content {
     display: flex;
@@ -208,6 +232,10 @@ form[name='zmiana_posilku'], form[name='na'] {
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     align-items: center;
     width: 100%;
+}
+input[type='radio'] {
+    width: 18px;
+    height: 18px;
 }
 form[name='zmiana_posilku'] > div, form[name='na'] > div {
     width: 120px;

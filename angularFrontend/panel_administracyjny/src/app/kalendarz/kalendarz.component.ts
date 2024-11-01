@@ -18,10 +18,28 @@ export class KalendarzComponent {
   month_before: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   month_next: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   selected: Array<string> = [];
-  typy_posilkow: Array<{id: string, array: Array<any>}> = [
-    {id : "sniadanie", array : []},
-    {id : "obiad", array : []},
-    {id : "kolacja", array : []}
+  // typy_posilkow: Array<{id: string, array : Array<any>}> = [
+  //   {id: 'sniadanie', array: []},
+  //   {id: 'obiad', array: []},
+  //   {id: 'kolacja', array: []}
+  //   ];
+  typy_posilkow: Array<{ operacja: string; array_operacaja: Array<{ id: string; array: Array<any> }> }> = [
+    {
+      operacja: 'dodanie',
+      array_operacaja: [
+        { id: 'sniadanie', array: [] },
+        { id: 'obiad', array: [] },
+        { id: 'kolacja', array: [] },
+      ],
+    },
+    {
+      operacja: 'usuniecie',
+      array_operacaja: [
+        { id: 'sniadanie', array: [] },
+        { id: 'obiad', array: [] },
+        { id: 'kolacja', array: [] },
+      ],
+    },
   ];
   numer_week : number = 0;
   constructor(private renderer: Renderer2, private el: ElementRef) {
@@ -30,7 +48,9 @@ export class KalendarzComponent {
     if (changes['typ'] || changes['name']) {
       this.selected = [];
       this.typy_posilkow.forEach((element) => {
-        element.array = [];
+        element.array_operacaja.forEach((element_2) => {
+          element_2.array = [];
+        });
       });
       this.show_calendar();
     }
@@ -44,7 +64,6 @@ week_number(): number[] {
     const weekNumber = this.getISOWeekNumber(firstDayOfMonth);
     weeks.push(weekNumber);
   }
-  console.log(weeks)
   return weeks;
 }
 getISOWeekNumber(date: Date): number {
@@ -74,6 +93,10 @@ getISOWeekNumber(date: Date): number {
     const weekDiv = this.renderer.createElement('div');
     this.renderer.addClass(weekDiv, 'week');
     this.renderer.appendChild(calendar_content, weekDiv);
+    function isWeekend(date: Date): boolean {
+      const day = date.getDay();
+      return day === 0 || day === 6;
+    }
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
       // create day button
@@ -97,10 +120,20 @@ getISOWeekNumber(date: Date): number {
             const checkbox = this.renderer.createElement('input');
             this.renderer.setAttribute(checkbox, 'type', 'checkbox');
             this.renderer.setAttribute(checkbox, 'value', element);
+            if(this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === element)?.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`)) {
+              checkbox.checked = true;
+            }
+            if(isWeekend(new Date(year, month, i - first_day_week + 1))) {
+              checkbox.disabled = true;
+            }
             this.renderer.appendChild(checkboxes,checkbox);
           })
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
+        }
+        if (isWeekend(new Date(year, month, i - first_day_week + 1))) {
+          dayButton.disabled = true;
+          this.renderer.addClass(dayButton, 'disabled');
         }
         this.renderer.appendChild(week, dayButton);
       }
@@ -143,7 +176,6 @@ getISOWeekNumber(date: Date): number {
       }
     });
     let week = this.week_number()[month];
-    console.log(week);
     // create zaznacz buttons
     const zaznacz: HTMLElement = this.el.nativeElement.querySelector('#zaznacz');
     zaznacz.innerHTML = '';
@@ -179,9 +211,10 @@ getISOWeekNumber(date: Date): number {
         console.log('selected');
         this.renderer.setAttribute(zaznaczElement, 'checked', 'true');
       }
+      this.renderer.appendChild(zaznaczLabel, zaznacz_);
       this.renderer.appendChild(zaznaczLabel, zaznaczElement);
       this.renderer.appendChild(zaznaczLabel, zaznaczSpan);
-      this.renderer.appendChild(zaznaczLabel, zaznacz_);
+
       this.renderer.appendChild(zaznacz, zaznaczLabel);
     }
   }
@@ -193,13 +226,17 @@ getISOWeekNumber(date: Date): number {
     this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
     this.show_calendar();
   }
+  default_date() {
+    this.date = new Date();
+    this.show_calendar();
+  }
   // when on click add/remove to selected array
   select(element: MouseEvent) {
     // dla uczniow zsti
     if(this.typ === "ZSTI") {
       let target = element.target as HTMLElement;
     if (target.classList.contains('day')) {
-      if (target.tagName === 'BUTTON') {
+      if (target.tagName === 'BUTTON' && !(target as HTMLButtonElement).disabled) {
         function isFullWeekSelected(week : HTMLElement) {
           let selected = 0;
           let days = 0;
@@ -232,14 +269,14 @@ getISOWeekNumber(date: Date): number {
         }
       }
     }
+    console.log(this.selected);
     }
     // dla wychowankow Internatu
     else if(this.typ === "Internat") {
       if(element.button == 2) {
         element.preventDefault()
         let target = element.target as HTMLElement
-        console.log(target)
-        if(target.tagName === "BUTTON") {
+        if(target.tagName === "BUTTON" && !(target as HTMLButtonElement).disabled) {
           if(!target.classList.contains('empty')) {
             let parent = target.parentElement as HTMLElement;
             let grandparent = parent.parentElement as HTMLElement;
@@ -274,18 +311,25 @@ getISOWeekNumber(date: Date): number {
       }
       else {
         let target = element.target as HTMLElement;
-        if(target.tagName === "INPUT") {
+        let grandparent = (target.parentElement as HTMLElement).parentElement as HTMLElement;
+        if(target.tagName === "INPUT" && !(grandparent as HTMLButtonElement).disabled) {
           let value = (target as HTMLInputElement).value;
-          const meal = this.typy_posilkow.find(meal => meal.id === value);
-          if (meal) {
-            meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`) // inner html is nan;
+          if((target as HTMLInputElement).checked) {
+            let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
+            if(meal) {
+              meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
+            }
+          }
+          else {
+            let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
+            if(meal) {
+              meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`), 1);
+            }
           }
           console.log(this.typy_posilkow)
         }
       }
     }
-
-    console.log(this.selected);
   }
   select_row(element : MouseEvent) {
     if(this.typ === "ZSTI") {
@@ -295,16 +339,18 @@ getISOWeekNumber(date: Date): number {
         if((target as HTMLInputElement).checked) {
           console.log('checked');
           for(let i = 0; i < week.children.length; i++) {
-            if(!week.children[i].classList.contains('empty')) {
+            if(!week.children[i].classList.contains('empty') && !week.children[i].disabled) {
               week.children[i].classList.add('selected');
-              this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`);
+              if(!this.selected.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`)) {
+                this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`);
+              }
             }
           }
         }
         else {
           console.log('unchecked');
           for(let i = 0; i < week.children.length; i++) {
-            if(!week.children[i].classList.contains('empty')) {
+            if(!week.children[i].classList.contains('empty') && !week.children[i].disabled) {
               week.children[i].classList.remove('selected');
               this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`), 1);
             }
@@ -330,9 +376,7 @@ getISOWeekNumber(date: Date): number {
   // zmien
   zmien_posilek($event: MouseEvent) {
     this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'none';
-    let target = $event.target as HTMLElement;
-    let parent = target.parentElement as HTMLElement;
-    let grandparent = parent.parentElement as HTMLElement;
+    const grandparent = ($event.target as HTMLElement).parentElement!.parentElement as HTMLElement;
     let typ = grandparent.querySelectorAll('form')[0] as HTMLElement;
     const na = this.el.nativeElement.querySelector(`form[name='na']`) as HTMLElement;
     const naChecked = Array.from(na.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>);
@@ -342,18 +386,27 @@ getISOWeekNumber(date: Date): number {
         Array.from(week.querySelectorAll('.day:not(.empty) div') as NodeListOf<HTMLElement>).forEach((div) => {
           const checkboxes : NodeListOf<HTMLInputElement> = div.querySelectorAll('input');
           checkboxes.forEach((checkbox) => {
-            if (checkbox instanceof HTMLInputElement && checkbox.value === dziecko.value || dziecko.value === 'wszystko') {
+            if (checkbox instanceof HTMLInputElement && !checkbox.disabled && checkbox.value === dziecko.value || dziecko.value === 'wszystko') {
               switch(na_dziecko.value) {
                 case 'być':
                   checkbox.checked = true;
+                  let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === dziecko.value);
+                  if(meal) {
+                    meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${div.parentElement!.textContent}`);
+                  }
                   break;
                 case 'nie_być':
                   checkbox.checked = false;
+                  let meal_2 = this.typy_posilkow.find(operacja => operacja.operacja === 'usuniecie')?.array_operacaja.find(meal => meal.id === dziecko.value);
+                  if(meal_2) {
+                    meal_2.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${div.parentElement!.textContent}`);
+                  }
                   break;
                 default:
-                  console.log("error");
+                  console.error('Nieznana wartość');
                   break;
               }
+              console.log(this.typy_posilkow);
             }
           })
         });
