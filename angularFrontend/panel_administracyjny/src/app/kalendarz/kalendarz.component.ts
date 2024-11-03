@@ -100,7 +100,7 @@ getISOWeekNumber(date: Date): number {
       const day = date.getDay();
       return day === 0 || day === 6;
     }
-    let eatenDays:any;
+    let eatenDays:string = "BRAK";
     if(this.dataService.CurrentStudentDeclaration.value)
     {
       eatenDays = Number(this.dataService.CurrentStudentDeclaration.value.dni.data).toString(2);
@@ -134,9 +134,8 @@ getISOWeekNumber(date: Date): number {
             console.log("EATEN DAYS INTERNAT: ", eatenDays)
             // if(Number(this.dataService.CurrentStudentDeclarationInternat.value.dni).toString(2)[new Date(year, month, i - first_day_week + 1).getDay()] === '0')
             //     checkbox.disabled = true
-            console.log(eatenDays.value);
-            console.log(eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0, new Date(year, month, i - first_day_week + 1).getDay())
-            if(isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0) {
+            console.log(eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === '0', new Date(year, month, i - first_day_week + 1).getDay())
+            if(isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === '0') {
               checkbox.disabled = true;
             }
             this.renderer.appendChild(checkboxes,checkbox);
@@ -144,7 +143,7 @@ getISOWeekNumber(date: Date): number {
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
-        if (isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0) {
+        if (isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === '0') {
           dayButton.disabled = true;
           this.renderer.addClass(dayButton, 'disabled');
         }
