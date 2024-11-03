@@ -65,6 +65,24 @@ wss.on('connection', function connection(ws) {
             case "DeleteStudent":
                 DeleteStudent(ws, parameters.studentId)
                 break;
+            case "getStudentDeclarationInternat":
+                getStudentDeclarationInternat(ws, parameters.studentId)
+                break;
+            case "getStudentDeclarationZsti":
+                getStudentDeclarationZsti(ws, parameters.studentId)
+                break;
+            case "changeStudentDeclarationInternat":
+                changeStudentDeclarationInternat(parameters.studentId, parameters.schoolYearId, parameters.days, parameters.beginDate, parameters.endDate, parameters.mealId);
+                break;
+            case "changeStudentDeclarationZsti":
+                changeStudentDeclarationZsti(parameters.studentId, parameters.schoolYearId, parameters.days, parameters.beginDate, parameters.endDate);
+                break;
+            case "getStudentListZsti":
+                getStudentListZsti(ws)
+                break;
+            case "getStudentListInternat":
+                getStudentListInternat(ws)
+                break;
         }
     });
 });
@@ -82,6 +100,96 @@ const database = mysql.createConnection({
     password: dbPassword,
     database: "stolowka"
 })
+
+function getStudentDeclarationInternat(websocketClient, StudentId)
+{
+    let query = "SELECT * FROM deklaracja_zywieniowa_internat WHERE osoby_internat_id = " + StudentId;
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+        console.log(result);
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "StudentDeclarationInternat",
+                        value: result
+                    }
+                }))
+    })
+}
+
+function getStudentDeclarationZsti(websocketClient, StudentId)
+{
+    let query = "SELECT * FROM deklaracja_zywieniowa_zsti WHERE id_osoby = " + StudentId;
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+        console.log(result);
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "StudentDeclarationZsti",
+                        value: result
+                    }
+                }))
+    })
+}
+
+function changeStudentDeclarationInternat(StudentId, schoolYearId, days, beginDate, endDate, mealId) {
+    let query = "UPDATE deklaracja_zywieniowa_internat SET rok_szkolny_id = " + schoolYearId + ", dni = " + days + ", posilki_id = " + mealId +  ", data_od = " + beginDate + ", data_do = " + endDate + " WHERE osoby_internat_id = " + StudentId + ";";
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function changeStudentDeclarationZsti(StudentId, schoolYearId, days, beginDate, endDate) {
+    let query = "UPDATE deklaracja_zywieniowa_zsti SET rok_szkolny_id = " + schoolYearId + ", dni = " + days + ", data_od = " + beginDate + ", data_do = " + endDate + " WHERE id_osoby = " + StudentId + ";";
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function getStudentListZsti(websocketClient)
+{
+    let query = "SELECT * FROM osoby_zsti";
+    database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "StudentListZsti",
+                        value: result
+                    }
+                }))
+    });
+}
+
+function getStudentListInternat(websocketClient)
+{
+    let query = "SELECT * FROM osoby_internat";
+    database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "StudentListInternat",
+                        value: result
+                    }
+                }))
+    });
+}
 
 function CardScan(cardId, timestamp)
 {
@@ -112,7 +220,7 @@ function QueryExecute(websocketClient, query, pass, responseBool, variable) {
     })
 }
 
-function StudentList(websocketClient ,condition)
+function StudentList(websocketClient, condition)
 {
     let query = "SELECT * FROM uczniowie";
     if(condition!=="")
