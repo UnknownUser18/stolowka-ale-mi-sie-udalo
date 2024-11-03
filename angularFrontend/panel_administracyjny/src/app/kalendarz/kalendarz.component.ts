@@ -1,6 +1,7 @@
 import {Component, ElementRef, Input, Renderer2, SimpleChanges} from '@angular/core';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+import {DataBaseService} from '../data-base.service';
 
 @Component({
   selector: 'app-kalendarz',
@@ -14,6 +15,8 @@ export class KalendarzComponent {
   @Input() name: string | undefined;
   currentDate: string | undefined;
   date: Date = new Date();
+  StudentZstiDays: any;
+  StudentInternatDays: any;
   months: Array<string> = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   month_before: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   month_next: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
@@ -42,7 +45,9 @@ export class KalendarzComponent {
     },
   ];
   numer_week : number = 0;
-  constructor(private renderer: Renderer2, private el: ElementRef) {
+  constructor(private renderer: Renderer2, private el: ElementRef, private dataService:DataBaseService) {
+    this.StudentInternatDays = this.dataService.StudentInternatDays.asObservable()
+    this.StudentZstiDays = this.dataService.StudentZstiDays.asObservable()
   };
   ngOnChanges(changes: SimpleChanges) {
     if (changes['typ'] || changes['name']) {
@@ -77,9 +82,7 @@ getISOWeekNumber(date: Date): number {
     this.week_number();
     this.show_calendar()
   }
-
   show_calendar() {
-
     const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
     calendar_content.innerHTML = '';
     let year = this.date.getFullYear();
@@ -96,6 +99,16 @@ getISOWeekNumber(date: Date): number {
     function isWeekend(date: Date): boolean {
       const day = date.getDay();
       return day === 0 || day === 6;
+    }
+    let eatenDaysInternat:any;
+    if(this.dataService.CurrentStudentDeclarationInternat.value)
+    {
+      eatenDaysInternat = Number(this.dataService.CurrentStudentDeclarationInternat.value.dni.data).toString(2);
+    }
+    let eatenDaysZsti:any;
+    if(this.dataService.CurrentStudentDeclarationZsti.value)
+    {
+      eatenDaysZsti = Number(this.dataService.CurrentStudentDeclarationZsti.value.dni.data).toString(2);
     }
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
@@ -123,7 +136,12 @@ getISOWeekNumber(date: Date): number {
             if(this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === element)?.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`)) {
               checkbox.checked = true;
             }
-            if(isWeekend(new Date(year, month, i - first_day_week + 1))) {
+            console.log("EATEN DAYS INTERNAT: ", eatenDaysInternat)
+            // if(Number(this.dataService.CurrentStudentDeclarationInternat.value.dni).toString(2)[new Date(year, month, i - first_day_week + 1).getDay()] === '0')
+            //     checkbox.disabled = true
+            console.log(eatenDaysInternat.value);
+            console.log(eatenDaysInternat[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0, new Date(year, month, i - first_day_week + 1).getDay())
+            if(isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDaysInternat[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0) {
               checkbox.disabled = true;
             }
             this.renderer.appendChild(checkboxes,checkbox);
@@ -131,7 +149,12 @@ getISOWeekNumber(date: Date): number {
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
-        if (isWeekend(new Date(year, month, i - first_day_week + 1))) {
+        else{
+          console.log("EATEN DAYS ZSTI: ", eatenDaysZsti)
+          // if(Number(this.dataService.CurrentStudentDeclarationZsti.value.dni).toString(2)[new Date(year, month, i - first_day_week + 1).getDay()] === '0')
+          //   dayButton.disabled = true
+        }
+        if (isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDaysZsti[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0) {
           dayButton.disabled = true;
           this.renderer.addClass(dayButton, 'disabled');
         }
@@ -153,6 +176,7 @@ getISOWeekNumber(date: Date): number {
       this.renderer.appendChild(dni, daySpan);
     }
     // checking for empty days
+    // @ts-ignore
     Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       if (week.children.length < 7) {
         for (let i = week.children.length; i < 7; i++) {
@@ -164,8 +188,10 @@ getISOWeekNumber(date: Date): number {
       }
     });
     // check if the week element is empty
+    // @ts-ignore
     Array.from(this.el.nativeElement.getElementsByClassName('week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       let empty = true;
+      // @ts-ignore
       Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
         if (!day.classList.contains('empty')) {
           empty = false;
@@ -383,7 +409,7 @@ getISOWeekNumber(date: Date): number {
     Array.from(typ.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>).forEach((dziecko) => {
       naChecked.forEach((na_dziecko) => {
         let week = this.el.nativeElement.getElementsByClassName('week')[this.numer_week];
-        Array.from(week.querySelectorAll('.day:not(.empty) div') as NodeListOf<HTMLElement>).forEach((div) => {
+        Array.from(week.querySelectorAll('.day:not(.empty) div') as NodeListOf<HTMLElement>).forEach((div:any) => {
           const checkboxes : NodeListOf<HTMLInputElement> = div.querySelectorAll('input');
           checkboxes.forEach((checkbox) => {
             if (checkbox instanceof HTMLInputElement && !checkbox.disabled && checkbox.value === dziecko.value || dziecko.value === 'wszystko') {

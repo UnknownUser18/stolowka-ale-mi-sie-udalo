@@ -23,7 +23,6 @@ const wss = new ws.WebSocketServer({
         // should not be compressed if context takeover is disabled.
     }
 });
-
 console.log("Waiting for connection...");
 wss.on('connection', function connection(ws) {
     ws.send("Succesfully connected to the server")
@@ -82,6 +81,12 @@ wss.on('connection', function connection(ws) {
                 break;
             case "getStudentListInternat":
                 getStudentListInternat(ws)
+                break;
+            case "getStudentZstiDays":
+                getStudentZstiDays(ws, parameters.studentId)
+                break;
+            case "getStudentInternatDays":
+                getStudentInternatDays(ws, parameters.studentId)
                 break;
         }
     });
@@ -189,6 +194,42 @@ function getStudentListInternat(websocketClient)
                     }
                 }))
     });
+}
+
+function getStudentZstiDays(websocketClient, StudentId)
+{
+    let query = "SELECT * FROM nieobecnosci_zsti WHERE osoby_zsti_id = " + StudentId + ";";
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: "StudentZstiDays",
+                    value: result
+                }
+            }
+        ))
+    })
+}
+
+function getStudentInternatDays(websocketClient, StudentId)
+{
+    let query = "SELECT * FROM nieobecnosci_internat WHERE osoby_internat_id = " + StudentId + ";";
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: "StudentInternatDays",
+                    value: result
+                }
+            }
+        ))
+    })
 }
 
 function CardScan(cardId, timestamp)

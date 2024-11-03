@@ -1,5 +1,7 @@
 import { Component, Input, OnInit, Renderer2, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import {KalendarzComponent} from '../kalendarz/kalendarz.component';
+import {DataBaseService} from '../data-base.service';
+
 @Component({
   selector: 'app-panel',
   standalone: true,
