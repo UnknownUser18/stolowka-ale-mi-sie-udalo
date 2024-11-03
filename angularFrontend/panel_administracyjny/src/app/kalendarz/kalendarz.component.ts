@@ -100,15 +100,10 @@ getISOWeekNumber(date: Date): number {
       const day = date.getDay();
       return day === 0 || day === 6;
     }
-    let eatenDaysInternat:any;
-    if(this.dataService.CurrentStudentDeclarationInternat.value)
+    let eatenDays:any;
+    if(this.dataService.CurrentStudentDeclaration.value)
     {
-      eatenDaysInternat = Number(this.dataService.CurrentStudentDeclarationInternat.value.dni.data).toString(2);
-    }
-    let eatenDaysZsti:any;
-    if(this.dataService.CurrentStudentDeclarationZsti.value)
-    {
-      eatenDaysZsti = Number(this.dataService.CurrentStudentDeclarationZsti.value.dni.data).toString(2);
+      eatenDays = Number(this.dataService.CurrentStudentDeclaration.value.dni.data).toString(2);
     }
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
@@ -136,12 +131,12 @@ getISOWeekNumber(date: Date): number {
             if(this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === element)?.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`)) {
               checkbox.checked = true;
             }
-            console.log("EATEN DAYS INTERNAT: ", eatenDaysInternat)
+            console.log("EATEN DAYS INTERNAT: ", eatenDays)
             // if(Number(this.dataService.CurrentStudentDeclarationInternat.value.dni).toString(2)[new Date(year, month, i - first_day_week + 1).getDay()] === '0')
             //     checkbox.disabled = true
-            console.log(eatenDaysInternat.value);
-            console.log(eatenDaysInternat[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0, new Date(year, month, i - first_day_week + 1).getDay())
-            if(isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDaysInternat[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0) {
+            console.log(eatenDays.value);
+            console.log(eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0, new Date(year, month, i - first_day_week + 1).getDay())
+            if(isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0) {
               checkbox.disabled = true;
             }
             this.renderer.appendChild(checkboxes,checkbox);
@@ -149,12 +144,7 @@ getISOWeekNumber(date: Date): number {
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
-        else{
-          console.log("EATEN DAYS ZSTI: ", eatenDaysZsti)
-          // if(Number(this.dataService.CurrentStudentDeclarationZsti.value.dni).toString(2)[new Date(year, month, i - first_day_week + 1).getDay()] === '0')
-          //   dayButton.disabled = true
-        }
-        if (isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDaysZsti[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0) {
+        if (isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === 0) {
           dayButton.disabled = true;
           this.renderer.addClass(dayButton, 'disabled');
         }
@@ -176,7 +166,7 @@ getISOWeekNumber(date: Date): number {
       this.renderer.appendChild(dni, daySpan);
     }
     // checking for empty days
-    // @ts-ignore
+    //@ts-ignore
     Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       if (week.children.length < 7) {
         for (let i = week.children.length; i < 7; i++) {
@@ -188,10 +178,10 @@ getISOWeekNumber(date: Date): number {
       }
     });
     // check if the week element is empty
-    // @ts-ignore
+    //@ts-ignore
     Array.from(this.el.nativeElement.getElementsByClassName('week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       let empty = true;
-      // @ts-ignore
+      //@ts-ignore
       Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
         if (!day.classList.contains('empty')) {
           empty = false;
@@ -209,6 +199,7 @@ getISOWeekNumber(date: Date): number {
     for (let i = 0; i < week_length; i++) {
       let selected_days = 0;
       let days = 0;
+      //@ts-ignore
       Array.from(this.el.nativeElement.getElementsByClassName('week')[i].children as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
         if(!day.classList.contains('empty')) {
           if(day.classList.contains('selected')) {
@@ -266,6 +257,7 @@ getISOWeekNumber(date: Date): number {
         function isFullWeekSelected(week : HTMLElement) {
           let selected = 0;
           let days = 0;
+          //@ts-ignore
           Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
             if(!day.classList.contains('empty')) {
               if(day.classList.contains('selected')) {
@@ -306,16 +298,20 @@ getISOWeekNumber(date: Date): number {
           if(!target.classList.contains('empty')) {
             let parent = target.parentElement as HTMLElement;
             let grandparent = parent.parentElement as HTMLElement;
+            //@ts-ignore
             let parent_index = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
+            //@ts-ignore
             let target_index = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
             const div = this.el.nativeElement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
             let checked = 0
             let unchecked = 0
             function getInputElements(parent : HTMLElement, check : boolean) {
+              //@ts-ignore
               Array.from(parent.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
                 (dziecko as HTMLInputElement).checked = check;
               })
             }
+            //@ts-ignore
             Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
               (dziecko as HTMLInputElement).checked ? checked++ : unchecked++;
             })
@@ -361,6 +357,7 @@ getISOWeekNumber(date: Date): number {
     if(this.typ === "ZSTI") {
       let target = element.target as HTMLElement;
       if(target.tagName === 'INPUT') {
+        //@ts-ignore
         const week = this.el.nativeElement.getElementsByClassName('week')[Array.from(this.el.nativeElement.querySelectorAll('.zaznacz')).indexOf(target)];
         if((target as HTMLInputElement).checked) {
           console.log('checked');
@@ -390,6 +387,7 @@ getISOWeekNumber(date: Date): number {
       if(target.tagName === 'INPUT') {
         let parent = target.parentElement as HTMLElement;
         let grandparent = parent.parentElement as HTMLElement;
+        //@ts-ignore
         this.numer_week = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
         this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'flex';
       }
@@ -405,10 +403,13 @@ getISOWeekNumber(date: Date): number {
     const grandparent = ($event.target as HTMLElement).parentElement!.parentElement as HTMLElement;
     let typ = grandparent.querySelectorAll('form')[0] as HTMLElement;
     const na = this.el.nativeElement.querySelector(`form[name='na']`) as HTMLElement;
+    //@ts-ignore
     const naChecked = Array.from(na.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>);
-    Array.from(typ.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>).forEach((dziecko) => {
-      naChecked.forEach((na_dziecko) => {
+    //@ts-ignore
+    Array.from(typ.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>).forEach((dziecko:any) => {
+      naChecked.forEach((na_dziecko:any) => {
         let week = this.el.nativeElement.getElementsByClassName('week')[this.numer_week];
+        //@ts-ignore
         Array.from(week.querySelectorAll('.day:not(.empty) div') as NodeListOf<HTMLElement>).forEach((div:any) => {
           const checkboxes : NodeListOf<HTMLInputElement> = div.querySelectorAll('input');
           checkboxes.forEach((checkbox) => {
