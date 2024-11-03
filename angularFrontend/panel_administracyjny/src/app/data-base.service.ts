@@ -61,8 +61,7 @@ export class DataBaseService {
       {
         action: "request",
         params: {
-          method: "getStudentDeclarationZsti",
-          studentId: this.CurrentStudentId.value
+          method: "getStudentDeclarationZsti"
         }
     }
     );
@@ -74,8 +73,7 @@ export class DataBaseService {
       {
         action: "request",
         params: {
-          method: "getStudentDeclarationInternat",
-          studentId: this.CurrentStudentId.value
+          method: "getStudentDeclarationInternat"
         }
       }
     );
@@ -87,12 +85,17 @@ export class DataBaseService {
     console.log(Id, type)
     if (this.StudentType.value === "ZSTI") {
       this.getStudentDeclarationZsti()
+      console.log(this.StudentDeclarationInternat.value, "NMIGER")
+      console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentZstiDays()
     }
     else{
       this.getStudentDeclarationInternat()
+      console.log(this.StudentDeclarationInternat.value, "NMIGER")
+      console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentInternatDays()
     }
+    console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
 
   }
   send(query:string)
@@ -102,40 +105,22 @@ export class DataBaseService {
 
   Initialize() {
       this.socket.addEventListener('message', (event) => {
-        console.log("EVENT DATA: ", event.data)
-        console.log('Message incoming from the server: ', event.data);
-        console.log()
+        // console.log('Message incoming from the server: ', event.data);
         if (event.data === "Succesfully connected to the server")
         {
           return
         }
-        if (typeof event.data === "string") {
-          this.lastValue = JSON.parse(event.data);
-        }
+        this.lastValue = JSON.parse(event.data);
         switch (this.lastValue.params.variable) {
           case 'StudentDeclarationZsti':
-            this.StudentDeclarationZsti.next(this.lastValue.params.value);
+            this.StudentDeclarationZsti.next(this.lastValue.params.value );
+            this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any)=> element.id_osoby == this.CurrentStudentId.value))
             console.log("StudentDeclarationZsti: ", this.lastValue.params.value);
-            this.lastValue.params.value.forEach((value:any) => {
-              let beginDate =new Date(value.data_od)
-              let endDate = new Date(value.data_do)
-              if(new Date() >= beginDate && new Date() <= endDate){
-                this.CurrentStudentDeclaration.next(value);
-              }
-            })
-            console.log("CurrentStudentDeclarationZsti: ", this.CurrentStudentDeclaration.value);
             break;
           case 'StudentDeclarationInternat':
-            this.StudentDeclarationInternat.next(this.lastValue.params.value);
+            this.StudentDeclarationInternat.next(this.lastValue.params.value );
+            this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value))
             console.log("StudentDeclarationInternat: ", this.lastValue.params.value);
-            this.lastValue.params.value.forEach((value:any) => {
-              let beginDate =new Date(value.data_od)
-              let endDate = new Date(value.data_do)
-              if(new Date() >= beginDate && new Date() <= endDate){
-                this.CurrentStudentDeclaration.next(value);
-              }
-            })
-            console.log("CurrentStudentDeclarationInternat: ", this.CurrentStudentDeclaration.value);
             break;
           case 'StudentListZsti':
             this.StudentListZsti.next(this.lastValue.params.value);

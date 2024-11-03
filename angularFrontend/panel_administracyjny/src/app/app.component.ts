@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { PanelComponent } from './panel/panel.component';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
+// @ts-ignore
 import {DataBaseService} from './data-base.service';
 
 @Component({
@@ -17,8 +18,8 @@ export class AppComponent implements OnInit{
 
   }
   ngOnInit() {
-    this.dataService.StudentListZstiData.subscribe(data => this.StudentListZstiData = data);
-    this.dataService.StudentListInternatData.subscribe(data => this.StudentListInternatData = data);
+    this.dataService.StudentListZstiData.subscribe((data: any) => this.StudentListZstiData = data);
+    this.dataService.StudentListInternatData.subscribe((data: any) => this.StudentListInternatData = data);
   }
 
   osoba : string | undefined;

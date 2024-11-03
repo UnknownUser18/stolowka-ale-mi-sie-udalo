@@ -65,10 +65,10 @@ wss.on('connection', function connection(ws) {
                 DeleteStudent(ws, parameters.studentId)
                 break;
             case "getStudentDeclarationInternat":
-                getStudentDeclarationInternat(ws, parameters.studentId)
+                getStudentDeclarationInternat(ws)
                 break;
             case "getStudentDeclarationZsti":
-                getStudentDeclarationZsti(ws, parameters.studentId)
+                getStudentDeclarationZsti(ws)
                 break;
             case "changeStudentDeclarationInternat":
                 changeStudentDeclarationInternat(parameters.studentId, parameters.schoolYearId, parameters.days, parameters.beginDate, parameters.endDate, parameters.mealId);
@@ -106,9 +106,9 @@ const database = mysql.createConnection({
     database: "stolowka"
 })
 
-function getStudentDeclarationInternat(websocketClient, StudentId)
+function getStudentDeclarationInternat(websocketClient)
 {
-    let query = "SELECT * FROM deklaracja_zywieniowa_internat WHERE osoby_internat_id = " + StudentId;
+    let query = "SELECT * FROM deklaracja_zywieniowa_internat";
     return database.query(query, (err, result) => {
         if (err) throw err;
         console.log(result);
@@ -125,9 +125,9 @@ function getStudentDeclarationInternat(websocketClient, StudentId)
     })
 }
 
-function getStudentDeclarationZsti(websocketClient, StudentId)
+function getStudentDeclarationZsti(websocketClient)
 {
-    let query = "SELECT * FROM deklaracja_zywieniowa_zsti WHERE id_osoby = " + StudentId;
+    let query = "SELECT * FROM deklaracja_zywieniowa_zsti";
     return database.query(query, (err, result) => {
         if (err) throw err;
         console.log(result);

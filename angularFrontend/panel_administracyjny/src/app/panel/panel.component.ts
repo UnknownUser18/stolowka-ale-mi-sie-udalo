@@ -1,6 +1,5 @@
 import { Component, Input, OnInit, Renderer2, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import {KalendarzComponent} from '../kalendarz/kalendarz.component';
-import {DataBaseService} from '../data-base.service';
 
 @Component({
   selector: 'app-panel',
@@ -25,6 +24,7 @@ export class PanelComponent implements OnInit, OnChanges {
       this.updateMainDisplay();
     }
   }
+
   private updateMainDisplay() {
 
     const main = this.el.nativeElement.querySelector('main');
@@ -34,4 +34,13 @@ export class PanelComponent implements OnInit, OnChanges {
       this.renderer.setStyle(main, 'display', 'flex');
     }
   }
+
+  contents = ['kalendarz']
+  //
+  // changeDisplay(content: string) {
+  //   this.contents.forEach((el)=>{this.renderer.setStyle(document.getElementById(el),'display','none')})
+  //   if (!content)
+  //     return
+  //   this.renderer.setStyle(document.getElementById(content),'display','block')
+  // }
 }

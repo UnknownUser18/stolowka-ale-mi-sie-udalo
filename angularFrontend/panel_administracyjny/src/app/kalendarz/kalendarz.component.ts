@@ -1,7 +1,9 @@
-import {Component, ElementRef, Input, Renderer2, SimpleChanges} from '@angular/core';
+import {Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges} from '@angular/core';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
+// @ts-ignore
 import {DataBaseService} from '../data-base.service';
+import {elementAt, Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-kalendarz',
@@ -10,11 +12,12 @@ import {DataBaseService} from '../data-base.service';
   templateUrl: './kalendarz.component.html',
   styleUrl: './kalendarz.component.css'
 })
-export class KalendarzComponent {
+export class KalendarzComponent implements OnChanges, OnInit{
   @Input() typ: string | undefined;
   @Input() name: string | undefined;
   currentDate: string | undefined;
   date: Date = new Date();
+  CurrentStudentDeclaration: any;
   StudentZstiDays: any;
   StudentInternatDays: any;
   months: Array<string> = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
@@ -30,25 +33,28 @@ export class KalendarzComponent {
     {
       operacja: 'dodanie',
       array_operacaja: [
-        { id: 'sniadanie', array: [] },
-        { id: 'obiad', array: [] },
-        { id: 'kolacja', array: [] },
+        {id: 'sniadanie', array: []},
+        {id: 'obiad', array: []},
+        {id: 'kolacja', array: []},
       ],
     },
     {
       operacja: 'usuniecie',
       array_operacaja: [
-        { id: 'sniadanie', array: [] },
-        { id: 'obiad', array: [] },
-        { id: 'kolacja', array: [] },
+        {id: 'sniadanie', array: []},
+        {id: 'obiad', array: []},
+        {id: 'kolacja', array: []},
       ],
     },
   ];
-  numer_week : number = 0;
-  constructor(private renderer: Renderer2, private el: ElementRef, private dataService:DataBaseService) {
+  numer_week: number = 0;
+
+  constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
     this.StudentInternatDays = this.dataService.StudentInternatDays.asObservable()
     this.StudentZstiDays = this.dataService.StudentZstiDays.asObservable()
+    this.CurrentStudentDeclaration = this.dataService.CurrentStudentDeclaration.asObservable()
   };
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes['typ'] || changes['name']) {
       this.selected = [];
@@ -60,29 +66,41 @@ export class KalendarzComponent {
       this.show_calendar();
     }
   }
-week_number(): number[] {
-  const weeks: number[] = [];
-  const year = this.date.getFullYear();
 
-  for (let month = 0; month < 12; month++) {
-    const firstDayOfMonth = new Date(year, month, 1);
-    const weekNumber = this.getISOWeekNumber(firstDayOfMonth);
-    weeks.push(weekNumber);
+  week_number(): number[] {
+    const weeks: number[] = [];
+    const year = this.date.getFullYear();
+
+    for (let month = 0; month < 12; month++) {
+      const firstDayOfMonth = new Date(year, month, 1);
+      const weekNumber = this.getISOWeekNumber(firstDayOfMonth);
+      weeks.push(weekNumber);
+    }
+    return weeks;
   }
-  return weeks;
-}
-getISOWeekNumber(date: Date): number {
-  const tempDate = new Date(date.getTime());
-  tempDate.setHours(0, 0, 0, 0);
-  tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
-  const week1 = new Date(tempDate.getFullYear(), 0, 4);
-  return 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-}
+
+  getISOWeekNumber(date: Date): number {
+    const tempDate = new Date(date.getTime());
+    tempDate.setHours(0, 0, 0, 0);
+    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
+    const week1 = new Date(tempDate.getFullYear(), 0, 4);
+    return 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+  }
+  changeDeclaration(change:any)
+  {
+    this.CurrentStudentDeclaration = change
+    this.show_calendar()
+  }
+
   ngOnInit() {
     this.week_number();
     this.show_calendar()
+    console.log("czy zadzialalo")
+    let subscript = this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
   }
+
   show_calendar() {
+    console.log(this.CurrentStudentDeclaration.value)
     const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
     calendar_content.innerHTML = '';
     let year = this.date.getFullYear();
@@ -96,15 +114,20 @@ getISOWeekNumber(date: Date): number {
     const weekDiv = this.renderer.createElement('div');
     this.renderer.addClass(weekDiv, 'week');
     this.renderer.appendChild(calendar_content, weekDiv);
-    function isWeekend(date: Date): boolean {
+
+    const isWeekend = (date: Date) =>{
+      if(!this.dataService.CurrentStudentDeclaration.value)
+        return true
+      let eatenDays = this.dataService.CurrentStudentDeclaration.value.dni.data
+      console.log("Eaten days: ", eatenDays)
+      eatenDays = Number(eatenDays).toString(2)
+      console.log("Eaten days binary: ", eatenDays)
       const day = date.getDay();
-      return day === 0 || day === 6;
+      console.log("Eaten day: ", eatenDays[day] === '0' || day === 6 || day === 5);
+      return eatenDays[day] === '0' || day === 6 || day === 5;
     }
-    let eatenDays:string = "BRAK";
-    if(this.dataService.CurrentStudentDeclaration.value)
-    {
-      eatenDays = Number(this.dataService.CurrentStudentDeclaration.value.dni.data).toString(2);
-    }
+    // let eatenDays: string = "0000000";
+    // let a = this.dataService.CurrentStudentDeclaration.asObservable().subscribe((element:any) => eatenDays = Number(element.dni.data).toString(2) + "00");
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
       // create day button
@@ -131,11 +154,11 @@ getISOWeekNumber(date: Date): number {
             if(this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === element)?.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`)) {
               checkbox.checked = true;
             }
-            console.log("EATEN DAYS INTERNAT: ", eatenDays)
+            // console.log("EATEN DAYS INTERNAT: ", eatenDays)
             // if(Number(this.dataService.CurrentStudentDeclarationInternat.value.dni).toString(2)[new Date(year, month, i - first_day_week + 1).getDay()] === '0')
             //     checkbox.disabled = true
-            console.log(eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === '0', new Date(year, month, i - first_day_week + 1).getDay())
-            if(isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === '0') {
+            // console.log(eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === '0', new Date(year, month, i - first_day_week + 1).getDay())
+            if(isWeekend(new Date(year, month, i - first_day_week))) {
               checkbox.disabled = true;
             }
             this.renderer.appendChild(checkboxes,checkbox);
@@ -143,12 +166,13 @@ getISOWeekNumber(date: Date): number {
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
-        if (isWeekend(new Date(year, month, i - first_day_week + 1)) || eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === '0') {
+        if(isWeekend(new Date(year, month, i - first_day_week))) {
           dayButton.disabled = true;
           this.renderer.addClass(dayButton, 'disabled');
         }
         this.renderer.appendChild(week, dayButton);
       }
+      // console.log(eatenDays)
       if (i % 7 === 0) {
         weekcount++;
         // create week div
