@@ -6,14 +6,16 @@ import {BehaviorSubject} from 'rxjs';
   providedIn: 'root'
 })
 export class DataBaseService {
-  socket: WebSocket;
+  socket: WebSocket | undefined;
   StudentDeclarationZsti = new BehaviorSubject<any>(null);
   CurrentStudentDeclaration = new BehaviorSubject<any>(null);
   StudentDeclarationInternat = new BehaviorSubject<any>(null);
   StudentListZsti = new BehaviorSubject<any>(null);
   StudentListZstiData = this.StudentListZsti.asObservable();
+  CurrentZstiDays = new BehaviorSubject<any>(null);
   StudentListInternat = new BehaviorSubject<any>(null);
   StudentListInternatData = this.StudentListInternat.asObservable();
+  CurrentInternatDays = new BehaviorSubject<any>(null);
   StudentZstiDays = new BehaviorSubject<any>(null);
   StudentInternatDays = new BehaviorSubject<any>(null);
   CurrentStudentId = new BehaviorSubject<number>(-1)
@@ -21,13 +23,14 @@ export class DataBaseService {
   lastValue:any = null;
 
   constructor() {
-    this.socket = new WebSocket("ws://localhost:8080");
-    // @ts-ignore
-    this.socket.onopen = (event: Event) => {
-      console.log('WebSocket connection established')
-      this.Initialize()
+    setTimeout(()=>{
+      this.socket = new WebSocket("ws://localhost:8080");
+      // @ts-ignore
+      this.socket.onopen = (event: Event) => {
+        console.log('WebSocket connection established')
+        this.Initialize()
+    }},500)
 
-    }
   }
   getStudentInternatDays()
   {
@@ -100,16 +103,17 @@ export class DataBaseService {
   }
   send(query:string)
   {
-    this.socket.send(query)
+    this.socket!.send(query)
   }
 
   Initialize() {
-      this.socket.addEventListener('message', (event) => {
+      this.socket!.addEventListener('message', (event) => {
         // console.log('Message incoming from the server: ', event.data);
         if (event.data === "Succesfully connected to the server")
         {
           return
         }
+        let tempArray:any[] = []
         this.lastValue = JSON.parse(event.data);
         switch (this.lastValue.params.variable) {
           case 'StudentDeclarationZsti':
@@ -132,10 +136,20 @@ export class DataBaseService {
             break;
           case 'StudentZstiDays':
             this.StudentZstiDays.next(this.lastValue.params.value);
+            this.lastValue.params.value.forEach((element:any)=> {
+              if(element.osoby_zsti_id === this.CurrentStudentId.value)
+                tempArray.push(element)
+            })
+            this.CurrentZstiDays.next(tempArray);
             console.log("StudentZstiDays: ", this.lastValue.params.value);
             break;
           case 'StudentInternatDays':
             this.StudentInternatDays.next(this.lastValue.params.value);
+            this.StudentInternatDays.value.forEach((element:any)=> {
+              if(element.osoby_zsti_id === this.CurrentStudentId.value)
+                tempArray.push(element)
+            })
+            this.CurrentInternatDays.next(tempArray);
             console.log("StudentInternatDays: ", this.lastValue.params.value);
             break;
         }

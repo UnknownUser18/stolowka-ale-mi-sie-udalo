@@ -29,6 +29,15 @@ export class KalendarzComponent implements OnChanges, OnInit{
   //   {id: 'obiad', array: []},
   //   {id: 'kolacja', array: []}
   //   ];
+  typy_posilkow_db: { operacja: string; array_operacaja: Array<{ id: string; array: Array<any> }> } =
+    {
+      operacja: 'zarejestrowane',
+      array_operacaja: [
+        {id: 'sniadanie', array: []},
+        {id: 'obiad', array: []},
+        {id: 'kolacja', array: []},
+      ],
+    }
   typy_posilkow: Array<{ operacja: string; array_operacaja: Array<{ id: string; array: Array<any> }> }> = [
     {
       operacja: 'dodanie',
@@ -53,7 +62,44 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.StudentInternatDays = this.dataService.StudentInternatDays.asObservable()
     this.StudentZstiDays = this.dataService.StudentZstiDays.asObservable()
     this.CurrentStudentDeclaration = this.dataService.CurrentStudentDeclaration.asObservable()
+    let subscript = this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
+    let daysSubscriptionZsti = this.dataService.CurrentZstiDays.asObservable().subscribe((change) => this.changeZstiDays())
+    let daysSubscriptionInternat = this.dataService.CurrentInternatDays.asObservable().subscribe((change) => this.changeInternatDays())
   };
+
+  changeInternatDays()
+  {
+    this.typy_posilkow_db.array_operacaja.forEach((element)=>{
+      element.array = []
+    })
+    this.dataService.CurrentInternatDays.value.forEach((element:any)=>{
+      switch(element.posilki_id){
+        case "śniadanie":
+          this.typy_posilkow_db.array_operacaja[0].array.push(element.dzien_wypisania);
+          break;
+        case "obiad":
+          this.typy_posilkow_db.array_operacaja[1].array.push(element.dzien_wypisania)
+          break;
+        case "kolacja":
+          this.typy_posilkow_db.array_operacaja[2].array.push(element.dzien_wypisania)
+          break;
+      }
+    })
+    console.log("Zarejestrowane dni nieobecnosci: ", this.typy_posilkow_db)
+    this.show_calendar()
+  }
+
+
+  changeZstiDays()
+  {
+    this.selected = []
+    this.dataService.CurrentZstiDays.value.forEach((element:any) => {
+      let data:Date = new Date(element.dzien_wypisania)
+      this.selected.push(data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate());
+    })
+    console.log("Nowe selected: ", this.selected)
+    this.show_calendar()
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['typ'] || changes['name']) {
@@ -96,11 +142,10 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.week_number();
     this.show_calendar()
     console.log("czy zadzialalo")
-    let subscript = this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
   }
 
   show_calendar() {
-    console.log(this.CurrentStudentDeclaration.value)
+
     const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
     calendar_content.innerHTML = '';
     let year = this.date.getFullYear();
@@ -119,11 +164,8 @@ export class KalendarzComponent implements OnChanges, OnInit{
       if(!this.dataService.CurrentStudentDeclaration.value)
         return true
       let eatenDays = this.dataService.CurrentStudentDeclaration.value.dni.data
-      console.log("Eaten days: ", eatenDays)
       eatenDays = Number(eatenDays).toString(2)
-      console.log("Eaten days binary: ", eatenDays)
       const day = date.getDay();
-      console.log("Eaten day: ", eatenDays[day] === '0' || day === 6 || day === 5);
       return eatenDays[day] === '0' || day === 6 || day === 5;
     }
     // let eatenDays: string = "0000000";
@@ -144,7 +186,6 @@ export class KalendarzComponent implements OnChanges, OnInit{
           this.renderer.addClass(dayButton, 'selected');
         }
         if(this.typ === 'Internat') {
-          console.log('Internat');
           const typy = ['sniadanie','obiad','kolacja']
           const checkboxes = this.renderer.createElement('div');
           typy.forEach((element) => {
