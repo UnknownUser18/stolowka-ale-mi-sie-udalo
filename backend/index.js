@@ -94,9 +94,9 @@ wss.on('connection', function connection(ws) {
 
 //todo: ENV variables
 const serverPassword = process.argv.slice(2,6)[0]
-const dbPassword = process.argv.slice(2,6)[1]
-const dbHost = process.argv.slice(2,6)[2]
-const dbPort = process.argv.slice(2,6)[3]
+const dbPassword = process.env.dbPassword
+const dbHost = process.env.dbHost
+const dbPort = process.env.dbPort
 
 const database = mysql.createConnection({
     host: dbHost,
