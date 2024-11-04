@@ -1,10 +1,12 @@
 <section class="kalendarz">
   <section id="date">
-    <span id="default_month" (click)="default_date()">Bieżący Miesiąc</span>
     <span id="change_month">
-      <span (click)="change_month(-1)"> <img ngSrc="../../assets/arrow_back.svg" alt="miesiąc w tył" height="48" width="48"> {{ month_before }}</span>
-      <span>{{ currentDate }}</span>
-      <span (click)="change_month(1)">{{ month_next }} <img ngSrc="../../assets/arrow_forward.svg" alt="miesiąc w przód" height="48" width="48"> </span>
+      <span id="default_month" (click)="default_date()">Bieżący Miesiąc</span>
+      <div>
+        <span (click)="change_month(-1)"> <img ngSrc="../../assets/arrow_back.svg" alt="miesiąc w tył" height="48" width="48"> {{ month_before }}</span>
+        <span>{{ currentDate }}</span>
+        <span (click)="change_month(1)">{{ month_next }} <img ngSrc="../../assets/arrow_forward.svg" alt="miesiąc w przód" height="48" width="48"> </span>
+      </div>
     </span>
     <span id="dni"></span>
     </section>
@@ -29,6 +31,13 @@
           <div>
             <label><input type="radio" name="na" value="być">Nie</label>
             <label><input type="radio" name="na" value="nie_być">Tak</label>
+          </div>
+        </form>
+        <form name="wszystko">
+          <h3>Zaznaczyć 'cały' tydzień?</h3>
+          <div>
+            <label><input type="radio" name="wszystko" value="tak">Tak</label>
+            <label><input type="radio" name="wszystko" value="nie">Nie</label>
           </div>
         </form>
         <button type="submit" (click)="zmien_posilek($event)">Wprowadź</button>

@@ -36,12 +36,12 @@
     transition: 150ms ease-in-out all;
     border-radius: 12px;
 }
-.day:not(.empty):disabled {
+.day:disabled {
     background-color: var(--disabled);
     color: var(--disabled-text-color);
     cursor: default;
 }
-.day:not(.empty):disabled input {
+.day:disabled input {
     cursor: default;
 }
 .day:not(.empty, :disabled):hover {
@@ -55,16 +55,16 @@
     background-color: transparent;
     cursor: default;
 }
-.selected {
-    background-color: var(--border-color) !important;
+.day:not(.empty).selected {
+    background-color: var(--border-color);
     color: var(--primary-color);
 }
-.selected.disabled-for-person {
-    background-color: var(--accent-color) !important;
-    color: var(--primary-color) !important;
+.day.selected.disabled-for-person {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
 }
 .disabled-for-person:hover {
-    color: var(--text-color); !important;
+    color: var(--text-color);
 }
 .internat {
     cursor: default;
@@ -73,13 +73,19 @@
     height: 90px;
     width: 90px;
 }
-.internat:hover {
+.day.internat:hover {
     background-color: var(--primary-color);
     color: var(--text-color);
 }
+.disabled-for-person.internat:hover {
+    background-color: var(--disabled-working-day);
+}
+.internat:disabled:hover {
+    background-color: var(--disabled);
+    color: var(--disabled-text-color);
+}
 .disabled-for-person {
-    background-color: var(--disabled-working-day) !important;
-
+    background-color: var(--disabled-working-day);
 }
 #date {
     width: 100%;
@@ -141,6 +147,13 @@
 }
 #change_month {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+#change_month > div {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: 1fr;
@@ -148,12 +161,12 @@
     justify-items: center;
     align-items: center;
 }
-#change_month > span:not(:nth-child(2)) {
+#change_month > div > span:not(:nth-child(2)) {
     cursor: pointer;
     display: flex;
     align-items: center;
 }
-#change_month > span:not(:nth-child(2)):hover, #default_month:hover {
+#change_month > div > span:not(:nth-child(2)):hover, #default_month:hover {
     text-decoration: underline;
 }
 #default_month {
@@ -196,7 +209,7 @@
     width: 100%;
 }
 #dni {
-    margin-left: 3.5vw;
+    margin-left: 5vw;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     justify-items: center;
@@ -204,6 +217,9 @@
     margin-top: 10px;
     font-size: 1.5em;
     border-radius: 12px;
+}
+#dni > span {
+    width: 40px;
 }
 #zmiana_posilku {
     display: none;
@@ -225,7 +241,7 @@
     flex-direction: column;
     box-shadow: var(--box-shadow);
     width: 20vw;
-    height: 30vh;
+    height: 40vh;
     border-radius: 20px;
     background-color: var(--primary-color);
     border: 3px solid var(--border-color);
@@ -239,7 +255,7 @@
     right: 5px;
     cursor: pointer;
 }
-form[name='zmiana_posilku'], form[name='na'] {
+form[name='zmiana_posilku'], form[name='na'], form[name='wszystko'] {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     align-items: center;
@@ -249,7 +265,7 @@ input[type='radio'] {
     width: 18px;
     height: 18px;
 }
-form[name='zmiana_posilku'] > div, form[name='na'] > div {
+form[name='zmiana_posilku'] > div, form[name='na'] > div, form[name='wszystko'] > div {
     width: 120px;
     display: flex;
     justify-self: center;
