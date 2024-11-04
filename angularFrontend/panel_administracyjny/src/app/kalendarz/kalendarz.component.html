@@ -9,7 +9,7 @@
     <span id="dni"></span>
     </section>
     <section id="content">
-      <div id="zaznacz" (click)="select_row($event)"></div>
+      <div id="zaznacz" (click)="select_row($event)" (contextmenu)="select_row($event)"></div>
       <section id="kalendarz" (click)="select($event)" (contextmenu)="select($event)"></section>
     </section>
     <section id="zmiana_posilku">

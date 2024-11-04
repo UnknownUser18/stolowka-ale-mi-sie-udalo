@@ -1,9 +1,7 @@
 import {Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges} from '@angular/core';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-// @ts-ignore
 import {DataBaseService} from '../data-base.service';
-import {elementAt, Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-kalendarz',
@@ -142,6 +140,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.week_number();
     this.show_calendar()
     console.log("czy zadzialalo")
+    let subscript = this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
   }
 
   show_calendar() {
@@ -160,16 +159,21 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.renderer.addClass(weekDiv, 'week');
     this.renderer.appendChild(calendar_content, weekDiv);
 
-    const isWeekend = (date: Date) =>{
-      if(!this.dataService.CurrentStudentDeclaration.value)
+    const isWeekend = (date: Date, button : HTMLElement) =>{
+      if((!this.dataService.CurrentStudentDeclaration.value))
         return true
       let eatenDays = this.dataService.CurrentStudentDeclaration.value.dni.data
       eatenDays = Number(eatenDays).toString(2)
       const day = date.getDay();
+      if(day !== 6 && day !== 0 && eatenDays[day] === '0') {
+        button.classList.add('disabled-for-person')
+      }
+      else if(day === 5 || day === 6) {
+        (button as HTMLButtonElement).disabled = true;
+      }
+      // console.log("Eaten day: ", eatenDays[day] === '0' || day === 6 || day === 5);
       return eatenDays[day] === '0' || day === 6 || day === 5;
     }
-    // let eatenDays: string = "0000000";
-    // let a = this.dataService.CurrentStudentDeclaration.asObservable().subscribe((element:any) => eatenDays = Number(element.dni.data).toString(2) + "00");
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
       // create day button
@@ -195,11 +199,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
             if(this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === element)?.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`)) {
               checkbox.checked = true;
             }
-            // console.log("EATEN DAYS INTERNAT: ", eatenDays)
-            // if(Number(this.dataService.CurrentStudentDeclarationInternat.value.dni).toString(2)[new Date(year, month, i - first_day_week + 1).getDay()] === '0')
-            //     checkbox.disabled = true
-            // console.log(eatenDays[(new Date(year, month, i - first_day_week + 1)).getDay()] === '0', new Date(year, month, i - first_day_week + 1).getDay())
-            if(isWeekend(new Date(year, month, i - first_day_week))) {
+            if(isWeekend(new Date(year, month, i - first_day_week), dayButton)) {
               checkbox.disabled = true;
             }
             this.renderer.appendChild(checkboxes,checkbox);
@@ -207,13 +207,9 @@ export class KalendarzComponent implements OnChanges, OnInit{
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
-        if(isWeekend(new Date(year, month, i - first_day_week))) {
-          dayButton.disabled = true;
-          this.renderer.addClass(dayButton, 'disabled');
-        }
+        isWeekend(new Date(year, month, i - first_day_week), dayButton);
         this.renderer.appendChild(week, dayButton);
       }
-      // console.log(eatenDays)
       if (i % 7 === 0) {
         weekcount++;
         // create week div
@@ -230,7 +226,6 @@ export class KalendarzComponent implements OnChanges, OnInit{
       this.renderer.appendChild(dni, daySpan);
     }
     // checking for empty days
-    //@ts-ignore
     Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       if (week.children.length < 7) {
         for (let i = week.children.length; i < 7; i++) {
@@ -242,10 +237,8 @@ export class KalendarzComponent implements OnChanges, OnInit{
       }
     });
     // check if the week element is empty
-    //@ts-ignore
     Array.from(this.el.nativeElement.getElementsByClassName('week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       let empty = true;
-      //@ts-ignore
       Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
         if (!day.classList.contains('empty')) {
           empty = false;
@@ -263,7 +256,6 @@ export class KalendarzComponent implements OnChanges, OnInit{
     for (let i = 0; i < week_length; i++) {
       let selected_days = 0;
       let days = 0;
-      //@ts-ignore
       Array.from(this.el.nativeElement.getElementsByClassName('week')[i].children as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
         if(!day.classList.contains('empty')) {
           if(day.classList.contains('selected')) {
@@ -278,12 +270,16 @@ export class KalendarzComponent implements OnChanges, OnInit{
         number = 1;
       }
       this.renderer.setProperty(zaznacz_, 'innerHTML', `${number}`);
-      let zaznaczLabel = this.renderer.createElement('label');
+      let zaznaczAbbr = this.renderer.createElement('abbr');
       let zaznaczElement = this.renderer.createElement('input');
       let zaznaczSpan = this.renderer.createElement('span');
       // dla wychowanków Internatu
       if(this.typ === 'Internat') {
-        this.renderer.addClass(zaznaczSpan,'zaznacz_internat');
+        this.renderer.addClass(zaznaczSpan, 'zaznacz_internat');
+        this.renderer.setProperty(zaznaczAbbr, 'title', 'Kliknij lewym przyciskiem myszy aby zmienić posiłek dla całego tygodnia');
+      }
+      else {
+        this.renderer.setProperty(zaznaczAbbr, 'title', 'Kliknij lewy przycisk myszy aby zaznaczyć cały tydzień na który osoba ma posiłki\nLub prawym aby zaznaczyć cały tydzień');
       }
       this.renderer.addClass(zaznaczElement, 'zaznacz');
       this.renderer.setAttribute(zaznaczElement, 'type', 'checkbox');
@@ -292,11 +288,11 @@ export class KalendarzComponent implements OnChanges, OnInit{
         console.log('selected');
         this.renderer.setAttribute(zaznaczElement, 'checked', 'true');
       }
-      this.renderer.appendChild(zaznaczLabel, zaznacz_);
-      this.renderer.appendChild(zaznaczLabel, zaznaczElement);
-      this.renderer.appendChild(zaznaczLabel, zaznaczSpan);
+      this.renderer.appendChild(zaznaczAbbr, zaznacz_);
+      this.renderer.appendChild(zaznaczAbbr, zaznaczElement);
+      this.renderer.appendChild(zaznaczAbbr, zaznaczSpan);
 
-      this.renderer.appendChild(zaznacz, zaznaczLabel);
+      this.renderer.appendChild(zaznacz, zaznaczAbbr);
     }
   }
 
@@ -317,13 +313,13 @@ export class KalendarzComponent implements OnChanges, OnInit{
     if(this.typ === "ZSTI") {
       let target = element.target as HTMLElement;
     if (target.classList.contains('day')) {
-      if (target.tagName === 'BUTTON' && !(target as HTMLButtonElement).disabled) {
+      if (target.tagName === 'BUTTON' && !(target as HTMLButtonElement).classList.contains('weekend')) {
+        console.log('button');
         function isFullWeekSelected(week : HTMLElement) {
           let selected = 0;
           let days = 0;
-          //@ts-ignore
           Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
-            if(!day.classList.contains('empty')) {
+            if(!day.classList.contains('empty') && !(day as HTMLButtonElement).disabled) {
               if(day.classList.contains('selected')) {
                 selected++;
               }
@@ -332,10 +328,11 @@ export class KalendarzComponent implements OnChanges, OnInit{
           });
           return selected === days;
         }
+        const week_number = Array.from((target.parentElement!).parentElement!.children as unknown as NodeListOf<HTMLElement>).indexOf(target.parentElement as HTMLElement);
         if (target.classList.contains('selected')) {
           if(isFullWeekSelected(target.parentElement as HTMLElement)) {
             console.log('full week selected check = false');
-            const zaznacz = this.el.nativeElement.querySelector('#zaznacz > label > input');
+            const zaznacz = this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`);
             (zaznacz as HTMLInputElement).checked = false;
           }
           target.classList.remove('selected');
@@ -345,7 +342,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
           this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`);
           if(isFullWeekSelected(target.parentElement as HTMLElement)) {
             console.log('full week selected check = true');
-            const zaznacz = this.el.nativeElement.querySelector('#zaznacz > label > input');
+            const zaznacz = this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`);
             (zaznacz as HTMLInputElement).checked = true;
           }
         }
@@ -362,20 +359,16 @@ export class KalendarzComponent implements OnChanges, OnInit{
           if(!target.classList.contains('empty')) {
             let parent = target.parentElement as HTMLElement;
             let grandparent = parent.parentElement as HTMLElement;
-            //@ts-ignore
             let parent_index = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
-            //@ts-ignore
             let target_index = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
             const div = this.el.nativeElement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
             let checked = 0
             let unchecked = 0
             function getInputElements(parent : HTMLElement, check : boolean) {
-              //@ts-ignore
               Array.from(parent.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
                 (dziecko as HTMLInputElement).checked = check;
               })
             }
-            //@ts-ignore
             Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
               (dziecko as HTMLInputElement).checked ? checked++ : unchecked++;
             })
@@ -399,6 +392,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
         let target = element.target as HTMLElement;
         let grandparent = (target.parentElement as HTMLElement).parentElement as HTMLElement;
         if(target.tagName === "INPUT" && !(grandparent as HTMLButtonElement).disabled) {
+          console.log((target as HTMLInputElement).checked);
           let value = (target as HTMLInputElement).value;
           if((target as HTMLInputElement).checked) {
             let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
@@ -419,27 +413,55 @@ export class KalendarzComponent implements OnChanges, OnInit{
   }
   select_row(element : MouseEvent) {
     if(this.typ === "ZSTI") {
+      let right_click = element.button == 2;
+      right_click ? element.preventDefault() : null;
       let target = element.target as HTMLElement;
       if(target.tagName === 'INPUT') {
-        //@ts-ignore
         const week = this.el.nativeElement.getElementsByClassName('week')[Array.from(this.el.nativeElement.querySelectorAll('.zaznacz')).indexOf(target)];
+        if (right_click) {
+          (target as HTMLInputElement).checked = !(right_click && (target as HTMLInputElement).checked);
+        }
         if((target as HTMLInputElement).checked) {
-          console.log('checked');
-          for(let i = 0; i < week.children.length; i++) {
-            if(!week.children[i].classList.contains('empty') && !week.children[i].disabled) {
-              week.children[i].classList.add('selected');
-              if(!this.selected.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`)) {
-                this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`);
+          const push = (day : HTMLElement) => {
+            if(!this.selected.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(day.innerHTML)}`)) {
+              this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(day.innerHTML)}`);
+            }
+          }
+          if(right_click) {
+            for(let i = 0; i < week.children.length; i++) {
+              if (!week.children[i].classList.contains('empty') && !week.children[i].disabled) {
+                week.children[i].classList.add('selected');
+                push(week.children[i]);
+              }
+            }
+          }
+          else {
+            for(let i = 0; i < week.children.length; i++) {
+              if(!week.children[i].classList.contains('empty') && !week.children[i].disabled && !week.children[i].classList.contains('disabled-for-person')) {
+                week.children[i].classList.add('selected');
+                push(week.children[i]);
               }
             }
           }
         }
         else {
-          console.log('unchecked');
-          for(let i = 0; i < week.children.length; i++) {
-            if(!week.children[i].classList.contains('empty') && !week.children[i].disabled) {
-              week.children[i].classList.remove('selected');
-              this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`), 1);
+          const remove = (day : HTMLElement) => {
+            this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(day.innerHTML)}`), 1);
+          }
+          if(right_click) {
+            for (let i = 0; i < week.children.length; i++) {
+              if (!week.children[i].classList.contains('empty') && !week.children[i].disabled) {
+                week.children[i].classList.remove('selected');
+                remove(week.children[i]);
+              }
+            }
+          }
+          else {
+            for(let i = 0; i < week.children.length; i++) {
+              if(!week.children[i].classList.contains('empty') && !week.children[i].disabled && !week.children[i].classList.contains('disabled-for-person')) {
+                week.children[i].classList.remove('selected');
+                remove(week.children[i]);
+              }
             }
           }
         }
@@ -451,7 +473,6 @@ export class KalendarzComponent implements OnChanges, OnInit{
       if(target.tagName === 'INPUT') {
         let parent = target.parentElement as HTMLElement;
         let grandparent = parent.parentElement as HTMLElement;
-        //@ts-ignore
         this.numer_week = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
         this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'flex';
       }
@@ -467,13 +488,10 @@ export class KalendarzComponent implements OnChanges, OnInit{
     const grandparent = ($event.target as HTMLElement).parentElement!.parentElement as HTMLElement;
     let typ = grandparent.querySelectorAll('form')[0] as HTMLElement;
     const na = this.el.nativeElement.querySelector(`form[name='na']`) as HTMLElement;
-    //@ts-ignore
     const naChecked = Array.from(na.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>);
-    //@ts-ignore
     Array.from(typ.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>).forEach((dziecko:any) => {
       naChecked.forEach((na_dziecko:any) => {
         let week = this.el.nativeElement.getElementsByClassName('week')[this.numer_week];
-        //@ts-ignore
         Array.from(week.querySelectorAll('.day:not(.empty) div') as NodeListOf<HTMLElement>).forEach((div:any) => {
           const checkboxes : NodeListOf<HTMLInputElement> = div.querySelectorAll('input');
           checkboxes.forEach((checkbox) => {

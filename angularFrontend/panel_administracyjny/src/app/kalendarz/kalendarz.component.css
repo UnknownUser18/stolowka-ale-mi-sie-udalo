@@ -38,7 +38,7 @@
 }
 .day:not(.empty):disabled {
     background-color: var(--disabled);
-    color: var(--text-color);
+    color: var(--disabled-text-color);
     cursor: default;
 }
 .day:not(.empty):disabled input {
@@ -59,6 +59,13 @@
     background-color: var(--border-color) !important;
     color: var(--primary-color);
 }
+.selected.disabled-for-person {
+    background-color: var(--accent-color) !important;
+    color: var(--primary-color) !important;
+}
+.disabled-for-person:hover {
+    color: var(--text-color); !important;
+}
 .internat {
     cursor: default;
     justify-content: space-evenly;
@@ -70,10 +77,15 @@
     background-color: var(--primary-color);
     color: var(--text-color);
 }
+.disabled-for-person {
+    background-color: var(--disabled-working-day) !important;
+
+}
 #date {
     width: 100%;
 }
-#zaznacz > label {
+#zaznacz > abbr {
+    text-decoration: none;
     width: 85px;
     display: flex;
     align-items: center;
@@ -81,7 +93,7 @@
     cursor: pointer;
     position: relative;
 }
-#zaznacz > label > input {
+#zaznacz > abbr > input {
     margin: 0;
     opacity: 0;
     width: 50px;
@@ -92,7 +104,7 @@
     font-size: 1.2em;
     margin-right: 10px;
 }
-#zaznacz > label > span {
+#zaznacz > abbr > span {
     position: absolute;
     top: 0;
     left: 0;
@@ -115,16 +127,16 @@
 .zaznacz ~ span {
     position: static !important;
 }
-#zaznacz > label > .zaznacz_internat {
+#zaznacz > abbr > .zaznacz_internat {
     background-image: url("../../assets/pencil.svg") !important;
     background-size: 35px !important;
     background-position: center;
     background-repeat: no-repeat;
 }
-#zaznacz > label:hover > span {
+#zaznacz > abbr:hover > span {
     background-color: var(--accent-color);
 }
-#zaznacz > label > input:checked + span {
+#zaznacz > abbr > input:checked + span {
     background-image: url("../../assets/checkmark.svg");
 }
 #change_month {
