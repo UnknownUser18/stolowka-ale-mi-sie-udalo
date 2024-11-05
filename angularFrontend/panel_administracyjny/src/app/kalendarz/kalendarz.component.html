@@ -14,6 +14,11 @@
       <div id="zaznacz" (click)="select_row($event)" (contextmenu)="select_row($event)"></div>
       <section id="kalendarz" (click)="select($event)" (contextmenu)="select($event)"></section>
     </section>
+    <section id="sending">
+      <button (click)="sendDays()">
+        Wyślij
+      </button>
+    </section>
     <section id="zmiana_posilku">
       <section id="zmiana">
         <img ngSrc="../../assets/x.svg" alt="zamknij" (click)="close()" width="12" height="12">

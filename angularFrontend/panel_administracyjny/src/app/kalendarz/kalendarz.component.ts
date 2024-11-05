@@ -17,7 +17,9 @@ export class KalendarzComponent implements OnChanges, OnInit{
   date: Date = new Date();
   CurrentStudentDeclaration: any;
   StudentZstiDays: any;
+  dbCopyZstiDays: any[] = [];
   StudentInternatDays: any;
+  dbCopyInternatDays: any;
   months : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   month_before: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   month_next: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
@@ -60,9 +62,9 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.StudentInternatDays = this.dataService.StudentInternatDays.asObservable()
     this.StudentZstiDays = this.dataService.StudentZstiDays.asObservable()
     this.CurrentStudentDeclaration = this.dataService.CurrentStudentDeclaration.asObservable()
-    let subscript = this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
-    let daysSubscriptionZsti = this.dataService.CurrentZstiDays.asObservable().subscribe((change) => this.changeZstiDays())
-    let daysSubscriptionInternat = this.dataService.CurrentInternatDays.asObservable().subscribe((change) => this.changeInternatDays())
+    this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
+    this.dataService.CurrentZstiDays.asObservable().subscribe(() => this.changeZstiDays())
+    this.dataService.CurrentInternatDays.asObservable().subscribe(() => this.changeInternatDays())
   };
 
   changeInternatDays()
@@ -70,6 +72,11 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.typy_posilkow_db.array_operacaja.forEach((element)=>{
       element.array = []
     })
+    if(!this.dataService.CurrentInternatDays.value)
+    {
+      this.show_calendar()
+      return
+    }
     this.dataService.CurrentInternatDays.value.forEach((element:any)=>{
       switch(element.posilki_id){
         case "śniadanie":
@@ -84,16 +91,23 @@ export class KalendarzComponent implements OnChanges, OnInit{
       }
     })
     console.log("Zarejestrowane dni nieobecnosci: ", this.typy_posilkow_db)
-    this.show_calendar()
   }
 
 
   changeZstiDays()
   {
     this.selected = []
+    this.dbCopyZstiDays = []
+    if(!this.dataService.CurrentZstiDays.value)
+    {
+      this.show_calendar()
+      return
+    }
     this.dataService.CurrentZstiDays.value.forEach((element:any) => {
       let data:Date = new Date(element.dzien_wypisania)
-      this.selected.push(data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate());
+      let value = data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate()
+      this.selected.push(value);
+      this.dbCopyZstiDays.push(value)
     })
     console.log("Nowe selected: ", this.selected)
     this.show_calendar()
@@ -135,16 +149,77 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.CurrentStudentDeclaration = change
     this.show_calendar()
   }
-
+  sendDays()
+  {
+    if(this.dataService.StudentType.value === "ZSTI")
+    {
+      this.selected.forEach((element)=>{
+        if(!this.dbCopyZstiDays.includes(element))
+        {
+          this.dataService.send(
+            JSON.stringify({
+              action: "request",
+              params: {
+                method: "AddZstiDays",
+                studentId: this.dataService.CurrentStudentId.value,
+                date: element,
+                schoolYearId: null
+              }
+            })
+          )
+          console.log("Dodaj element: ", element)
+        }
+      })
+      this.dbCopyZstiDays.forEach((element: any)=>{
+        if(!this.selected.includes(element))
+        {
+          this.dataService.send(
+            JSON.stringify({
+              action: "request",
+              params: {
+                method: "DeleteZstiDays",
+                studentId: this.dataService.CurrentStudentId.value,
+                date: element
+              }
+            })
+          )
+          console.log("Usun element: ", element,{
+            action: "request",
+            params: {
+              method: "DeleteZstiDays",
+              studentId: this.dataService.CurrentStudentId.value,
+              date: element
+            }
+          })
+        }
+      })
+      console.log("Zsti Send")
+      this.dataService.getStudentZstiDays()
+    }
+    else if(this.dataService.StudentType.value === "Internat")
+    {
+      console.log(this.typy_posilkow_db);
+      console.log(this.typy_posilkow);
+      console.log("Internat Send")
+      this.dataService.getStudentInternatDays()
+    }
+  }
   ngOnInit() {
     this.week_number();
     this.show_calendar()
     console.log("czy zadzialalo")
-    let subscript = this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
+    this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
   }
-
+  repeatStr(data:string, iter:number)
+  {
+    let wynik = '';
+    for(let i = 0 ; i < iter ; i++)
+    {
+      wynik += data
+    }
+    return wynik;
+  }
   show_calendar() {
-
     const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
     calendar_content.innerHTML = '';
     let year = this.date.getFullYear();
@@ -160,12 +235,27 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.renderer.appendChild(calendar_content, weekDiv);
 
     const isWeekend = (date: Date, button : HTMLElement) =>{
+      const day = date.getDay();
       if((!this.dataService.CurrentStudentDeclaration.value))
-        return true
+      {
+        if(day === 5 || day === 6) {
+          (button as HTMLButtonElement).disabled = true;
+        }
+        else {
+          button.classList.add('disabled-for-person')
+        }
+        return true;
+      }
+      if(day >=5)
+      {
+        (button as HTMLButtonElement).disabled = true;
+        return
+      }
       let eatenDays = this.dataService.CurrentStudentDeclaration.value.dni.data
       eatenDays = Number(eatenDays).toString(2)
-      const day = date.getDay();
-      if(day !== 6 && day !== 0 && eatenDays[day] === '0') {
+      eatenDays = this.repeatStr('0' , (5-eatenDays.length)) + eatenDays
+      console.log("Eaten days after: ", eatenDays[day], day)
+      if(eatenDays[day] === '0') {
         button.classList.add('disabled-for-person')
       }
       else if(day === 5 || day === 6) {
@@ -396,13 +486,18 @@ export class KalendarzComponent implements OnChanges, OnInit{
           if((target as HTMLInputElement).checked) {
             let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
             if(meal) {
-              meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
+              // @ts-ignore
+              if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value))) {
+                meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
+              }
             }
           }
           else {
             let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
             if(meal) {
               meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`), 1);
+              if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value)))
+                this.typy_posilkow.find(operacja => operacja.operacja === 'usuniecie')?.array_operacaja.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${grandparent.textContent}`);
             }
           }
           console.log(this.typy_posilkow)

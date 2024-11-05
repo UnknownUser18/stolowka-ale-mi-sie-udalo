@@ -309,3 +309,18 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='na'] > lab
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
+#sending button {
+    transition: 150ms ease-in-out all;
+    border: 2px var(--accent-color) solid;
+    margin: 5px;
+    padding: 5px 10px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: 1.5em;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#sending button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}

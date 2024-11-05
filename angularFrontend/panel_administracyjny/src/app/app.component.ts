@@ -36,6 +36,9 @@ export class AppComponent implements OnInit{
     target = target.parentElement as HTMLElement;
     target = target.querySelector('button') as HTMLElement;
     this.typ = target.textContent!;
+    // @ts-ignore
+    if(!this.StudentListZstiData[daneTarget.getAttribute('data-index')])
+      return
     if(this.typ === "ZSTI") {
       this.dataService.changeStudent(this.StudentListZstiData[daneTarget.getAttribute('data-index')!].id, this.typ)
     }

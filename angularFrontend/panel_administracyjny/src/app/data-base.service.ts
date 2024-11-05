@@ -103,7 +103,8 @@ export class DataBaseService {
   }
   send(query:string)
   {
-    this.socket!.send(query)
+    // @ts-ignore
+    this.socket.send(query)
   }
 
   Initialize() {
@@ -146,7 +147,7 @@ export class DataBaseService {
           case 'StudentInternatDays':
             this.StudentInternatDays.next(this.lastValue.params.value);
             this.StudentInternatDays.value.forEach((element:any)=> {
-              if(element.osoby_zsti_id === this.CurrentStudentId.value)
+              if(element.osoby_internat_id === this.CurrentStudentId.value)
                 tempArray.push(element)
             })
             this.CurrentInternatDays.next(tempArray);

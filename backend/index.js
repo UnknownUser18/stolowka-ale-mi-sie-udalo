@@ -33,6 +33,7 @@ wss.on('connection', function connection(ws) {
         if(typeof data != 'object')
             return -1;
         let object = JSON.parse(data)
+        console.log(data)
         if(object.action !== "request")
             return -1;
         let parameters = object.params;
@@ -88,6 +89,18 @@ wss.on('connection', function connection(ws) {
             case "getStudentInternatDays":
                 getStudentInternatDays(ws, parameters.studentId)
                 break;
+            case "AddZstiDays":
+                AddZstiDays(parameters.studentId, parameters.date, parameters.schoolYearId)
+                break;
+            case "AddInternatDays":
+                AddInternatDays(parameters.studentId, parameters.date, parameters.mealId, parameters.schoolYearId);
+                break;
+            case "DeleteZstiDays":
+                DeleteZstiDays(parameters.studentId, parameters.date);
+                break;
+            case "DeleteInternatDays":
+                DeleteInternatDays(parameters.studentId, parameters.date, parameters.mealId);
+                break;
         }
     });
 });
@@ -97,15 +110,40 @@ const serverPassword = process.argv.slice(2,6)[0]
 const dbPassword = process.env.dbPassword
 const dbHost = process.env.dbHost
 const dbPort = process.env.dbPort
-
-const database = mysql.createConnection({
+const dbConfig = {
     host: dbHost,
     port: dbPort,
     user: "root",
     password: dbPassword,
     database: "stolowka"
-})
+}
+let database = mysql.createConnection(dbConfig);
+function handleDisconnect()
+{
+    database = mysql.createConnection(dbConfig);
 
+    database.on('error', function (err) {
+        console.error('Db error: ', err);
+        if(err.code === "PROTOCOL_CONNECTION_LOST")
+        {
+            handleDisconnect();
+        }
+        else{
+            throw err;
+        }
+    });
+}
+
+database.on('error', function (err) {
+    console.error('Db error: ', err);
+    if(err.code === "PROTOCOL_CONNECTION_LOST")
+    {
+        handleDisconnect();
+    }
+    else{
+        throw err;
+    }
+});
 function getStudentDeclarationInternat(websocketClient)
 {
     let query = "SELECT * FROM deklaracja_zywieniowa_internat";
@@ -229,6 +267,51 @@ function getStudentInternatDays(websocketClient, StudentId)
                 }
             }
         ))
+    })
+}
+
+function AddZstiDays(StudentId, Date, schoolYearId)
+{
+    let query = "INSERT INTO nieobecnosci_zsti (dzien_wypisania, osoby_zsti_id, rok_szkolny_id) VALUES('" + Date + "', " + StudentId
+    if(schoolYearId)
+        query += ", " + schoolYearId + ");"
+    else
+        query += ", null);"
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function AddInternatDays(StudentId, Date, schoolYearId, mealId)
+{
+    let query = "INSERT INTO nieobecnosci_internat (dzien_wypisania, osoby_zsti_id, posilki_id,rok_szkolny_id) VALUES('" + Date + "', " + StudentId + ", " + mealId
+    if(schoolYearId)
+        query += ", " + schoolYearId + ");"
+    else
+        query += ", null);"
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function DeleteZstiDays(StudentId, Date)
+{
+    let query = "DELETE FROM nieobecnosci_zsti WHERE osoby_zsti_id = " + StudentId + " && dzien_wypisania = '" + Date + "';";
+    console.log(query, "NIGER NIGER NIGER")
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function DeleteInternatDays(StudentId, Date, mealId)
+{
+    let query = "DELETE FROM nieobecnosci_internat WHERE osoby_zsti_id = " + StudentId + " && dzien_wypisania = '" + Date + "' && posilki_id = " + mealId + ";";
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
     })
 }
 
