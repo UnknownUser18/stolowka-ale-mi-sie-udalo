@@ -24,11 +24,6 @@ export class KalendarzComponent implements OnChanges, OnInit{
   month_before: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   month_next: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   selected: Array<string> = [];
-  // typy_posilkow: Array<{id: string, array : Array<any>}> = [
-  //   {id: 'sniadanie', array: []},
-  //   {id: 'obiad', array: []},
-  //   {id: 'kolacja', array: []}
-  //   ];
   typy_posilkow_db: { operacja: string; array_operacaja: Array<{ id: string; array: Array<any> }> } =
     {
       operacja: 'zarejestrowane',
@@ -486,7 +481,6 @@ export class KalendarzComponent implements OnChanges, OnInit{
           if((target as HTMLInputElement).checked) {
             let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
             if(meal) {
-              // @ts-ignore
               if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value))) {
                 meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
               }

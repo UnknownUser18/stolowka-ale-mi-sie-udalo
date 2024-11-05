@@ -31,6 +31,9 @@ section > :nth-child(2) button {
     height: 100%;
 }
 app-kalendarz {
-    display: block;
+    width: 100%;
+}
+app-edycja {
+    display: none;
     width: 100%;
 }

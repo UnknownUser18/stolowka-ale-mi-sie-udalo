@@ -1,14 +1,14 @@
 <main>
   <section>
     <h1>{{ name }}</h1>
-    <div>
-      <button >Kalendarz</button>
+    <div (click)="select($event)">
+      <button>Kalendarz</button>
       <button>Edytuj</button>
-      <button>Usuń</button>
       <button>Raport</button>
     </div>
     <div id="content">
       <app-kalendarz [typ]="typ" [name]="name"></app-kalendarz>
+      <app-edycja [typ]="typ"></app-edycja>
     </div>
   </section>
 </main>
