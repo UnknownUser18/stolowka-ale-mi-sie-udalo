@@ -1,3 +1,18 @@
+form[name='osoba'] {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+fieldset {
+    width: 45%;
+    border: 2px solid var(--border-color);
+    border-radius: 7px;
+    padding: 10px;
+    margin: 10px 0;
+}
+legend {
+    font-size: 1.5em;
+}
 label {
     box-sizing: border-box;
     display: flex;
@@ -44,9 +59,32 @@ select {
     outline: 0;
     transition: all 150ms ease-in-out;
 }
-fieldset {
-    border: 2px solid var(--border-color);
+#usun {
+    border-color: #b20000;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+#usun > label {
+    max-width: unset;
+    justify-content: center;
+    margin: 5px 10px;
+}
+#usun > legend {
+    color: #b20000;
+}
+#usun label > button {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid #b20000;
     border-radius: 7px;
-    padding: 10px;
-    margin: 10px 0;
+    padding: 5px 10px;
+    font-size: 1.4em;
+    cursor: pointer;
+    width: 270px;
+    transition: all 150ms ease-in-out;
+}
+#usun label > button:hover {
+    background-color: #b20000;
+    color: var(--background-color);
 }

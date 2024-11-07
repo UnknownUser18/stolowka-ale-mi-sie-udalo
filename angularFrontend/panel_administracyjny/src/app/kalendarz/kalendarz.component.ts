@@ -2,6 +2,7 @@ import {Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChange
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {DataBaseService} from '../data-base.service';
+import {isEmpty} from "rxjs";
 
 @Component({
   selector: 'app-kalendarz',
@@ -106,7 +107,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
       return
     }
     this.dataService.CurrentZstiDays.value.forEach((element:any) => {
-      let data:Date = new Date(element.dzien_wypisania)
+      let data : Date = new Date(element.dzien_wypisania)
       let value = data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate()
       this.selected.push(value);
       this.dbCopyZstiDays.push(value)

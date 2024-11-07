@@ -33,4 +33,36 @@ export class EdycjaComponent {
       }
     }
   }
+  clear_data(typ : string) {
+    if(typ === 'podstawowe') {
+      this.el.nativeElement.querySelectorAll('form[name="osoba"] > fieldset')[0].childNodes.forEach((element : HTMLFieldSetElement) => {
+        console.log(element);
+        element.childNodes.forEach((child : ChildNode) => {
+          if(child.nodeName === 'INPUT') {
+            (child as HTMLInputElement).value = '';
+          }
+        })
+      })
+    }
+    else if(typ === 'deklaracja') {
+      this.el.nativeElement.querySelectorAll('form[name="osoba"] > fieldset')[1].childNodes.forEach((element : HTMLFieldSetElement) => {
+        element.childNodes.forEach((child : ChildNode) => {
+          console.log(child);
+          if(child.nodeName === 'INPUT') {
+            (child as HTMLInputElement).value = '';
+          }
+          else if(child.nodeName === 'DIV') {
+            child.childNodes.forEach((child2 : ChildNode) => {
+              if(child2.nodeName === 'LABEL') {
+                (child2.childNodes[0] as HTMLInputElement).checked = false;
+              }
+            })
+          }
+        })
+      })
+    }
+  }
+  remove_user() {
+    console.log('remove user');
+  }
 }
