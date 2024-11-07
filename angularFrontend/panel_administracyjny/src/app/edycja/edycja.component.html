@@ -15,7 +15,7 @@
     <legend>Deklaracja Żywieniowa</legend>
     <label>Data od: <input type="date" name="data_od"></label>
     <label>Data do: <input type="date" name="data_do"></label>
-    <label class="zsti">Dni <div>
+    <label class="zsti">Dni obecności <div>
       <label><input type="checkbox" name="poniedziałek">Poniedziałek</label>
       <label><input type="checkbox" name="wtorek">Wtorek</label>
       <label><input type="checkbox" name="środa">Środa</label>
@@ -32,5 +32,11 @@
       <option value="7">Obiady</option>
     </select></label>
     <label>Rok Szkolny: <input type="text" name="rok_szkolny"></label>
+  </fieldset>
+  <fieldset id="usun">
+    <legend>Wyczyść dane/Usuń Ucznia</legend>
+    <label><button type="button" (click)="clear_data('podstawowe')">Wyczyść Dane Podstawowe</button></label>
+    <label><button type="button" (click)="clear_data('deklaracja')">Wyczyść Dane Deklaracji Żywieniowej</button></label>
+    <label><button type="button" (click)="remove_user()">Usuń Osobę</button></label>
   </fieldset>
 </form>

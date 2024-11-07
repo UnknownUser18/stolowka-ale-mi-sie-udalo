@@ -229,6 +229,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.renderer.addClass(weekDiv, 'week');
     this.renderer.appendChild(calendar_content, weekDiv);
 
+    // @ts-ignore
     const isWeekend = (date: Date, button : HTMLElement) =>{
       const day = date.getDay();
       if((!this.dataService.CurrentStudentDeclaration.value))
@@ -246,18 +247,20 @@ export class KalendarzComponent implements OnChanges, OnInit{
         (button as HTMLButtonElement).disabled = true;
         return
       }
-      let eatenDays = this.dataService.CurrentStudentDeclaration.value.dni.data
-      eatenDays = Number(eatenDays).toString(2)
-      eatenDays = this.repeatStr('0' , (5-eatenDays.length)) + eatenDays
-      console.log("Eaten days after: ", eatenDays[day], day)
-      if(eatenDays[day] === '0') {
-        button.classList.add('disabled-for-person')
+      if(this.typ === 'ZSTI') {
+        let eatenDays = this.dataService.CurrentStudentDeclaration.value.dni.data
+        eatenDays = Number(eatenDays).toString(2)
+        eatenDays = this.repeatStr('0' , (5-eatenDays.length)) + eatenDays
+        console.log("Eaten days after: ", eatenDays[day], day)
+        if(eatenDays[day] === '0') {
+          button.classList.add('disabled-for-person')
+        }
+        else if(day === 5 || day === 6) {
+          (button as HTMLButtonElement).disabled = true;
+        }
+        // console.log("Eaten day: ", eatenDays[day] === '0' || day === 6 || day === 5);
+        return eatenDays[day] === '0' || day === 6 || day === 5;
       }
-      else if(day === 5 || day === 6) {
-        (button as HTMLButtonElement).disabled = true;
-      }
-      // console.log("Eaten day: ", eatenDays[day] === '0' || day === 6 || day === 5);
-      return eatenDays[day] === '0' || day === 6 || day === 5;
     }
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];

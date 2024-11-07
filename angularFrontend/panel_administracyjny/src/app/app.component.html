@@ -1,13 +1,14 @@
 <nav>
   <h2>Spis Osób</h2>
+  <label id="wyszukaj"><input type="text" (input)="szukaj()"></label>
   <section>
-    <button (click)="rozwin($event, 2)">ZSTI<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
+    <button (click)="rozwin($event, 3, false)">ZSTI<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
     <ol (click)="show($event)" >
       <li *ngFor="let element of StudentListZstiData; let i = index" [attr.data-index]="i"><span>{{element.imie}} {{element.nazwisko}}</span></li>
     </ol>
   </section>
   <section>
-    <button (click)="rozwin($event, 3)">Internat<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
+    <button (click)="rozwin($event, 4, false)">Internat<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
     <ol (click)="show($event)">
       <li *ngFor="let element of StudentListInternatData; let i = index" [attr.data-index]="i"><span>{{element.imie}} {{element.nazwisko}}</span></li>
     </ol>
