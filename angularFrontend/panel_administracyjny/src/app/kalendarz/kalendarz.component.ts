@@ -20,10 +20,15 @@ export class KalendarzComponent implements OnChanges, OnInit{
   dbCopyZstiDays: any[] = [];
   StudentInternatDays: any;
   dbCopyInternatDays: any;
+  StudentDisabledZstiDays: any;
+  dbCopyDisabledZstiDays: any[] = [];
+  StudentDisabledInternatDays: any;
+  dbCopyDisabledInternatDays: any;
   months : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   month_before: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   month_next: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   selected: Array<string> = [];
+  selectedDisabled: Array<string> = [];
   typy_posilkow_db: { operacja: string; array_operacaja: Array<{ id: string; array: Array<any> }> } =
     {
       operacja: 'zarejestrowane',
@@ -60,6 +65,8 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
     this.dataService.CurrentZstiDays.asObservable().subscribe(() => this.changeZstiDays())
     this.dataService.CurrentInternatDays.asObservable().subscribe(() => this.changeInternatDays())
+    this.dataService.CurrentDisabledZstiDays.asObservable().subscribe(() => this.changeDisabledZstiDays())
+
   };
 
   changeInternatDays()
@@ -105,6 +112,25 @@ export class KalendarzComponent implements OnChanges, OnInit{
       this.dbCopyZstiDays.push(value)
     })
     console.log("Nowe selected: ", this.selected)
+    this.show_calendar()
+  }
+
+  changeDisabledZstiDays()
+  {
+    this.selectedDisabled = []
+    this.dbCopyDisabledZstiDays = []
+    if(!this.dataService.CurrentDisabledZstiDays.value)
+    {
+      this.show_calendar()
+      return
+    }
+    this.dataService.CurrentDisabledZstiDays.value.forEach((element:any) => {
+      let data:Date = new Date(element.dzien_wypisania)
+      let value = data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate()
+      this.selectedDisabled.push(value);
+      this.dbCopyDisabledZstiDays.push(value)
+    })
+    console.log("Nowe selected disabled: ", this.selectedDisabled)
     this.show_calendar()
   }
 
@@ -190,6 +216,47 @@ export class KalendarzComponent implements OnChanges, OnInit{
       })
       console.log("Zsti Send")
       this.dataService.getStudentZstiDays()
+      this.selectedDisabled.forEach((element)=>{
+        if(!this.dbCopyDisabledZstiDays.includes(element))
+        {
+          this.dataService.send(
+            JSON.stringify({
+              action: "request",
+              params: {
+                method: "AddDisabledZstiDays",
+                studentId: this.dataService.CurrentStudentId.value,
+                date: element,
+                schoolYearId: null
+              }
+            })
+          )
+          console.log("Dodaj element disabled: ", element)
+        }
+      })
+      this.dbCopyDisabledZstiDays.forEach((element: any)=>{
+        if(!this.selectedDisabled.includes(element))
+        {
+          this.dataService.send(
+            JSON.stringify({
+              action: "request",
+              params: {
+                method: "DeleteDisabledZstiDays",
+                studentId: this.dataService.CurrentStudentId.value,
+                date: element
+              }
+            })
+          )
+          console.log("Usun element: ", element,{
+            action: "request",
+            params: {
+              method: "DeleteDisabledZstiDays",
+              studentId: this.dataService.CurrentStudentId.value,
+              date: element
+            }
+          })
+        }
+      })
+      this.dataService.getStudentDisabledZstiDays();
     }
     else if(this.dataService.StudentType.value === "Internat")
     {
@@ -197,6 +264,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
       console.log(this.typy_posilkow);
       console.log("Internat Send")
       this.dataService.getStudentInternatDays()
+      this.dataService.getStudentDisabledInternatDays()
     }
   }
   ngOnInit() {
@@ -214,6 +282,38 @@ export class KalendarzComponent implements OnChanges, OnInit{
     }
     return wynik;
   }
+  isWeekend = (date: Date, button : HTMLElement | null) =>{
+    const day = date.getDay();
+    if(!button)
+      return false
+    if((!this.dataService.CurrentStudentDeclaration.value))
+    {
+      if(day === 5 || day === 6) {
+        (button as HTMLButtonElement).disabled = true;
+      }
+      else {
+        button.classList.add('disabled-for-person')
+      }
+      return true;
+    }
+    if(day >=5)
+    {
+      (button as HTMLButtonElement).disabled = true;
+      return
+    }
+    let eatenDays = this.dataService.CurrentStudentDeclaration.value.dni.data
+    eatenDays = Number(eatenDays).toString(2)
+    eatenDays = this.repeatStr('0' , (5-eatenDays.length)) + eatenDays
+    if(eatenDays[day] === '0') {
+      button.classList.add('disabled-for-person')
+    }
+    else if(day === 5 || day === 6) {
+      (button as HTMLButtonElement).disabled = true;
+    }
+    // console.log("Eaten day: ", eatenDays[day] === '0' || day === 6 || day === 5);
+    return eatenDays[day] === '0' || day === 6 || day === 5;
+  }
+
   show_calendar() {
     const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
     calendar_content.innerHTML = '';
@@ -229,36 +329,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.renderer.addClass(weekDiv, 'week');
     this.renderer.appendChild(calendar_content, weekDiv);
 
-    const isWeekend = (date: Date, button : HTMLElement) =>{
-      const day = date.getDay();
-      if((!this.dataService.CurrentStudentDeclaration.value))
-      {
-        if(day === 5 || day === 6) {
-          (button as HTMLButtonElement).disabled = true;
-        }
-        else {
-          button.classList.add('disabled-for-person')
-        }
-        return true;
-      }
-      if(day >=5)
-      {
-        (button as HTMLButtonElement).disabled = true;
-        return
-      }
-      let eatenDays = this.dataService.CurrentStudentDeclaration.value.dni.data
-      eatenDays = Number(eatenDays).toString(2)
-      eatenDays = this.repeatStr('0' , (5-eatenDays.length)) + eatenDays
-      console.log("Eaten days after: ", eatenDays[day], day)
-      if(eatenDays[day] === '0') {
-        button.classList.add('disabled-for-person')
-      }
-      else if(day === 5 || day === 6) {
-        (button as HTMLButtonElement).disabled = true;
-      }
-      // console.log("Eaten day: ", eatenDays[day] === '0' || day === 6 || day === 5);
-      return eatenDays[day] === '0' || day === 6 || day === 5;
-    }
+
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
       // create day button
@@ -271,10 +342,10 @@ export class KalendarzComponent implements OnChanges, OnInit{
         const dayButton = this.renderer.createElement('button');
         this.renderer.addClass(dayButton, 'day');
         this.renderer.setProperty(dayButton, 'innerHTML', (i - first_day_week + 1).toString());
-        if (this.selected.includes(`${year}-${month+1}-${i - first_day_week + 1}`)) {
+        if (this.selected.includes(`${year}-${month+1}-${i - first_day_week + 1}`) || this.selectedDisabled.includes(`${year}-${month+1}-${i - first_day_week + 1}`)) {
           this.renderer.addClass(dayButton, 'selected');
         }
-        isWeekend(new Date(year, month, i - first_day_week), dayButton);
+        this.isWeekend(new Date(year, month, i - first_day_week), dayButton);
         if(this.typ === 'Internat') {
           console.log('Internat');
           const typy = ['sniadanie','obiad','kolacja']
@@ -419,11 +490,27 @@ export class KalendarzComponent implements OnChanges, OnInit{
             const zaznacz = this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`);
             (zaznacz as HTMLInputElement).checked = false;
           }
+          if(target.classList.contains('disabled-for-person')) {
+            this.selectedDisabled.splice(this.selectedDisabled.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`), 1);
+            console.log("Disabled classlist: ", this.selectedDisabled);
+          }
+          else{
+            this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`), 1);
+            console.log(" selected: ", this.selected);
+          }
           target.classList.remove('selected');
-          this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`), 1);
         } else {
           target.classList.add('selected');
-          this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`);
+          if(target.classList.contains('disabled-for-person')) {
+            this.selectedDisabled.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`);
+            console.log("Disabled classlist: ", this.selectedDisabled);
+          }
+          else{
+
+            this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`);
+            console.log(" selected: ", this.selected);
+          }
+          console.log("Disabled selected: ", this.selectedDisabled);
           if(isFullWeekSelected(target.parentElement as HTMLElement)) {
             console.log('full week selected check = true');
             const zaznacz = this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`);

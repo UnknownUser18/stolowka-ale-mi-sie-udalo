@@ -21,15 +21,30 @@ export class DataBaseService {
   CurrentStudentId = new BehaviorSubject<number>(-1)
   StudentType = new BehaviorSubject<string>("BRAK")
   lastValue:any = null;
+  CurrentDisabledInternatDays = new BehaviorSubject<any>(null);
+  StudentDisabledZstiDays = new BehaviorSubject<any>(null);
+  StudentDisabledInternatDays = new BehaviorSubject<any>(null);
+  CurrentDisabledZstiDays = new BehaviorSubject<any>(null);
 
+  initWebSocket()
+  {
+    this.socket = new WebSocket("ws://localhost:8080");
+    // @ts-ignore
+    this.socket.onopen = (event: Event) => {
+      console.log('WebSocket connection established')
+      this.Initialize()
+    }
+    this.socket.onerror = (event: Event) => {
+      console.log('WebSocket connection error')
+      setTimeout(()=>{
+        this.initWebSocket()
+      },1000)
+    }
+  }
   constructor() {
     setTimeout(()=>{
-      this.socket = new WebSocket("ws://localhost:8080");
-      // @ts-ignore
-      this.socket.onopen = (event: Event) => {
-        console.log('WebSocket connection established')
-        this.Initialize()
-    }},500)
+      this.initWebSocket()
+    },500)
 
   }
   getStudentInternatDays()
@@ -45,6 +60,19 @@ export class DataBaseService {
     );
     this.send(query);
   }
+  getStudentDisabledInternatDays()
+  {
+    let query = JSON.stringify(
+      {
+        action: "request",
+        params: {
+          method: "getStudentDisabledInternatDays",
+          studentId: this.CurrentStudentId.value
+        }
+      }
+    );
+    this.send(query);
+  }
   getStudentZstiDays()
   {
     let query = JSON.stringify(
@@ -52,6 +80,19 @@ export class DataBaseService {
         action: "request",
         params: {
           method: "getStudentZstiDays",
+          studentId: this.CurrentStudentId.value
+        }
+      }
+    );
+    this.send(query);
+  }
+  getStudentDisabledZstiDays()
+  {
+    let query = JSON.stringify(
+      {
+        action: "request",
+        params: {
+          method: "getStudentDisabledZstiDays",
           studentId: this.CurrentStudentId.value
         }
       }
@@ -91,12 +132,14 @@ export class DataBaseService {
       console.log(this.StudentDeclarationInternat.value, "NMIGER")
       console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentZstiDays()
+      this.getStudentDisabledZstiDays()
     }
     else{
       this.getStudentDeclarationInternat()
       console.log(this.StudentDeclarationInternat.value, "NMIGER")
       console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentInternatDays()
+      this.getStudentDisabledInternatDays()
     }
     console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
 
@@ -144,6 +187,15 @@ export class DataBaseService {
             this.CurrentZstiDays.next(tempArray);
             console.log("StudentZstiDays: ", this.lastValue.params.value);
             break;
+          case 'StudentDisabledZstiDays':
+            this.StudentDisabledZstiDays.next(this.lastValue.params.value);
+            this.lastValue.params.value.forEach((element:any)=> {
+              if(element.osoby_zsti_id === this.CurrentStudentId.value)
+                tempArray.push(element)
+            })
+            this.CurrentDisabledZstiDays.next(tempArray);
+            console.log("StudentDisabledZstiDays: ", this.lastValue.params.value);
+            break;
           case 'StudentInternatDays':
             this.StudentInternatDays.next(this.lastValue.params.value);
             this.StudentInternatDays.value.forEach((element:any)=> {
@@ -152,6 +204,15 @@ export class DataBaseService {
             })
             this.CurrentInternatDays.next(tempArray);
             console.log("StudentInternatDays: ", this.lastValue.params.value);
+            break;
+          case 'StudentDisabledInternatDays':
+            this.StudentDisabledInternatDays.next(this.lastValue.params.value);
+            this.StudentDisabledInternatDays.value.forEach((element:any)=> {
+              if(element.osoby_internat_id === this.CurrentStudentId.value)
+                tempArray.push(element)
+            })
+            this.CurrentDisabledInternatDays.next(tempArray);
+            console.log("StudentDisabledInternatDays: ", this.lastValue.params.value);
             break;
         }
       })

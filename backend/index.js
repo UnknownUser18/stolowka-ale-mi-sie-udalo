@@ -86,20 +86,38 @@ wss.on('connection', function connection(ws) {
             case "getStudentZstiDays":
                 getStudentZstiDays(ws, parameters.studentId)
                 break;
+            case "getStudentDisabledZstiDays":
+                getStudentDisabledZstiDays(ws, parameters.studentId)
+                break;
             case "getStudentInternatDays":
                 getStudentInternatDays(ws, parameters.studentId)
+                break;
+            case "getStudentDisabledInternatDays":
+                getStudentDisabledInternatDays(ws, parameters.studentId)
                 break;
             case "AddZstiDays":
                 AddZstiDays(parameters.studentId, parameters.date, parameters.schoolYearId)
                 break;
+            case "AddDisabledZstiDays":
+                AddDisabledZstiDays(parameters.studentId, parameters.date, parameters.schoolYearId)
+                break;
             case "AddInternatDays":
                 AddInternatDays(parameters.studentId, parameters.date, parameters.mealId, parameters.schoolYearId);
+                break;
+            case "AddDisabledInternatDays":
+                AddDisabledInternatDays(parameters.studentId, parameters.date, parameters.mealId, parameters.schoolYearId);
                 break;
             case "DeleteZstiDays":
                 DeleteZstiDays(parameters.studentId, parameters.date);
                 break;
+            case "DeleteDisabledZstiDays":
+                DeleteDisabledZstiDays(parameters.studentId, parameters.date);
+                break;
             case "DeleteInternatDays":
                 DeleteInternatDays(parameters.studentId, parameters.date, parameters.mealId);
+                break;
+            case "DeleteDisabledInternatDays":
+                DeleteDisabledInternatDays(parameters.studentId, parameters.date, parameters.mealId);
                 break;
         }
     });
@@ -183,7 +201,7 @@ function getStudentDeclarationZsti(websocketClient)
 }
 
 function changeStudentDeclarationInternat(StudentId, schoolYearId, days, beginDate, endDate, mealId) {
-    let query = "UPDATE deklaracja_zywieniowa_internat SET rok_szkolny_id = " + schoolYearId + ", dni = " + days + ", posilki_id = " + mealId +  ", data_od = " + beginDate + ", data_do = " + endDate + " WHERE osoby_internat_id = " + StudentId + ";";
+    let query = "UPDATE deklaracja_zywieniowa_internat SET rok_szkolny_id = " + schoolYearId + ", dniPosilki = " + days + ", posilki_id = " + mealId +  ", data_od = " + beginDate + ", data_do = " + endDate + " WHERE osoby_internat_id = " + StudentId + ";";
     return database.query(query, (err, result) => {
         if (err) throw err;
         console.log(result);
@@ -314,6 +332,99 @@ function DeleteInternatDays(StudentId, Date, mealId)
         console.log(result);
     })
 }
+
+function getStudentDisabledZstiDays(websocketClient, StudentId)
+{
+    let query = "SELECT * FROM obencosci_zsti WHERE osoby_zsti_id = " + StudentId + ";";
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: "StudentDisabledZstiDays",
+                    value: result
+                }
+            }
+        ))
+    })
+}
+
+function getStudentDisabledInternatDays(websocketClient, StudentId)
+{
+    let query = "SELECT * FROM obencosci_internat WHERE osoby_internat_id = " + StudentId + ";";
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: "StudentDisabledInternatDays",
+                    value: result
+                }
+            }
+        ))
+    })
+}
+
+function AddDisabledZstiDays(StudentId, Date, schoolYearId)
+{
+    let query = "INSERT INTO obencosci_zsti (dzien_wypisania, osoby_zsti_id, rok_szkolny_id) VALUES('" + Date + "', " + StudentId
+    if(schoolYearId)
+        query += ", " + schoolYearId + ");"
+    else
+        query += ", null);"
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function AddDisabledInternatDays(StudentId, Date, schoolYearId, mealId)
+{
+    let query = "INSERT INTO obencosci_internat (dzien_wypisania, osoby_zsti_id, posilki_id,rok_szkolny_id) VALUES('" + Date + "', " + StudentId + ", " + mealId
+    if(schoolYearId)
+        query += ", " + schoolYearId + ");"
+    else
+        query += ", null);"
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function DeleteDisabledZstiDays(StudentId, Date)
+{
+    let query = "DELETE FROM obencosci_zsti WHERE osoby_zsti_id = " + StudentId + " && dzien_wypisania = '" + Date + "';";
+    console.log(query, "NIGER NIGER NIGER")
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function DeleteDisabledInternatDays(StudentId, Date, mealId)
+{
+    let query = "DELETE FROM obencosci_internat WHERE osoby_zsti_id = " + StudentId + " && dzien_wypisania = '" + Date + "' && posilki_id = " + mealId + ";";
+    return database.query(query, function (err, result) {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 function CardScan(cardId, timestamp)
 {
