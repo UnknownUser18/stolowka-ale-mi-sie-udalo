@@ -1,6 +1,6 @@
 <nav>
   <h2>Spis Osób</h2>
-  <label id="wyszukaj"><input type="text" (input)="szukaj()"></label>
+  <label id="wyszukaj"><input type="text" (input)="szukaj()" placeholder="Szukaj..."></label>
   <section>
     <button (click)="rozwin($event, 3, false)">ZSTI<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
     <ol (click)="show($event)" >

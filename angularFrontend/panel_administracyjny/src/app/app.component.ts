@@ -46,10 +46,6 @@ export class AppComponent implements OnInit{
     });
   }
   szukaj() {
-    let zsti_current: string[] = [];
-    this.el.nativeElement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
-      zsti_current.push(element.textContent!);
-    })
     const searchTerm = this.el.nativeElement.querySelector('#wyszukaj > input').value.toLowerCase();
     if(searchTerm === '') {
       this.el.nativeElement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
@@ -63,7 +59,7 @@ export class AppComponent implements OnInit{
     this.rozwin(this.el.nativeElement.querySelector('section:nth-of-type(1) > button'), 3, true);
     this.rozwin(this.el.nativeElement.querySelector('section:nth-of-type(2) > button'), 4, true);
     this.el.nativeElement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
-      if(!element.textContent?.includes(searchTerm)) {
+      if(!element.textContent?.toLowerCase().includes(searchTerm)) {
         element.style.display = 'none';
       }
       else {
@@ -71,7 +67,7 @@ export class AppComponent implements OnInit{
       }
     })
     this.el.nativeElement.querySelectorAll('section:nth-of-type(2) > ol > li').forEach((element : HTMLElement) => {
-      if(!element.textContent?.includes(searchTerm)) {
+      if(!element.textContent?.toLowerCase().includes(searchTerm)) {
         element.style.display = 'none';
       }
       else {

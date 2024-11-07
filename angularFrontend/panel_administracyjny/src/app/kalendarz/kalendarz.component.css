@@ -255,7 +255,7 @@
     right: 5px;
     cursor: pointer;
 }
-form[name='zmiana_posilku'], form[name='na'], form[name='wszystko'] {
+form[name='zmiana_posilku'], form[name='na'] {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     align-items: center;
@@ -265,7 +265,7 @@ input[type='radio'] {
     width: 18px;
     height: 18px;
 }
-form[name='zmiana_posilku'] > div, form[name='na'] > div, form[name='wszystko'] > div {
+form[name='zmiana_posilku'] > div, form[name='na'] > div {
     width: 120px;
     display: flex;
     justify-self: center;
@@ -321,6 +321,57 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='na'] > lab
     cursor: pointer;
 }
 #sending button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+#stop_background {
+    display: none;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 3;
+}
+#stop_background > section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--box-shadow);
+    width: 30vw;
+    height: 20vh;
+    border-radius: 20px;
+    background-color: var(--primary-color);
+    border: 3px solid var(--border-color);
+    padding: 0 25px;
+}
+#stop_background h2 {
+    text-align: center;
+    font-size: 2em;
+}
+#stop_background > section > div {
+    margin-bottom: 5%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+#stop_background > section button {
+    width: fit-content;
+    padding: 5px 10px;
+    margin: 0 auto;
+    font-size: 1.2em;
+    font-family: inherit;
+    font-weight: 500;
+    border: 0;
+    border-radius: 7px;
+    background-color: var(--background-color);
+    transition: 150ms ease-in-out all;
+    cursor: pointer;
+}
+#stop_background > section  button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
