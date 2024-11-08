@@ -2,7 +2,6 @@ import {Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChange
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {DataBaseService} from '../data-base.service';
-import {isEmpty} from "rxjs";
 
 @Component({
   selector: 'app-kalendarz',
@@ -317,7 +316,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
 
   show_calendar() {
     const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
-    calendar_content.innerHTML = '';
+    calendar_content !== undefined ? calendar_content.innerHTML = '' : this.el.nativeElement.innerHTML = '';
     let year = this.date.getFullYear();
     let month = this.date.getMonth();
     let month_days = new Date(year, month + 1, 0).getDate();
@@ -328,8 +327,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
     // create week div
     const weekDiv = this.renderer.createElement('div');
     this.renderer.addClass(weekDiv, 'week');
-    this.renderer.appendChild(calendar_content, weekDiv);
-
+    calendar_content !== undefined ? this.renderer.appendChild(calendar_content, weekDiv) : null;
 
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
@@ -338,7 +336,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
         const dayDiv = this.renderer.createElement('div');
         this.renderer.addClass(dayDiv, 'day');
         this.renderer.addClass(dayDiv, 'empty');
-        this.renderer.appendChild(week, dayDiv);
+        week !== undefined ? this.renderer.appendChild(week, dayDiv) : null;
       } else {
         const dayButton = this.renderer.createElement('button');
         this.renderer.addClass(dayButton, 'day');
@@ -364,22 +362,22 @@ export class KalendarzComponent implements OnChanges, OnInit{
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
-        this.renderer.appendChild(week, dayButton);
+        week !== undefined ? this.renderer.appendChild(week, dayButton) : null;
       }
       if (i % 7 === 0) {
         weekcount++;
         // create week div
         const weekDiv = this.renderer.createElement('div');
         this.renderer.addClass(weekDiv, 'week');
-        this.renderer.appendChild(calendar_content, weekDiv);
+        calendar_content !== undefined ? this.renderer.appendChild(calendar_content, weekDiv) : null;
       }
     }
     const dni = this.el.nativeElement.querySelector('#dni');
-    dni.innerHTML = '';
+    dni !== undefined ? dni.innerHTML = '' : null;
     for (let i = 0; i < 7; i++) {
       const daySpan = this.renderer.createElement('span');
       this.renderer.setProperty(daySpan, 'innerHTML', ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i]);
-      this.renderer.appendChild(dni, daySpan);
+      dni !== undefined ? this.renderer.appendChild(dni, daySpan) : null;
     }
     // checking for empty days
     Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
@@ -388,7 +386,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
           const dayDiv = this.renderer.createElement('div');
           this.renderer.addClass(dayDiv, 'day');
           this.renderer.addClass(dayDiv, 'empty');
-          this.renderer.appendChild(week, dayDiv);
+          week ? this.renderer.appendChild(week, dayDiv) : null;
         }
       }
     });
@@ -407,7 +405,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
     let week = this.week_number()[month];
     // create zaznacz buttons
     const zaznacz: HTMLElement = this.el.nativeElement.querySelector('#zaznacz');
-    zaznacz.innerHTML = '';
+    zaznacz !== undefined ? zaznacz.innerHTML = '' : null;
     let week_length = this.el.nativeElement.getElementsByClassName('week').length;
     for (let i = 0; i < week_length; i++) {
       let selected_days = 0;

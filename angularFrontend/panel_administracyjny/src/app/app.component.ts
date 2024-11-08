@@ -3,12 +3,13 @@ import { PanelComponent } from './panel/panel.component';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 // @ts-ignore
 import {DataBaseService} from './data-base.service';
+import {GlobalnyPanelComponent} from './globalny-panel/globalny-panel.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: true,
-  imports: [PanelComponent, NgOptimizedImage, NgForOf],
+  imports: [PanelComponent, NgOptimizedImage, NgForOf, GlobalnyPanelComponent],
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit{
@@ -27,7 +28,6 @@ export class AppComponent implements OnInit{
   StudentListZstiData:any = null;
   StudentListInternatData:any = null;
   constructor(private dataService:DataBaseService, private el: ElementRef) {
-
   }
   ngOnInit() {
     this.dataService.StudentListZstiData.subscribe((data: any) => {
@@ -80,46 +80,53 @@ export class AppComponent implements OnInit{
   typ : string | undefined;
   show(event: Event) {
     let target = event.target as HTMLElement;
-    if(target.tagName == "SPAN") {
+    if(target.tagName != 'OL') {
+      if(target.tagName == "SPAN") {
+        target = target.parentElement as HTMLElement;
+    }
+      this.el.nativeElement.querySelector('app-globalny-panel').style.display = 'none';
+      let daneTarget = target;
+      this.osoba = target.querySelector('span')?.textContent!;
       target = target.parentElement as HTMLElement;
-    }
-    let daneTarget = target;
-    this.osoba = target.querySelector('span')?.textContent!;
-    target = target.parentElement as HTMLElement;
-    target = target.parentElement as HTMLElement;
-    target = target.querySelector('button') as HTMLElement;
-    this.typ = target.textContent!;
-    // @ts-ignore
-    if(!this.StudentListZstiData[daneTarget.getAttribute('data-index')])
-      return
-    if(this.typ === "ZSTI") {
-      this.dataService.changeStudent(this.StudentListZstiData[daneTarget.getAttribute('data-index')!].id, this.typ)
-    }
-    else{
-      this.dataService.changeStudent(this.StudentListInternatData[daneTarget.getAttribute('data-index')!].id, this.typ)
-    }
-  }
-    rozwin(event: Event, number: number, szukaj : boolean) {
-      let target = szukaj ? event : (event.target as HTMLElement);
+      target = target.parentElement as HTMLElement;
+      target = target.querySelector('button') as HTMLElement;
+      this.typ = target.textContent!;
       // @ts-ignore
-      target = target.parentElement as HTMLElement;
-      target = target.parentElement as HTMLElement;
-      let img = target.querySelector(`:nth-child(${number}) > button img`) as HTMLElement;
-      target = target.querySelector(`:nth-child(${number}) > ol`) as HTMLElement;
-      if(target.style.opacity === '1' && !szukaj) {
-        target.style.opacity = '0';
-        target.style.maxHeight = '0';
-        target.style.overflow = 'hidden';
-        img.classList.remove('rotate');
-        return;
+      if(!this.StudentListZstiData[daneTarget.getAttribute('data-index')])
+        return
+      if(this.typ === "ZSTI") {
+        this.dataService.changeStudent(this.StudentListZstiData[daneTarget.getAttribute('data-index')!].id, this.typ)
       }
       else {
-        target.style.opacity = '1';
-        target.style.maxHeight = 'fit-content';
-        target.style.overflow = 'visible';
-        img.classList.add('rotate');
+        this.dataService.changeStudent(this.StudentListInternatData[daneTarget.getAttribute('data-index')!].id, this.typ)
       }
     }
-
+  }
+  rozwin(event: Event, number: number, szukaj : boolean) {
+    let target = szukaj ? event : (event.target as HTMLElement);
+    // @ts-ignore
+    target = target.parentElement as HTMLElement;
+    target = target.parentElement as HTMLElement;
+    let img = target.querySelector(`:nth-child(${number}) > button img`) as HTMLElement;
+    target = target.querySelector(`:nth-child(${number}) > ol`) as HTMLElement;
+    if(target.style.opacity === '1' && !szukaj) {
+      target.style.opacity = '0';
+      target.style.maxHeight = '0';
+      target.style.overflow = 'hidden';
+      img.classList.remove('rotate');
+      return;
+    }
+    else {
+      target.style.opacity = '1';
+      target.style.maxHeight = 'fit-content';
+      target.style.overflow = 'visible';
+      img.classList.add('rotate');
+    }
+  }
   protected readonly JSON = JSON;
+  main_menu() {
+    this.el.nativeElement.querySelector('app-globalny-panel').style.display = 'block';
+    this.el.nativeElement.querySelector('app-panel').style.display = 'none';
+    // żydon zrób żeby usunąc zaznaczoną osobę po tym kliknięciu ^
+  }
 }

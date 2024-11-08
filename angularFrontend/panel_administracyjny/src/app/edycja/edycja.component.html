@@ -15,14 +15,14 @@
     <legend>Deklaracja Żywieniowa</legend>
     <label>Data od: <input type="date" name="data_od"></label>
     <label>Data do: <input type="date" name="data_do"></label>
-    <label class="zsti">Dni obecności <div>
+    <label class="zsti">Dni żywienia: <div>
       <label><input type="checkbox" name="poniedziałek">Poniedziałek</label>
       <label><input type="checkbox" name="wtorek">Wtorek</label>
       <label><input type="checkbox" name="środa">Środa</label>
       <label><input type="checkbox" name="czwartek">Czwartek</label>
       <label><input type="checkbox" name="piątek">Piątek</label>
     </div></label>
-    <label class="internat">Typ: <select name="typ_posilku">
+    <label class="internat">Wersja Posiłku: <select name="typ_posilku">
       <option value="1">I</option>
       <option value="2">II</option>
       <option value="3">III</option>
@@ -31,7 +31,7 @@
       <option value="6">VI</option>
       <option value="7">Obiady</option>
     </select></label>
-    <label>Rok Szkolny: <input type="text" name="rok_szkolny"></label>
+    <label>Rok Szkolny: <input type="text" name="rok_szkolny" max="9"></label>
   </fieldset>
   <fieldset id="usun">
     <legend>Wyczyść dane/Usuń Ucznia</legend>

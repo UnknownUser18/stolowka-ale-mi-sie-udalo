@@ -36,6 +36,7 @@ export class PanelComponent implements OnInit, OnChanges {
     }
   }
   select(event: MouseEvent) {
+    console.log(this.el.nativeElement.querySelector('app-panel > main'));
     let target = event.target as HTMLElement;
     let text = target.innerText;
     let kalendarz = this.el.nativeElement.querySelector('app-kalendarz');
