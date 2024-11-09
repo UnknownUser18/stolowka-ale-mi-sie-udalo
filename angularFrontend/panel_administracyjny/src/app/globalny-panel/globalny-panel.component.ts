@@ -24,16 +24,15 @@ export class GlobalnyPanelComponent {
   aktualny_dni_nieczynne: string[] | undefined;
   yearBefore: number = this.year;
   miesiace: Array<{ month: string, disabled: boolean }> = [];
-
+  minDay: number = 1;
   ngOnInit() {
     let date = new Date();
     let futureDate = new Date();
     futureDate.setMonth(date.getMonth() + 3);
     this.aktualny_dni_nieczynne = this.dni_nieczynne.filter(dateStr => {
       const date_inner = new Date(dateStr);
-      return date_inner >= date && date_inner <= futureDate;
+      return date_inner >= date && date_inner <= futureDate || date_inner.toDateString() === date.toDateString();
     });
-
     this.dni_nieczynne.forEach(dateStr => {
       const daysDiff = (dateStr: string) => {
         const date_inner = new Date(dateStr);
@@ -66,6 +65,13 @@ export class GlobalnyPanelComponent {
         month,
         disabled: !disabledMonths.has(index + 1)
       }));
+      if(this.day - 7 < 1) {
+        this.miesiace[this.month-1] = { month: this.miesiace[this.month-1].month, disabled: false };
+        this.minDay = new Date(this.year, this.month + 1, 0).getDate() - 7;
+      }
+      else {
+        this.minDay = this.day - 7;
+      }
     });
   }
 
@@ -99,10 +105,12 @@ export class GlobalnyPanelComponent {
         this.el.nativeElement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]').value = this.month.toString();
         // safeguard
         if(this.day - 7 < 1) {
-          this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = 1;
+          this.miesiace[month-1] = { month: this.miesiace[month-1].month, disabled: false };
+          this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = new Date(year, this.month + 1, 0).getDate() - 7;
         }
         else {
           this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = this.day - 7;
+          this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').value = this.day;
         }
         this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').max = new Date(year, this.month + 1, 0).getDate();
       }, 0);
@@ -112,7 +120,8 @@ export class GlobalnyPanelComponent {
     if (year === this.year && month === this.month) {
       // safeguard
       if(this.day - 7 < 1) {
-        this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = 1;
+        this.miesiace[month-1] = { month: this.miesiace[month-1].month, disabled: false };
+        this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = new Date(year, month + 1, 0).getDate() - 7;
       }
       else {
         this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = this.day - 7;
