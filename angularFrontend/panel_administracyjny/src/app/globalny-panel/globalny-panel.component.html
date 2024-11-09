@@ -24,7 +24,7 @@
       <form name="dni_nieczynne">
         <fieldset>
           <legend>Dodaj dzień</legend>
-          <label>Dzień: <input type="number" [min]="day" [max]="days_in_month" [value]="day" name="dzien"></label>
+          <label>Dzień: <input type="number" [min]="minDay" [max]="days_in_month" [value]="day" name="dzien"></label>
           <label>Miesiąc: <select [value]="month" name="miesiac" (change)="check()">
               <option *ngFor="let element of miesiace; let i = index" [value]="i" [disabled]="element.disabled">{{element.month}}</option>
             </select>

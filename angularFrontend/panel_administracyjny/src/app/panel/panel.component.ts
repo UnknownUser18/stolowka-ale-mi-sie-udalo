@@ -46,11 +46,15 @@ export class PanelComponent implements OnInit, OnChanges {
         this.contents = ['kalendarz'];
         this.renderer.setStyle(kalendarz, 'display', 'block');
         this.renderer.setStyle(edycja, 'display', 'none');
+        this.renderer.addClass(target, 'selected');
+        this.renderer.removeClass(target.nextElementSibling, 'selected');
         break;
       case 'Edytuj':
         this.contents = ['edycja'];
         this.renderer.setStyle(kalendarz, 'display', 'none');
         this.renderer.setStyle(edycja, 'display', 'block');
+        this.renderer.addClass(target, 'selected');
+        this.renderer.removeClass(target.previousElementSibling, 'selected');
         break;
       default:
         break;
