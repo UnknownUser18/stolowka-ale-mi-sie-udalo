@@ -119,6 +119,9 @@ wss.on('connection', function connection(ws) {
             case "DeleteDisabledInternatDays":
                 DeleteDisabledInternatDays(parameters.studentId, parameters.date, parameters.mealId);
                 break;
+            case "getDniNieczynne":
+                getDniNieczynne(ws);
+                break;
         }
     });
 });
@@ -162,9 +165,30 @@ database.on('error', function (err) {
         throw err;
     }
 });
+
+function getDniNieczynne(websocketClient)
+{
+    console.log("noggers?")
+    let query = "SELECT * FROM dni_nieczynne_stolowki"
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+        console.log(result);
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "DisabledDays",
+                        value: result
+                    }
+                }))
+    })
+}
+
 function getStudentDeclarationInternat(websocketClient)
 {
-    let query = "SELECT * FROM deklaracja_zywieniowa_internat";
+    let query = "SELECT * FROM deklaracja_zywieniowa_internat JOIN slownik_wersje ON wersja = slownik_wersje.id";
     return database.query(query, (err, result) => {
         if (err) throw err;
         console.log(result);
@@ -272,7 +296,7 @@ function getStudentZstiDays(websocketClient, StudentId)
 
 function getStudentInternatDays(websocketClient, StudentId)
 {
-    let query = "SELECT * FROM nieobecnosci_internat WHERE osoby_internat_id = " + StudentId + ";";
+    let query = "SELECT * FROM nieobecnosci_internat  WHERE osoby_internat_id = " + StudentId + ";";
     return database.query(query, function (err, result) {
         if (err) throw err;
         console.log(result);
@@ -301,9 +325,9 @@ function AddZstiDays(StudentId, Date, schoolYearId)
     })
 }
 
-function AddInternatDays(StudentId, Date, schoolYearId, mealId)
+function AddInternatDays(StudentId, Date, mealId, schoolYearId)
 {
-    let query = "INSERT INTO nieobecnosci_internat (dzien_wypisania, osoby_zsti_id, posilki_id,rok_szkolny_id) VALUES('" + Date + "', " + StudentId + ", " + mealId
+    let query = "INSERT INTO nieobecnosci_internat (dzien_wypisania, osoby_internat_id, posilki_id, rok_szkolny_id) VALUES('" + Date + "', " + StudentId + ", " + mealId
     if(schoolYearId)
         query += ", " + schoolYearId + ");"
     else

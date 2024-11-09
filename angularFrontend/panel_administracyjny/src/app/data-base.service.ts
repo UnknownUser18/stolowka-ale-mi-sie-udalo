@@ -25,7 +25,13 @@ export class DataBaseService {
   StudentDisabledZstiDays = new BehaviorSubject<any>(null);
   StudentDisabledInternatDays = new BehaviorSubject<any>(null);
   CurrentDisabledZstiDays = new BehaviorSubject<any>(null);
-
+  DisabledDays = new BehaviorSubject<any>(null);
+  TypPosilkuSaved = new BehaviorSubject<boolean>(true)
+  SelectedSaved = new BehaviorSubject<boolean>(true)
+  SavedList: any[] = [
+    this.TypPosilkuSaved,
+    this.SelectedSaved
+  ];
   initWebSocket()
   {
     this.socket = new WebSocket("ws://localhost:8080");
@@ -47,6 +53,31 @@ export class DataBaseService {
     },500)
 
   }
+
+  public changeSelectedSaved(change:boolean)
+  {
+    this.SelectedSaved.next(change)
+  }
+
+  public changeTypPoslikuSaved(change:boolean)
+  {
+    this.TypPosilkuSaved.next(change);
+  }
+
+
+  getDisabledDays()
+  {
+    let query = JSON.stringify(
+      {
+        action: "request",
+        params: {
+          method: "getDniNieczynne"
+        }
+      }
+    );
+    this.send(query);
+  }
+
   getStudentInternatDays()
   {
     let query = JSON.stringify(
@@ -214,6 +245,10 @@ export class DataBaseService {
             this.CurrentDisabledInternatDays.next(tempArray);
             console.log("StudentDisabledInternatDays: ", this.lastValue.params.value);
             break;
+          case 'DisabledDays':
+            this.DisabledDays.next(this.lastValue.params.value);
+            console.log("DisabledDays: ", this.lastValue.params.value);
+            break;
         }
       })
       let query: string = JSON.stringify(
@@ -234,5 +269,14 @@ export class DataBaseService {
         }
       );
       this.send(query);
+    query = JSON.stringify(
+      {
+        action: "request",
+        params: {
+          method: "getDniNieczynne"
+        }
+      }
+    );
+    this.send(query);
   }
 }

@@ -75,10 +75,25 @@ export class AppComponent implements OnInit{
       }
     })
   }
+  cantDoThat()
+  {
+    alert("Ayo niga")
+  }
+
   osoba : string | undefined;
   title: string = 'panel_administracyjny';
   typ : string | undefined;
   show(event: Event) {
+    let ifRet = false
+    this.dataService.SavedList.forEach((element)=>{
+      if(!element.value)
+      {
+        this.cantDoThat()
+        ifRet = true
+      }
+    })
+    if(ifRet)
+      return;
     let target = event.target as HTMLElement;
     if(target.tagName == "SPAN") {
       target = target.parentElement as HTMLElement;
