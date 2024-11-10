@@ -716,7 +716,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
           checkyMeal.checked = true;
           if(meal) {
             meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`), 1);
-            if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === checkyMeal.value)?.array.includes(checkyMeal.value)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`).getDay(),parseInt(checkyMeal.value)))
+            if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === checkyMeal.value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`).getDay(),typy.indexOf(checkyMeal.value)))
               this.usuniecie.find(meal => meal.id === checkyMeal.value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`);
           }
           console.log("być")
@@ -725,7 +725,9 @@ export class KalendarzComponent implements OnChanges, OnInit{
         case 'nie_być':
           checkyMeal.checked = false;
           if(meal) {
-            if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === checkyMeal.value)?.array.includes(checkyMeal.value))  && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`).getDay(),typy.indexOf(checkyMeal.value))) {
+            // @ts-ignore
+            this.usuniecie.find(meal => meal.id === checkyMeal.value)?.array.splice(this.usuniecie.find(meal => meal.id === checkyMeal.value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`),1)
+            if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === checkyMeal.value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`))  && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`).getDay(),typy.indexOf(checkyMeal.value))) {
               meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`);
             }
           }
