@@ -1,7 +1,7 @@
 <section class="kalendarz">
   <section id="date">
     <span id="change_month">
-      <span id="default_month" (click)="default_date()">Bieżący Miesiąc</span>
+      <span id="default_month" (click)="change_month(0)">Bieżący Miesiąc</span>
       <div>
         <span (click)="change_month(-1)"> <img ngSrc="../../assets/arrow_back.svg" alt="miesiąc w tył" height="48" width="48"> {{ month_before }}</span>
         <span>{{ currentDate }}</span>
