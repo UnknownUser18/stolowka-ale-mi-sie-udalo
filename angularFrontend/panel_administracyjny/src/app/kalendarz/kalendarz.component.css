@@ -1,0 +1,283 @@
+.week {
+    display: grid;
+    background-color: var(--secondary-color);
+    grid-template-columns: repeat(7, 1fr);
+    justify-items: center;
+    text-align: center;
+    font-size: 1.5em;
+    padding: 10px;
+    border-radius: 12px;
+    margin: 10px 0;
+}
+.day > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.day > div > input {
+    cursor: pointer;
+    margin: 0 2px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+}
+.day {
+    border: 2px solid var(--border-color);
+    padding: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1.5em;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--primary-color);
+    transition: 150ms ease-in-out all;
+    border-radius: 12px;
+}
+.day:not(.empty):disabled {
+    background-color: var(--disabled);
+    color: var(--text-color);
+    cursor: default;
+}
+.day:not(.empty):disabled input {
+    cursor: default;
+}
+.day:not(.empty, :disabled):hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+.day.empty {
+    width: 50px;
+    height: 50px;
+    border: none;
+    background-color: transparent;
+    cursor: default;
+}
+.selected {
+    background-color: var(--border-color) !important;
+    color: var(--primary-color);
+}
+.internat {
+    cursor: default;
+    justify-content: space-evenly;
+    flex-direction: column;
+    height: 90px;
+    width: 90px;
+}
+.internat:hover {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+#date {
+    width: 100%;
+}
+#zaznacz > label {
+    width: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+#zaznacz > label > input {
+    margin: 0;
+    opacity: 0;
+    width: 50px;
+    height: 50px;
+}
+#zaznacz div {
+    width: 20px;
+    font-size: 1.2em;
+    margin-right: 10px;
+}
+#zaznacz > label > span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 50px;
+    width: 50px;
+    background-image: url("../../assets/x.svg");
+    background-size: 50px;
+    background-repeat: no-repeat;
+    background-color: var(--background-color);
+    border: 2px solid var(--border-color);
+    border-radius: 7px;
+    transition: 150ms ease-in-out all;
+}
+.zaznacz {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.zaznacz ~ span {
+    position: static !important;
+}
+#zaznacz > label > .zaznacz_internat {
+    background-image: url("../../assets/pencil.svg") !important;
+    background-size: 35px !important;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+#zaznacz > label:hover > span {
+    background-color: var(--accent-color);
+}
+#zaznacz > label > input:checked + span {
+    background-image: url("../../assets/checkmark.svg");
+}
+#change_month {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+    font-size: 2em;
+    justify-items: center;
+    align-items: center;
+}
+#change_month > span:not(:nth-child(2)) {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+#change_month > span:not(:nth-child(2)):hover, #default_month:hover {
+    text-decoration: underline;
+}
+#default_month {
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 5px 10px;
+}
+#content {
+    display: flex;
+    width: 100%;
+}
+#zaznacz {
+    margin-right: 10px;
+    width: fit-content;
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    grid-template-columns: 1fr;
+}
+#zaznacz button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 70px;
+    padding: 5px 10px;
+    font-family: inherit;
+    font-size: 2em;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--background-color);
+    transition: 150ms ease-in-out all;
+    cursor: pointer;
+}
+#zaznacz button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+#kalendarz {
+    width: 100%;
+}
+#dni {
+    margin-left: 3.5vw;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    justify-items: center;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1.5em;
+    border-radius: 12px;
+}
+#zmiana_posilku {
+    display: none;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 4;
+}
+#zmiana {
+    position: relative;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: column;
+    box-shadow: var(--box-shadow);
+    width: 20vw;
+    height: 30vh;
+    border-radius: 20px;
+    background-color: var(--primary-color);
+    border: 3px solid var(--border-color);
+    padding: 0 25px;
+}
+#zmiana img {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+}
+form[name='zmiana_posilku'], form[name='na'] {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    align-items: center;
+    width: 100%;
+}
+input[type='radio'] {
+    width: 18px;
+    height: 18px;
+}
+form[name='zmiana_posilku'] > div, form[name='na'] > div {
+    width: 120px;
+    display: flex;
+    justify-self: center;
+    justify-content: center;
+    flex-direction: column;
+}
+#zmiana h3 {
+    font-size: 1.5em;
+    margin: 10px 0;
+}
+#zmiana label {
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    margin: 3px 0;
+    font-size: 1.4em;
+    cursor: pointer;
+}
+form[name='zmiana_posilku'] > label > input[type='radio'], form[name='na'] > label > input[type='radio'] {
+    width: 20px;
+    height: 20px;
+}
+#zmiana label:hover {
+    text-decoration: underline;
+}
+#zmiana button {
+    width: fit-content;
+    height: 50px;
+    padding: 10px 25px;
+    margin: 0 auto;
+    font-size: 1.5em;
+    font-family: inherit;
+    font-weight: 500;
+    border: 0;
+    border-radius: 7px;
+    background-color: var(--background-color);
+    transition: 150ms ease-in-out all;
+    cursor: pointer;
+}
+#zmiana button:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
