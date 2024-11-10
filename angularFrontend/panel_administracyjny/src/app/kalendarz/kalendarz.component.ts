@@ -731,7 +731,9 @@ export class KalendarzComponent implements OnChanges, OnInit{
           if(!(target as HTMLInputElement).checked) {
             let meal = this.dodanie.find(meal => meal.id === value);
             if(meal) {
-              if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value))) {
+              // @ts-ignore
+              this.usuniecie.find(meal => meal.id === value)?.array.splice(this.usuniecie.find(meal => meal.id === value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`),1)
+              if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value))) {
                 meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
               }
             }
@@ -741,12 +743,8 @@ export class KalendarzComponent implements OnChanges, OnInit{
             let meal = this.dodanie.find(meal => meal.id === value);
             if(meal) {
               meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`), 1);
-              console.log('ciabab')
-              if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),parseInt(value)))
-                console.log(this.usuniecie.find(meal => meal.id === value) === undefined);
+              if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value)))
                 this.usuniecie.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
-              console.log('niga pu')
-              console.log(this.usuniecie)
             }
             this.checkTypPosilkow();
           }
