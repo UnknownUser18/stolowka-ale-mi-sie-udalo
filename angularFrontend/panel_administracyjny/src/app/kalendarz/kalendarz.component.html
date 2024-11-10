@@ -11,13 +11,22 @@
     <span id="dni"></span>
     </section>
     <section id="content">
-      <div id="zaznacz" (click)="select_row($event)" (contextmenu)="select_row($event)"></div>
+      <div id="zaznacz" (click)="select_row($event)"></div>
       <section id="kalendarz" (click)="select($event)" (contextmenu)="select($event)"></section>
     </section>
     <section id="sending">
       <button (click)="sendDays()">
         Wyślij
       </button>
+       <ul style="display: flex">
+         <li *ngFor="let element of diff_selected_zsti" style="margin-right: 10px; list-style-type: none">{{element}}</li>
+       </ul>
+      <ul style="display: flex">
+        <li *ngFor="let element of dodanie">{{element.id}}: {{element.array.join(', ')}}</li>
+      </ul>
+      <ul style="display: flex">
+        <li *ngFor="let element of usuniecie">{{element.id}}: {{element.array.join(', ')}}</li>
+      </ul>
     </section>
     <section id="zmiana_posilku">
       <section id="zmiana">
