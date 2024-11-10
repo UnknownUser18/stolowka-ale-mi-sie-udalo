@@ -107,10 +107,11 @@ export class KalendarzComponent implements OnChanges, OnInit{
 
   changeInternatDays()
   {
-    this.typy_posilkow.forEach((element)=>{
-      element.array_operacaja.forEach((innerElement)=>{
-        innerElement.array = []
-      })
+   this.dodanie.forEach((element)=>{
+     element.array = []
+   })
+    this.usuniecie.forEach((element)=>{
+      element.array = []
     })
     this.typy_posilkow_db.array_operacaja.forEach((element)=>{
       element.array = []
@@ -681,7 +682,9 @@ export class KalendarzComponent implements OnChanges, OnInit{
                 {
                     let meal = this.dodanie.find(meal => meal.id === value);
                     if(meal) {
-                      if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value))) {
+                      // @ts-ignore
+                      this.usuniecie.find(meal => meal.id === value)?.array.splice(this.usuniecie.find(meal => meal.id === value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`),1)
+                      if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`))  && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`).getDay(),typy.indexOf(value))) {
                         meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`);
                       }
                   }
@@ -692,12 +695,11 @@ export class KalendarzComponent implements OnChanges, OnInit{
                   let meal = this.dodanie.find(meal => meal.id === value);
                   if(meal) {
                     meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`), 1);
-                    if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`).getDay(),parseInt(value)))
-                      this.usuniecie.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${target.textContent}`);
+                    if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`).getDay(),typy.indexOf(value)))
+                      this.usuniecie.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`);
                   }
                   this.checkTypPosilkow();
                 }
-                console.log(this.typy_posilkow_db, this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array , this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`), `${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`)
               })
             }
             Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
