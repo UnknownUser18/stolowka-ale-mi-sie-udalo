@@ -18,13 +18,16 @@
       <button (click)="sendDays()">
         Wyślij
       </button>
-       <ul style="display: flex">
+       <ul *ngIf="diff_selected_zsti" style="display: flex">
          <li *ngFor="let element of diff_selected_zsti" style="margin-right: 10px; list-style-type: none">{{element}}</li>
        </ul>
-      <ul style="display: flex">
+      <ul *ngIf="diff_undo_selected_zsti" style="display: flex">
+        <li *ngFor="let element of diff_undo_selected_zsti" style="margin-right: 10px; list-style-type: none">{{element}}</li>
+      </ul>
+      <ul *ngIf="dodanie" style="display: flex">
         <li *ngFor="let element of dodanie">{{element.id}}: {{element.array.join(', ')}}</li>
       </ul>
-      <ul style="display: flex">
+      <ul *ngIf="usuniecie" style="display: flex">
         <li *ngFor="let element of usuniecie">{{element.id}}: {{element.array.join(', ')}}</li>
       </ul>
     </section>

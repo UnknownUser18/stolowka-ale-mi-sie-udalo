@@ -5,7 +5,7 @@
       <h2>Najbliższe dni nieczynne</h2>
       <ul>
         <li *ngFor="let element of aktualny_dni_nieczynne; let i = index" [attr.data-index]="i">
-          <span>{{element}} <span>{{nieczynneZaIle_teraz[i]}}</span></span>
+          <span>{{element}} <span>{{ daysFromNow(element) }}</span></span>
         </li>
       </ul>
       <button (click)="show()">Pokaż Całość</button>
@@ -25,14 +25,15 @@
         <fieldset>
           <legend>Dodaj dzień</legend>
           <label>Dzień: <input type="number" [min]="minDay" [max]="days_in_month" [value]="day" name="dzien"></label>
-          <label>Miesiąc: <select [value]="month" name="miesiac" (change)="check()">
-              <option *ngFor="let element of miesiace; let i = index" [value]="i" [disabled]="element.disabled">{{element.month}}</option>
+          <label>Miesiąc: <select [value]="month" name="miesiac"  (change)="check()">
+<!--            [disabled]="element.disabled" - Wyłączyłem bo czasami nie działa :/-->
+              <option *ngFor="let element of miesiace; let i = index"  [value]="i" >{{element.month}}</option>
             </select>
           </label>
           <label>Rok: <input type="number" [min]="year" [value]="year" name="rok" (change)="check()"></label>
         </fieldset>
         <select multiple>
-          <option *ngFor="let element of dni_nieczynne; let i = index" [value]="element">{{element}} {{dni_nieczynne_za_ile[i]}}</option>
+          <option *ngFor="let element of dni_nieczynne; let i = index" [value]="element">{{element}} {{ daysFromNow(element) }}</option>
         </select>
       </form>
       <div>

@@ -19,6 +19,7 @@ export class DataBaseService {
   StudentZstiDays = new BehaviorSubject<any>(null);
   StudentInternatDays = new BehaviorSubject<any>(null);
   CurrentStudentId = new BehaviorSubject<number>(-1)
+  CurrentStudent = new BehaviorSubject<any>(null)
   StudentType = new BehaviorSubject<string>("BRAK")
   lastValue:any = null;
   CurrentDisabledInternatDays = new BehaviorSubject<any>(null);
@@ -157,6 +158,7 @@ export class DataBaseService {
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
     this.StudentType.next(type)
+
     console.log(Id, type)
     if (this.StudentType.value === "ZSTI") {
       this.getStudentDeclarationZsti()

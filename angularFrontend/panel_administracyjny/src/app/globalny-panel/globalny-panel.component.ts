@@ -1,5 +1,6 @@
-import { Component, ElementRef } from '@angular/core';
+import {Component, ElementRef, OnInit} from '@angular/core';
 import { NgForOf, NgOptimizedImage } from '@angular/common';
+import {DataBaseService} from '../data-base.service';
 
 @Component({
   selector: 'app-globalny-panel',
@@ -11,14 +12,17 @@ import { NgForOf, NgOptimizedImage } from '@angular/common';
   templateUrl: './globalny-panel.component.html',
   styleUrls: ['./globalny-panel.component.css']
 })
-export class GlobalnyPanelComponent {
-  constructor(private el: ElementRef) { }
+export class GlobalnyPanelComponent implements OnInit{
+  constructor(private el: ElementRef, private dataService: DataBaseService) {
+    this.dataService.DisabledDays.asObservable().subscribe((change:any)=>this.updateDays(change));
+    this.dataService.getDisabledDays()
+  }
 
   day: number = new Date().getDate();
   month: number = new Date().getMonth();
   year: number = new Date().getFullYear();
   days_in_month: number = new Date(this.year, this.month + 1, 0).getDate();
-  dni_nieczynne: string[] = ['2024-11-07', '2024-12-25', '2025-11-03', '2024-11-09', '2024-11-06','2025-03-05','2024-10-11','2024-11-11'].sort();
+  dni_nieczynne: string[] = []
   nieczynneZaIle_teraz: string[] = [];
   dni_nieczynne_za_ile: string[] = [];
   aktualny_dni_nieczynne: string[] | undefined;
@@ -26,6 +30,37 @@ export class GlobalnyPanelComponent {
   miesiace: Array<{ month: string, disabled: boolean }> = [];
   minDay: number = 1;
   ngOnInit() {
+    this.updateDays(null)
+    this.refresh()
+  }
+
+  updateDays(change:any)
+  {
+    this.dni_nieczynne = []
+    if(!change)
+    {
+      this.dni_nieczynne.push('')
+      return
+
+    }
+    change.forEach((dni:any) => {
+      let value = new Date(dni.dzien)
+      this.dni_nieczynne.push(`${value.getFullYear()}-${value.getMonth() + 1}-${value.getDate()}`)
+    })
+    this.dni_nieczynne.sort((a:any, b:any) => {
+      // Przekształcamy stringi na obiekty Date
+      let dateA:Date = new Date(a);
+      let dateB:Date = new Date(b);
+
+      // Porównujemy obiekty Date
+      // @ts-ignore
+      return dateA - dateB;
+    });
+    this.refresh()
+  }
+
+  refresh()
+  {
     let date = new Date();
     let futureDate = new Date();
     futureDate.setMonth(date.getMonth() + 3);
@@ -75,6 +110,28 @@ export class GlobalnyPanelComponent {
     });
   }
 
+  daysFromNow(dateString: string): string {
+    // Parse the input date string into a Date object
+    const inputDate = new Date(dateString);
+    const today = new Date();
+
+    // Calculate the difference in milliseconds
+    const differenceInTime = inputDate.getTime() - today.getTime();
+
+    // Convert milliseconds to days
+    const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
+
+    if(differenceInDays < 0 )
+      return '(' + Math.abs(differenceInDays) + " dni temu)"
+    if(differenceInDays === 0)
+      return '(dzisiaj)'
+    if(differenceInDays === 1)
+      return '(jutro)'
+    if(differenceInDays > 0 )
+      return '(za ' + differenceInDays + ' dni)'
+    return 'undefined'
+  }
+
   dodaj() {
     console.log('dodaj');
     let day = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]');
@@ -85,7 +142,18 @@ export class GlobalnyPanelComponent {
     let month = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]');
     let year = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="rok"]');
     let string = `${year.value}-${month.value}-${day.value}`;
-    console.log(string);
+    let date = new Date(string)
+    date.setMonth(date.getMonth() + 1)
+    console.log(`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`);
+    this.dataService.send(
+      JSON.stringify({
+        action: "request",
+        params: {
+          method: "AddDniNieczynne",
+          date: `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`
+        }
+      }))
+    this.dataService.getDisabledDays()
   }
 
   check() {
@@ -113,7 +181,7 @@ export class GlobalnyPanelComponent {
           this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').value = this.day;
         }
         this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').max = new Date(year, this.month + 1, 0).getDate();
-      }, 0);
+      }, 10);
 
     }
     this.yearBefore = year;
@@ -140,6 +208,15 @@ export class GlobalnyPanelComponent {
       alert('Nie wybrano żadnego dnia do usunięcia!')
     }
     console.log(element)
+    this.dataService.send(
+      JSON.stringify({
+        action: "request",
+        params: {
+          method: "DeleteDniNieczynne",
+          date: element
+        }
+      }))
+    this.dataService.getDisabledDays()
   }
 
   show() {

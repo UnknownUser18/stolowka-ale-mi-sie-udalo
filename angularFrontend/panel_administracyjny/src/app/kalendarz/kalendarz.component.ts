@@ -1,12 +1,12 @@
 import {Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges} from '@angular/core';
-import {NgForOf, NgOptimizedImage} from '@angular/common';
+import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from "@angular/forms";
 import {DataBaseService} from '../data-base.service';
 
 @Component({
   selector: 'app-kalendarz',
   standalone: true,
-  imports: [NgOptimizedImage, FormsModule, NgForOf],
+  imports: [NgOptimizedImage, FormsModule, NgForOf, NgIf],
   templateUrl: './kalendarz.component.html',
   styleUrl: './kalendarz.component.css'
 })
@@ -20,6 +20,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
   dbCopyZstiDays: any[] = [];
   StudentInternatDays: any;
   diff_selected_zsti: string[] = [];
+  diff_undo_selected_zsti: string[] = [];
   months : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   month_before: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   month_next: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
@@ -278,6 +279,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
     this.show_calendar()
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
     this.diff_selected_zsti = this.selected.filter((element) => !this.dbCopyZstiDays.includes(element));
+    this.diff_undo_selected_zsti = this.selected.filter((element) => this.dbCopyZstiDays.includes(element));
     this.dodanie.forEach((element) => {
       element.array = []
     });
