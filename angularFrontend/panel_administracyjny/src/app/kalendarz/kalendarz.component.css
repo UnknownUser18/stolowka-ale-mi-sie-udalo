@@ -3,7 +3,7 @@
     box-shadow: 0 -2px 0 0 var(--gradient);
 }
 .kalendarz > * {
-    margin-left: 3%;
+    margin-left: 1%;
 }
 .week {
     display: grid;
@@ -80,6 +80,9 @@
     height: 90px;
     width: 90px;
 }
+input:disabled {
+    cursor: default !important;
+}
 .day.internat:hover {
     background-color: var(--primary-color);
     color: var(--text-color);
@@ -92,7 +95,10 @@
     color: var(--disabled-text-color);
 }
 .disabled-for-person {
-    background-color: var(--disabled-working-day);
+    background-color: var(--disabled-working-day) !important;
+}
+.disabled-day-global {
+    background-color: var(--disabled-global-day) !important;
 }
 #date {
     width: 100%;
@@ -174,6 +180,9 @@
     display: flex;
     align-items: center;
 }
+#sending {
+    display: flex;
+}
 #change_month > div > span:not(:nth-child(2)):hover, #default_month:hover {
     text-decoration: underline;
 }
@@ -240,6 +249,7 @@
     top: 0;
     left: 0;
     z-index: 4;
+    margin: 0;
 }
 #zmiana {
     position: relative;
