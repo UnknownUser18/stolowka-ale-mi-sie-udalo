@@ -178,7 +178,7 @@ export class DataBaseService {
   send(query:string)
   {
     // @ts-ignore
-    query !== undefined ? this.socket.send(query) : null;
+    if(this.socket !== undefined) this.socket.send(query);
   }
 
   Initialize() {
