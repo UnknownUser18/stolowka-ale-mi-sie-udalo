@@ -112,6 +112,11 @@ export class KalendarzComponent implements OnChanges, OnInit{
 
   changeInternatDays()
   {
+    this.typy_posilkow.forEach((element)=>{
+      element.array_operacaja.forEach((innerElement)=>{
+        innerElement.array = []
+      })
+    })
     this.typy_posilkow_db.array_operacaja.forEach((element)=>{
       element.array = []
     })
@@ -246,20 +251,20 @@ export class KalendarzComponent implements OnChanges, OnInit{
     else if(this.dataService.StudentType.value === "Internat")
     {
       this.typy_posilkow.find(elem=>elem.operacja === 'dodanie')!.array_operacaja.find(innerElem => innerElem.id === 'sniadanie')!.array.forEach((element)=>{
-          this.dataService.send(
-            JSON.stringify({
-              action: "request",
-              params: {
-                method: "AddInternatDays",
-                studentId: this.dataService.CurrentStudentId.value,
-                date: element,
-                mealId: 1,
-                schoolYearId: 1
-              }
-            })
-          )
-      console.log("Dodaj element: ", element)
-      this.dataService.getStudentInternatDays()
+        this.dataService.send(
+          JSON.stringify({
+            action: "request",
+            params: {
+              method: "AddInternatDays",
+              studentId: this.dataService.CurrentStudentId.value,
+              date: element,
+              mealId: 1,
+              schoolYearId: 1
+            }
+          })
+        )
+        console.log("Dodaj element: ", element)
+        this.dataService.getStudentInternatDays()
       })
       this.typy_posilkow.find(elem=>elem.operacja === 'dodanie')!.array_operacaja.find(innerElem => innerElem.id === 'obiad')!.array.forEach((element)=>{
         this.dataService.send(
@@ -448,7 +453,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
 
   show_calendar() {
     const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
-    calendar_content !== undefined ? calendar_content.innerHTML = '' : this.el.nativeElement.innerHTML = '';
+    calendar_content.innerHTML = '';
     let year = this.date.getFullYear();
     let month = this.date.getMonth();
     let month_days = new Date(year, month + 1, 0).getDate();
@@ -459,7 +464,8 @@ export class KalendarzComponent implements OnChanges, OnInit{
     // create week div
     const weekDiv = this.renderer.createElement('div');
     this.renderer.addClass(weekDiv, 'week');
-    calendar_content !== undefined ? this.renderer.appendChild(calendar_content, weekDiv) : null;
+    this.renderer.appendChild(calendar_content, weekDiv);
+
 
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
@@ -468,7 +474,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
         const dayDiv = this.renderer.createElement('div');
         this.renderer.addClass(dayDiv, 'day');
         this.renderer.addClass(dayDiv, 'empty');
-        week !== undefined ? this.renderer.appendChild(week, dayDiv) : null;
+        this.renderer.appendChild(week, dayDiv);
       } else {
         const dayButton = this.renderer.createElement('button');
         this.renderer.addClass(dayButton, 'day');
@@ -507,22 +513,22 @@ export class KalendarzComponent implements OnChanges, OnInit{
           this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
-        week !== undefined ? this.renderer.appendChild(week, dayButton) : null;
+        this.renderer.appendChild(week, dayButton);
       }
       if (i % 7 === 0) {
         weekcount++;
         // create week div
         const weekDiv = this.renderer.createElement('div');
         this.renderer.addClass(weekDiv, 'week');
-        calendar_content !== undefined ? this.renderer.appendChild(calendar_content, weekDiv) : null;
+        this.renderer.appendChild(calendar_content, weekDiv);
       }
     }
     const dni = this.el.nativeElement.querySelector('#dni');
-    dni !== undefined ? dni.innerHTML = '' : null;
+    dni.innerHTML = '';
     for (let i = 0; i < 7; i++) {
       const daySpan = this.renderer.createElement('span');
       this.renderer.setProperty(daySpan, 'innerHTML', ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i]);
-      dni !== undefined ? this.renderer.appendChild(dni, daySpan) : null;
+      this.renderer.appendChild(dni, daySpan);
     }
     // checking for empty days
     Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
@@ -531,7 +537,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
           const dayDiv = this.renderer.createElement('div');
           this.renderer.addClass(dayDiv, 'day');
           this.renderer.addClass(dayDiv, 'empty');
-          week ? this.renderer.appendChild(week, dayDiv) : null;
+          this.renderer.appendChild(week, dayDiv);
         }
       }
     });
@@ -550,7 +556,7 @@ export class KalendarzComponent implements OnChanges, OnInit{
     let week = this.week_number()[month];
     // create zaznacz buttons
     const zaznacz: HTMLElement = this.el.nativeElement.querySelector('#zaznacz');
-    zaznacz !== undefined ? zaznacz.innerHTML = '' : null;
+    zaznacz.innerHTML = '';
     let week_length = this.el.nativeElement.getElementsByClassName('week').length;
     for (let i = 0; i < week_length; i++) {
       let selected_days = 0;
@@ -611,61 +617,61 @@ export class KalendarzComponent implements OnChanges, OnInit{
     // dla uczniow zsti
     if(this.typ === "ZSTI") {
       let target = element.target as HTMLElement;
-    if (target.classList.contains('day')) {
-      if (target.tagName === 'BUTTON' && !(target as HTMLButtonElement).classList.contains('weekend')) {
-        console.log('button');
-        function isFullWeekSelected(week : HTMLElement) {
-          let selected = 0;
-          let days = 0;
-          Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
-            if(!day.classList.contains('empty') && !(day as HTMLButtonElement).disabled) {
-              if(day.classList.contains('selected')) {
-                selected++;
+      if (target.classList.contains('day')) {
+        if (target.tagName === 'BUTTON' && !(target as HTMLButtonElement).classList.contains('weekend')) {
+          console.log('button');
+          function isFullWeekSelected(week : HTMLElement) {
+            let selected = 0;
+            let days = 0;
+            Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
+              if(!day.classList.contains('empty') && !(day as HTMLButtonElement).disabled) {
+                if(day.classList.contains('selected')) {
+                  selected++;
+                }
+                days++;
               }
-              days++;
+            });
+            return selected === days;
+          }
+          const week_number = Array.from((target.parentElement!).parentElement!.children as unknown as NodeListOf<HTMLElement>).indexOf(target.parentElement as HTMLElement);
+          if (target.classList.contains('selected')) {
+            if(isFullWeekSelected(target.parentElement as HTMLElement)) {
+              console.log('full week selected check = false');
+              const zaznacz = this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`);
+              (zaznacz as HTMLInputElement).checked = false;
             }
-          });
-          return selected === days;
-        }
-        const week_number = Array.from((target.parentElement!).parentElement!.children as unknown as NodeListOf<HTMLElement>).indexOf(target.parentElement as HTMLElement);
-        if (target.classList.contains('selected')) {
-          if(isFullWeekSelected(target.parentElement as HTMLElement)) {
-            console.log('full week selected check = false');
-            const zaznacz = this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`);
-            (zaznacz as HTMLInputElement).checked = false;
-          }
-          if(target.classList.contains('disabled-for-person')) {
-            this.selectedDisabled.splice(this.selectedDisabled.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`), 1);
-            console.log("Disabled classlist: ", this.selectedDisabled);
-          }
-          else{
-            this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`), 1);
-            console.log(" selected: ", this.selected);
-            this.checkSelected()
-          }
-          target.classList.remove('selected');
-        } else {
-          target.classList.add('selected');
-          if(target.classList.contains('disabled-for-person')) {
-            this.selectedDisabled.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`);
-            console.log("Disabled classlist: ", this.selectedDisabled);
-          }
-          else{
+            if(target.classList.contains('disabled-for-person')) {
+              this.selectedDisabled.splice(this.selectedDisabled.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`), 1);
+              console.log("Disabled classlist: ", this.selectedDisabled);
+            }
+            else{
+              this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`), 1);
+              console.log(" selected: ", this.selected);
+              this.checkSelected()
+            }
+            target.classList.remove('selected');
+          } else {
+            target.classList.add('selected');
+            if(target.classList.contains('disabled-for-person')) {
+              this.selectedDisabled.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`);
+              console.log("Disabled classlist: ", this.selectedDisabled);
+            }
+            else{
 
-            this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`);
-            console.log(" selected: ", this.selected);
-            this.checkSelected()
-          }
-          console.log("Disabled selected: ", this.selectedDisabled);
-          if(isFullWeekSelected(target.parentElement as HTMLElement)) {
-            console.log('full week selected check = true');
-            const zaznacz = this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`);
-            (zaznacz as HTMLInputElement).checked = true;
+              this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`);
+              console.log(" selected: ", this.selected);
+              this.checkSelected()
+            }
+            console.log("Disabled selected: ", this.selectedDisabled);
+            if(isFullWeekSelected(target.parentElement as HTMLElement)) {
+              console.log('full week selected check = true');
+              const zaznacz = this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`);
+              (zaznacz as HTMLInputElement).checked = true;
+            }
           }
         }
       }
-    }
-    console.log(this.selected);
+      console.log(this.selected);
     }
     // dla wychowankow Internatu
     else if(this.typ === "Internat") {
@@ -681,30 +687,32 @@ export class KalendarzComponent implements OnChanges, OnInit{
             const div = this.el.nativeElement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
             let checked = 0
             let unchecked = 0
+            const typy = ['sniadanie','obiad','kolacja']
             const getInputElements = (parent: HTMLElement, check: boolean) => {
               Array.from(parent.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
                 (dziecko as HTMLInputElement).checked = check;
                 let value = (dziecko as HTMLInputElement).value;
                 if(!check)
                 {
-                    let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
-                    if(meal) {
-                      if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value))) {
-                        meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`);
-                      }
+                  let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
+                  if(meal) {
+                    if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`).getDay(), typy.indexOf(value))) {
+                      meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`);
+                    }
                   }
-                    this.checkTypPosilkow();
+                  this.checkTypPosilkow();
                 }
                 else
                 {
                   let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
                   if(meal) {
                     meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`), 1);
-                    if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`).getDay(),parseInt(value)))
-                      this.typy_posilkow.find(operacja => operacja.operacja === 'usuniecie')?.array_operacaja.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${target.textContent}`);
+                    if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`).getDay(),typy.indexOf(value)))
+                      this.typy_posilkow.find(operacja => operacja.operacja === 'usuniecie')?.array_operacaja.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`);
                   }
                   this.checkTypPosilkow();
                 }
+                console.log(this.typy_posilkow_db, this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array , this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`), `${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`)
               })
             }
             Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
@@ -735,20 +743,21 @@ export class KalendarzComponent implements OnChanges, OnInit{
           console.log("Target?: ", target)
           const typy = ['sniadanie','obiad','kolacja']
           if(!(target as HTMLInputElement).checked) {
-            let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'us')?.array_operacaja.find(meal => meal.id === value);
+            let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(posilek => posilek.id === value);
             if(meal) {
-              if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value))) {
+              if(!(this.typy_posilkow_db.array_operacaja.find(posilek => posilek.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value))) {
                 meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
               }
             }
             this.checkTypPosilkow();
           }
           else {
-            let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(meal => meal.id === value);
+            let meal = this.typy_posilkow.find(operacja => operacja.operacja === 'dodanie')?.array_operacaja.find(posilek => posilek.id === value);
             if(meal) {
-              meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`), 1);
-              if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(value)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),parseInt(value)))
-                this.typy_posilkow.find(operacja => operacja.operacja === 'usuniecie')?.array_operacaja.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
+              console.log( "Is it niggers? : " ,(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`)), this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value)), new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay())
+              // meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`), 1);
+              if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value)))
+                this.typy_posilkow.find(operacja => operacja.operacja === 'usuniecie')?.array_operacaja.find(posilek => posilek.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
             }
             this.checkTypPosilkow();
           }

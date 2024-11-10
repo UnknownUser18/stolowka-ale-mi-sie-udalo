@@ -122,6 +122,12 @@ wss.on('connection', function connection(ws) {
             case "getDniNieczynne":
                 getDniNieczynne(ws);
                 break;
+            case "DeleteDniNieczynne":
+                DeleteDniNieczynne(parameters.date)
+                break;
+            case "AddDniNieczynne":
+                AddDniNieczynne(parameters.date)
+                break;
         }
     });
 });
@@ -166,13 +172,29 @@ database.on('error', function (err) {
     }
 });
 
-function getDniNieczynne(websocketClient)
+function AddDniNieczynne(day)
 {
-    console.log("noggers?")
-    let query = "SELECT * FROM dni_nieczynne_stolowki"
+    let query = "INSERT INTO dni_nieczynne_stolowki VALUES(null, '" + day + "')";
     return database.query(query, (err, result) => {
         if (err) throw err;
         console.log(result);
+    })
+}
+
+function DeleteDniNieczynne(day)
+{
+    let query = "DELETE FROM dni_nieczynne_stolowki WHERE dzien = '" + day + "';";
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function getDniNieczynne(websocketClient)
+{
+    let query = "SELECT * FROM dni_nieczynne_stolowki"
+    return database.query(query, (err, result) => {
+        if (err) throw err;
         console.log(result);
         websocketClient.send(
             JSON.stringify(
@@ -350,7 +372,7 @@ function DeleteZstiDays(StudentId, Date)
 
 function DeleteInternatDays(StudentId, Date, mealId)
 {
-    let query = "DELETE FROM nieobecnosci_internat WHERE osoby_zsti_id = " + StudentId + " && dzien_wypisania = '" + Date + "' && posilki_id = " + mealId + ";";
+    let query = "DELETE FROM nieobecnosci_internat WHERE osoby_internat_id = " + StudentId + " && dzien_wypisania = '" + Date + "' && posilki_id = " + mealId + ";";
     return database.query(query, function (err, result) {
         if (err) throw err;
         console.log(result);
