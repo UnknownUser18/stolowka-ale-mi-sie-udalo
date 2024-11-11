@@ -34,7 +34,7 @@ input {
     border: 0;
     outline: 0;
 }
-input:focus {
+input:not(input[type='radio'], input[type='checkbox']):focus {
     outline: 2px solid var(--border-color);
 }
 label > div {

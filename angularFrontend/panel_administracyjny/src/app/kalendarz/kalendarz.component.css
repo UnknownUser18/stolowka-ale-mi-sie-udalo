@@ -12,7 +12,7 @@
     justify-items: center;
     text-align: center;
     font-size: 1.5em;
-    padding: 10px;
+    padding: 5px;
     border-radius: 12px;
     margin: 10px 0;
 }
@@ -24,9 +24,34 @@
 .day > div > input {
     cursor: pointer;
     margin: 0 2px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     padding: 0;
+}
+#sending button {
+    height: fit-content;
+}
+#sending  ul {
+    display: flex;
+}
+#sending  ul > li {
+    list-style-type: none;
+    margin: 0 10px;
+}
+#sending > div > h2 {
+    text-align: center;
+    font-size: 1.7em;
+    margin: 0.4em 0;
+}
+#sending > div > ul > li {
+    background-color: var(--background-color);
+    padding: 5px 10px;
+    border-radius: 7px;
+    height: fit-content;
+    overflow: auto;
+    max-height: 14vh;
+    border: 1px solid var(--border-color);
+    width: 100px;
 }
 .day {
     border: 2px solid var(--border-color);
@@ -77,8 +102,8 @@
     cursor: default;
     justify-content: space-evenly;
     flex-direction: column;
-    height: 90px;
-    width: 90px;
+    height: 80px;
+    width: 80px;
 }
 input:disabled {
     cursor: default !important;
@@ -171,7 +196,7 @@ input:disabled {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: 1fr;
-    font-size: 2em;
+    font-size: 1.6em;
     justify-items: center;
     align-items: center;
 }

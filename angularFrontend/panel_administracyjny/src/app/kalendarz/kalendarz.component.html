@@ -3,9 +3,9 @@
     <span id="change_month">
       <span id="default_month" (click)="change_month(0)">Bieżący Miesiąc</span>
       <div>
-        <span (click)="change_month(-1)"> <img ngSrc="../../assets/arrow_back.svg" alt="miesiąc w tył" height="48" width="48"> {{ month_before }}</span>
+        <span (click)="change_month(-1)"> <img ngSrc="../../assets/arrow_back.svg" alt="miesiąc w tył" height="36" width="36"> {{ month_before }}</span>
         <span>{{ currentDate }}</span>
-        <span (click)="change_month(1)">{{ month_next }} <img ngSrc="../../assets/arrow_forward.svg" alt="miesiąc w przód" height="48" width="48"> </span>
+        <span (click)="change_month(1)">{{ month_next }} <img ngSrc="../../assets/arrow_forward.svg" alt="miesiąc w przód" height="36" width="36"> </span>
       </div>
     </span>
     <span id="dni"></span>
@@ -18,17 +18,23 @@
       <button (click)="sendDays()">
         Wyślij
       </button>
-       <ul *ngIf="diff_selected_zsti" style="display: flex">
-         <li *ngFor="let element of diff_selected_zsti" style="margin-right: 10px; list-style-type: none">{{element}}</li>
+      <div>
+        <h2>Dodane</h2>
+        <ul *ngIf="dodanie">
+          <li *ngFor="let element of dodanie">{{element.id}}: {{element.array.join(', ')}}</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Usunięte</h2>
+        <ul *ngIf="usuniecie">
+          <li *ngFor="let element of usuniecie">{{element.id}}: {{element.array.join(', ')}}</li>
+        </ul>
+      </div>
+       <ul *ngIf="diff_selected_zsti">
+         <li *ngFor="let element of diff_selected_zsti">{{element}}</li>
        </ul>
-      <ul *ngIf="diff_undo_selected_zsti" style="display: flex">
-        <li *ngFor="let element of diff_undo_selected_zsti" style="margin-right: 10px; list-style-type: none">{{element}}</li>
-      </ul>
-      <ul *ngIf="dodanie" style="display: flex">
-        <li *ngFor="let element of dodanie">{{element.id}}: {{element.array.join(', ')}}</li>
-      </ul>
-      <ul *ngIf="usuniecie" style="display: flex">
-        <li *ngFor="let element of usuniecie">{{element.id}}: {{element.array.join(', ')}}</li>
+      <ul *ngIf="diff_undo_selected_zsti">
+        <li *ngFor="let element of diff_undo_selected_zsti">{{element}}</li>
       </ul>
     </section>
     <section id="zmiana_posilku">
