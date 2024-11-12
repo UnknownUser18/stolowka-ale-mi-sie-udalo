@@ -313,3 +313,12 @@ form[name='dni_nieczynne'] > fieldset select {
     border: 0;
     border-radius: 0;
 }
+@media only screen and (min-width: 1280px) and (max-height: 1800px) {
+    #dni_nieczynne > section {
+        width: 50%;
+    }
+    #dodaj_osobe img {
+        width: 30px;
+        height: 30px;
+    }
+}
