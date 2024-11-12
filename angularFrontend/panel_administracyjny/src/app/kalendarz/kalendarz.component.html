@@ -18,22 +18,22 @@
       <button (click)="sendDays()">
         Wyślij
       </button>
-      <div>
+      <div *ngIf="!empty_dodanie">
         <h2>Dodane</h2>
-        <ul *ngIf="dodanie">
+        <ul>
           <li *ngFor="let element of dodanie">{{element.id}}: {{element.array.join(', ')}}</li>
         </ul>
       </div>
-      <div>
+      <div *ngIf="!empty_usuniecie">
         <h2>Usunięte</h2>
-        <ul *ngIf="usuniecie">
+        <ul>
           <li *ngFor="let element of usuniecie">{{element.id}}: {{element.array.join(', ')}}</li>
         </ul>
       </div>
-       <ul *ngIf="diff_selected_zsti">
+       <ul *ngIf="!empty_diff_zsti">
          <li *ngFor="let element of diff_selected_zsti">{{element}}</li>
        </ul>
-      <ul *ngIf="diff_undo_selected_zsti">
+      <ul *ngIf="!empty_diff_undo_zsti">
         <li *ngFor="let element of diff_undo_selected_zsti">{{element}}</li>
       </ul>
     </section>

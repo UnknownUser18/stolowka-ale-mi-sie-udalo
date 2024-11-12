@@ -56,3 +56,15 @@ app-edycja {
     display: none;
     box-shadow: 0 -2px 0 0 var(--gradient);
 }
+@media only screen and (min-width: 1280px) and (max-width: 1800px) {
+    section {
+        width: 78%;
+        margin-left: 22%;
+    }
+    h1 {
+        font-size: 1.7em;
+    }
+    button {
+        font-size: 1.5em;
+    }
+}

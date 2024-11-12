@@ -103,3 +103,16 @@ button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
+@media only screen and (min-width: 1280px) and (max-width: 1800px) {
+    nav {
+        font-size: 1.4em;
+    }
+    img {
+        width: 40px;
+        height: 40px;
+    }
+    li {
+        width: 82%;
+        overflow: auto;
+    }
+}

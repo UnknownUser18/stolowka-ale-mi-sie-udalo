@@ -10,7 +10,7 @@ import {DataBaseService} from '../data-base.service';
   templateUrl: './kalendarz.component.html',
   styleUrl: './kalendarz.component.css'
 })
-export class KalendarzComponent implements OnChanges, OnInit{
+export class KalendarzComponent implements OnChanges, OnInit {
   @Input() typ: string | undefined;
   @Input() name: string | undefined;
   currentDate: string | undefined;
@@ -28,6 +28,11 @@ export class KalendarzComponent implements OnChanges, OnInit{
   selectedDisabled: Array<string> = [];
   dni: any[] = [];
   DisabledDays: any;
+  empty_diff_zsti : boolean = true;
+  empty_diff_undo_zsti : boolean = true;
+  // dla wychowanków internatu
+  empty_dodanie : boolean = true;
+  empty_usuniecie : boolean = true;
   typy_posilkow_db: { operacja: string; array_operacaja: Array<{ id: string; array: Array<any> }> } =
     {
       operacja: 'zarejestrowane',
@@ -132,6 +137,8 @@ export class KalendarzComponent implements OnChanges, OnInit{
       result = false
     })
     this.dataService.changeSelectedSaved(result)
+    if (this.empty_diff_zsti) this.empty_diff_zsti = false;
+    if (this.empty_diff_undo_zsti) this.empty_diff_undo_zsti = false;
   }
 
   checkTypPosilkow(){
@@ -150,6 +157,8 @@ export class KalendarzComponent implements OnChanges, OnInit{
       })
     })
     console.log(this.usuniecie)
+    if (this.empty_dodanie) this.empty_dodanie = false;
+    if (this.empty_usuniecie) this.empty_usuniecie = false;
     this.dataService.changeTypPoslikuSaved(result);
     console.log("Is everything saved? : ", this.dataService.TypPosilkuSaved.value);
   }
