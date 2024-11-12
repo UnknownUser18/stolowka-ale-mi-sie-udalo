@@ -288,7 +288,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.show_calendar()
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
     this.diff_selected_zsti = this.selected.filter((element) => !this.dbCopyZstiDays.includes(element));
-    this.diff_undo_selected_zsti = this.selected.filter((element) => this.dbCopyZstiDays.includes(element));
+    this.diff_undo_selected_zsti = this.dbCopyZstiDays.filter((element) => !this.selected.includes(element));
     this.dodanie.forEach((element) => {
       element.array = []
     });
@@ -578,6 +578,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
         }
       }
       this.diff_selected_zsti = this.selected.filter((element) => !this.dbCopyZstiDays.includes(element));
+      this.diff_undo_selected_zsti = this.dbCopyZstiDays.filter((element) => !this.selected.includes(element));
     }
     // dla wychowanków Internatu
     else if(this.typ === "Internat") {
