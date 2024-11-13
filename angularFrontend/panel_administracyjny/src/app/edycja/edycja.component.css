@@ -91,3 +91,29 @@ select {
     background-color: #b20000;
     color: var(--background-color);
 }
+#wyslij {
+    border-color: #003E1F;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+#wyslij > label {
+    max-width: unset;
+    justify-content: center;
+    margin: 5px 10px;
+}
+#wyslij label > button {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid #003E1F;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 1.4em;
+    cursor: pointer;
+    width: 270px;
+    transition: all 150ms ease-in-out;
+}
+#wyslij label > button:hover {
+    background-color: #9FFFCB;
+    color: #1B1F3B;
+}

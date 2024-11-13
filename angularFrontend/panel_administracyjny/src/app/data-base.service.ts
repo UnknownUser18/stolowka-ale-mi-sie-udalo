@@ -29,9 +29,14 @@ export class DataBaseService {
   DisabledDays = new BehaviorSubject<any>(null);
   TypPosilkuSaved = new BehaviorSubject<boolean>(true)
   SelectedSaved = new BehaviorSubject<boolean>(true)
+  PersonalDataSaved = new BehaviorSubject<boolean>(true)
+  DeclarationDataSaved = new BehaviorSubject<boolean>(true)
+  SchoolYears = new BehaviorSubject<any>(null)
   SavedList: any[] = [
     this.TypPosilkuSaved,
-    this.SelectedSaved
+    this.SelectedSaved,
+    this.PersonalDataSaved,
+    this.DeclarationDataSaved
   ];
   initWebSocket()
   {
@@ -65,7 +70,15 @@ export class DataBaseService {
     this.TypPosilkuSaved.next(change);
   }
 
+  public changePersonalDataSaved(change:boolean)
+  {
+    this.PersonalDataSaved.next(change);
+  }
 
+  public changeDeclarationDataSaved(change:boolean)
+  {
+    this.DeclarationDataSaved.next(change);
+  }
   getDisabledDays()
   {
     let query = JSON.stringify(
@@ -177,6 +190,19 @@ export class DataBaseService {
     console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
 
   }
+
+  getStudentList()
+  {
+    this.send(JSON.stringify(
+        {
+          action: "request",
+          params: {
+            method: "getStudentListZsti"
+          }
+        }
+    ))
+  }
+
   send(query:string)
   {
     // @ts-ignore
@@ -251,6 +277,9 @@ export class DataBaseService {
             this.DisabledDays.next(this.lastValue.params.value);
             console.log("DisabledDays: ", this.lastValue.params.value);
             break;
+          case 'SchoolYears':
+            this.SchoolYears.next(this.lastValue.params.value);
+            break;
         }
       })
       let query: string = JSON.stringify(
@@ -279,6 +308,16 @@ export class DataBaseService {
         }
       }
     );
+    this.send(query);
+    query = JSON.stringify(
+        {
+          action: "request",
+          params: {
+            method: "getSchoolYears"
+          }
+        }
+    );
+    console.log("Get School Years")
     this.send(query);
   }
 }

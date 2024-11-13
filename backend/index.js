@@ -77,6 +77,12 @@ wss.on('connection', function connection(ws) {
             case "changeStudentDeclarationZsti":
                 changeStudentDeclarationZsti(parameters.studentId, parameters.schoolYearId, parameters.days, parameters.beginDate, parameters.endDate);
                 break;
+            case "changeStudentInternat":
+                changeStudentInternat(parameters.studentId, parameters.name, parameters.surname, parameters.attends);
+                break;
+            case "changeStudentZsti":
+                changeStudentZsti(parameters.studentId, parameters.type, parameters.name, parameters.surname, parameters.class, parameters.attends);
+                break;
             case "getStudentListZsti":
                 getStudentListZsti(ws)
                 break;
@@ -128,6 +134,9 @@ wss.on('connection', function connection(ws) {
             case "AddDniNieczynne":
                 AddDniNieczynne(parameters.date)
                 break;
+            case 'getSchoolYears':
+                getSchoolYears(ws)
+                break;
         }
     });
 });
@@ -168,9 +177,45 @@ database.on('error', function (err) {
         handleDisconnect();
     }
     else{
+        handleDisconnect()
         throw err;
     }
 });
+
+function getSchoolYears(websocketClient)
+{
+    let query = "SELECT * FROM rok_szkolny;"
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "SchoolYears",
+                        value: result
+                    }
+                }))
+    })
+}
+
+function changeStudentZsti(studentId, type, name, surname, klasa, attends)
+{
+    let query = "UPDATE osoby_zsti SET typ_osoby_id = " + type + ", imie = '" + name + "', nazwisko = '" + surname + "', klasa = '" + klasa + "', uczeszcza = " + attends + " WHERE id = " + studentId + ";"
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+    })
+}
+
+function changeStudentInternat(studentId, name, surname, attends)
+{
+    let query = "UPDATE osoby_internat SET imie = '" + name + "', nazwisko = '" + surname + "', uczeszcza = " + attends + " WHERE id = " + studentId + ";"
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+    })
+}
 
 function AddDniNieczynne(day)
 {
