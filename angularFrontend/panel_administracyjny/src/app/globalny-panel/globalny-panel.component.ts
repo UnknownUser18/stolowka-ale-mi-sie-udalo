@@ -16,7 +16,17 @@ export class GlobalnyPanelComponent implements OnInit{
   constructor(private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.DisabledDays.asObservable().subscribe((change:any)=>this.updateDays(change));
     this.dataService.getDisabledDays()
+    this.dataService.LastStudentInsertId.asObservable().subscribe((change:any)=>this.sendDeclaration(change));
   }
+
+  student: { imie: string, nazwisko:string, typ_osoby_id:number, klasa:string, uczeszcza:boolean} = {imie:'', nazwisko:'', typ_osoby_id: 0, klasa:'', uczeszcza:false}
+  editedStudent: { imie: string, nazwisko:string, typ_osoby_id?:number, klasa?:string, uczeszcza:boolean} = {imie:'', nazwisko:'', typ_osoby_id: 0, klasa:'', uczeszcza:false}
+
+  nullDeclaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string ,osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
+  declaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string ,osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
+  editedDeclaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string, osoby_internat_id?:number, id_osoby?:number, dniString?: string, dni?:any, wersja?:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
+
+  insertedDeclaration:boolean = true;
 
   day: number = new Date().getDate();
   month: number = new Date().getMonth();
@@ -233,8 +243,145 @@ export class GlobalnyPanelComponent implements OnInit{
     this.el.nativeElement.querySelector('#dodaj_osobe').style.display = 'none';
   }
   dodaj_osobe() {
+    let thisElement = this.el.nativeElement;
+    this.editedStudent = {
+      imie: thisElement.querySelector('input[name="imie"]').value,
+      nazwisko:thisElement.querySelector('input[name="nazwisko"]').value,
+      uczeszcza: true
+    }
+    if(thisElement.querySelector('select[name="typ"]').value === 'ZSTI')
+    {
+      this.editedStudent.typ_osoby_id = thisElement.querySelector('select[name="typ_zsti"]').value
+      this.editedStudent.klasa = thisElement.querySelector('input[name="klasa"]').value
+      this.dataService.send(JSON.stringify({
+        action: "request",
+        params: {
+          method: "addZstiStudent",
+          name: this.editedStudent.imie,
+          surname: this.editedStudent.nazwisko,
+          class: this.editedStudent.klasa,
+          attends: this.editedStudent.uczeszcza,
+          type: this.editedStudent.typ_osoby_id
+        }
+      }))
+    }
+    else{
+      this.dataService.send(JSON.stringify({
+        action: "request",
+        params: {
+          method: "addInternatStudent",
+          name: this.editedStudent.imie,
+          surname: this.editedStudent.nazwisko,
+          attends: this.editedStudent.uczeszcza
+        }
+      }))
+    }
+    this.insertedDeclaration = false;
     console.log('dodaj_osobe');
   }
+  sendDeclaration(change:any)
+  {
+    let thisElement = this.el.nativeElement;
+    this.editedDeclaration = {
+      rok_szkolny_id: 0,
+      data_od: thisElement.querySelector('input[name="data_od"]').value,
+      data_do: thisElement.querySelector('input[name="data_do"]').value
+    }
+    this.editedDeclaration.rok_szkolny = thisElement.querySelector('input[name="rok_szkolny"]').value
+    let rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny == this.editedDeclaration.rok_szkolny)
+    if(!rokSzkolny)
+    {
+      this.dataService.send(JSON.stringify(
+        {
+          action: "request",
+          params: {
+            method: "addSchoolYear",
+            year: this.editedDeclaration.rok_szkolny
+          }
+        }))
+      console.log(JSON.stringify(
+        {
+          action: "request",
+          params: {
+            method: "addSchoolYear",
+            year: this.editedDeclaration.rok_szkolny
+          }
+        }))
+      this.dataService.getSchoolYears()
+    }
+    let IntervalSchoolYear = setInterval(()=>{
+      rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny === this.editedDeclaration.rok_szkolny)
+      if(rokSzkolny.id)
+      {
+        clearInterval(IntervalSchoolYear)
+        this.editedDeclaration.rok_szkolny_id = rokSzkolny.id
+        this.afterSendDeclaration()
+      }
+    }, 500)
+
+  }
+
+  toBinary(num : number, len : number)
+  {
+    let binary = Number(num).toString(2)
+    for(let i = 0 ; i < len - binary.length; i++)
+    {
+      binary = '0' + binary
+    }
+    return binary;
+  }
+
+  afterSendDeclaration()
+  {
+    let thisElement = this.el.nativeElement;
+    if(thisElement.querySelector('select[name="typ"]').value === 'ZSTI')
+    {
+      this.editedDeclaration.id_osoby = this.dataService.LastStudentInsertId.value.insertId;
+      let dni = [
+        this.el.nativeElement.querySelector('input[name="poniedzialek"]'),
+        this.el.nativeElement.querySelector('input[name="wtorek"]'),
+        this.el.nativeElement.querySelector('input[name="sroda"]'),
+        this.el.nativeElement.querySelector('input[name="czwartek"]'),
+        this.el.nativeElement.querySelector('input[name="piatek"]')
+      ]
+      let value = ''
+      dni.forEach((element:any)=>{
+        value += element.checked ? '1' : '0';
+      })
+      console.log(value, this.toBinary(parseInt(value, 2), 5))
+      this.editedDeclaration.dni = parseInt(value, 2);
+      this.dataService.send(JSON.stringify({
+        action: "request",
+        params: {
+          method: "addZstiDeclaration",
+          studentId: this.editedDeclaration.id_osoby,
+          schoolYearId: this.editedDeclaration.rok_szkolny_id,
+          beginDate: this.editedDeclaration.data_od,
+          endDate: this.editedDeclaration.data_do,
+          days: this.editedDeclaration.dni
+        }
+      }))
+      this.dataService.getStudentDeclarationZsti()
+    }
+    else{
+      this.editedDeclaration.osoby_internat_id = this.dataService.LastStudentInsertId.value.insertId;
+      this.dataService.send(JSON.stringify({
+        action: "request",
+        params: {
+          method: "addInternatDeclaration",
+          studentId: this.editedDeclaration.osoby_internat_id,
+          schoolYearId: this.editedDeclaration.rok_szkolny_id,
+          beginDate: this.editedDeclaration.data_od,
+          endDate: this.editedDeclaration.data_do,
+          wersja: this.editedDeclaration.wersja
+        }
+      }))
+      this.dataService.getStudentDeclarationInternat()
+    }
+    console.log(this.dataService.LastStudentInsertId.value.insertId)
+    this.dataService.getStudentList()
+  }
+
   change_form() {
     console.log('change_form');
     const typ = this.el.nativeElement.querySelector('form[name="dodaj"] select[name="typ"]').value;

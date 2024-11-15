@@ -32,6 +32,7 @@ export class DataBaseService {
   PersonalDataSaved = new BehaviorSubject<boolean>(true)
   DeclarationDataSaved = new BehaviorSubject<boolean>(true)
   SchoolYears = new BehaviorSubject<any>(null)
+  LastStudentInsertId = new BehaviorSubject<any>(null)
   SavedList: any[] = [
     this.TypPosilkuSaved,
     this.SelectedSaved,
@@ -194,6 +195,14 @@ export class DataBaseService {
   getStudentList()
   {
     this.send(JSON.stringify(
+      {
+        action: "request",
+        params: {
+          method: "getStudentListInternat"
+        }
+      }
+    ))
+    this.send(JSON.stringify(
         {
           action: "request",
           params: {
@@ -201,6 +210,18 @@ export class DataBaseService {
           }
         }
     ))
+  }
+
+  getSchoolYears()
+  {
+    this.send(JSON.stringify(
+      {
+        action: "request",
+        params: {
+          method: "getSchoolYears"
+        }
+      }
+    ));
   }
 
   send(query:string)
@@ -221,12 +242,12 @@ export class DataBaseService {
         switch (this.lastValue.params.variable) {
           case 'StudentDeclarationZsti':
             this.StudentDeclarationZsti.next(this.lastValue.params.value );
-            this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any)=> element.id_osoby == this.CurrentStudentId.value))
+            this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any)=> element.id_osoby == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
             console.log("StudentDeclarationZsti: ", this.lastValue.params.value);
             break;
           case 'StudentDeclarationInternat':
             this.StudentDeclarationInternat.next(this.lastValue.params.value );
-            this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value))
+            this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
             console.log("StudentDeclarationInternat: ", this.lastValue.params.value);
             break;
           case 'StudentListZsti':
@@ -280,6 +301,8 @@ export class DataBaseService {
           case 'SchoolYears':
             this.SchoolYears.next(this.lastValue.params.value);
             break;
+          case 'LastStudentInsertId':
+            this.LastStudentInsertId.next(this.lastValue.params.value)
         }
       })
       let query: string = JSON.stringify(

@@ -210,7 +210,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
                 method: "AddZstiDays",
                 studentId: this.dataService.CurrentStudentId.value,
                 date: element,
-                schoolYearId: null
+                schoolYearId: this.dataService.CurrentStudentDeclaration.value.rok_szkolny_id
               }
             })
           )
@@ -256,7 +256,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
                 date: element,
                 // @ts-ignore
                 mealId: typ[element_parent.id],
-                schoolYearId: 1
+                schoolYearId: this.dataService.CurrentStudentDeclaration.value.rok_szkolny_id
               }
             })
           )
@@ -280,6 +280,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
       })
       this.dataService.getStudentInternatDays()
     }
+    this.diff_undo_selected_zsti = []
+    this.diff_selected_zsti = []
     this.dataService.changeTypPoslikuSaved(true)
     this.dataService.changeSelectedSaved(true)
   }

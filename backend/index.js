@@ -72,7 +72,7 @@ wss.on('connection', function connection(ws) {
                 getStudentDeclarationZsti(ws)
                 break;
             case "changeStudentDeclarationInternat":
-                changeStudentDeclarationInternat(parameters.studentId, parameters.schoolYearId, parameters.days, parameters.beginDate, parameters.endDate, parameters.mealId);
+                changeStudentDeclarationInternat(parameters.studentId, parameters.schoolYearId, parameters.wersja, parameters.beginDate, parameters.endDate);
                 break;
             case "changeStudentDeclarationZsti":
                 changeStudentDeclarationZsti(parameters.studentId, parameters.schoolYearId, parameters.days, parameters.beginDate, parameters.endDate);
@@ -137,6 +137,24 @@ wss.on('connection', function connection(ws) {
             case 'getSchoolYears':
                 getSchoolYears(ws)
                 break;
+            case 'addSchoolYear':
+                addSchoolYear(parameters.year)
+                break;
+            case 'DeleteStudentZsti':
+                DeleteStudentZsti(parameters.studentId)
+                break;
+            case 'addZstiDeclaration':
+                addZstiDeclaration(parameters.studentId, parameters.schoolYearId, parameters.beginDate, parameters.endDate, parameters.days);
+                break;
+            case 'addInternatDeclaration':
+                addInternatDeclaration(parameters.studentId, parameters.schoolYearId, parameters.beginDate, parameters.endDate, parameters.wersja)
+                break;
+            case 'addZstiStudent':
+                addZstiStudent(ws, parameters.name, parameters.surname, parameters.class, parameters.attends, parameters.type);
+                break;
+            case 'addInternatStudent':
+                addInternatStudent(ws, parameters.name, parameters.surname, parameters.attends)
+                break;
         }
     });
 });
@@ -181,6 +199,76 @@ database.on('error', function (err) {
         throw err;
     }
 });
+
+function addZstiStudent(websocketClient, name, surname, classa, attends, type)
+{
+    let query = `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id) VALUES('${name}', '${surname}', '${classa}', ${attends}, ${type})`
+    console.log(query)
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result.insertId)
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "LastStudentInsertId",
+                        value: result
+                    }
+                }))
+    })
+}
+
+function addInternatStudent(websocketClient, name, surname, attends)
+{
+    let query = `INSERT INTO osoby_internat (imie, nazwisko, uczeszcza) VALUES('${name}', '${surname}', ${attends})`
+    console.log(query)
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result)
+        websocketClient.send(
+            JSON.stringify(
+                {
+                    action: "response",
+                    params: {
+                        variable: "LastStudentInsertId",
+                        value: result
+                    }
+                }))
+    })
+}
+
+function addZstiDeclaration(studentId, schoolYearId, beginDate, endDate, days)
+{
+    let query = `INSERT INTO deklaracja_zywieniowa_zsti (id_osoby, rok_szkolny_id, data_od, data_do, dni) VALUES(${studentId}, ${schoolYearId}, '${beginDate}', '${endDate}', ${days});`
+    return database.query(query, (err, result)=>{
+        if(err) throw err;
+        console.log(result)
+    })
+}
+
+function addInternatDeclaration(studentId, schoolYearId, beginDate, endDate, wersja)
+{
+    let query = `INSERT INTO deklaracja_zywieniowa_internat (osoby_internat_id, rok_szkolny_id, data_od, data_do, wersja) VALUES(${studentId}, ${schoolYearId}, '${beginDate}', '${endDate}', ${wersja});`
+    return database.query(query, (err, result)=>{
+        if(err) throw err;
+        console.log(result)
+    })
+}
+
+function DeleteStudentZsti(studentId)
+{
+    let query = `DELETE FROM `
+}
+
+function addSchoolYear(year)
+{
+    let query = `INSERT INTO rok_szkolny VALUES(null, '${year}');`
+    return database.query(query, (err,result)=>{
+        if(err) throw err;
+        console.log(result);
+    })
+}
 
 function getSchoolYears(websocketClient)
 {
@@ -291,8 +379,8 @@ function getStudentDeclarationZsti(websocketClient)
     })
 }
 
-function changeStudentDeclarationInternat(StudentId, schoolYearId, days, beginDate, endDate, mealId) {
-    let query = "UPDATE deklaracja_zywieniowa_internat SET rok_szkolny_id = " + schoolYearId + ", dniPosilki = " + days + ", posilki_id = " + mealId +  ", data_od = " + beginDate + ", data_do = " + endDate + " WHERE osoby_internat_id = " + StudentId + ";";
+function changeStudentDeclarationInternat(StudentId, schoolYearId, wersja, beginDate, endDate) {
+    let query = `UPDATE deklaracja_zywieniowa_internat SET rok_szkolny_id = ${schoolYearId}, data_od = '${beginDate}', data_do = '${endDate}', wersja = ${wersja} WHERE osoby_internat_id = ${StudentId};`
     return database.query(query, (err, result) => {
         if (err) throw err;
         console.log(result);
@@ -300,7 +388,7 @@ function changeStudentDeclarationInternat(StudentId, schoolYearId, days, beginDa
 }
 
 function changeStudentDeclarationZsti(StudentId, schoolYearId, days, beginDate, endDate) {
-    let query = "UPDATE deklaracja_zywieniowa_zsti SET rok_szkolny_id = " + schoolYearId + ", dni = " + days + ", data_od = " + beginDate + ", data_do = " + endDate + " WHERE id_osoby = " + StudentId + ";";
+    let query = `UPDATE deklaracja_zywieniowa_zsti SET rok_szkolny_id = ${schoolYearId}, data_od = '${beginDate}', data_do = '${endDate}', dni = ${days} WHERE id_osoby = ${StudentId}`
     return database.query(query, (err, result) => {
         if (err) throw err;
         console.log(result);
