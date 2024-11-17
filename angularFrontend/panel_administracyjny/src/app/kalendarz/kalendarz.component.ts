@@ -299,7 +299,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
     });
   }
   // @ts-ignore
-  isWeekend = (date: Date, button: HTMLElement, typ: string) =>{
+  // @ts-ignore
+isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | undefined => {
     let dayOfTheWeek = date.getDay();
     if(dayOfTheWeek === 0)
       dayOfTheWeek = 7
@@ -309,21 +310,22 @@ export class KalendarzComponent implements OnChanges, OnInit {
       if((!this.dataService.CurrentStudentDeclaration.value))
       {
         if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
-          (button as HTMLButtonElement).disabled = true;
+          button.disabled = true;
         }
         else {
+          button.disabled = true;
           button.classList.add('disabled-for-person')
         }
         return true;
       }
       if( dayOfTheWeek === 5 || dayOfTheWeek === 6)
       {
-        (button as HTMLButtonElement).disabled = true;
+        button.disabled = true;
         return true;
       }
       else if (this.toBinary(this.CurrentStudentDeclaration.dni.data, 5)[dayOfTheWeek] === '0')
       {
-        (button as HTMLButtonElement).disabled = true;
+        button.disabled = true;
         button.classList.add('disabled-for-person')
         return true;
       }
@@ -333,7 +335,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
     {
       if(dayOfTheWeek === 5 || dayOfTheWeek === 6)
       {
-        (button as HTMLButtonElement).disabled = true;
+        button.disabled = true;
         return true;
       }
       return false;

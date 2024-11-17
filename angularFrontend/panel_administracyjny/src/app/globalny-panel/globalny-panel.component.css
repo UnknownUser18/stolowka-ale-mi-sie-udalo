@@ -114,14 +114,17 @@ section:nth-of-type(1) {
     align-items: center;
     width: 100%;
 }
-section:nth-of-type(1) > div:nth-of-type(1) {
+section:nth-of-type(1) > div {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background-color: var(--primary-color);
     padding: 10px;
     border: 2px solid var(--border-color);
     border-radius: 10px;
     width: 25%;
+    height: 200px;
     max-height: 300px;
     overflow: auto;
 }
@@ -134,7 +137,6 @@ section:nth-of-type(1) > div:nth-of-type(1) > h2 {
     margin: 0.4em 0 0.8em 0;
 }
 section:nth-of-type(1) > div:nth-of-type(1) > button {
-    align-self: end;
     display: inline-block;
     margin: 0.5em auto;
     padding: 10px 20px;
@@ -313,7 +315,7 @@ form[name='dni_nieczynne'] > fieldset select {
     border: 0;
     border-radius: 0;
 }
-@media only screen and (min-width: 1280px) and (max-height: 1800px) {
+@media (min-width: 1280px) and (max-width: 1800px) {
     #dni_nieczynne > section {
         width: 50%;
     }

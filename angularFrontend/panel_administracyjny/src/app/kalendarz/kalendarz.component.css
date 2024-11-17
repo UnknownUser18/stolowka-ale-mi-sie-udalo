@@ -121,9 +121,10 @@ input:disabled {
 }
 .disabled-for-person {
     background-color: var(--disabled-working-day) !important;
+    color: var(--disabled-text-color) !important;
 }
-.disabled-day-global {
-    background-color: var(--disabled-global-day) !important;
+.day.disabled-day-global {
+    background-color: var(--disabled-global-day);
 }
 #date {
     width: 100%;
@@ -418,7 +419,7 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='yah'] > la
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
-@media only screen and (min-width: 1280px) and (max-width: 1800px) {
+@media (min-width: 1280px) and (max-width: 1800px) {
     #zaznacz input {
         width: 40px;
         height: 40px;

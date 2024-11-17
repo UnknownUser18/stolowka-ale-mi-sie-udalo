@@ -1,13 +1,15 @@
 import {Component, ElementRef, OnInit} from '@angular/core';
 import { NgForOf, NgOptimizedImage } from '@angular/common';
 import {DataBaseService} from '../data-base.service';
+import {GlobalnyRaportComponent} from '../globalny-raport/globalny-raport.component';
 
 @Component({
   selector: 'app-globalny-panel',
   standalone: true,
   imports: [
     NgForOf,
-    NgOptimizedImage
+    NgOptimizedImage,
+    GlobalnyRaportComponent
   ],
   templateUrl: './globalny-panel.component.html',
   styleUrls: ['./globalny-panel.component.css']

@@ -1,13 +1,11 @@
 import {Component, Input, SimpleChanges, ElementRef, OnChanges} from '@angular/core';
 import {DataBaseService} from '../data-base.service';
-import {NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-edycja',
   standalone: true,
   imports: [
-    NgIf,
     FormsModule
   ],
   templateUrl: './edycja.component.html',

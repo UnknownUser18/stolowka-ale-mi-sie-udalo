@@ -11,7 +11,7 @@
       <button (click)="show()">Pokaż Całość</button>
     </div>
     <div>
-      insert raport component here
+      <app-globalny-raport></app-globalny-raport>
     </div>
   </section>
   <section>
@@ -27,6 +27,7 @@
           <label>Dzień: <input type="number" [min]="minDay" [max]="days_in_month" [value]="day" name="dzien"></label>
           <label>Miesiąc: <select [value]="month" name="miesiac"  (change)="check()">
 <!--            [disabled]="element.disabled" - Wyłączyłem bo czasami nie działa :/-->
+<!--            k 👌-->
               <option *ngFor="let element of miesiace; let i = index"  [value]="i" >{{element.month}}</option>
             </select>
           </label>
