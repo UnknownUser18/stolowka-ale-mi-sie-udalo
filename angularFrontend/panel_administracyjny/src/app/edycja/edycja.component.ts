@@ -48,9 +48,7 @@ export class EdycjaComponent implements OnChanges {
     setTimeout(()=>{
       this.el.nativeElement.querySelector('input[name="imie"]').value = this.student.imie;
       this.el.nativeElement.querySelector('input[name="nazwisko"]').value = this.student.nazwisko;
-      console.log(this.el.nativeElement.querySelectorAll('input[name="typ"]'))
       this.el.nativeElement.querySelectorAll('input[name="typ"]').forEach((element:any)=>{
-        console.log(element, element.value, element.value == this.student.typ_osoby_id, this.student.typ_osoby_id)
         if(element.value == this.student.typ_osoby_id)
           element.checked = 'checked';
       })
@@ -73,10 +71,15 @@ export class EdycjaComponent implements OnChanges {
 
 
   updateDeclaration():void {
-    if(!this.dataService.CurrentStudentDeclaration.value)
+    if(!(this.dataService.CurrentStudentDeclaration.value))
     {
       this.clear_data('deklaracja')
+      this.declaration = this.nullDeclaration;
+      this.dataService.changeDeclarationDataSaved(true);
       return
+    }
+    else{
+      console.log("PRAWDZIWE")
     }
     this.dataService.changeDeclarationDataSaved(true)
     this.declaration = this.dataService.CurrentStudentDeclaration.value;
@@ -130,7 +133,6 @@ export class EdycjaComponent implements OnChanges {
 
   changeDeclaration()
   {
-    // parseInt(binaryStr, 2);
     let dni = [
       this.el.nativeElement.querySelector('input[name="poniedziałek"]'),
       this.el.nativeElement.querySelector('input[name="wtorek"]'),
@@ -181,10 +183,17 @@ export class EdycjaComponent implements OnChanges {
   {
     if(!this.dataService.CurrentStudentDeclaration.value)
       this.dataService.changeDeclarationDataSaved(true);
+    if(this.declaration === this.nullDeclaration)
+    {
+      this.dataService.changeDeclarationDataSaved(false);
+      return [false];
+    }
     let conditions = [
       this.editedDeclaration.id_osoby === this.declaration.id_osoby,
       this.editedDeclaration.rok_szkolny_id === this.declaration.rok_szkolny_id
     ]
+
+
     if(this.editedDeclaration.data_od !== '')
     {
       conditions.push(this.formatDate(this.editedDeclaration.data_od) === this.formatDate(this.declaration.data_od))
@@ -262,13 +271,14 @@ export class EdycjaComponent implements OnChanges {
   {
     if(this.dataService.StudentType.value === 'ZSTI')
     {
+      console.log(this.declaration, this.editedDeclaration)
       if(this.declaration === this.nullDeclaration)
       {
         this.dataService.send(JSON.stringify(
           {
             action: "request",
             params: {
-              method: "changeStudentDeclarationZsti",
+              method: "addZstiDeclaration",
               studentId: this.dataService.CurrentStudentId.value,
               schoolYearId: this.editedDeclaration.rok_szkolny_id,
               days: this.editedDeclaration.dni,
@@ -281,7 +291,7 @@ export class EdycjaComponent implements OnChanges {
           {
             action: "request",
             params: {
-              method: "changeStudentDeclarationZsti",
+              method: "addZstiDeclaration",
               studentId: this.dataService.CurrentStudentId.value,
               schoolYearId: this.editedDeclaration.rok_szkolny_id,
               days: this.editedDeclaration.dni,
@@ -296,7 +306,7 @@ export class EdycjaComponent implements OnChanges {
           {
             action: "request",
             params: {
-              method: "addZstiDeclaration",
+              method: "changeStudentDeclarationZsti",
               studentId: this.dataService.CurrentStudentId.value,
               schoolYearId: this.editedDeclaration.rok_szkolny_id,
               days: this.editedDeclaration.dni,
@@ -309,7 +319,7 @@ export class EdycjaComponent implements OnChanges {
           {
             action: "request",
             params: {
-              method: "addZstiDeclaration",
+              method: "changeStudentDeclarationZsti",
               studentId: this.dataService.CurrentStudentId.value,
               schoolYearId: this.editedDeclaration.rok_szkolny_id,
               days: this.editedDeclaration.dni,
@@ -329,7 +339,7 @@ export class EdycjaComponent implements OnChanges {
           {
             action: "request",
             params: {
-              method: "changeStudentDeclarationInternat",
+              method: "addInternatDeclaration",
               studentId: this.dataService.CurrentStudentId.value,
               schoolYearId: this.editedDeclaration.rok_szkolny_id,
               wersja: this.editedDeclaration.wersja,
@@ -342,7 +352,7 @@ export class EdycjaComponent implements OnChanges {
           {
             action: "request",
             params: {
-              method: "changeStudentDeclarationInternat",
+              method: "addInternatDeclaration",
               studentId: this.dataService.CurrentStudentId.value,
               schoolYearId: this.editedDeclaration.rok_szkolny_id,
               wersja: this.editedDeclaration.wersja,
@@ -357,7 +367,7 @@ export class EdycjaComponent implements OnChanges {
           {
             action: "request",
             params: {
-              method: "addInternatDeclaration",
+              method: "changeStudentDeclarationInternat",
               studentId: this.dataService.CurrentStudentId.value,
               schoolYearId: this.editedDeclaration.rok_szkolny_id,
               wersja: this.editedDeclaration.wersja,

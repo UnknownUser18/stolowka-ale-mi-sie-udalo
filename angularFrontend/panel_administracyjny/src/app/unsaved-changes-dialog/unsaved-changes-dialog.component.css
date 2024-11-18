@@ -1,0 +1,6 @@
+h1 {
+    color: #ff5722;
+}
+div[mat-dialog-content] {
+    font-size: 16px;
+}

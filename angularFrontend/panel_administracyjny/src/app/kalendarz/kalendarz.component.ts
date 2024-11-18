@@ -165,6 +165,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
   ngOnChanges(changes: SimpleChanges) {
     if (changes['typ'] || changes['name']) {
       this.selected = [];
+      this.diff_selected_zsti = [];
+      this.diff_undo_selected_zsti = [];
       this.usuniecie.forEach((element) => {
         element.array = []
       });
@@ -193,6 +195,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
   }
   changeDeclaration(change:any)
   {
+    console.log("Neew declaration: ", change)
     this.CurrentStudentDeclaration = change
     this.show_calendar()
   }
@@ -307,8 +310,14 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
     dayOfTheWeek--
     if(typ === 'ZSTI')
     {
-      if((!this.dataService.CurrentStudentDeclaration.value))
+      if( dayOfTheWeek === 5 || dayOfTheWeek === 6)
       {
+        (button as HTMLButtonElement).disabled = true;
+        return true;
+      }
+      if(!(this.dataService.CurrentStudentDeclaration.value))
+      {
+        console.log("istnieje2")
         if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
           button.disabled = true;
         }
@@ -318,12 +327,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
         }
         return true;
       }
-      if( dayOfTheWeek === 5 || dayOfTheWeek === 6)
-      {
-        button.disabled = true;
-        return true;
-      }
-      else if (this.toBinary(this.CurrentStudentDeclaration.dni.data, 5)[dayOfTheWeek] === '0')
+      if (this.toBinary(this.dataService.CurrentStudentDeclaration.value.dni,5)[dayOfTheWeek] === '0')
       {
         button.disabled = true;
         button.classList.add('disabled-for-person')
@@ -408,7 +412,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
         if(this.typ !== 'Internat')
         {
           this.isWeekend(new Date(`${year}-${month+1}-${i - first_day_week + 1}`), dayButton, this.typ!);
-          if(this.DisabledDays !== undefined) {
+          if(this.DisabledDays) {
             if(this.DisabledDays.includes(`${year}-${month + 1}-${i - first_day_week + 1}`)) {
               dayButton.classList.add('disabled-day-global')
               dayButton.setAttribute('disabled', 'true');

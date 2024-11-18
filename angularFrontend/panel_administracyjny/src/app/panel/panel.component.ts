@@ -1,11 +1,12 @@
 import { Component, Input, OnInit, Renderer2, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import {KalendarzComponent} from '../kalendarz/kalendarz.component';
 import {EdycjaComponent} from '../edycja/edycja.component';
+import {PlatnosciComponent} from '../platnosci/platnosci.component';
 
 @Component({
   selector: 'app-panel',
   standalone: true,
-  imports: [KalendarzComponent, EdycjaComponent],
+  imports: [KalendarzComponent, EdycjaComponent, PlatnosciComponent],
   templateUrl: './panel.component.html',
   styleUrls: ['./panel.component.css']
 })
@@ -41,20 +42,38 @@ export class PanelComponent implements OnInit, OnChanges {
     let text = target.innerText;
     let kalendarz = this.el.nativeElement.querySelector('app-kalendarz');
     let edycja = this.el.nativeElement.querySelector('app-edycja');
+    let platnosci = this.el.nativeElement.querySelector('app-platnosci')
     switch (text) {
       case 'Kalendarz':
         this.contents = ['kalendarz'];
         this.renderer.setStyle(kalendarz, 'display', 'block');
         this.renderer.setStyle(edycja, 'display', 'none');
+        this.renderer.setStyle(platnosci, 'display', 'none')
+        Array.from((target.parentElement as HTMLElement).children).forEach((element: any) => {
+          this.renderer.removeClass(element, 'selected');
+        })
         this.renderer.addClass(target, 'selected');
-        this.renderer.removeClass(target.nextElementSibling, 'selected');
         break;
       case 'Edytuj':
         this.contents = ['edycja'];
         this.renderer.setStyle(kalendarz, 'display', 'none');
+        this.renderer.setStyle(platnosci, 'display', 'none')
         this.renderer.setStyle(edycja, 'display', 'block');
+        Array.from((target.parentElement as HTMLElement).children).forEach((element: any) => {
+          this.renderer.removeClass(element, 'selected');
+        })
         this.renderer.addClass(target, 'selected');
-        this.renderer.removeClass(target.previousElementSibling, 'selected');
+        break;
+      case 'Płatności':
+        console.log("PLATNOSCI")
+        this.contents = ['Płatności']
+        this.renderer.setStyle(kalendarz, 'display', 'none');
+        this.renderer.setStyle(edycja, 'display', 'none');
+        this.renderer.setStyle(platnosci, 'display', 'block')
+        Array.from((target.parentElement as HTMLElement).children).forEach((element: any) => {
+            this.renderer.removeClass(element, 'selected');
+        })
+        this.renderer.addClass(target, 'selected');
         break;
       default:
         break;

@@ -4,6 +4,8 @@ import {NgForOf, NgOptimizedImage} from '@angular/common';
 // @ts-ignore
 import {DataBaseService} from './data-base.service';
 import {GlobalnyPanelComponent} from './globalny-panel/globalny-panel.component';
+import { MatDialog } from '@angular/material/dialog';
+import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-changes-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +29,7 @@ export class AppComponent implements OnInit{
   ];
   StudentListZstiData:any = null;
   StudentListInternatData:any = null;
-  constructor(private dataService:DataBaseService, private el: ElementRef) {
+  constructor(private dataService:DataBaseService, private el: ElementRef, private dialog: MatDialog) {
   }
   ngOnInit() {
     this.dataService.StudentListZstiData.subscribe((data: any) => {
@@ -75,9 +77,24 @@ export class AppComponent implements OnInit{
       }
     })
   }
-  cantDoThat()
+  cantDoThat(func:Function)
   {
-    alert("Ayo niga")
+    const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
+      width: '400px',
+    });
+    // Obsługa zamknięcia dialogu
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'proceed') {
+        console.log('Użytkownik zdecydował się kontynuować mimo niezapisanych zmian.');
+        this.dataService.SavedList.forEach((element:any) => {
+          element.next(true)
+        })
+        func();
+      } else {
+        console.log('Użytkownik anulował akcję.');
+      }
+      console.log(this.dataService.SavedList)
+    });
   }
 
   osoba : string | undefined;
@@ -87,35 +104,39 @@ export class AppComponent implements OnInit{
     let ifRet = false
     this.dataService.SavedList.forEach((element)=>{
       if(!element.value)
-      {
-        this.cantDoThat()
         ifRet = true
-      }
     })
-    if(ifRet)
-      return;
-    let target = event.target as HTMLElement;
-    if(target.tagName != 'OL') {
-      if(target.tagName == "SPAN") {
+    let func = () =>
+    {
+      let target = event.target as HTMLElement;
+      if(target.tagName != 'OL') {
+        if(target.tagName == "SPAN") {
+          target = target.parentElement as HTMLElement;
+        }
+        this.el.nativeElement.querySelector('app-globalny-panel').style.display = 'none';
+        let daneTarget = target;
+        this.osoba = target.querySelector('span')?.textContent!;
         target = target.parentElement as HTMLElement;
-    }
-      this.el.nativeElement.querySelector('app-globalny-panel').style.display = 'none';
-      let daneTarget = target;
-      this.osoba = target.querySelector('span')?.textContent!;
-      target = target.parentElement as HTMLElement;
-      target = target.parentElement as HTMLElement;
-      target = target.querySelector('button') as HTMLElement;
-      this.typ = target.textContent!;
-      // @ts-ignore
-      if(!this.StudentListZstiData[daneTarget.getAttribute('data-index')])
-        return
-      if(this.typ === "ZSTI") {
-        this.dataService.changeStudent(this.StudentListZstiData[daneTarget.getAttribute('data-index')!].id, this.typ)
-      }
-      else {
-        this.dataService.changeStudent(this.StudentListInternatData[daneTarget.getAttribute('data-index')!].id, this.typ)
+        target = target.parentElement as HTMLElement;
+        target = target.querySelector('button') as HTMLElement;
+        this.typ = target.textContent!;
+        // @ts-ignore
+        if(!this.StudentListZstiData[daneTarget.getAttribute('data-index')])
+          return
+        if(this.typ === "ZSTI") {
+          this.dataService.changeStudent(this.StudentListZstiData[daneTarget.getAttribute('data-index')!].id, this.typ)
+        }
+        else {
+          this.dataService.changeStudent(this.StudentListInternatData[daneTarget.getAttribute('data-index')!].id, this.typ)
+        }
       }
     }
+    if(ifRet)
+    {
+      this.cantDoThat(func)
+      return;
+    }
+    func()
   }
   rozwin(event: Event, number: number, szukaj : boolean) {
     let target = szukaj ? event : (event.target as HTMLElement);

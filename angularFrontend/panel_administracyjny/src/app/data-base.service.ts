@@ -19,7 +19,6 @@ export class DataBaseService {
   StudentZstiDays = new BehaviorSubject<any>(null);
   StudentInternatDays = new BehaviorSubject<any>(null);
   CurrentStudentId = new BehaviorSubject<number>(-1)
-  CurrentStudent = new BehaviorSubject<any>(null)
   StudentType = new BehaviorSubject<string>("BRAK")
   lastValue:any = null;
   CurrentDisabledInternatDays = new BehaviorSubject<any>(null);
@@ -33,6 +32,7 @@ export class DataBaseService {
   DeclarationDataSaved = new BehaviorSubject<boolean>(true)
   SchoolYears = new BehaviorSubject<any>(null)
   LastStudentInsertId = new BehaviorSubject<any>(null)
+  PaymentZsti = new BehaviorSubject<any>(null)
   SavedList: any[] = [
     this.TypPosilkuSaved,
     this.SelectedSaved,
@@ -92,7 +92,15 @@ export class DataBaseService {
     );
     this.send(query);
   }
-
+  getPaymentZsti()
+  {
+    this.send(JSON.stringify({
+      action: "request",
+      params: {
+        method: 'getPaymentZsti'
+      }
+    }))
+  }
   getStudentInternatDays()
   {
     let query = JSON.stringify(
@@ -303,6 +311,10 @@ export class DataBaseService {
             break;
           case 'LastStudentInsertId':
             this.LastStudentInsertId.next(this.lastValue.params.value)
+            break;
+          case 'PaymentZsti':
+            this.PaymentZsti.next(this.lastValue.params.value);
+            break;
         }
       })
       let query: string = JSON.stringify(
@@ -342,5 +354,6 @@ export class DataBaseService {
     );
     console.log("Get School Years")
     this.send(query);
+    this.getPaymentZsti();
   }
 }

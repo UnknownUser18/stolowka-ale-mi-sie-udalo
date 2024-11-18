@@ -155,6 +155,15 @@ wss.on('connection', function connection(ws) {
             case 'addInternatStudent':
                 addInternatStudent(ws, parameters.name, parameters.surname, parameters.attends)
                 break;
+            case 'getPaymentZsti':
+                getPaymentZsti(ws);
+                break;
+            case 'addPaymentZsti':
+                addPaymentZsti(parameters.studentId, parameters.cost, parameters.date, parameters.month, parameters.description);
+                break;
+            case 'DeletePaymentZsti':
+                DeletePaymentZsti(parameters.id);
+                break;
         }
     });
 });
@@ -199,6 +208,42 @@ database.on('error', function (err) {
         throw err;
     }
 });
+
+function getPaymentZsti(websocketClient)
+{
+    let query = `SELECT * FROM platnosci_zsti;`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: 'PaymentZsti',
+                    value: result
+                }
+            }
+        ));
+    })
+}
+
+function addPaymentZsti(id, cost, date, month, description)
+{
+    let query = `INSERT INTO platnosci_zsti (id_ucznia, platnosc, data_platnosci, miesiac, opis) values(${id}, ${cost}, '${date}', ${month}, '${description}')`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result)
+    })
+}
+
+function DeletePaymentZsti(id)
+{
+    let query = `DELETE FROM platnosci_zsti WHERE id = ${id};`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result)
+    })
+}
 
 function addZstiStudent(websocketClient, name, surname, classa, attends, type)
 {
