@@ -32,6 +32,15 @@ export class PlatnosciComponent implements OnChanges{
     return this.Months[month]
   }
 
+  formatDate(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-');
+    console.log(dateStr.split('-'))
+    const formattedMonth = month.padStart(2, '0');
+    const formattedDay = day.padStart(2, '0');
+
+    return `${year}-${formattedMonth}-${formattedDay}`;
+  }
+
   changePayments(changes:any)
   {
     this.PaymentZsti = []
@@ -60,10 +69,6 @@ export class PlatnosciComponent implements OnChanges{
   {
     let editPayment = JSON.parse(JSON.stringify(this.CurrentPayment));
     editPayment.id_ucznia = this.dataService.CurrentStudentId.value;
-    // this.el.nativeElement.querySelector('input[name="payment-amount"]').value = this.CurrentPayment.platnosc
-    // this.el.nativeElement.querySelector('input[name="payment-date"]').value = this.CurrentPayment.data_platnosci
-    // this.el.nativeElement.querySelector('select[name="payment-month"]').value = this.CurrentPayment.miesiac - 1
-    // this.el.nativeElement.querySelector('input[name="payment-description"]').value = this.CurrentPayment.opis;
     editPayment.data_platnosci = this.el.nativeElement.querySelector('input[name="payment-date-edit"]').value;
     editPayment.platnosc = this.el.nativeElement.querySelector('input[name="payment-amount-edit"]').value;
     editPayment.miesiac = this.el.nativeElement.querySelector('select[name="payment-month-edit"]').value;
@@ -104,7 +109,7 @@ export class PlatnosciComponent implements OnChanges{
     this.CurrentPayment = this.PaymentZsti[(event.target as HTMLInputElement).value]
     console.log(this.CurrentPayment)
     this.el.nativeElement.querySelector('input[name="payment-amount"]').value = this.CurrentPayment.platnosc
-    this.el.nativeElement.querySelector('input[name="payment-date"]').value = this.CurrentPayment.data_platnosci
+    this.el.nativeElement.querySelector('input[name="payment-date"]').value = this.formatDate(this.CurrentPayment.data_platnosci)
     this.el.nativeElement.querySelector('select[name="payment-month"]').value = this.CurrentPayment.miesiac - 1
     this.el.nativeElement.querySelector('input[name="payment-description"]').value = this.CurrentPayment.opis;
   }
