@@ -1,5 +1,6 @@
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import {NgOptimizedImage} from '@angular/common';
+import * as XLS from 'xlsx';
 
 @Component({
   selector: 'app-globalny-raport',
@@ -11,61 +12,12 @@ import {NgOptimizedImage} from '@angular/common';
   styleUrl: './globalny-raport.component.css'
 })
 export class GlobalnyRaportComponent {
-  constructor(private renderer: Renderer2, private el: ElementRef) {
-
-  }
-
-  exportTableToExcel(tableID: string, filename: string = 'excel_data', header: string = 'Custom Header'): void {
-  const downloadLink: HTMLAnchorElement = document.createElement("a");
-  const dataType: string = 'application/vnd.ms-excel';
-  const tableSelect: HTMLTableElement | null = document.getElementById(tableID) as HTMLTableElement;
-  if (!tableSelect) {
-    console.error("Table not found!");
-    return;
-  }
-  const columnCount = tableSelect.rows[0].cells.length;
-  const headerHTML = `<tr><th colspan="${columnCount}" style="border: 1px solid black; text-align: center; font-size: 16px; padding: 8px;">${header}</th></tr>`;
-  let tableHTML = tableSelect.outerHTML
-    .replace(/#/g, '%23')
-    .replace(/<table/g, '<table style="border-collapse: collapse; width: 100%;"')
-    .replace(/<th/g, '<th style="border: 1px solid black; text-align: center;"')
-    .replace(/<td/g, '<td style="border: 1px solid black; text-align: center;"');
-  // Check for <thead> and inject the header row
-  if (tableHTML.includes('<thead>')) {
-    tableHTML.replace('<thead>', `<thead>${headerHTML}`);
-  } else {
-    tableHTML.replace('<table', `<table><thead>${headerHTML}</thead>`);
-  }
-  const fullHTML = `
-    <html xmlns="http://www.w3.org/TR/REC-html40" lang="pl">
-
-      <head>
-        <title>${filename}</title>
-        <meta charset="UTF-8">
-        <style>
-          table { border-collapse: collapse; }
-          th, td { border: 1px solid black; text-align: center; padding: 5px; }
-        </style>
-      </head>
-      <body>
-        <table>${headerHTML}${tableSelect.innerHTML}</table>
-      </body>
-    </html>`;
-  const blob: Blob = new Blob(['\ufeff', fullHTML], { type: dataType });
-  const url: string = URL.createObjectURL(blob);
-  downloadLink.href = url;
-  downloadLink.download = `${filename}.xls`;
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-  URL.revokeObjectURL(url);
-}
-
+  constructor(private renderer: Renderer2, private el: ElementRef) {}
 
 
   miesiac : string = '';
   miesiace : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
-  osoby_zsti : string[] = ['Jacek Gyatterek', 'Wojtek Skidibi', 'Agata Tobolewska', 'Pozdrawiam AT']
+  osoby_zsti : string[] = ['Jacek Gyatterek', 'Wojtek Skibidi', 'Agata Tobolewska', 'Pozdrawiam AT']
   date : Date = new Date();
   show() : void {
     this.renderer.setStyle(this.el.nativeElement.querySelector('main'), 'display', 'flex');
@@ -99,7 +51,28 @@ export class GlobalnyRaportComponent {
     button.innerHTML = `Zapisz raport za ${this.miesiac} do pliku Excel`;
     button.addEventListener('click', () : void => {
       console.log('click', this.miesiac);
-      this.exportTableToExcel('raport_table', `raport_${this.miesiac.split(' ')[0].toLowerCase()}_${this.miesiac.split(' ')[1]}`, `Raport za ${this.miesiac}`);
+
+      // Create a workbook from the HTML table
+      let table = XLS.utils.table_to_book(document.getElementById('raport_table'), {sheet: `Raport za ${this.miesiac}`});
+      let ws = table.Sheets[`Raport za ${this.miesiac}`];
+
+      // Apply styling
+      ws['!cols'] = [{wch: 20}, {wch: 20}, {wch: 20}, {wch: 20}]; // Set column widths
+
+      // Center align all cells in the worksheet
+      const range = XLS.utils.decode_range(<string>ws['!ref']); // Get the range of the worksheet
+      for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const cellAddress = XLS.utils.encode_cell({r: row, c: col});
+          if (!ws[cellAddress]) continue; // Skip if the cell is empty
+          if (!ws[cellAddress].s) ws[cellAddress].s = {}; // Initialize style object if not present
+          if (!ws[cellAddress].s.alignment) ws[cellAddress].s.alignment = {}; // Initialize alignment object if not present
+          ws[cellAddress].s.alignment.horizontal = 'center';
+          ws[cellAddress].s.alignment.vertical = 'center';
+        }
+      }
+      // Write the file
+      XLS.writeFile(table, `raport_${this.miesiac.split(' ')[0].toLowerCase()}_${this.miesiac.split(' ')[1]}.xlsx`);
     });
 
     for(let i : number = 0; i < days_in_month; i++) {

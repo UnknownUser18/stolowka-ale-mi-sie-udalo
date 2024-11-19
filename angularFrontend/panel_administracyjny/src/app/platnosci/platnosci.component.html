@@ -1,49 +1,40 @@
-<div class="container">
-  <div class="left-section">
-    <h2>Zarządzanie Płatnościami</h2>
-    <div class="input-group">
-      <label for="payment-amount">Kwota:</label>
-      <input type="number" name="payment-amount" id="payment-amount" placeholder="Wprowadź kwotę">
+<form name="zarzadzanie_platnosci">
+  <fieldset>
+    <legend>Zarządzanie istniejącymi Płatnościami</legend>
+    <div>
+      <label>Kwota:<input type="number" name="payment-amount" placeholder="Wprowadź kwotę" min="0" required></label>
+      <label>Data:<input type="date" name="payment-date"></label>
+      <label>Miesiąc:<select name="payment-month">
+          <option *ngFor="let element  of Months; let i = index" [attr.data-index]="i" [value]="i">  {{ element }}</option>
+        </select>
+      </label>
+      <label for="opis">Opis:<input type="text" id="opis" name="payment-description" placeholder="Wprowadź opis"></label><button class="btn" (click)="delete()">Cofnij wpłatę</button>
     </div>
-    <div class="input-group">
-      <label for="payment-date">Data:</label>
-      <input type="date" name="payment-date" id="payment-date">
-    </div>
-    <div class="input-group">
-      <label for="payment-month">Miesiąc:</label>
-      <select name="payment-month" id="payment-month">
-        <option *ngFor="let element of Months; let i = index" [attr.data-index]="i" [value]="i">  {{ element }}</option>
+    <div>
+      <h2>Lista Płatności</h2>
+      <select multiple (click)="updatePayment($event)">
+        <option *ngFor="let element of PaymentZsti; let i = index" [attr.data-index]="i" [value]="i"><span>{{ monthToString(element.miesiac, true) }} {{ element.data_platnosci }}</span></option>
       </select>
+      <button class="btn" (click)="dodajPlatnosc()">Dodaj nową płatność</button>
     </div>
-    <div class="input-group">
-      <label for="payment-description">Opis:</label>
-      <input type="text" id="payment-description" name="payment-description" placeholder="Wprowadź opis">
-    </div>
-    <button class="btn" id="refund-button" (click)="delete()">Cofnij wpłatę</button>
-  </div>
-  <div class="right-section">
-    <h2>Lista Płatności</h2>
-    <select multiple id="payment-list" (click)="updatePayment($event)">
-      <option *ngFor="let element of PaymentZsti; let i = index" [attr.data-index]="i" [value]="i"><span>{{ monthToString(element.miesiac, true) }} {{ element.data_platnosci }}</span></option>
-    </select>
-    <button class="btn" id="add-button" (click)="dodajPlatnosc()">Dodaj</button>
-  </div>
-</div>
+  </fieldset>
+</form>
+
 <section id="dodaj_platnosc">
   <form name="dodaj">
     <h2>Dodawanie Płatności</h2>
     <img ngSrc="../../assets/x.svg" alt="Zamknij" (click)="closePlatnosc()" height="48" width="48">
-    <div>
-      <fieldset id="deklaracja">
-        <legend>Informacje Płatności</legend>
-        <label for="payment-amount">Kwota: <input type="number" name="payment-amount-edit" id="payment-amount-edit" placeholder="Wprowadź kwotę"></label>
-        <label>Data: <input type="date" name="payment-date-edit" id="payment-date-edit"></label>
-        <label class="internat">Wersja posiłku <select name="payment-month-edit" id="payment-month-edit">
+    <fieldset id="deklaracja">
+      <legend>Informacje o Płatności</legend>
+      <div>
+        <label>Kwota: <input type="number" name="payment-amount-edit" placeholder="Wprowadź kwotę" required min="0"></label>
+        <label>Data: <input type="date" name="payment-date-edit" required></label>
+        <label class="internat">Wersja posiłku <select name="payment-month-edit" required>
           <option *ngFor="let element of Months; let i = index" [attr.data-index]="i" [value]="i">  {{ element }}</option>
         </select></label>
-        <label for="payment-description">Opis: <input type="text" id="payment-description-edit" name="payment-description-edit" placeholder="Wprowadź opis"></label>
-      </fieldset>
-    </div>
-    <span><button type="button" (click)="sendPayment()">Dodaj</button></span>
+        <label>Opis: <input type="text" name="payment-description-edit" placeholder="Wprowadź opis"></label>
+      </div>
+    </fieldset>
+    <span><button type="button" (click)="sendPayment()">Zapisz</button></span>
   </form>
 </section>

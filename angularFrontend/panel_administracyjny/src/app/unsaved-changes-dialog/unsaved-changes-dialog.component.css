@@ -1,6 +1,14 @@
-h1 {
-    color: #ff5722;
-}
+
 div[mat-dialog-content] {
     font-size: 16px;
+}
+h1 {
+    font-weight: 600 !important;
+    font-size: 2.3em !important;
+    margin: 0.4em 0 0.8em 0 !important;
+}
+* {
+    font-size: 1em !important;
+    font-family: 'Inter', sans-serif !important;
+    overflow: visible !important;
 }
