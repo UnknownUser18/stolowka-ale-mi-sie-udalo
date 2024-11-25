@@ -33,6 +33,8 @@ export class DataBaseService {
   SchoolYears = new BehaviorSubject<any>(null)
   LastStudentInsertId = new BehaviorSubject<any>(null)
   PaymentZsti = new BehaviorSubject<any>(null)
+  CardsZsti = new BehaviorSubject<any>(null)
+  CurrentStudentCardZsti = new BehaviorSubject<any>(null)
   SavedList: any[] = [
     this.TypPosilkuSaved,
     this.SelectedSaved,
@@ -82,101 +84,53 @@ export class DataBaseService {
   }
   getDisabledDays()
   {
-    let query = JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getDniNieczynne"
-        }
-      }
-    );
-    this.send(query);
+    this.send(JSON.stringify({action: "request", params: {method: "getDniNieczynne"}}));
   }
   getPaymentZsti()
   {
-    this.send(JSON.stringify({
-      action: "request",
-      params: {
-        method: 'getPaymentZsti'
-      }
-    }))
+    this.send(JSON.stringify({action: "request", params: {method: 'getPaymentZsti'}}))
   }
   getStudentInternatDays()
   {
-    let query = JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getStudentInternatDays",
-          studentId: this.CurrentStudentId.value
-        }
-      }
-    );
-    this.send(query);
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentInternatDays", studentId: this.CurrentStudentId.value}}));
   }
   getStudentDisabledInternatDays()
   {
-    let query = JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getStudentDisabledInternatDays",
-          studentId: this.CurrentStudentId.value
-        }
-      }
-    );
-    this.send(query);
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentDisabledInternatDays", studentId: this.CurrentStudentId.value}}));
   }
   getStudentZstiDays()
   {
-    let query = JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getStudentZstiDays",
-          studentId: this.CurrentStudentId.value
-        }
-      }
-    );
-    this.send(query);
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentZstiDays", studentId: this.CurrentStudentId.value}}));
   }
   getStudentDisabledZstiDays()
   {
-    let query = JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getStudentDisabledZstiDays",
-          studentId: this.CurrentStudentId.value
-        }
-      }
-    );
-    this.send(query);
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentDisabledZstiDays", studentId: this.CurrentStudentId.value}}));
   }
   getStudentDeclarationZsti()
   {
-    let query = JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getStudentDeclarationZsti"
-        }
-    }
-    );
-    this.send(query);
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentDeclarationZsti"}}));
   }
   getStudentDeclarationInternat()
   {
-    let query = JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getStudentDeclarationInternat"
-        }
-      }
-    );
-    this.send(query);
+    this.send( JSON.stringify({action: "request", params: {method: "getStudentDeclarationInternat"}}));
   }
+
+  getStudentList()
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentListInternat"}}))
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentListZsti"}}))
+  }
+
+  getSchoolYears()
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getSchoolYears"}}));
+  }
+
+  getCardsZsti()
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getKartyZsti"}}))
+  }
+
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
     this.StudentType.next(type)
@@ -197,39 +151,8 @@ export class DataBaseService {
       this.getStudentDisabledInternatDays()
     }
     console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
-
-  }
-
-  getStudentList()
-  {
-    this.send(JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getStudentListInternat"
-        }
-      }
-    ))
-    this.send(JSON.stringify(
-        {
-          action: "request",
-          params: {
-            method: "getStudentListZsti"
-          }
-        }
-    ))
-  }
-
-  getSchoolYears()
-  {
-    this.send(JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getSchoolYears"
-        }
-      }
-    ));
+    this.CurrentStudentCardZsti.next(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
+    console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
   }
 
   send(query:string)
@@ -315,45 +238,17 @@ export class DataBaseService {
           case 'PaymentZsti':
             this.PaymentZsti.next(this.lastValue.params.value);
             break;
+          case 'CardsZsti':
+            this.CardsZsti.next(this.lastValue.params.value);
+            this.CurrentStudentCardZsti.next(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
+            console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
+            break;
         }
       })
-      let query: string = JSON.stringify(
-        {
-          action: "request",
-          params: {
-            method: "getStudentListZsti"
-          }
-        }
-      );
-      this.send(query);
-      query = JSON.stringify(
-        {
-          action: "request",
-          params: {
-            method: "getStudentListInternat"
-          }
-        }
-      );
-      this.send(query);
-    query = JSON.stringify(
-      {
-        action: "request",
-        params: {
-          method: "getDniNieczynne"
-        }
-      }
-    );
-    this.send(query);
-    query = JSON.stringify(
-        {
-          action: "request",
-          params: {
-            method: "getSchoolYears"
-          }
-        }
-    );
-    console.log("Get School Years")
-    this.send(query);
+    this.getCardsZsti();
+    this.getStudentList();
+    this.getDisabledDays();
+    this.getSchoolYears();
     this.getPaymentZsti();
   }
 }

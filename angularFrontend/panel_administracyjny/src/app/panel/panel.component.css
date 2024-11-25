@@ -60,6 +60,10 @@ app-platnosci{
     display: none;
     box-shadow: 0 -2px 0 0 var(--gradient);
 }
+app-karty{
+    display: none;
+    box-shadow: 0 -2px 0 0 var(--gradient);
+}
 @media only screen and (min-width: 1280px) and (max-width: 1800px) {
     section {
         width: 78%;

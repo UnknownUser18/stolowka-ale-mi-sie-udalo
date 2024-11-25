@@ -43,6 +43,8 @@ export class PlatnosciComponent implements OnChanges{
 
   changePayments(changes:any)
   {
+    this.clearData()
+    this.selectedPayment = null;
     this.PaymentZsti = []
     if(changes.value)
       changes = changes.value
@@ -62,6 +64,8 @@ export class PlatnosciComponent implements OnChanges{
       // @ts-ignore
       return dateA - dateB;
     });
+    this.PaymentZsti.reverse();
+    this.selectedPayment = -1;
     this.showPayment()
   }
 
@@ -71,7 +75,7 @@ export class PlatnosciComponent implements OnChanges{
     editPayment.id_ucznia = this.dataService.CurrentStudentId.value;
     editPayment.data_platnosci = this.el.nativeElement.querySelector('input[name="payment-date-edit"]').value;
     editPayment.platnosc = this.el.nativeElement.querySelector('input[name="payment-amount-edit"]').value;
-    editPayment.miesiac = this.el.nativeElement.querySelector('select[name="payment-month-edit"]').value;
+    editPayment.miesiac = this.el.nativeElement.querySelector('select[name="payment-month-edit"]').value ;
     editPayment.opis = this.el.nativeElement.querySelector('input[name="payment-description-edit"]').value;
     if(editPayment.data_platnosci !== '' && editPayment.platnosc !== null && editPayment.miesiac !== 0)
     {
@@ -106,13 +110,23 @@ export class PlatnosciComponent implements OnChanges{
   updatePayment(event: Event)
   {
     console.log(event);
-    this.CurrentPayment = this.PaymentZsti[(event.target as HTMLInputElement).value]
+    if((event.target as HTMLInputElement).type === 'radio')
+      this.CurrentPayment = this.PaymentZsti[(event.target as HTMLInputElement).value]
+    else
+      this.CurrentPayment = this.PaymentZsti[((event.target as HTMLElement).querySelector('input[name="Payment"]') as HTMLInputElement).value]
     console.log(this.CurrentPayment)
     this.el.nativeElement.querySelector('input[name="payment-amount"]').value = this.CurrentPayment.platnosc
     this.el.nativeElement.querySelector('input[name="payment-date"]').value = this.formatDate(this.CurrentPayment.data_platnosci)
     this.el.nativeElement.querySelector('select[name="payment-month"]').value = this.CurrentPayment.miesiac - 1
     this.el.nativeElement.querySelector('input[name="payment-description"]').value = this.CurrentPayment.opis;
   }
+
+  selectedPayment: number | null = -1;
+
+  selectPayment(index: number): void {
+    this.selectedPayment = index;
+  }
+
 
   ngOnChanges(){
    this.showPayment()

@@ -114,6 +114,7 @@ export class AppComponent implements OnInit{
           target = target.parentElement as HTMLElement;
         }
         this.el.nativeElement.querySelector('app-globalny-panel').style.display = 'none';
+        this.el.nativeElement.querySelector('app-panel').style.display = 'block';
         let daneTarget = target;
         this.osoba = target.querySelector('span')?.textContent!;
         target = target.parentElement as HTMLElement;

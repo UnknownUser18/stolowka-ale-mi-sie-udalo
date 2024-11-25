@@ -1,0 +1,133 @@
+form[name='osoba'] {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+h1 {
+    margin: 0 0 10px 3%;
+    padding-top: 10px;
+    font-size: 2em;
+}
+form div{
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
+    height: 100%;
+}
+fieldset {
+    width: 90%;
+    border: 2px solid var(--border-color);
+    border-radius: 7px;
+    padding: 10px;
+    margin: 10px 0;
+    height: fit-content;
+}
+legend {
+    font-size: 1.5em;
+}
+label {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    max-width: 10vw;
+}
+input {
+    padding: 5px 7px;
+    transition: all 30ms ease-in;
+    font-family: inherit;
+    font-size: 1.2em;
+    height: fit-content;
+    border-radius: 7px;
+    border: 0;
+    outline: 0;
+}
+input:not(input[type='radio'], input[type='checkbox']):focus {
+    outline: 2px solid var(--border-color);
+}
+label > div {
+    display: flex;
+    flex-direction: column;
+}
+input[type='radio'], input[type='checkbox'] {
+    margin: 0 5px 0 0;
+    width: 18px;
+    height: 18px;
+}
+label > div > label {
+    font-size: 1.2em;
+    align-items: center;
+    margin: 5px 0;
+    flex-direction: row;
+}
+select {
+    background-color: var(--background-color);
+    font-family: inherit;
+    font-size: 1.2em;
+    padding: 5px 7px;
+    border-radius: 7px;
+    border: 1px solid var(--primary-color);
+    outline: 0;
+    transition: all 150ms ease-in-out;
+}
+#usun, fieldset[name='manage-karta'] {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 40%;
+}
+#usun > label, fieldset[name='manage-karta']>label {
+    max-width: unset;
+    justify-content: center;
+    margin: 5px 10px;
+}
+#usun label > button, fieldset[name='manage-karta'] label > button {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid #b20000;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 1.4em;
+    cursor: pointer;
+    width: 270px;
+    transition: all 150ms ease-in-out;
+}
+#usun label > button:hover, fieldset[name='manage-karta'] label > button:hover {
+    background-color: #b20000;
+    color: var(--background-color);
+}
+#wyslij {
+    border-color: #003E1F;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+#wyslij > label {
+    max-width: unset;
+    justify-content: center;
+    margin: 5px 10px;
+}
+#wyslij label > button {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid #003E1F;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 1.4em;
+    cursor: pointer;
+    width: 270px;
+    transition: all 150ms ease-in-out;
+}
+#wyslij label > button:hover {
+    background-color: #9FFFCB;
+    color: #1B1F3B;
+}
+
+fieldset[name="Karta"] label {
+    margin: 40px 0;
+}
+
+fieldset[name="Karta"] legend ~ label {
+    margin: 10px 0 20px 0;
+}

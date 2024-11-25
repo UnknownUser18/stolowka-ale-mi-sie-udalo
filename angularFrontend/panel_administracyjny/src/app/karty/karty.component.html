@@ -1,0 +1,60 @@
+<h1>Karty i Aplikacje</h1>
+<form name="osoba">
+    <fieldset name="Karta">
+      <legend>Aktualna Karta</legend>
+      <label>Klucz Karty: <input type="number"  name="key_card"> <button (click)="generateRandomKeyCard($event)">Losuj</button></label>
+      <label>Data Wydania: <input type="date"  name="data_wydania"></label>
+      <label>Ostatnie Użycie <input type="date"  name="ostatnie_uzycie"></label>
+    </fieldset>
+    <fieldset id="usun">
+      <legend>Zarządzanie Kartą</legend>
+      <label><button id="dodaj" type="button">Dodaj Kartę</button></label>
+      <label><button type="button">Usuń Kartę</button></label>
+    </fieldset>
+
+  <!--    <fieldset name="manage-karta">-->
+<!--      <legend>Wyczyść dane/Usuń Ucznia</legend>-->
+<!--      <label><button type="button" >Wyczyść Dane Podstawowe</button></label>-->
+<!--      <label><button type="button" >Wyczyść Dane Deklaracji Żywieniowej</button></label>-->
+<!--      <label><button type="button" >Usuń Osobę</button></label>-->
+<!--    </fieldset>-->
+<!--  <fieldset>-->
+<!--    <legend>Aplikacja Użytkownika</legend>-->
+<!--    <label>Data od: <input type="date"  name="data_od"></label>-->
+<!--    <label>Data do: <input type="date"  name="data_do"></label>-->
+<!--    <label class="zsti">Dni żywienia:-->
+<!--      <label><input type="checkbox" [value]='0' name="poniedziałek">Poniedziałek</label>-->
+<!--      <label><input type="checkbox" [value]='1' name="wtorek">Wtorek</label>-->
+<!--      <label><input type="checkbox" [value]='2' name="środa">Środa</label>-->
+<!--      <label><input type="checkbox" [value]='3' name="czwartek">Czwartek</label>-->
+<!--      <label><input type="checkbox" [value]='4' name="piątek">Piątek</label>-->
+<!--    </label>-->
+<!--    <label class="internat">Wersja Posiłku: <select name="typ_posilku" >-->
+<!--      <option [value]="1">I</option>-->
+<!--      <option [value]="2">II</option>-->
+<!--      <option [value]="3">III</option>-->
+<!--      <option [value]="4">IV</option>-->
+<!--      <option [value]="5">V</option>-->
+<!--      <option [value]="6">VI</option>-->
+<!--      <option [value]="7">Obiady</option>-->
+<!--    </select></label>-->
+<!--    <label>Rok Szkolny: <input type="text"   name="rok_szkolny" max="9"></label>-->
+<!--  </fieldset>-->
+</form>
+<!--    <fieldset name="manage-karta">-->
+<!--      <legend>Wyczyść dane/Usuń Ucznia</legend>-->
+<!--      <label><button type="button" >Wyczyść Dane Podstawowe</button></label>-->
+<!--      <label><button type="button" >Wyczyść Dane Deklaracji Żywieniowej</button></label>-->
+<!--      <label><button type="button" >Usuń Osobę</button></label>-->
+<!--    </fieldset>-->
+<!--  <fieldset id="usun">-->
+<!--    <legend>Wyczyść dane/Usuń Ucznia</legend>-->
+<!--    <label><button type="button" >Wyczyść Dane Podstawowe</button></label>-->
+<!--    <label><button type="button" >Wyczyść Dane Deklaracji Żywieniowej</button></label>-->
+<!--    <label><button type="button" >Usuń Osobę</button></label>-->
+<!--  </fieldset>-->
+<!--  <fieldset id="wyslij">-->
+<!--    <legend>Wyślij Dane Ucznia</legend>-->
+<!--    <label><button type="button" >Prześlij Dane Personalne</button></label>-->
+<!--    <label><button type="button" >Prześlij Dane Deklaracji</button></label>-->
+<!--  </fieldset>-->

@@ -164,6 +164,15 @@ wss.on('connection', function connection(ws) {
             case 'DeletePaymentZsti':
                 DeletePaymentZsti(parameters.id);
                 break;
+            case 'getKartyZsti':
+                getKartyZsti(ws);
+                break;
+            case 'DeleteKartyZsti':
+                DeleteKartyZsti(parameters.id);
+                break;
+            case 'addKartyZsti':
+                addKartyZsti(parameters.studentId, parameters.keyCard, parameters.beginDate, parameters.lastUse);
+                break;
         }
     });
 });
@@ -208,6 +217,43 @@ database.on('error', function (err) {
         throw err;
     }
 });
+
+function addKartyZsti(studentId, keyCard, beginDate, lastUse)
+{
+    let query = `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES(${studentId}, ${keyCard}, '${beginDate}', '${lastUse}')`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+    })
+}
+
+
+function DeleteKartyZsti(id)
+{
+    let query = `DELETE FROM karty_zsti WHERE id = ${id};`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+    })
+}
+
+function getKartyZsti(websocketClient)
+{
+    let query = `SELECT * FROM karty_zsti;`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(err);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: 'CardsZsti',
+                    value: result
+                }
+            }
+        ))
+    })
+}
 
 function getPaymentZsti(websocketClient)
 {
@@ -388,7 +434,7 @@ function getDniNieczynne(websocketClient)
 
 function getStudentDeclarationInternat(websocketClient)
 {
-    let query = "SELECT * FROM deklaracja_zywieniowa_internat JOIN slownik_wersje ON wersja = slownik_wersje.id";
+    let query = "SELECT * FROM deklaracja_zywieniowa_internat  JOIN slownik_wersje ON wersja = slownik_wersje.id";
     return database.query(query, (err, result) => {
         if (err) throw err;
         console.log(result);

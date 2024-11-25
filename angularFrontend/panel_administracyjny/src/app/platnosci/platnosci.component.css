@@ -1,12 +1,13 @@
 form[name="zarzadzanie_platnosci"] {
-    padding: 10px;
+    padding: 15vh 10px 10px;
 }
 fieldset {
     display: flex;
     border-radius: 10px;
     padding: 20px;
     margin: 10px auto;
-    width: 50%;
+    width: 65%;
+    height:fit-content;
     justify-content: space-between;
     border: 2px solid var(--border-color);
 }
@@ -17,7 +18,7 @@ label {
     display: flex;
     flex-direction: column;
     width: fit-content;
-    max-width: 10vw;
+    /*max-width: 10vw;*/
     margin: 5px 0;
 }
 input {
@@ -29,9 +30,6 @@ input {
     border-radius: 7px;
     border: 0;
     outline: 0;
-}
-input:focus {
-    outline: 2px solid var(--border-color);
 }
 select {
     background-color: var(--background-color);
@@ -84,7 +82,126 @@ button:hover {
     align-items: center;
     justify-content: center;
 }
-form[name="dodaj"] {
+#dodaj_platnosc img{
+    position: absolute;
+    top: 2%;
+    right: 2%;
+    cursor: pointer;
+}
+
+.edit-container{
+    height: fit-content;
+}
+.edit-container > label{
+    margin: 10px 0;
+}
+
+/* Styl całego kontenera */
+.payment-container {
+    display: flex;
+    flex-direction: column; /* Ustawia etykiety w pionie */
+    gap: 15px; /* Odstęp między etykietami */
+    padding: 10px;
+    background-color: #e6eaf1; /* Jasne tło kontenera */
+    border: 2px solid #ccc; /* Obramowanie */
+    border-radius: 10px; /* Zaokrąglenie narożników */
+    max-height: 400px;
+    overflow: auto;
+    width: 15vw;
+    align-items: center;
+}
+
+/* Styl pojedynczej etykiety */
+.payment-label {
+    display: flex; /* Ustawia input i tekst w jednej linii */
+    align-items: center; /* Wyrównanie inputa i tekstu w pionie */
+    padding: 10px; /* Odstęp wewnętrzny etykiety */
+    background-color: #ffffff; /* Tło etykiety */
+    border: 1px solid #ddd; /* Obramowanie etykiety */
+    border-radius: 8px; /* Zaokrąglenie narożników */
+    cursor: pointer; /* Kursor wskazujący możliwość kliknięcia */
+    flex-direction: row;
+    transition: background-color 0.3s ease; /* Animacja tła na hover */
+}
+
+.payment-label:hover {
+    background-color: #f0f8ff; /* Zmiana koloru tła po najechaniu */
+}
+
+/* Styl inputa */
+.payment-label input {
+    margin-right: 10px; /* Odstęp między radiobuttonem a tekstem */
+    flex-shrink: 0; /* Zapobiega ściskaniu inputa */
+}
+
+/* Styl tekstu */
+.payment-label span {
+    font-size: 16px; /* Wielkość tekstu */
+    color: #333; /* Kolor tekstu */
+    /* Usuń white-space, jeśli chcesz, aby tekst mógł się zawijać */
+}
+
+/* Styl zaznaczonego inputa */
+.payment-label input:checked + span {
+    color: #007bff; /* Zmiana koloru tekstu */
+}
+
+
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    height: 100vh; /* Ensure container takes full height of the viewport */
+    box-sizing: border-box; /* Include padding and border in height calculation */
+}
+
+.left-section, .right-section  {
+    width: 45%;
+    margin-top: 15vh; /* Apply 35% margin from the top */
+}
+
+#add-button, .add{
+    position: absolute;
+    top: -50px;
+    right: 20px;
+    background-color: #007bff;
+    width: 80px;
+    height: 32px;
+    font-size: 1em;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#add-button:hover {
+    background-color: #0056b3;
+}
+
+
+.payment-options label {
+    display: block;
+    margin: 8px 0;
+}
+
+.payment-options input[type="radio"] {
+    margin-right: 8px;
+}
+#wyslij{
+    position: relative;
+    display: block;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: fit-content;
+}
+#wyslij button{
+    padding: 15px 30px;
+}
+form[name='dodaj'] {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -92,7 +209,7 @@ form[name="dodaj"] {
     border-radius: 10px;
     background-color: var(--primary-color);
     border: 2px solid var(--border-color);
-    width: 30%;
+    width: 45%;
     height: 45%;
 }
 #dodaj_platnosc img {
