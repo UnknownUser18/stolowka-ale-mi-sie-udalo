@@ -33,6 +33,7 @@ export class DataBaseService {
   SchoolYears = new BehaviorSubject<any>(null)
   LastStudentInsertId = new BehaviorSubject<any>(null)
   PaymentZsti = new BehaviorSubject<any>(null)
+  PaymentInternat = new BehaviorSubject<any>(null);
   CardsZsti = new BehaviorSubject<any>(null)
   CurrentStudentCardZsti = new BehaviorSubject<any>(null)
   SavedList: any[] = [
@@ -89,6 +90,10 @@ export class DataBaseService {
   getPaymentZsti()
   {
     this.send(JSON.stringify({action: "request", params: {method: 'getPaymentZsti'}}))
+  }
+  getPaymentInternat()
+  {
+    this.send(JSON.stringify({action: "request", params: {method: 'getPaymentInternat'}}))
   }
   getStudentInternatDays()
   {
@@ -157,8 +162,7 @@ export class DataBaseService {
 
   send(query:string)
   {
-    // @ts-ignore
-    if(this.socket !== undefined) this.socket.send(query);
+    if(this.socket) this.socket.send(query);
   }
 
   Initialize() {
@@ -237,6 +241,9 @@ export class DataBaseService {
             break;
           case 'PaymentZsti':
             this.PaymentZsti.next(this.lastValue.params.value);
+            break;
+          case 'PaymentInternat':
+            this.PaymentInternat.next(this.lastValue.params.value);
             break;
           case 'CardsZsti':
             this.CardsZsti.next(this.lastValue.params.value);

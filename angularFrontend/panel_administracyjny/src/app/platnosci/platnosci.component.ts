@@ -19,10 +19,13 @@ export class PlatnosciComponent implements OnChanges{
   @Input() typ: string | undefined;
   Months: string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień']
   PaymentZsti:any = null;
+  PaymentInternat:any = null;
   CurrentPayment: {id:number, id_ucznia:number, platnosc:number, data_platnosci:string, miesiac:number, opis:string} = {id: -1, id_ucznia:-1, data_platnosci:'', platnosc:-1, miesiac:-1, opis:''};
   constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.PaymentZsti.asObservable().subscribe(change => this.changePayments(change));
-    this.dataService.CurrentStudentId.asObservable().subscribe(()=> this.changePayments(this.dataService.PaymentZsti))
+    this.dataService.CurrentStudentId.asObservable().subscribe(()=> this.typeChangePayment())
+    this.dataService.PaymentInternat.asObservable().subscribe(change=> this.changePayments(change))
+    this.dataService.StudentType.asObservable().subscribe(()=> this.typeChangePayment())
   }
 
   monthToString(month:number, isNormal:boolean)
@@ -39,6 +42,18 @@ export class PlatnosciComponent implements OnChanges{
     const formattedDay = day.padStart(2, '0');
 
     return `${year}-${formattedMonth}-${formattedDay}`;
+  }
+
+  typeChangePayment()
+  {
+    if(this.dataService.StudentType.value === 'ZSTI')
+    {
+      this.changePayments(this.dataService.PaymentZsti.value);
+    }
+    else if (this.dataService.StudentType.value === 'Internat')
+    {
+      this.changePayments(this.dataService.PaymentInternat.value);
+    }
   }
 
   changePayments(changes:any)
@@ -71,6 +86,9 @@ export class PlatnosciComponent implements OnChanges{
 
   sendPayment()
   {
+    let method = 'addPaymentZsti';
+    if(this.dataService.StudentType.value === 'Internat')
+      method = 'addPaymentInternat';
     let editPayment = JSON.parse(JSON.stringify(this.CurrentPayment));
     editPayment.id_ucznia = this.dataService.CurrentStudentId.value;
     editPayment.data_platnosci = this.el.nativeElement.querySelector('input[name="payment-date-edit"]').value;
@@ -82,7 +100,7 @@ export class PlatnosciComponent implements OnChanges{
       this.dataService.send(JSON.stringify({
         action: "request",
           params: {
-            method: "addPaymentZsti",
+            method: method,
             studentId: editPayment.id_ucznia,
             cost: editPayment.platnosc,
             date: editPayment.data_platnosci,
@@ -90,13 +108,15 @@ export class PlatnosciComponent implements OnChanges{
             description: editPayment.opis
       }
       }))
-
-      this.dataService.getPaymentZsti()
+      if(this.dataService.StudentType.value === 'ZSTI')
+        this.dataService.getPaymentZsti()
+      else
+        this.dataService.getPaymentInternat()
     }
     console.log(editPayment, {
       action: "request",
       params: {
-        method: "addPaymentZsti",
+        method: method,
         studentId: editPayment.id_ucznia,
         cost: editPayment.platnosc,
         date: editPayment.data_platnosci,
@@ -143,17 +163,23 @@ export class PlatnosciComponent implements OnChanges{
 
   delete()
   {
+    let method = 'DeletePaymentZsti';
+    if(this.dataService.StudentType.value === 'Internat')
+      method = 'DeletePaymentInternat';
     this.dataService.send(JSON.stringify(
       {
         action: "request",
         params: {
-          method: "DeletePaymentZsti",
+          method: method,
           id: this.CurrentPayment.id
         }
       }
     ))
     this.clearData()
-    this.dataService.getPaymentZsti()
+    if(this.dataService.StudentType.value === 'ZSTI')
+      this.dataService.getPaymentZsti()
+    else
+      this.dataService.getPaymentInternat()
   }
 
   clearData()

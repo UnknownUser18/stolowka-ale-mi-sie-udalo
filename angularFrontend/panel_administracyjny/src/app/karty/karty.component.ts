@@ -1,19 +1,27 @@
 import {Component, ElementRef, Input} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {DataBaseService} from '../data-base.service';
+import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
+import {CardDisplayComponent} from '../card-display/card-display.component';
 
 @Component({
   selector: 'app-karty',
   standalone: true,
   imports: [
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgForOf,
+    NgOptimizedImage,
+    CardDisplayComponent,
+    NgIf
   ],
   templateUrl: './karty.component.html',
   styleUrl: './karty.component.css'
 })
 export class KartyComponent {
   @Input() typ: string | undefined;
+  today:Date = new Date();
+  todayString:string;
   CurrentKarta: { id: number, id_ucznia:number, key_card:number, data_wydania:string, ostatnie_uzycie:string } =
       {
         id:-1,
@@ -32,6 +40,7 @@ export class KartyComponent {
       }
   constructor(private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.CurrentStudentCardZsti.asObservable().subscribe((change:any)=>this.updateCard(change))
+    this.todayString = `${this.today.getFullYear()}-${this.today.getMonth()+1}-${this.today.getDate()}`;
   }
   updateCard(change:any)
   {
@@ -65,12 +74,35 @@ export class KartyComponent {
     this.el.nativeElement.querySelector('input[name="ostatnie_uzycie"]').value = '';
   }
 
-  generateRandomKeyCard(event:Event)
+  generateRandomKeyCard(event: Event | null)
   {
     let max = 0x10000;
     let min = 0x400;
-    let val = Math.floor(Math.random() * (max-min)+min);
-    ((event.target as HTMLElement).parentElement!.querySelector('input[name="key_card"]') as HTMLInputElement).value = String(val);
+    this.el.nativeElement.querySelector('input[name="card-amount-edit"]').value = Math.floor(Math.random() * (0x10000 - 0x400) + 0x400);
+  }
+
+  deleteCard()
+  {
+    this.dataService.send(JSON.stringify(
+      {
+        action: "request",
+        params: {
+          method: "DeleteKartyZsti",
+          id: this.CurrentKarta.id
+        }
+      }
+    ))
+    this.dataService.getCardsZsti()
+  }
+
+  dodajPlatnosc()
+  {
+    this.el.nativeElement.querySelector('#dodaj_karte').style.display = 'flex';
+  }
+
+  closeCard()
+  {
+    this.el.nativeElement.querySelector('#dodaj_karte').style.display = 'none';
   }
 
 }
