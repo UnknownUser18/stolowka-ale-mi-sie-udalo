@@ -21,7 +21,7 @@
     <fieldset id="deklaracja">
       <legend>Informacje o Płatności</legend>
       <div>
-        <label>Klucz Karty: <input type="number" name="card-amount-edit" focused="true" placeholder="Wprowadź kwotę" required min="0"> <button class="button" (click)="generateRandomKeyCard(null)">Losuj</button></label>
+        <label>Klucz Karty: <input type="number" name="card-amount-edit" placeholder="Wprowadź kwotę" required min="0"> <button class="button" (click)="generateRandomKeyCard(null)">Losuj</button></label>
         <label>Data Wydania: <input type="date" name="card-date-release" [value]="todayString" required></label>
         <label>Ostatnie Użycie: <input type="date" name="payment-description-edit" [value]="todayString" disabled></label>
       </div>

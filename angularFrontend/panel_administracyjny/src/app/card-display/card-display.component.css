@@ -1,12 +1,12 @@
 .card-container {
-    width: 200px; /* Card width */
-    height: 300px; /* Card height */
+    width: 200px;
+    height: 300px;
     background-color: white;
-    border: 2px solid #000; /* Border color */
+    border: 2px solid #000;
     position: relative;
     box-sizing: border-box;
     padding: 20px;
-    text-align: center; /* Center content */
+    text-align: center;
 }
 
 .card-key {
@@ -22,9 +22,9 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0.5; /* 50% opacity */
-    width: 50px; /* Adjust size */
-    height: 50px; /* Adjust size */
+    opacity: 0.5;
+    width: 50px;
+    height: 50px;
 }
 
 .card-owner {

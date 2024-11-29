@@ -52,26 +52,22 @@ export class GlobalnyRaportComponent {
     button.addEventListener('click', () : void => {
       console.log('click', this.miesiac);
 
-      // Create a workbook from the HTML table
       let table = XLS.utils.table_to_book(document.getElementById('raport_table'), {sheet: `Raport za ${this.miesiac}`});
       let ws = table.Sheets[`Raport za ${this.miesiac}`];
 
-      // Apply styling
-      ws['!cols'] = [{wch: 20}, {wch: 20}, {wch: 20}, {wch: 20}]; // Set column widths
+      ws['!cols'] = [{wch: 20}, {wch: 20}, {wch: 20}, {wch: 20}];
 
-      // Center align all cells in the worksheet
-      const range = XLS.utils.decode_range(<string>ws['!ref']); // Get the range of the worksheet
+      const range = XLS.utils.decode_range(<string>ws['!ref']);
       for (let row = range.s.r; row <= range.e.r; row++) {
         for (let col = range.s.c; col <= range.e.c; col++) {
           const cellAddress = XLS.utils.encode_cell({r: row, c: col});
-          if (!ws[cellAddress]) continue; // Skip if the cell is empty
-          if (!ws[cellAddress].s) ws[cellAddress].s = {}; // Initialize style object if not present
-          if (!ws[cellAddress].s.alignment) ws[cellAddress].s.alignment = {}; // Initialize alignment object if not present
+          if (!ws[cellAddress]) continue;
+          if (!ws[cellAddress].s) ws[cellAddress].s = {};
+          if (!ws[cellAddress].s.alignment) ws[cellAddress].s.alignment = {};
           ws[cellAddress].s.alignment.horizontal = 'center';
           ws[cellAddress].s.alignment.vertical = 'center';
         }
       }
-      // Write the file
       XLS.writeFile(table, `raport_${this.miesiac.split(' ')[0].toLowerCase()}_${this.miesiac.split(' ')[1]}.xlsx`);
     });
 

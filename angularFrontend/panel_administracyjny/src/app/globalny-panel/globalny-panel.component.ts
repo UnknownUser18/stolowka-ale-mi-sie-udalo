@@ -60,11 +60,9 @@ export class GlobalnyPanelComponent implements OnInit{
       this.dni_nieczynne.push(`${value.getFullYear()}-${value.getMonth() + 1}-${value.getDate()}`)
     })
     this.dni_nieczynne.sort((a:any, b:any) => {
-      // Przekształcamy stringi na obiekty Date
       let dateA:Date = new Date(a);
       let dateB:Date = new Date(b);
 
-      // Porównujemy obiekty Date
       // @ts-ignore
       return dateA - dateB;
     });
@@ -123,14 +121,11 @@ export class GlobalnyPanelComponent implements OnInit{
   }
 
   daysFromNow(dateString: string): string {
-    // Parse the input date string into a Date object
     const inputDate = new Date(dateString);
     const today = new Date();
 
-    // Calculate the difference in milliseconds
     const differenceInTime = inputDate.getTime() - today.getTime();
 
-    // Convert milliseconds to days
     const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24));
 
     if(differenceInDays < 0 )
@@ -183,7 +178,6 @@ export class GlobalnyPanelComponent implements OnInit{
       });
       setTimeout(() => {
         this.el.nativeElement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]').value = this.month.toString();
-        // safeguard
         if(this.day - 7 < 1) {
           this.miesiace[month-1] = { month: this.miesiace[month-1].month, disabled: false };
           this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = new Date(year, this.month + 1, 0).getDate() - 7;
@@ -198,7 +192,6 @@ export class GlobalnyPanelComponent implements OnInit{
     }
     this.yearBefore = year;
     if (year === this.year && month === this.month) {
-      // safeguard
       if(this.day - 7 < 1) {
         this.miesiace[month-1] = { month: this.miesiace[month-1].month, disabled: false };
         this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = new Date(year, month + 1, 0).getDate() - 7;

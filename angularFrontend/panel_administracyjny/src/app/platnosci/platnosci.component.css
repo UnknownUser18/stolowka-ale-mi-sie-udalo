@@ -7,7 +7,7 @@ fieldset {
     padding: 20px;
     margin: 10px auto;
     width: 65%;
-    height:fit-content;
+    height: fit-content;
     justify-content: space-between;
     border: 2px solid var(--border-color);
 }
@@ -18,7 +18,6 @@ label {
     display: flex;
     flex-direction: column;
     width: fit-content;
-    /*max-width: 10vw;*/
     margin: 5px 0;
 }
 input {
@@ -82,88 +81,70 @@ button:hover {
     align-items: center;
     justify-content: center;
 }
-#dodaj_platnosc img{
+#dodaj_platnosc img {
     position: absolute;
     top: 2%;
     right: 2%;
     cursor: pointer;
 }
-
-.edit-container{
+.edit-container {
     height: fit-content;
 }
-.edit-container > label{
+.edit-container > label {
     margin: 10px 0;
 }
-
-/* Styl całego kontenera */
 .payment-container {
     display: flex;
-    flex-direction: column; /* Ustawia etykiety w pionie */
-    gap: 15px; /* Odstęp między etykietami */
+    flex-direction: column;
+    gap: 15px;
     padding: 10px;
-    background-color: #e6eaf1; /* Jasne tło kontenera */
-    border: 2px solid #ccc; /* Obramowanie */
-    border-radius: 10px; /* Zaokrąglenie narożników */
+    background-color: #e6eaf1;
+    border: 2px solid #ccc;
+    border-radius: 10px;
     max-height: 400px;
     overflow: auto;
     width: 15vw;
     align-items: center;
 }
-
-/* Styl pojedynczej etykiety */
 .payment-label {
-    display: flex; /* Ustawia input i tekst w jednej linii */
-    align-items: center; /* Wyrównanie inputa i tekstu w pionie */
-    padding: 10px; /* Odstęp wewnętrzny etykiety */
-    background-color: #ffffff; /* Tło etykiety */
-    border: 1px solid #ddd; /* Obramowanie etykiety */
-    border-radius: 8px; /* Zaokrąglenie narożników */
-    cursor: pointer; /* Kursor wskazujący możliwość kliknięcia */
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
     flex-direction: row;
-    transition: background-color 0.3s ease; /* Animacja tła na hover */
+    transition: background-color 0.3s ease;
 }
-
 .payment-label:hover {
-    background-color: #f0f8ff; /* Zmiana koloru tła po najechaniu */
+    background-color: #f0f8ff;
 }
-
-/* Styl inputa */
 .payment-label input {
-    margin-right: 10px; /* Odstęp między radiobuttonem a tekstem */
-    flex-shrink: 0; /* Zapobiega ściskaniu inputa */
+    margin-right: 10px;
+    flex-shrink: 0;
 }
-
-/* Styl tekstu */
 .payment-label span {
-    font-size: 16px; /* Wielkość tekstu */
-    color: #333; /* Kolor tekstu */
-    /* Usuń white-space, jeśli chcesz, aby tekst mógł się zawijać */
+    font-size: 16px;
+    color: #333;
 }
-
-/* Styl zaznaczonego inputa */
 .payment-label input:checked + span {
-    color: #007bff; /* Zmiana koloru tekstu */
+    color: #007bff;
 }
-
-
-
 .container {
     display: flex;
     justify-content: space-between;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    height: 100vh; /* Ensure container takes full height of the viewport */
-    box-sizing: border-box; /* Include padding and border in height calculation */
+    height: 100vh;
+    box-sizing: border-box;
 }
-
-.left-section, .right-section  {
+.left-section, .right-section {
     width: 45%;
-    margin-top: 15vh; /* Apply 35% margin from the top */
+    margin-top: 15vh;
 }
-
-#add-button, .add{
+#add-button, .add {
     position: absolute;
     top: -50px;
     right: 20px;
@@ -177,28 +158,24 @@ button:hover {
     border-radius: 4px;
     cursor: pointer;
 }
-
 #add-button:hover {
     background-color: #0056b3;
 }
-
-
 .payment-options label {
     display: block;
     margin: 8px 0;
 }
-
 .payment-options input[type="radio"] {
     margin-right: 8px;
 }
-#wyslij{
+#wyslij {
     position: relative;
     display: block;
     left: 50%;
     transform: translate(-50%, 0);
     width: fit-content;
 }
-#wyslij button{
+#wyslij button {
     padding: 15px 30px;
 }
 form[name='dodaj'] {
@@ -229,6 +206,6 @@ form[name="dodaj"] span {
 form[name="dodaj"] span > button {
     margin: 0 auto;
 }
-.payment-label{
+.payment-label {
     flex-direction: row;
 }

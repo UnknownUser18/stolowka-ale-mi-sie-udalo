@@ -301,8 +301,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
       element.array = []
     });
   }
-  // @ts-ignore
-  // @ts-ignore
+  //@ts-ignore
 isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | undefined => {
     let dayOfTheWeek = date.getDay();
     if(dayOfTheWeek === 0)
@@ -317,7 +316,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
       }
       if(!(this.dataService.CurrentStudentDeclaration.value))
       {
-        console.log("istnieje2")
         if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
           button.disabled = true;
         }
@@ -390,7 +388,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
 
     this.currentDate = this.months[month] + ' ' + year;
     let weekcount = 0;
-    // create week div
     const weekDiv = this.renderer.createElement('div');
     this.renderer.addClass(weekDiv, 'week');
     if(calendar_content !== undefined) this.renderer.appendChild(calendar_content, weekDiv);
@@ -398,7 +395,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
 
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
       let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
-      // create day button
       if (i < first_day_week) {
         const dayDiv = this.renderer.createElement('div');
         this.renderer.addClass(dayDiv, 'day');
@@ -459,7 +455,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
       this.renderer.setProperty(daySpan, 'innerHTML', ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i]);
       if(dni !== undefined) this.renderer.appendChild(dni, daySpan);
     }
-    // checking for empty days
     Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       if (week.children.length < 7) {
         for (let i = week.children.length; i < 7; i++) {
@@ -470,7 +465,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
         }
       }
     });
-    // check if the week element is empty
 
     Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week : HTMLElement) => {
       // @ts-ignore
@@ -478,7 +472,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
       if (isEmpty) week.remove();
     });
     let week = this.week_number()[month];
-    // create zaznacz buttons
     const zaznacz: HTMLElement = this.el.nativeElement.querySelector('#zaznacz');
     if(zaznacz !== undefined) zaznacz.innerHTML = '';
     let week_length = this.el.nativeElement.getElementsByClassName('week').length;
@@ -520,7 +513,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
     }
   }
 
-  // show previous/next month
   change_month(number: number) {
     if(number === 0) {
       this.date = new Date();
@@ -532,7 +524,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
     this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
     this.show_calendar();
   }
-  // when on click add/remove to selected array
   select(element: MouseEvent) {
     // dla uczniow zsti
     if(this.typ === "ZSTI") {
@@ -739,7 +730,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
             if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === checkyMeal.value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`).getDay(),typy.indexOf(checkyMeal.value)))
               this.usuniecie.find(meal => meal.id === checkyMeal.value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`);
           }
-          console.log("być")
           this.checkTypPosilkow();
           break;
         case 'nie_być':

@@ -54,7 +54,7 @@ export class KartyComponent {
 
   updateCard(change:any)
   {
-    console.log( "NIGERS Karta pierwsza zmiana" + this.CurrentKarta, change)
+    console.log("Karta pierwsza zmiana" + this.CurrentKarta, change)
     if(typeof change != 'object' || change.id === -1)
     {
       console.log("Null karta!")
@@ -67,7 +67,7 @@ export class KartyComponent {
       this.CurrentKarta.data_wydania = `${dateBegin.getFullYear()}-${dateBegin.getMonth() + 1}-${dateBegin.getDate()}`
       let lastUse = new Date(this.CurrentKarta.ostatnie_uzycie)
       this.CurrentKarta.ostatnie_uzycie = `${lastUse.getFullYear()}-${lastUse.getMonth() + 1}-${lastUse.getDate()}`
-    console.log( "NIGERS Karta" + this.CurrentKarta, change)
+    console.log("Karta" + this.CurrentKarta, change)
     this.showCardInformation();
   }
 
