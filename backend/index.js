@@ -182,6 +182,15 @@ wss.on('connection', function connection(ws) {
             case 'addKartyZsti':
                 addKartyZsti(parameters.studentId, parameters.keyCard, parameters.beginDate, parameters.lastUse);
                 break;
+            case 'getKartyInternat':
+                getKartyInternat(ws);
+                break;
+            case 'DeleteKartyInternat':
+                DeleteKartyInternat(parameters.id);
+                break;
+            case 'addKartyInternat':
+                addKartyInternat(parameters.studentId, parameters.keyCard, parameters.beginDate, parameters.lastUse);
+                break;
         }
     });
 });
@@ -227,9 +236,51 @@ database.on('error', function (err) {
     }
 });
 
+
+function addKartyInternat(studentId, keyCard, beginDate, lastUse)
+{
+    let query = `INSERT INTO karty_internat (id_ucznia, key_card, data_wydania) VALUES(${studentId}, ${keyCard}, '${beginDate}')`;
+    if(lastUse)
+        query = `INSERT INTO karty_internat (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES(${studentId}, ${keyCard}, '${beginDate}', '${lastUse}')`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+    })
+}
+
+
+function DeleteKartyInternat(id)
+{
+    let query = `DELETE FROM karty_internat WHERE id = ${id};`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+    })
+}
+
+function getKartyInternat(websocketClient)
+{
+    let query = `SELECT * FROM karty_internat;`;
+    return database.query(query, (err, result) => {
+        if(err) throw err;
+        console.log(err);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: 'CardsInternat',
+                    value: result
+                }
+            }
+        ))
+    })
+}
+
 function addKartyZsti(studentId, keyCard, beginDate, lastUse)
 {
-    let query = `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES(${studentId}, ${keyCard}, '${beginDate}', '${lastUse}')`;
+    let query = `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania) VALUES(${studentId}, ${keyCard}, '${beginDate}')`;
+    if(lastUse)
+        query = `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES(${studentId}, ${keyCard}, '${beginDate}', '${lastUse}')`;
     return database.query(query, (err, result) => {
         if(err) throw err;
         console.log(result);

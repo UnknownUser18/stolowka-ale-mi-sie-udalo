@@ -229,3 +229,6 @@ form[name="dodaj"] span {
 form[name="dodaj"] span > button {
     margin: 0 auto;
 }
+.payment-label{
+    flex-direction: row;
+}

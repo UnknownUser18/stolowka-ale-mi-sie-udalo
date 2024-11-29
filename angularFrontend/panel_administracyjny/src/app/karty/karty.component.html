@@ -11,7 +11,7 @@
     <fieldset id="usun">
       <legend>Zarządzanie Kartą</legend>
       <label><button id="dodaj" (click)="dodajPlatnosc()" type="button">Dodaj Kartę</button></label>
-      <label><button type="button" (click)="deleteCard()">Usuń Kartę</button></label>
+      <label><button id="usunbtn" type="button" (click)="deleteCard()">Usuń Kartę</button></label>
     </fieldset>
 </form>
 <section id="dodaj_karte">
@@ -21,13 +21,13 @@
     <fieldset id="deklaracja">
       <legend>Informacje o Płatności</legend>
       <div>
-        <label>Klucz Karty: <input type="number" name="card-amount-edit" placeholder="Wprowadź kwotę" required min="0"> <button class="button" (click)="generateRandomKeyCard(null)">Losuj</button></label>
-        <label>Data Wydania: <input type="date" name="payment-date-edit" [value]="todayString" required></label>
+        <label>Klucz Karty: <input type="number" name="card-amount-edit" focused="true" placeholder="Wprowadź kwotę" required min="0"> <button class="button" (click)="generateRandomKeyCard(null)">Losuj</button></label>
+        <label>Data Wydania: <input type="date" name="card-date-release" [value]="todayString" required></label>
         <label>Ostatnie Użycie: <input type="date" name="payment-description-edit" [value]="todayString" disabled></label>
       </div>
 
     </fieldset>
-    <button type="button" class="button" id="zapisz" ><span>Zapisz</span></button>
+    <button type="button" class="button" id="zapisz" (click)="dodajKarte()"><span>Zapisz</span></button>
   </form>
 </section>
 <!--<label>Klucz Karty: <input type="number"  name="key_card" disabled> <button (click)="generateRandomKeyCard($event)">Losuj</button></label>-->
