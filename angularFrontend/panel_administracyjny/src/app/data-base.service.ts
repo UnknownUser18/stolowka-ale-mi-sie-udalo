@@ -286,5 +286,6 @@ export class DataBaseService {
     this.getDisabledDays();
     this.getSchoolYears();
     this.getPaymentZsti();
+    this.getPaymentInternat();
   }
 }

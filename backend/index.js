@@ -191,6 +191,12 @@ wss.on('connection', function connection(ws) {
             case 'addKartyInternat':
                 addKartyInternat(parameters.studentId, parameters.keyCard, parameters.beginDate, parameters.lastUse);
                 break;
+            case 'getStudentFromCardZsti':
+                getStudentFromCardZsti(ws, parameters.keyCard);
+                break;
+            case 'getStudentFromCardInternat':
+                getStudentFromCardInternat(ws, parameters.keyCard);
+                break;
         }
     });
 });
@@ -235,6 +241,42 @@ database.on('error', function (err) {
         throw err;
     }
 });
+
+function getStudentFromCardZsti(websocketClient, keyCard)
+{
+    let query = `SELECT * FROM karty_zsti WHERE key_card = ${keyCard}`
+    return database.query(query, (err, result) => {
+        if(err)throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: 'StudentCardZsti',
+                    value: result
+                }
+            }
+        ))
+    })
+}
+
+function getStudentFromCardInternat(websocketClient, keyCard)
+{
+    let query = `SELECT * FROM karty_internat WHERE key_card = ${keyCard}`
+    return database.query(query, (err, result) => {
+        if(err)throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: 'StudentCardInternat',
+                    value: result
+                }
+            }
+        ))
+    })
+}
 
 
 function addKartyInternat(studentId, keyCard, beginDate, lastUse)
