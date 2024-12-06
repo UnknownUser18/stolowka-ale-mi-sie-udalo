@@ -38,6 +38,7 @@ export class DataBaseService {
   CurrentStudentCardZsti = new BehaviorSubject<any>(null)
   CardsInternat = new BehaviorSubject<any>(null);
   CurrentStudentCardInternat = new BehaviorSubject<any>(null)
+  AllStudentDeclarations = new BehaviorSubject<any>(null);
   nullKarta = {
     id: -1,
     id_ucznia: -1,
@@ -201,12 +202,14 @@ export class DataBaseService {
           case 'StudentDeclarationZsti':
             this.StudentDeclarationZsti.next(this.lastValue.params.value );
             this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any)=> element.id_osoby == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
-            console.log("StudentDeclarationZsti: ", this.lastValue.params.value);
+            this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value))
+            console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
             break;
           case 'StudentDeclarationInternat':
             this.StudentDeclarationInternat.next(this.lastValue.params.value );
             this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
-            console.log("StudentDeclarationInternat: ", this.lastValue.params.value);
+            this.AllStudentDeclarations.next(this.StudentDeclarationInternat.value.find((element:any) => element.osoby_internat_id == this.CurrentStudentId.value))
+            console.log("StudentDeclarationInternat: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
             break;
           case 'StudentListZsti':
             this.StudentListZsti.next(this.lastValue.params.value);
@@ -287,5 +290,15 @@ export class DataBaseService {
     this.getSchoolYears();
     this.getPaymentZsti();
     this.getPaymentInternat();
+    this.getStudentDeclarationZsti();
+    this.getStudentDeclarationInternat();
+  }
+
+  sendDeclaration(declaration: {end_date: any; begin_date: any; dni_tygodnia: any[]; wersja_posilku: any; opis: any}) {
+
+  }
+
+  deleteDeclaration(id: number) {
+
   }
 }

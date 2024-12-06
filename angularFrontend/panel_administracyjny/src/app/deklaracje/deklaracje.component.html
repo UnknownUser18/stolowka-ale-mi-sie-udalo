@@ -1,0 +1,75 @@
+<form name="zarzadzanie_deklaracje">
+  <fieldset>
+    <legend>Zarządzanie istniejącymi Deklaracjami</legend>
+    <div class="edit-container">
+      <label>Opis:
+        <input type="text" name="declaration-description" placeholder="Wprowadź opis" required>
+      </label>
+      <label>Data rozpoczęcia:
+        <input type="date" name="declaration-begin-date" required>
+      </label>
+      <label>Data zakończenia:
+        <input type="date" name="declaration-end-date" required>
+      </label>
+      <button class="btn" (click)="deleteDeclaration()">Usuń deklarację</button>
+    </div>
+    <div>
+      <h2>Lista Deklaracji</h2>
+      <div class="declaration-container">
+        <label
+          class="declaration-label"
+          *ngFor="let element of Declarations; let i = index">
+          <input
+            name="declaration-radio"
+            [id]="'decl' + i"
+            type="radio"
+            [value]="i"
+            (click)="updateDeclaration($event)">
+          <span>{{ element.opis }} {{ element.data_rozpoczecia }}</span>
+        </label>
+      </div>
+      <button class="btn" (click)="dodajDeklaracje()">Dodaj nową deklarację</button>
+    </div>
+  </fieldset>
+</form>
+
+<section id="dodaj_deklaracje">
+  <form name="dodaj">
+    <h2>Dodawanie Deklaracji</h2>
+    <img ngSrc="../../assets/x.svg" alt="Zamknij" (click)="closeDeklaracje()" height="48" width="48">
+    <fieldset id="deklaracja">
+      <legend>Informacje o Deklaracji</legend>
+      <div>
+        <label>Data rozpoczęcia:
+          <input type="date" name="begin-date-edit" required>
+        </label>
+        <label>Data zakończenia:
+          <input type="date" name="end-date-edit" required>
+        </label>
+        <div class="zsti">
+          <span>Dni tygodnia:</span>
+          <label><input type="checkbox" name="days" value="1"> Poniedziałek</label>
+          <label><input type="checkbox" name="days" value="2"> Wtorek</label>
+          <label><input type="checkbox" name="days" value="3"> Środa</label>
+          <label><input type="checkbox" name="days" value="4"> Czwartek</label>
+          <label><input type="checkbox" name="days" value="5"> Piątek</label>
+        </div>
+        <label class="internat">Wersja posiłku:
+          <select name="meal-version" required>
+            <option value="I">I</option>
+            <option value="II">II</option>
+            <option value="III">III</option>
+            <option value="IV">IV</option>
+            <option value="V">V</option>
+            <option value="VI">VI</option>
+            <option value="VII">VII</option>
+            <option value="VIII">Obiad</option>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+    <div id="wyslij">
+      <button type="button" (click)="sendDeclaration()"><span>Zapisz</span></button>
+    </div>
+  </form>
+</section>
