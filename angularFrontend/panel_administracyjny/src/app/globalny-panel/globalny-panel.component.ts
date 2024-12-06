@@ -273,6 +273,7 @@ export class GlobalnyPanelComponent implements OnInit{
     }
     this.insertedDeclaration = false;
     console.log('dodaj_osobe');
+    this.close_os()
   }
   sendDeclaration(change:any)
   {
