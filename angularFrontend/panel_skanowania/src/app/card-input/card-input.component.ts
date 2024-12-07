@@ -24,7 +24,6 @@ export class CardInputComponent {
     event.preventDefault();
     let cardInput = ((event.target as HTMLElement).children[0] as HTMLInputElement).value;
     this.cardChange.emit(cardInput);
-
   }
 
 
