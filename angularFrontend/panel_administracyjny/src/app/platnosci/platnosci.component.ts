@@ -70,11 +70,11 @@ export class PlatnosciComponent implements OnChanges{
     })
     this.PaymentZsti.forEach((element:any) => {
       let date = new Date(element.data_platnosci)
-      element.data_platnosci = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+      element.data_platnosci = this.formatDate(`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`);
     })
     this.PaymentZsti.sort((a:any, b:any) => {
-      let dateA:Date = new Date(a.data_platnosci);
-      let dateB:Date = new Date(b.data_platnosci);
+      let dateA:Date = new Date(this.formatDate(a.data_platnosci));
+      let dateB:Date = new Date(this.formatDate(b.data_platnosci));
 
       // @ts-ignore
       return dateA - dateB;

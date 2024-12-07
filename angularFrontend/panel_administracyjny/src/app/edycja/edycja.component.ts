@@ -107,18 +107,12 @@ export class EdycjaComponent implements OnChanges {
     ]
 
     setTimeout(()=>{
-      console.log(`${new Date(this.declaration.data_od).getFullYear()}-${new Date(this.declaration.data_od).getMonth()+1}-${new Date(this.declaration.data_od).getDate()}`)
-      this.el.nativeElement.querySelector('input[name="data_od"]').value =
-          `${new Date(this.declaration.data_od).getFullYear()}-${
-              String(new Date(this.declaration.data_od).getMonth() + 1).padStart(2, '0')}-${
-              String(new Date(this.declaration.data_od).getDate()).padStart(2, '0')}`;
+      let data_od = new Date(this.formatDate(this.declaration.data_od));
+      this.el.nativeElement.querySelector('input[name="data_od"]').value = this.formatDate(`${data_od.getFullYear()}-${data_od.getMonth() + 1}-${data_od.getDate()}`);
+      let data_do = new Date(this.formatDate(this.declaration.data_do));
+      this.el.nativeElement.querySelector('input[name="data_do"]').value = this.formatDate(`${data_do.getFullYear()}-${data_do.getMonth() + 1}-${data_do.getDate()}`)
 
-      this.el.nativeElement.querySelector('input[name="data_do"]').value =
-          `${new Date(this.declaration.data_do).getFullYear()}-${
-              String(new Date(this.declaration.data_do).getMonth() + 1).padStart(2, '0')}-${
-              String(new Date(this.declaration.data_do).getDate()).padStart(2, '0')}`;
-
-
+      console.log("Test daty: ", data_do, this.formatDate(this.declaration.data_do) ,data_od, this.formatDate(this.declaration.data_od));
       if(this.dataService.StudentType.value === 'Internat')
         this.el.nativeElement.querySelector('input[name="typ_posilku"]').value = this.declaration.wersja
       else{
@@ -172,7 +166,6 @@ export class EdycjaComponent implements OnChanges {
 
   formatDate(dateStr: string): string {
     const [year, month, day] = dateStr.split('-');
-    console.log(dateStr.split('-'))
     const formattedMonth = month.padStart(2, '0');
     const formattedDay = day.padStart(2, '0');
 

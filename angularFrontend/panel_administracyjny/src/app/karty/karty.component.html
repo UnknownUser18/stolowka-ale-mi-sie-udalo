@@ -6,7 +6,6 @@
       <label>Data Wydania: <input type="date"  name="data_wydania" disabled></label>
       <label>Ostatnie Użycie <input type="date"  name="ostatnie_uzycie" disabled></label>
 <!--      <app-card [cardKey]="this.CurrentKarta.key_card.toString()" [ownerName]="'hgafsdgjh'" *ngIf="this.CurrentKarta.key_card"></app-card>-->
-
     </fieldset>
     <fieldset id="usun">
       <legend>Zarządzanie Kartą</legend>
@@ -21,7 +20,9 @@
     <fieldset id="deklaracja">
       <legend>Informacje o Płatności</legend>
       <div>
-        <label>Klucz Karty: <input type="number" name="card-amount-edit" placeholder="Wprowadź kwotę" required min="0"> <button class="button" (click)="generateRandomKeyCard(null)">Losuj</button></label>
+        <label>Klucz Karty: <input type="number" name="card-amount-edit" placeholder="Wprowadź kwotę" required min="0">
+<!--          <button class="button" (click)="generateRandomKeyCard(null)">Losuj</button>-->
+        </label>
         <label>Data Wydania: <input type="date" name="card-date-release" [value]="todayString" required></label>
         <label>Ostatnie Użycie: <input type="date" name="payment-description-edit" [value]="todayString" disabled></label>
       </div>

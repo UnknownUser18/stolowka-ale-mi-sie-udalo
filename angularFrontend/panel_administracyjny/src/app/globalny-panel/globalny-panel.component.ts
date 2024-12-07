@@ -121,6 +121,9 @@ export class GlobalnyPanelComponent implements OnInit{
   }
 
   daysFromNow(dateString: string): string {
+    console.log(dateString)
+    if(dateString)
+      dateString = this.formatDate(dateString);
     const inputDate = new Date(dateString);
     const today = new Date();
 
@@ -139,6 +142,14 @@ export class GlobalnyPanelComponent implements OnInit{
     return 'undefined'
   }
 
+  formatDate(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-');
+    const formattedMonth = month.padStart(2, '0');
+    const formattedDay = day.padStart(2, '0');
+
+    return `${year}-${formattedMonth}-${formattedDay}`;
+  }
+
   dodaj() {
     console.log('dodaj');
     let day = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]');
@@ -148,7 +159,7 @@ export class GlobalnyPanelComponent implements OnInit{
     }
     let month = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]');
     let year = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="rok"]');
-    let string = `${year.value}-${month.value}-${day.value}`;
+    let string = this.formatDate(`${year.value}-${month.value}-${day.value}`);
     let date = new Date(string)
     date.setMonth(date.getMonth() + 1)
     console.log(`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`);

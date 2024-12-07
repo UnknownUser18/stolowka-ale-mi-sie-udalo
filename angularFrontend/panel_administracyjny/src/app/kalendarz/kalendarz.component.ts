@@ -59,6 +59,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.StudentZstiDays = this.dataService.StudentZstiDays.asObservable()
     this.CurrentStudentDeclaration = this.dataService.CurrentStudentDeclaration.asObservable()
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
+    this.month_next = this.months[new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getFullYear()
+    this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
     this.dataService.CurrentZstiDays.asObservable().subscribe(() => {
       this.selected = []
       this.dbCopyZstiDays = []
@@ -303,6 +305,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
   }
   //@ts-ignore
 isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | undefined => {
+
     let dayOfTheWeek = date.getDay();
     if(dayOfTheWeek === 0)
       dayOfTheWeek = 7
@@ -407,7 +410,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
         this.selected.includes(`${year}-${month+1}-${i - first_day_week + 1}`) || this.selectedDisabled.includes(`${year}-${month+1}-${i - first_day_week + 1}`) ? this.renderer.addClass(dayButton, 'selected') : null;
         if(this.typ !== 'Internat')
         {
-          this.isWeekend(new Date(`${year}-${month+1}-${i - first_day_week + 1}`), dayButton, this.typ!);
+          this.isWeekend(new Date(this.formatDate(`${year}-${month+1}-${i - first_day_week + 1}`)), dayButton, this.typ!);
           if(this.DisabledDays) {
             if(this.DisabledDays.includes(`${year}-${month + 1}-${i - first_day_week + 1}`)) {
               dayButton.classList.add('disabled-day-global')
@@ -423,7 +426,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
             this.renderer.setAttribute(checkbox, 'type', 'checkbox');
             this.renderer.setAttribute(checkbox, 'value', element);
 
-            !this.isWeekend(new Date(`${year}-${month + 1}-${i - first_day_week + 1}`), dayButton, this.typ!) && this.checkDayInternat(year, month+1, i - first_day_week + 1, element, first_day_week, i, typy) ? checkbox.checked = true : checkbox.disabled = true;
+            !this.isWeekend(new Date(this.formatDate(`${year}-${month + 1}-${i - first_day_week + 1}`)), dayButton, this.typ!) && this.checkDayInternat(year, month+1, i - first_day_week + 1, element, first_day_week, i, typy) ? checkbox.checked = true : checkbox.disabled = true;
             if(this.typy_posilkow_db.array_operacaja.find(elem=>elem.id === element)!.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`))
               checkbox.checked = false;
             dayButton.disabled ? checkbox.disabled = true : null;
@@ -434,7 +437,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
             }
             this.renderer.appendChild(checkboxes,checkbox);
           })
-          if(!this.isWeekend(new Date(`${year}-${month + 1}-${i - first_day_week + 1}`), dayButton, this.typ!) && !this.DisabledDays.includes(`${year}-${month + 1}-${i - first_day_week + 1}`))
+          if(!this.isWeekend(new Date(this.formatDate(`${year}-${month + 1}-${i - first_day_week + 1}`)), dayButton, this.typ!) && !this.DisabledDays.includes(`${year}-${month + 1}-${i - first_day_week + 1}`))
             this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
@@ -712,6 +715,16 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
   close() {
     this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'none';
   }
+
+  formatDate(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-');
+    const formattedMonth = month.padStart(2, '0');
+    const formattedDay = day.padStart(2, '0');
+
+    return `${year}-${formattedMonth}-${formattedDay}`;
+  }
+
+
   // zmien
   zmien_posilek($event: MouseEvent) {
     this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'none';
