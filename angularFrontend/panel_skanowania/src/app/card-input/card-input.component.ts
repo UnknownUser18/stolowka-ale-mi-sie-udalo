@@ -1,30 +1,36 @@
-import {Component, EventEmitter, output, Output} from '@angular/core';
-import {DataBaseService} from "../data-base.service";
+import {AfterViewInit, Component, ElementRef, EventEmitter, Output, ViewChild} from '@angular/core';
+import { DataBaseService } from "../data-base.service";
 
 @Component({
   selector: 'app-card-input',
   standalone: true,
   imports: [],
   templateUrl: './card-input.component.html',
-  styleUrl: './card-input.component.css'
+  styleUrls: ['./card-input.component.css']
 })
-export class CardInputComponent {
-  cardChange = output<string>()
+export class CardInputComponent implements AfterViewInit{
+  @Output() cardChange = new EventEmitter<string>();
   today: Date = new Date();
   todayString: string = this.today.toString();
-  constructor(private dataService: DataBaseService) {
+
+  @ViewChild('cardInput') cardInput: ElementRef<HTMLInputElement> | undefined;
+
+  ngAfterViewInit() {
+    this.focusInput();
   }
 
-  setNewName(event: Event)
-  {
-    this.cardChange.emit((event.target as HTMLInputElement).value);
+
+
+  focusInput() {
+    (this.cardInput!.nativeElement as HTMLInputElement).focus();
+    console.log("blur", this.cardInput!.nativeElement)
   }
+
+  constructor(private dataService: DataBaseService) {}
 
   handleSubmit(event: Event) {
     event.preventDefault();
     let cardInput = ((event.target as HTMLElement).children[0] as HTMLInputElement).value;
     this.cardChange.emit(cardInput);
   }
-
-
 }

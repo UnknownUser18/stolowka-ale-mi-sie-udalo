@@ -1,0 +1,123 @@
+/* Container for the buttons */
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;  /* Increased space between buttons */
+  margin-top: 30px;
+}
+
+/* General button styling */
+.button {
+  padding: 15px 35px;  /* Increased padding for larger buttons */
+  font-size: 22px;  /* Larger font for tablet view */
+  font-weight: 700;  /* Bold font weight for better visibility */
+  border: 2px solid transparent;
+  border-radius: 12px;  /* More rounded corners */
+  cursor: pointer;
+  transition: all 0.3s ease;  /* Smooth transition for all properties */
+  text-transform: uppercase;  /* Make button text uppercase */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);  /* Stronger shadow for depth */
+}
+
+/* Green button styling */
+.green {
+  color: #fff;
+  background-color: #4CAF50;  /* Modern green color */
+  border-color: #4CAF50;
+}
+
+/* Hover effect for green button */
+.green:hover {
+  background-color: #45a049;
+  transform: translateY(-5px);  /* Lift effect on hover */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);  /* Stronger shadow on hover */
+}
+
+/* Red button styling */
+.red {
+  color: #fff;
+  background-color: #f44336;  /* Modern red color */
+  border-color: #f44336;
+}
+
+/* Hover effect for red button */
+.red:hover {
+  background-color: #e53935;
+  transform: translateY(-5px);  /* Lift effect on hover */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);  /* Stronger shadow on hover */
+}
+
+/* Yellow button styling */
+.yellow {
+  color: #333;
+  background-color: #FFEB3B;  /* Modern yellow color */
+  border-color: #FFEB3B;
+}
+
+/* Hover effect for yellow button */
+.yellow:hover {
+  background-color: #FDD835;
+  transform: translateY(-5px);  /* Lift effect on hover */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);  /* Stronger shadow on hover */
+}
+
+/* Container for the main content */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;  /* Full viewport height */
+  font-family: Arial, sans-serif;
+  margin: 0;
+  text-align: center;
+  padding: 40px;  /* Add padding to the container */
+  box-sizing: border-box;
+  transition: background-color 0.3s ease;
+}
+
+/* Header for name and surname */
+.header {
+  display: flex;
+  justify-content: center;
+  gap: 20px;  /* Increased gap between name and surname */
+  margin-bottom: 30px;
+}
+
+.name,
+.surname {
+  font-size: 36px;  /* Larger font size for name and surname */
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Message section */
+.message {
+  margin: 30px 0;
+  font-size: 24px;  /* Larger font for message */
+}
+
+/* Responsiveness for better tablet layout */
+@media (max-width: 1024px) {
+  .button {
+    padding: 18px 40px;  /* Larger button padding for tablets */
+    font-size: 24px;  /* Larger font size on tablet */
+  }
+
+  .name,
+  .surname {
+    font-size: 42px;  /* Bigger name and surname */
+  }
+
+  .message {
+    font-size: 28px;  /* Bigger message font */
+  }
+
+  .container {
+    padding: 50px;  /* More padding around the content */
+  }
+
+  .header {
+    gap: 30px;  /* Increase space between name and surname */
+  }
+}

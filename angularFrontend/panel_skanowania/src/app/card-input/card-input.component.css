@@ -1,0 +1,88 @@
+/* Ogólne Style */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f6f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.scanner-container {
+  background-color: white;
+  width: 100%;
+  max-width: 600px;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.header p {
+  font-size: 1.1rem;
+  color: #777;
+  margin-top: 5px;
+}
+
+.scanner-form {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.card-input {
+  padding: 14px 18px;
+  font-size: 1.2rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.card-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.submit-btn {
+  padding: 14px 18px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .scanner-container {
+    padding: 20px;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .card-input {
+    font-size: 1rem;
+  }
+
+  .submit-btn {
+    font-size: 1rem;
+  }
+}
