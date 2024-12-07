@@ -1,2 +1,17 @@
-<p>card-output works!</p>
-<p>{{ value }}</p>
+<section class="container" [ngStyle]="{ 'background-color': backgroundColor }">
+  <header class="header">
+    <h1 class="name">{{ capitalizeFirstChar(currentStudent.imie) }}</h1>
+    <h1 class="surname">{{ capitalizeFirstChar(currentStudent.nazwisko) }}</h1>
+  </header>
+  <article class="message">
+    <p>{{ message }}</p>
+  </article>
+  <footer class="buttons">
+    <button class="button green" type="button" (click)="onAccept()">Wpuść</button>
+    <button class="button red" type="button" (click)="onReject()">Odrzuć</button>
+    <button class="button yellow" type="button" (click)="onMoreInfo()">Więcej</button>
+  </footer>
+</section>
+
+<!--<p>card-output works!</p>-->
+<!--<p>{{ value }}</p>-->
