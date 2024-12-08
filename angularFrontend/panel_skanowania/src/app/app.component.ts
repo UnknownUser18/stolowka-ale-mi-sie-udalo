@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, ElementRef} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {CardInputComponent} from "./card-input/card-input.component";
 import {CardOutputComponent} from "./card-output/card-output.component";
@@ -17,7 +17,7 @@ export class AppComponent {
   toggleVisibility: boolean = false;
   value:string = 'nic';
 
-  constructor(private dataService:DataBaseService) {
+  constructor(private dataService:DataBaseService, private el: ElementRef) {
     this.dataService.CurrentStudentCardFromKeyCard.asObservable().subscribe((element:any) => this.handleCardResult())
     this.toggleVisibility = false;
   }
@@ -35,9 +35,11 @@ export class AppComponent {
     this.toggleVisibility = true;
   }
 
-  reset()
+  handleReset()
   {
     this.toggleVisibility = false;
+    this.el.nativeElement.querySelector('input').focus();
+    (this.el.nativeElement.querySelector('input') as HTMLInputElement ).value = '';
   }
 
 

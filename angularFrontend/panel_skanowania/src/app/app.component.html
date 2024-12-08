@@ -1,2 +1,2 @@
 <app-card-input (cardChange)="handleCardRequest($event)" *ngIf="!toggleVisibility"></app-card-input>
-<app-card-output *ngIf="toggleVisibility"></app-card-output>
+<app-card-output (reset)="handleReset()" *ngIf="toggleVisibility"></app-card-output>

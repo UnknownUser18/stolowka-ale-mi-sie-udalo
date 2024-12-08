@@ -39,6 +39,8 @@ export class DataBaseService {
   CardsInternat = new BehaviorSubject<any>(null);
   CurrentStudentCardInternat = new BehaviorSubject<any>(null)
   CurrentStudentCardFromKeyCard = new BehaviorSubject<any>(null);
+  ScanZsti = new BehaviorSubject<any>(null);
+  CurrentStudentScan = new BehaviorSubject<any>(null);
   nullKarta = {
     id: -1,
     id_ucznia: -1,
@@ -161,6 +163,10 @@ export class DataBaseService {
     this.send(JSON.stringify({action: "request", params: {method: "getStudentFromCardInternat", keyCard: keyCard}}));
   }
 
+  getScanZsti()
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getScanZsti"}}));
+  }
 
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
@@ -304,6 +310,10 @@ export class DataBaseService {
           this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value[0]);
           console.log("ZMIANA KARTY ZSTI: ", this.lastValue.params.value, this.CurrentStudentCardFromKeyCard.value);
           break;
+        case 'ScanZsti':
+          this.ScanZsti.next(this.lastValue.params.value);
+          this.CurrentStudentScan.next(this.lastValue.params.value.filter((element:any)=>element.id_karty == this.CurrentStudentCardFromKeyCard.value.id))
+          break;
       }
     })
     this.getCardsZsti();
@@ -313,5 +323,6 @@ export class DataBaseService {
     this.getSchoolYears();
     this.getPaymentZsti();
     this.getPaymentInternat();
+    this.getScanZsti();
   }
 }

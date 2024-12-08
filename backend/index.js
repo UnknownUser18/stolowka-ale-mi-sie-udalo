@@ -197,6 +197,12 @@ wss.on('connection', function connection(ws) {
             case 'getStudentFromCardInternat':
                 getStudentFromCardInternat(ws, parameters.keyCard);
                 break;
+            case 'addScanZsti':
+                addScanZsti(parameters.cardId, parameters.datetime);
+                break;
+            case 'getScanZsti':
+                getScanZsti(ws);
+                break;
         }
     });
 });
@@ -241,6 +247,34 @@ database.on('error', function (err) {
         throw err;
     }
 });
+
+
+function getScanZsti(websocketClient)
+{
+    let query = `SELECT * FROM skany_zsti;`;
+    return database.query(query, (err, result) => {
+        if(err)throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: 'ScanZsti',
+                    value: result
+                }
+            }
+        ))
+    })
+}
+
+function addScanZsti(cardId, datetime)
+{
+    let query = `INSERT INTO skany_zsti (id_karty, czas) values(${cardId}, '${datetime}')`;
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result)
+    })
+}
 
 function getStudentFromCardZsti(websocketClient, keyCard)
 {

@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {DataBaseService} from '../data-base.service';
 import {NgStyle} from '@angular/common';
 
@@ -12,6 +12,7 @@ import {NgStyle} from '@angular/common';
   styleUrl: './card-output.component.css'
 })
 export class CardOutputComponent {
+  @Output() reset = new EventEmitter<null>();
   today: Date = new Date();
   todayString: string = this.today.toString();
   currentCard:any = null;
@@ -76,6 +77,25 @@ export class CardOutputComponent {
         if(this.today.getDate() <= 10)
           this.message = "Nie zapłacił - Data Przed 10";
       }
+    console.log(this.dataService.CurrentStudentScan.value, this.dataService.CurrentStudentScan.value.filter((element:any) => new Date(element.czas).getMonth() == new Date().getMonth()))
+    this.dataService.ScanZsti.value.filter((element:any) => element.id_karty == this.dataService.CurrentStudentCardFromKeyCard.value.id).filter((element:any) => new Date(element.czas).getMonth() == new Date().getMonth()).forEach((element:any) =>{
+      let curData = new Date(element.czas);
+      let today = new Date();
+      if(curData.getFullYear() == today.getFullYear() && curData.getMonth() == today.getMonth() && curData.getDate() == today.getDate())
+      {
+        value = false;
+        this.message = "Karta Została Dzisiaj Zeskanowanoa"
+      }
+    })
+    this.dataService.CurrentStudentScan.value.filter((element:any) => new Date(element.czas).getMonth() == new Date().getMonth()).forEach((element:any) =>{
+      let curData = new Date(element.czas);
+      let today = new Date();
+      if(curData.getFullYear() == today.getFullYear() && curData.getMonth() == today.getMonth() && curData.getDate() == today.getDate())
+      {
+        value = false;
+        this.message = "Karta Została Dzisiaj Zeskanowanoa"
+      }
+    })
     console.log(payments, payments.length, this.dataService.PaymentZsti.value, this.dataService.PaymentInternat.value);
     if(payments.length > 0)
       console.log(payments.filter((element:any) => element.miesiac == (this.today.getMonth() + 1) && element.rok == this.today.getFullYear()));
@@ -83,22 +103,40 @@ export class CardOutputComponent {
       console.log(payments.miesiac, this.today, payments.rok,(payments.miesiac == (this.today.getMonth() + 1) && payments.rok == this.today.getFullYear()));
     // zmien tlo na kolor :3
     this.backgroundColor = value ? 'lightgreen' : 'lightcoral';
+    this.dataService.getScanZsti();
     return value;
   }
 
 
   onAccept() {
     this.backgroundColor = 'lightgreen';  // Dim green
+    let data = new Date();
+    this.dataService.send(JSON.stringify(
+      {
+        action: "request",
+        params: {
+          method: "addScanZsti",
+          cardId: this.dataService.CurrentStudentCardFromKeyCard.value.id,
+          datetime: `${data.getFullYear()}-${data.getMonth() + 1}-${data.getDate()}`
+        }
+      }
+    ))
+    this.onReset()
   }
 
   onReject() {
     this.backgroundColor = 'lightcoral';  // Dim red
+    this.onReset()
   }
 
   onMoreInfo() {
     // You can add logic for more info if needed
     alert('More information');
+    this.onReset()
   }
 
+  onReset(){
+    this.reset.emit();
+  }
 
 }
