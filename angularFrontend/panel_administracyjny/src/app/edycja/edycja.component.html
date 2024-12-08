@@ -1,0 +1,47 @@
+<h1>Dane Osobowe</h1>
+<form name="osoba">
+  <fieldset (change)="logChangesPersonal()">
+    <legend>Dane Podstawowe</legend>
+    <label>Imię: <input type="text" [(ngModel)]="editedStudent.imie" name="imie"></label>
+    <label>Nazwisko: <input type="text" [(ngModel)]="editedStudent.nazwisko" name="nazwisko"></label>
+    <label class="zsti">Typ:<div>
+      <label><input type="radio" [(ngModel)]="editedStudent.typ_osoby_id" value="1" [value]='1' name="typ">Uczeń</label>
+      <label><input type="radio" [(ngModel)]="editedStudent.typ_osoby_id" value="2" [value]='2' name="typ">Nauczyciel</label>
+    </div></label>
+    <label class="zsti">Klasa: <input type="text" [(ngModel)]="editedStudent.klasa" name="klasa"></label>
+    <label>Uczęszcza: <input type="checkbox" [(ngModel)]="editedStudent.uczeszcza" name="uczeszcza"></label>
+  </fieldset>
+  <fieldset (change)="changeDeclaration()">
+    <legend>Deklaracja Żywieniowa</legend>
+    <label>Data od: <input type="date" [(ngModel)]="editedDeclaration.data_od" name="data_od"></label>
+    <label>Data do: <input type="date" [(ngModel)]="editedDeclaration.data_do" name="data_do"></label>
+    <label class="zsti">Dni żywienia: <div>
+      <label><input type="checkbox" [value]='0' name="poniedziałek">Poniedziałek</label>
+      <label><input type="checkbox" [value]='1' name="wtorek">Wtorek</label>
+      <label><input type="checkbox" [value]='2' name="środa">Środa</label>
+      <label><input type="checkbox" [value]='3' name="czwartek">Czwartek</label>
+      <label><input type="checkbox" [value]='4' name="piątek">Piątek</label>
+    </div></label>
+    <label class="internat">Wersja Posiłku: <select name="typ_posilku" [(ngModel)]="editedDeclaration.wersja">
+      <option [value]="1">I</option>
+      <option [value]="2">II</option>
+      <option [value]="3">III</option>
+      <option [value]="4">IV</option>
+      <option [value]="5">V</option>
+      <option [value]="6">VI</option>
+      <option [value]="7">Obiady</option>
+    </select></label>
+    <label>Rok Szkolny: <input type="text" [(ngModel)]="editedDeclaration.rok_szkolny"  name="rok_szkolny" max="9"></label>
+  </fieldset>
+  <fieldset id="usun">
+    <legend>Wyczyść dane/Usuń Ucznia</legend>
+    <label><button type="button" (click)="clear_data('podstawowe')">Wyczyść Dane Podstawowe</button></label>
+    <label><button type="button" (click)="clear_data('deklaracja')">Wyczyść Dane Deklaracji Żywieniowej</button></label>
+    <label><button type="button" (click)="remove_user()">Usuń Osobę</button></label>
+  </fieldset>
+  <fieldset id="wyslij">
+      <legend>Wyślij Dane Ucznia</legend>
+      <label><button type="button" (click)="sendChangesPersonal()">Prześlij Dane Personalne</button></label>
+      <label><button type="button" (click)="sendChangesDeclaration()">Prześlij Dane Deklaracji</button></label>
+  </fieldset>
+</form>

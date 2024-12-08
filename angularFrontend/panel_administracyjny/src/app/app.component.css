@@ -1,4 +1,5 @@
 nav {
+    overflow: auto;
     position: absolute;
     top: 0;
     left: 0;
@@ -10,7 +11,29 @@ nav {
     border-right: 2px solid var(--border-color);
 }
 h2 {
+    cursor: pointer;
+    margin: 30px 0 10px 0;
     text-align: center;
+}
+h2:hover {
+    text-decoration: underline;
+}
+#wyszukaj {
+    margin: 5px 0 10px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#wyszukaj > input {
+    font-size: 0.8em;
+    font-family: inherit;
+    outline: 0;
+    border: 2px solid var(--border-color);
+    border-radius: 7px;
+    padding: 10px;
+    width: 60%;
+    margin: 10px 0;
+    transition: 150ms ease-in-out all;
 }
 ol {
     opacity: 0;
@@ -79,4 +102,17 @@ button > img {
 button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
+}
+@media (min-width: 1280px) and (max-width: 1800px) {
+    nav {
+        font-size: 1.4em;
+    }
+    img {
+        width: 40px;
+        height: 40px;
+    }
+    li {
+        width: 82%;
+        overflow: auto;
+    }
 }

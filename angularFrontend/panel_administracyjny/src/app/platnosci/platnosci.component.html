@@ -1,0 +1,51 @@
+<form name="zarzadzanie_platnosci">
+  <fieldset>
+    <legend>Zarządzanie istniejącymi Płatnościami</legend>
+    <div class="edit-container">
+      <label>Kwota:<input type="number" name="payment-amount" placeholder="Wprowadź kwotę" min="0" required></label>
+      <label>Data:<input type="date" name="payment-date"></label>
+      <label>Miesiąc:<select name="payment-month">
+          <option *ngFor="let element  of Months; let i = index" [attr.data-index]="i" [value]="i">  {{ element }}</option>
+        </select>
+      </label>
+      <label for="opis">Opis:<input type="text" id="opis" name="payment-description" placeholder="Wprowadź opis"></label><button class="btn" (click)="delete()">Cofnij wpłatę</button>
+    </div>
+    <div>
+      <h2>Lista Płatności</h2>
+      <div class="payment-container">
+        <label
+          class="payment-label"
+          *ngFor="let element of PaymentZsti; let i = index">
+          <input
+            name="payment-radio"
+            [id]="'abc' + i"
+            type="radio"
+            [value]="i"
+            (click)="updatePayment($event)">
+          <span>{{ monthToString(element.miesiac, true) }} {{ element.data_platnosci }}</span>
+        </label>
+      </div>
+      <button class="btn" (click)="dodajPlatnosc()">Dodaj nową płatność</button>
+    </div>
+  </fieldset>
+</form>
+<section id="dodaj_platnosc">
+  <form name="dodaj">
+    <h2>Dodawanie Płatności</h2>
+    <img ngSrc="../../assets/x.svg" alt="Zamknij" (click)="closePlatnosc()" height="48" width="48">
+    <fieldset id="deklaracja">
+      <legend>Informacje o Płatności</legend>
+      <div>
+        <label>Kwota: <input type="number" name="payment-amount-edit" placeholder="Wprowadź kwotę" required min="0"></label>
+        <label>Data: <input type="date" name="payment-date-edit" required></label>
+        <label class="internat">Wersja posiłku <select name="payment-month-edit" required>
+          <option *ngFor="let element of Months; let i = index" [attr.data-index]="i" [value]="i + 1">  {{ element }}</option>
+        </select></label>
+        <label>Opis: <input type="text" name="payment-description-edit" placeholder="Wprowadź opis"></label>
+      </div>
+    </fieldset>
+    <div id="wyslij">
+      <button type="button"  (click)="sendPayment()"><span>Zapisz</span></button>
+    </div>
+  </form>
+</section>

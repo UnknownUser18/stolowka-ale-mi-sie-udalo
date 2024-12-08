@@ -1,16 +1,41 @@
 <section class="kalendarz">
   <section id="date">
-    <span id="default_month" (click)="default_date()">Bieżący Miesiąc</span>
     <span id="change_month">
-      <span (click)="change_month(-1)"> <img ngSrc="../../assets/arrow_back.svg" alt="miesiąc w tył" height="48" width="48"> {{ month_before }}</span>
-      <span>{{ currentDate }}</span>
-      <span (click)="change_month(1)">{{ month_next }} <img ngSrc="../../assets/arrow_forward.svg" alt="miesiąc w przód" height="48" width="48"> </span>
+      <span id="default_month" (click)="change_month(0)">Bieżący Miesiąc</span>
+      <div>
+        <span (click)="change_month(-1)"> <img ngSrc="../../assets/arrow_back.svg" alt="miesiąc w tył" height="36" width="36"> {{ month_before }}</span>
+        <span>{{ currentDate }}</span>
+        <span (click)="change_month(1)">{{ month_next }} <img ngSrc="../../assets/arrow_forward.svg" alt="miesiąc w przód" height="36" width="36"> </span>
+      </div>
     </span>
     <span id="dni"></span>
     </section>
     <section id="content">
       <div id="zaznacz" (click)="select_row($event)"></div>
       <section id="kalendarz" (click)="select($event)" (contextmenu)="select($event)"></section>
+    </section>
+    <section id="sending">
+      <button (click)="sendDays()">
+        Wyślij
+      </button>
+      <div *ngIf="!empty_dodanie">
+        <h2>Dodane</h2>
+        <ul>
+          <li *ngFor="let element of dodanie">{{element.id}}: {{element.array.join(', ')}}</li>
+        </ul>
+      </div>
+      <div *ngIf="!empty_usuniecie">
+        <h2>Usunięte</h2>
+        <ul>
+          <li *ngFor="let element of usuniecie">{{element.id}}: {{element.array.join(', ')}}</li>
+        </ul>
+      </div>
+       <ul *ngIf="!empty_diff_zsti">
+         <li *ngFor="let element of diff_selected_zsti">{{element}}</li>
+       </ul>
+      <ul *ngIf="!empty_diff_undo_zsti">
+        <li *ngFor="let element of diff_undo_selected_zsti">{{element}}</li>
+      </ul>
     </section>
     <section id="zmiana_posilku">
       <section id="zmiana">
@@ -24,7 +49,7 @@
             <label><input type="radio" name="posilek" value="wszystko">Wszystko</label>
           </div>
         </form>
-        <form name="na">
+        <form name="yah">
           <h3>Nieobecność</h3>
           <div>
             <label><input type="radio" name="na" value="być">Nie</label>
@@ -34,4 +59,14 @@
         <button type="submit" (click)="zmien_posilek($event)">Wprowadź</button>
       </section>
     </section>
+</section>
+<section id="stop_background">
+  <section>
+    <h2>Uwaga masz niezapisane zmiany!</h2>
+    <div>
+      <button>Zapisz</button>
+      <button>Nie zapisuj</button>
+      <button>Anuluj</button>
+    </div>
+  </section>
 </section>

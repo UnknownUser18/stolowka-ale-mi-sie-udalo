@@ -11,7 +11,11 @@
     font-weight: normal;
 }
 :root {
-    --disabled: #bfbec9;
+    --gradient: #b5bdcc;
+    --disabled-global-day: #7e7eab;
+    --disabled-working-day: #A9A9BE;
+    --disabled: #c0bfca;
+    --disabled-text-color: #2d2d2d;
     --background-color: #fffdfb;
     --primary-color: #cfd5e3;
     --secondary-color: #a1aab9;

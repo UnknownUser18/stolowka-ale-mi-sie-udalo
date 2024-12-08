@@ -1,0 +1,33 @@
+<h1>Karty i Aplikacje</h1>
+<form name="osoba">
+    <fieldset name="Karta">
+      <legend>Aktualna Karta</legend>
+      <label>Klucz Karty: <input type="number"  name="key_card" disabled></label>
+      <label>Data Wydania: <input type="date"  name="data_wydania" disabled></label>
+      <label>Ostatnie Użycie <input type="date"  name="ostatnie_uzycie" disabled></label>
+<!--      <app-card [cardKey]="this.CurrentKarta.key_card.toString()" [ownerName]="'hgafsdgjh'" *ngIf="this.CurrentKarta.key_card"></app-card>-->
+
+    </fieldset>
+    <fieldset id="usun">
+      <legend>Zarządzanie Kartą</legend>
+      <label><button id="dodaj" (click)="dodajPlatnosc()" type="button">Dodaj Kartę</button></label>
+      <label><button id="usunbtn" type="button" (click)="deleteCard()">Usuń Kartę</button></label>
+    </fieldset>
+</form>
+<section id="dodaj_karte">
+  <form name="dodaj">
+    <h2>Dodawanie Karty Ucznia</h2>
+    <img ngSrc="../../assets/x.svg" alt="Zamknij" (click)="closeCard()" height="48" width="48">
+    <fieldset id="deklaracja">
+      <legend>Informacje o Płatności</legend>
+      <div>
+        <label>Klucz Karty: <input type="number" name="card-amount-edit" placeholder="Wprowadź kwotę" required min="0"> <button class="button" (click)="generateRandomKeyCard(null)">Losuj</button></label>
+        <label>Data Wydania: <input type="date" name="card-date-release" [value]="todayString" required></label>
+        <label>Ostatnie Użycie: <input type="date" name="payment-description-edit" [value]="todayString" disabled></label>
+      </div>
+
+    </fieldset>
+    <button type="button" class="button" id="zapisz" (click)="dodajKarte()"><span>Zapisz</span></button>
+  </form>
+</section>
+<!--<label>Klucz Karty: <input type="number"  name="key_card" disabled> <button (click)="generateRandomKeyCard($event)">Losuj</button></label>-->
