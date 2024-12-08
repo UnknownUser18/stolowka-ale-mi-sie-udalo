@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnChanges} from '@angular/core';
+import {Component, ElementRef, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {DataBaseService} from '../data-base.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
@@ -32,14 +32,13 @@ export class DeklaracjeComponent implements OnChanges {
     this.dataService.AllStudentDeclarations.subscribe((change:any) => this.updateDeclarations(change));
     this.DOMelement = this.el.nativeElement;
   }
-
-updateDeclarations(declarations: any) : void {
-  if (Array.isArray(declarations)) {
-    this.Declarations = declarations.filter((d: any) => d.id_ucznia === this.dataService.CurrentStudentId.value);
-  } else {
-    console.error('Expected declarations to be an array, but got:', declarations);
+  updateDeclarations(declarations: any) : void {
+    if (Array.isArray(declarations)) {
+      this.Declarations = declarations.filter((d: any) => d.id_ucznia === this.dataService.CurrentStudentId.value);
+    } else {
+      console.error('Expected declarations to be an array, but got:', declarations);
+    }
   }
-}
 
   sendDeclaration() {
     const declaration = {
@@ -74,7 +73,17 @@ updateDeclarations(declarations: any) : void {
     this.CurrentDeclaration = this.Declarations[event.target.value];
   }
 
-  ngOnChanges() {
+  ngOnChanges(changes : SimpleChanges) {
+    if(changes['typ']) {
+      if(this.typ === 'ZSTI') {
+        this.DOMelement.querySelector('.zsti').style.display = 'block';
+        this.DOMelement.querySelector('.internat').style.display = 'none';
+      }
+      else if(this.typ === 'Internat') {
+        this.DOMelement.querySelector('.zsti').style.display = 'none';
+        this.DOMelement.querySelector('.internat').style.display = 'block';
+      }
+    }
     this.updateDeclarations([]);
   }
 }

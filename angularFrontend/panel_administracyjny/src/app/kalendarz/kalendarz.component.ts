@@ -153,14 +153,12 @@ export class KalendarzComponent implements OnChanges, OnInit {
         result = false
       })
     })
-    console.log(this.dodanie)
     // usuniecie
     this.usuniecie.forEach((element)=>{
       element.array.forEach(()=>{
         result = false
       })
     })
-    console.log(this.usuniecie)
     if (this.empty_dodanie) this.empty_dodanie = false;
     if (this.empty_usuniecie) this.empty_usuniecie = false;
     this.dataService.changeTypPoslikuSaved(result);
@@ -588,22 +586,23 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
     else if(this.typ === "Internat") {
       if(element.button == 2) {
         element.preventDefault()
-        let target = element.target as HTMLElement
+        let target : HTMLElement = element.target as HTMLElement
         if(target.tagName === "BUTTON" && !(target as HTMLButtonElement).disabled && !target.classList.contains('empty')) {
-          let parent = target.parentElement as HTMLElement;
-          let grandparent = parent.parentElement as HTMLElement;
-          let parent_index = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
-          let target_index = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
-          const div = this.DOMelement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
-          let checked = 0
-          let unchecked = 0
+          let parent : HTMLElement = target.parentElement as HTMLElement;
+          let grandparent : HTMLElement = parent.parentElement as HTMLElement;
+          let parent_index : number = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
+          let target_index : number = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
+          const div : HTMLElement = this.DOMelement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
+          let all : number = 0;
+          let checked : number = 0
+          let unchecked : number = 0
           const typy = ['sniadanie','obiad','kolacja']
           const getInputElements = (parent: HTMLElement, check: boolean) => {
-            Array.from(parent.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
-              (dziecko as HTMLInputElement).checked = check;
-              let value = (dziecko as HTMLInputElement).value;
-              if(!check)
-              {
+            // @ts-ignore
+            Array.from(parent.children as unknown as NodeListOf<HTMLInputElement>).forEach((dziecko) => {
+              dziecko.disabled ? dziecko.checked = false : dziecko.checked = check;
+              let value = dziecko.value;
+              if(!check) {
                 let meal = this.dodanie.find(meal => meal.id === value);
                 if(meal) {
                   // @ts-ignore
@@ -614,8 +613,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
                 }
                 this.checkTypPosilkow();
               }
-              else
-              {
+              else {
                 let meal = this.dodanie.find(meal => meal.id === value);
                 if(meal) {
                   meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`), 1);
@@ -626,13 +624,16 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
               }
             })
           }
-          Array.from(div.children as unknown as NodeListOf<HTMLElement>).forEach((dziecko) => {
-            (dziecko as HTMLInputElement).checked ? checked++ : unchecked++;
+          Array.from(div.children as unknown as NodeListOf<HTMLInputElement>).forEach((dziecko) => {
+            if(!dziecko.disabled) {
+              all++;
+              dziecko.checked ? checked++ : unchecked++;
+            }
           })
-          if(checked === 3) {
+          if(checked === all) {
             getInputElements(div, false);
           }
-          else if(unchecked === 3) {
+          else if(unchecked === all) {
             getInputElements(div, true);
           }
           else if(checked < unchecked) {
