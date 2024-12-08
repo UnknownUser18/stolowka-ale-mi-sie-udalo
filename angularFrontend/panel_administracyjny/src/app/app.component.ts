@@ -14,7 +14,9 @@ import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-
   imports: [PanelComponent, NgOptimizedImage, NgForOf, GlobalnyPanelComponent],
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
+  DOMelement : any | undefined;
+
   zsti_users: Array<{imie: string[], nazwisko: string[]}> = [
   {
     imie: [],
@@ -30,6 +32,7 @@ export class AppComponent implements OnInit{
   StudentListZstiData:any = null;
   StudentListInternatData:any = null;
   constructor(private dataService:DataBaseService, private el: ElementRef, private dialog: MatDialog) {
+    this.DOMelement = this.el.nativeElement
   }
   ngOnInit() {
     this.dataService.StudentListZstiData.subscribe((data: any) => {
@@ -50,31 +53,21 @@ export class AppComponent implements OnInit{
   szukaj() {
     const searchTerm = this.el.nativeElement.querySelector('#wyszukaj > input').value.toLowerCase();
     if(searchTerm === '') {
-      this.el.nativeElement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
+      this.DOMelement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
         element.style.display = 'block';
       })
-      this.el.nativeElement.querySelectorAll('section:nth-of-type(2) > ol > li').forEach((element : HTMLElement) => {
+      this.DOMelement.querySelectorAll('section:nth-of-type(2) > ol > li').forEach((element : HTMLElement) => {
         element.style.display = 'block';
       })
       return;
     }
-    this.rozwin(this.el.nativeElement.querySelector('section:nth-of-type(1) > button'), 3, true);
-    this.rozwin(this.el.nativeElement.querySelector('section:nth-of-type(2) > button'), 4, true);
-    this.el.nativeElement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
-      if(!element.textContent?.toLowerCase().includes(searchTerm)) {
-        element.style.display = 'none';
-      }
-      else {
-        element.style.display = 'block';
-      }
+    this.rozwin(this.DOMelement.querySelector('section:nth-of-type(1) > button'), 3, true);
+    this.rozwin(this.DOMelement.querySelector('section:nth-of-type(2) > button'), 4, true);
+    this.DOMelement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
+      !element.textContent?.toLowerCase().includes(searchTerm) ? element.style.display = 'none' : element.style.display = 'block';
     })
     this.el.nativeElement.querySelectorAll('section:nth-of-type(2) > ol > li').forEach((element : HTMLElement) => {
-      if(!element.textContent?.toLowerCase().includes(searchTerm)) {
-        element.style.display = 'none';
-      }
-      else {
-        element.style.display = 'block';
-      }
+      !element.textContent?.toLowerCase().includes(searchTerm) ? element.style.display = 'none' : element.style.display = 'block';
     })
   }
   cantDoThat(func:Function)
@@ -113,8 +106,8 @@ export class AppComponent implements OnInit{
         if(target.tagName == "SPAN") {
           target = target.parentElement as HTMLElement;
         }
-        this.el.nativeElement.querySelector('app-globalny-panel').style.display = 'none';
-        this.el.nativeElement.querySelector('app-panel').style.display = 'block';
+        this.DOMelement.querySelector('app-globalny-panel').style.display = 'none';
+        this.DOMelement.querySelector('app-panel').style.display = 'block';
         let daneTarget = target;
         this.osoba = target.querySelector('span')?.textContent!;
         target = target.parentElement as HTMLElement;
@@ -162,8 +155,8 @@ export class AppComponent implements OnInit{
   }
   protected readonly JSON = JSON;
   main_menu() {
-    this.el.nativeElement.querySelector('app-globalny-panel').style.display = 'block';
-    this.el.nativeElement.querySelector('app-panel').style.display = 'none';
+    this.DOMelement.querySelector('app-globalny-panel').style.display = 'block';
+    this.DOMelement.querySelector('app-panel').style.display = 'none';
     // żydon zrób żeby usunąc zaznaczoną osobę po tym kliknięciu ^
   }
 }
