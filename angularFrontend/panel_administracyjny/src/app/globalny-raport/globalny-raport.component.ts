@@ -12,23 +12,25 @@ import * as XLS from 'xlsx';
   styleUrl: './globalny-raport.component.css'
 })
 export class GlobalnyRaportComponent {
-  constructor(private renderer: Renderer2, private el: ElementRef) {}
-
+  DOMelement : any | undefined;
+  constructor(private renderer: Renderer2, private el: ElementRef) {
+    this.DOMelement = this.el.nativeElement;
+  }
 
   miesiac : string = '';
   miesiace : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   osoby_zsti : string[] = ['Jacek Gyatterek', 'Wojtek Skibidi', 'Agata Tobolewska', 'Pozdrawiam AT']
   date : Date = new Date();
   show() : void {
-    this.renderer.setStyle(this.el.nativeElement.querySelector('main'), 'display', 'flex');
+    this.renderer.setStyle(this.DOMelement.querySelector('main'), 'display', 'flex');
   }
   close() : void {
-    this.renderer.setStyle(this.el.nativeElement.querySelector('main'), 'display', 'none');
+    this.renderer.setStyle(this.DOMelement.querySelector('main'), 'display', 'none');
   }
   generuj(event : Event) : void | string {
     event.preventDefault();
-    let date : string = this.el.nativeElement.querySelector('form[name="miesiac"] input[name="month"]').value;
-    let raport : HTMLElement = this.el.nativeElement.querySelector('#raport');
+    let date : string = this.DOMelement.querySelector('form[name="miesiac"] input[name="month"]').value;
+    let raport : HTMLElement = this.DOMelement.querySelector('#raport');
     if(parseInt(date.split('-')[1]) >= 13 || parseInt(date.split('-')[1]) == 0) return raport.innerHTML = `Niepoprawny format daty! <br> Wprowadź miesiąc w zakresie od 1 do 12!`;
     if(date.length != 7) return raport.innerHTML = `Niepoprawny format daty! <br> Wprowadź datę w formacie RRRR-MM`;
     let myslnik : number = 0;
@@ -40,7 +42,7 @@ export class GlobalnyRaportComponent {
       if(((i < 4 || i > 5) && (date[i] < '0' || date[i] > '9')) || (i == 4 && date[i] != '-')) return raport.innerHTML = `Niepoprawny format daty! <br> Wprowadź datę w formacie RRRR-MM`
     }
     this.miesiac = this.miesiace[parseInt(date.split('-')[1], 10) - 1] + ' ' + date.split('-')[0];
-    let typ : string = this.el.nativeElement.querySelector('form[name="miesiac"] select[name="typ"]').value;
+    let typ : string = this.DOMelement.querySelector('form[name="miesiac"] select[name="typ"]').value;
     let table : HTMLElement = this.renderer.createElement('table');
     table.setAttribute('id', 'raport_table');
     let days_in_month : number = new Date(parseInt(date.split('-')[0], 10), parseInt(date.split('-')[1], 10), 0).getDate();

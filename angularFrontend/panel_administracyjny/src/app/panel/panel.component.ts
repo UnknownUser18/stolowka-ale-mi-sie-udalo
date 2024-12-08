@@ -13,6 +13,7 @@ import {DeklaracjeComponent} from '../deklaracje/deklaracje.component';
   styleUrls: ['./panel.component.css']
 })
 export class PanelComponent implements OnInit, OnChanges {
+  DOMelement: any | undefined;
   @Input() name: string | undefined;
   @Input() typ: string | undefined;
 
@@ -20,7 +21,18 @@ export class PanelComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    this.DOMelement = this.el.nativeElement;
     this.updateMainDisplay();
+    let kalendarz = this.DOMelement.querySelector('app-kalendarz');
+    let edycja = this.DOMelement.querySelector('app-edycja');
+    let platnosci = this.DOMelement.querySelector('app-platnosci')
+    let karty = this.DOMelement.querySelector('app-karty')
+    let deklaracje = this.DOMelement.querySelector('app-deklaracje')
+    this.renderer.setStyle(kalendarz, 'display', 'block');
+    this.renderer.setStyle(edycja, 'display', 'none');
+    this.renderer.setStyle(platnosci, 'display', 'none')
+    this.renderer.setStyle(karty, 'display', 'none')
+    this.renderer.setStyle(deklaracje, 'display', 'none')
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -30,8 +42,8 @@ export class PanelComponent implements OnInit, OnChanges {
   }
 
   private updateMainDisplay() {
-
-    const main = this.el.nativeElement.querySelector('main');
+    if(this.DOMelement === undefined) return;
+    const main = this.DOMelement.querySelector('main');
     if (this.name === undefined) {
       this.renderer.setStyle(main, 'display', 'none');
     } else {
@@ -39,14 +51,14 @@ export class PanelComponent implements OnInit, OnChanges {
     }
   }
   select(event: MouseEvent) {
-    console.log(this.el.nativeElement.querySelector('app-panel > main'));
+    console.log(this.DOMelement.querySelector('app-panel > main'));
     let target = event.target as HTMLElement;
     let text = target.innerText;
-    let kalendarz = this.el.nativeElement.querySelector('app-kalendarz');
-    let edycja = this.el.nativeElement.querySelector('app-edycja');
-    let platnosci = this.el.nativeElement.querySelector('app-platnosci')
-    let karty = this.el.nativeElement.querySelector('app-karty')
-    let deklaracje = this.el.nativeElement.querySelector('app-deklaracje')
+    let kalendarz = this.DOMelement.querySelector('app-kalendarz');
+    let edycja = this.DOMelement.querySelector('app-edycja');
+    let platnosci = this.DOMelement.querySelector('app-platnosci')
+    let karty = this.DOMelement.querySelector('app-karty')
+    let deklaracje = this.DOMelement.querySelector('app-deklaracje')
     switch (text) {
       case 'Kalendarz':
         this.contents = ['kalendarz'];
@@ -100,7 +112,7 @@ export class PanelComponent implements OnInit, OnChanges {
         break;
       case 'Deklaracje':
         console.log("DEKLARACJE")
-        this.contents = ['Deklaracje']
+        this.contents = ['deklaracje']
         this.renderer.setStyle(kalendarz, 'display', 'none');
         this.renderer.setStyle(edycja, 'display', 'none');
         this.renderer.setStyle(platnosci, 'display', 'none')

@@ -11,6 +11,7 @@ import {DataBaseService} from '../data-base.service';
   styleUrl: './kalendarz.component.css'
 })
 export class KalendarzComponent implements OnChanges, OnInit {
+  DOMelement : any | undefined;
   @Input() typ: string | undefined;
   @Input() name: string | undefined;
   currentDate: string | undefined;
@@ -61,6 +62,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
     this.month_next = this.months[new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getFullYear()
     this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
+    this.DOMelement = this.el.nativeElement;
     this.dataService.CurrentZstiDays.asObservable().subscribe(() => {
       this.selected = []
       this.dbCopyZstiDays = []
@@ -199,7 +201,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
   {
     console.log("Neew declaration: ", change)
     this.CurrentStudentDeclaration = change
-    this.show_calendar()
+    if(this.DOMelement !== undefined) this.show_calendar()
   }
   sendDays()
   {
@@ -382,7 +384,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
 
 
   show_calendar() {
-    const calendar_content: HTMLElement = this.el.nativeElement.querySelector('#kalendarz');
+    const calendar_content: HTMLElement = this.DOMelement.querySelector('#kalendarz');
     if(calendar_content !== undefined) calendar_content.innerHTML = '';
     let year = this.date.getFullYear();
     let month = this.date.getMonth();
@@ -397,7 +399,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
 
 
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
-      let week = this.el.nativeElement.getElementsByClassName('week')[weekcount];
+      let week = this.DOMelement.getElementsByClassName('week')[weekcount];
       if (i < first_day_week) {
         const dayDiv = this.renderer.createElement('div');
         this.renderer.addClass(dayDiv, 'day');
@@ -451,14 +453,14 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
         if(calendar_content !== undefined) this.renderer.appendChild(calendar_content, weekDiv);
       }
     }
-    const dni = this.el.nativeElement.querySelector('#dni');
+    const dni = this.DOMelement.querySelector('#dni');
     if(dni !== undefined) dni.innerHTML = '';
     for (let i = 0; i < 7; i++) {
       const daySpan = this.renderer.createElement('span');
       this.renderer.setProperty(daySpan, 'innerHTML', ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i]);
       if(dni !== undefined) this.renderer.appendChild(dni, daySpan);
     }
-    Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
+    Array.from(this.DOMelement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       if (week.children.length < 7) {
         for (let i = week.children.length; i < 7; i++) {
           const dayDiv = this.renderer.createElement('div');
@@ -469,19 +471,19 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
       }
     });
 
-    Array.from(this.el.nativeElement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week : HTMLElement) => {
+    Array.from(this.DOMelement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week : HTMLElement) => {
       // @ts-ignore
       const isEmpty = Array.from(week.children).every((day: HTMLElement) => day.classList.contains('empty'));
       if (isEmpty) week.remove();
     });
     let week = this.week_number()[month];
-    const zaznacz: HTMLElement = this.el.nativeElement.querySelector('#zaznacz');
+    const zaznacz: HTMLElement = this.DOMelement.querySelector('#zaznacz');
     if(zaznacz !== undefined) zaznacz.innerHTML = '';
-    let week_length = this.el.nativeElement.getElementsByClassName('week').length;
+    let week_length = this.DOMelement.getElementsByClassName('week').length;
     for (let i = 0; i < week_length; i++) {
       let selected_days = 0;
       let days = 0;
-      Array.from(this.el.nativeElement.getElementsByClassName('week')[i].children as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
+      Array.from(this.DOMelement.getElementsByClassName('week')[i].children as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
         if(!day.classList.contains('empty')) {
           if(day.classList.contains('selected')) selected_days++;
           days++;
@@ -548,7 +550,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
           if (target.classList.contains('selected')) {
             if(isFullWeekSelected(target.parentElement as HTMLElement)) {
               console.log('full week selected check = false');
-              this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`).checked = false;
+              this.DOMelement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`).checked = false;
             }
             if(target.classList.contains('disabled-for-person')) {
               this.selectedDisabled.splice(this.selectedDisabled.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`), 1);
@@ -574,7 +576,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
             console.log("Disabled selected: ", this.selectedDisabled);
             if(isFullWeekSelected(target.parentElement as HTMLElement)) {
               console.log('full week selected check = true');
-              this.el.nativeElement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`).checked = true;
+              this.DOMelement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`).checked = true;
             }
           }
         }
@@ -592,7 +594,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
           let grandparent = parent.parentElement as HTMLElement;
           let parent_index = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
           let target_index = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
-          const div = this.el.nativeElement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
+          const div = this.DOMelement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
           let checked = 0
           let unchecked = 0
           const typy = ['sniadanie','obiad','kolacja']
@@ -677,7 +679,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
     if(this.typ === "ZSTI") {
       let target = element.target as HTMLElement;
       if(target.tagName === 'INPUT') {
-        const week = this.el.nativeElement.getElementsByClassName('week')[Array.from(this.el.nativeElement.querySelectorAll('.zaznacz')).indexOf(target)];
+        const week = this.DOMelement.getElementsByClassName('week')[Array.from(this.DOMelement.querySelectorAll('.zaznacz')).indexOf(target)];
         if((target as HTMLInputElement).checked) {
           for(let i = 0; i < week.children.length; i++) {
             if(!week.children[i].classList.contains('empty') && !week.children[i].disabled && !week.children[i].classList.contains('disabled-for-person')) {
@@ -707,13 +709,13 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
         let parent = target.parentElement as HTMLElement;
         let grandparent = parent.parentElement as HTMLElement;
         this.numer_week = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
-        this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'flex';
+        this.DOMelement.querySelector('#zmiana_posilku').style.display = 'flex';
       }
     }
   }
   // close change meal
   close() {
-    this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'none';
+    this.DOMelement.querySelector('#zmiana_posilku').style.display = 'none';
   }
 
   formatDate(dateStr: string): string {
@@ -727,11 +729,11 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
 
   // zmien
   zmien_posilek($event: MouseEvent) {
-    this.el.nativeElement.querySelector('#zmiana_posilku').style.display = 'none';
+    this.DOMelement.querySelector('#zmiana_posilku').style.display = 'none';
     const grandparent = ($event.target as HTMLElement).parentElement!.parentElement as HTMLElement;
     let typ = grandparent.querySelectorAll('form')[0] as HTMLElement;
-    const formularz = this.el.nativeElement.querySelector(`form[name="yah"]`) as HTMLFormElement;
-    const wszystko : HTMLInputElement = this.el.nativeElement.querySelector('input[value="wszystko"]').checked;
+    const formularz = this.DOMelement.querySelector(`form[name="yah"]`) as HTMLFormElement;
+    const wszystko : HTMLInputElement = this.DOMelement.querySelector('input[value="wszystko"]').checked;
     const checkbox_function = (switch_value: string, checkyMeal: any) => {
       let meal = this.dodanie.find(meal => meal.id === checkyMeal.value)!;
       const typy = ['sniadanie','obiad','kolacja']
@@ -762,7 +764,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
       }
     }
     Array.from(typ.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>).forEach((dziecko:any) => {
-      let week = this.el.nativeElement.getElementsByClassName('week')[this.numer_week];
+      let week = this.DOMelement.getElementsByClassName('week')[this.numer_week];
       Array.from(week.querySelectorAll('.day:not(.empty) div') as NodeListOf<HTMLElement>).forEach((div:any) => {
         // @ts-ignore
         let nieobecnosc = formularz.elements['na']

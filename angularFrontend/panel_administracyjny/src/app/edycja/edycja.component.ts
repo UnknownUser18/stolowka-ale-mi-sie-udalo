@@ -13,11 +13,12 @@ import {FormsModule} from '@angular/forms';
 })
 export class EdycjaComponent implements OnChanges {
   @Input() typ: string | undefined;
+  DOMelement : any | undefined;
   constructor(private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.StudentListZsti.asObservable().subscribe(()=>this.updateStudent(this.dataService.CurrentStudentId))
     this.dataService.CurrentStudentId.asObservable().subscribe((newStudent:any)=>this.updateStudent(newStudent));
     this.dataService.StudentType.asObservable().subscribe((newStudent:any)=>this.updateStudent(this.dataService.CurrentStudentId));
-
+    this.DOMelement = this.el.nativeElement;
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe(()=>this.updateDeclaration())
   }
 
@@ -46,14 +47,14 @@ export class EdycjaComponent implements OnChanges {
     console.log("Updated")
 
     setTimeout(()=>{
-      this.el.nativeElement.querySelector('input[name="imie"]').value = this.student.imie;
-      this.el.nativeElement.querySelector('input[name="nazwisko"]').value = this.student.nazwisko;
-      this.el.nativeElement.querySelectorAll('input[name="typ"]').forEach((element:any)=>{
+      this.DOMelement.querySelector('input[name="imie"]').value = this.student.imie;
+      this.DOMelement.querySelector('input[name="nazwisko"]').value = this.student.nazwisko;
+      this.DOMelement.querySelectorAll('input[name="typ"]').forEach((element:any)=>{
         if(element.value == this.student.typ_osoby_id)
           element.checked = 'checked';
       })
-      this.el.nativeElement.querySelector('input[name="klasa"]').value = this.student.klasa;
-      this.el.nativeElement.querySelector('input[name="uczeszcza"]').checked = this.student.uczeszcza ? 'checked' : '';
+      this.DOMelement.querySelector('input[name="klasa"]').value = this.student.klasa;
+      this.DOMelement.querySelector('input[name="uczeszcza"]').checked = this.student.uczeszcza ? 'checked' : '';
 
     },100)
 
@@ -99,28 +100,28 @@ export class EdycjaComponent implements OnChanges {
     this.editedDeclaration = JSON.parse(temp);
     console.log(this.editedDeclaration, temp, this.declaration)
     let dni = [
-      this.el.nativeElement.querySelector('input[name="poniedziałek"]'),
-      this.el.nativeElement.querySelector('input[name="wtorek"]'),
-      this.el.nativeElement.querySelector('input[name="środa"]'),
-      this.el.nativeElement.querySelector('input[name="czwartek"]'),
-      this.el.nativeElement.querySelector('input[name="piątek"]')
+      this.DOMelement.querySelector('input[name="poniedziałek"]'),
+      this.DOMelement.querySelector('input[name="wtorek"]'),
+      this.DOMelement.querySelector('input[name="środa"]'),
+      this.DOMelement.querySelector('input[name="czwartek"]'),
+      this.DOMelement.querySelector('input[name="piątek"]')
     ]
 
     setTimeout(()=>{
       let data_od = new Date(this.formatDate(this.declaration.data_od));
-      this.el.nativeElement.querySelector('input[name="data_od"]').value = this.formatDate(`${data_od.getFullYear()}-${data_od.getMonth() + 1}-${data_od.getDate()}`);
+      this.DOMelement.querySelector('input[name="data_od"]').value = this.formatDate(`${data_od.getFullYear()}-${data_od.getMonth() + 1}-${data_od.getDate()}`);
       let data_do = new Date(this.formatDate(this.declaration.data_do));
-      this.el.nativeElement.querySelector('input[name="data_do"]').value = this.formatDate(`${data_do.getFullYear()}-${data_do.getMonth() + 1}-${data_do.getDate()}`)
+      this.DOMelement.querySelector('input[name="data_do"]').value = this.formatDate(`${data_do.getFullYear()}-${data_do.getMonth() + 1}-${data_do.getDate()}`)
 
       console.log("Test daty: ", data_do, this.formatDate(this.declaration.data_do) ,data_od, this.formatDate(this.declaration.data_od));
       if(this.dataService.StudentType.value === 'Internat')
-        this.el.nativeElement.querySelector('input[name="typ_posilku"]').value = this.declaration.wersja
+        this.DOMelement.querySelector('input[name="typ_posilku"]').value = this.declaration.wersja
       else{
         dni.forEach((element:any)=>{
           element.checked = (this.declaration.dniString[dni.indexOf(element)] === '1')
         })
       }
-      this.el.nativeElement.querySelector('input[name="rok_szkolny"]').value = this.declaration.rok_szkolny
+      this.DOMelement.querySelector('input[name="rok_szkolny"]').value = this.declaration.rok_szkolny
     },100)
 
   }
@@ -128,11 +129,11 @@ export class EdycjaComponent implements OnChanges {
   changeDeclaration()
   {
     let dni = [
-      this.el.nativeElement.querySelector('input[name="poniedziałek"]'),
-      this.el.nativeElement.querySelector('input[name="wtorek"]'),
-      this.el.nativeElement.querySelector('input[name="środa"]'),
-      this.el.nativeElement.querySelector('input[name="czwartek"]'),
-      this.el.nativeElement.querySelector('input[name="piątek"]')
+      this.DOMelement.querySelector('input[name="poniedziałek"]'),
+      this.DOMelement.querySelector('input[name="wtorek"]'),
+      this.DOMelement.querySelector('input[name="środa"]'),
+      this.DOMelement.querySelector('input[name="czwartek"]'),
+      this.DOMelement.querySelector('input[name="piątek"]')
     ]
     let value = ''
     dni.forEach((element:any)=>{
@@ -250,7 +251,6 @@ export class EdycjaComponent implements OnChanges {
       {
         clearInterval(IntervalSchoolYear)
         this.editedDeclaration.rok_szkolny_id = rokSzkolny.id
-        // @ts-ignore
         if(!this.checkDeclaration().includes(false))
         {
           console.log("Nie ma po co wysylac");
@@ -456,19 +456,19 @@ export class EdycjaComponent implements OnChanges {
   ngOnChanges(changes : SimpleChanges) {
     if(changes['typ']) {
       if(this.typ === 'ZSTI') {
-        this.el.nativeElement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
           element.style.display = 'none';
         })
-        this.el.nativeElement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
           element.style.display = 'flex';
         })
         this.updateStudent(this.dataService.CurrentStudentId)
       }
       else if(this.typ === 'Internat') {
-        this.el.nativeElement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
           element.style.display = 'none';
         })
-        this.el.nativeElement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
           element.style.display = 'flex';
         })
         this.updateStudent(this.dataService.CurrentStudentId)
@@ -477,7 +477,7 @@ export class EdycjaComponent implements OnChanges {
   }
   clear_data(typ : string) {
     if(typ === 'podstawowe') {
-      this.el.nativeElement.querySelectorAll('form[name="osoba"] > fieldset')[0].childNodes.forEach((element : HTMLFieldSetElement) => {
+      this.DOMelement.querySelectorAll('form[name="osoba"] > fieldset')[0].childNodes.forEach((element : HTMLFieldSetElement) => {
         console.log(element);
         element.childNodes.forEach((child : ChildNode) => {
           if(child.nodeName === 'INPUT') {
@@ -493,9 +493,9 @@ export class EdycjaComponent implements OnChanges {
       this.checkStudents()
     }
     else if(typ === 'deklaracja') {
-      this.el.nativeElement.querySelectorAll('form[name="osoba"] > fieldset')[1].childNodes.forEach((element : HTMLFieldSetElement) => {
+      this.DOMelement.querySelectorAll('form[name="osoba"] > fieldset')[1].childNodes.forEach((element : HTMLFieldSetElement) => {
         element.childNodes.forEach((child : ChildNode) => {
-          console.log(child);
+          // console.log(child);
           if(child.nodeName === 'INPUT') {
             (child as HTMLInputElement).value = '';
           }
