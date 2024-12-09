@@ -30,10 +30,10 @@
           <li *ngFor="let element of usuniecie">{{element.id}}: {{element.array.join(', ')}}</li>
         </ul>
       </div>
-       <ul *ngIf="!empty_diff_zsti">
+       <ul *ngIf="!empty_diff_zsti" class="logs">
          <li *ngFor="let element of diff_selected_zsti">{{element}}</li>
        </ul>
-      <ul *ngIf="!empty_diff_undo_zsti">
+      <ul *ngIf="!empty_diff_undo_zsti" class="logs">
         <li *ngFor="let element of diff_undo_selected_zsti">{{element}}</li>
       </ul>
     </section>
@@ -59,14 +59,4 @@
         <button type="submit" (click)="zmien_posilek($event)">Wprowadź</button>
       </section>
     </section>
-</section>
-<section id="stop_background">
-  <section>
-    <h2>Uwaga masz niezapisane zmiany!</h2>
-    <div>
-      <button>Zapisz</button>
-      <button>Nie zapisuj</button>
-      <button>Anuluj</button>
-    </div>
-  </section>
 </section>

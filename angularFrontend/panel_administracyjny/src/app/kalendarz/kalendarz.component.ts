@@ -290,12 +290,22 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.dataService.changeTypPoslikuSaved(true)
     this.dataService.changeSelectedSaved(true)
   }
+  checkIfEmpty() {
+    this.diff_selected_zsti = this.selected.filter((element) => !this.dbCopyZstiDays.includes(element));
+    let ul_1 : HTMLElement = this.DOMelement.querySelector('.logs:nth-of-type(1)');
+    let ul_2 : HTMLElement = this.DOMelement.querySelector('.logs:nth-of-type(2)');
+    this.diff_selected_zsti.length === 0 ? ul_1.classList.add('empty') : ul_1.classList.remove('empty');
+    this.diff_undo_selected_zsti = this.dbCopyZstiDays.filter((element) => !this.selected.includes(element));
+    this.diff_undo_selected_zsti.length === 0 ? ul_2.classList.add('empty') : ul_2.classList.remove('empty');
+  }
   ngOnInit() {
     this.week_number();
     this.show_calendar()
-    this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
-    this.diff_selected_zsti = this.selected.filter((element) => !this.dbCopyZstiDays.includes(element));
-    this.diff_undo_selected_zsti = this.dbCopyZstiDays.filter((element) => !this.selected.includes(element));
+    this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change));
+    this.DOMelement.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
+      element.classList.add('empty');
+    });
+    this.checkIfEmpty()
     this.dodanie.forEach((element) => {
       element.array = []
     });
@@ -579,8 +589,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
           }
         }
       }
-      this.diff_selected_zsti = this.selected.filter((element) => !this.dbCopyZstiDays.includes(element));
-      this.diff_undo_selected_zsti = this.dbCopyZstiDays.filter((element) => !this.selected.includes(element));
+      this.checkIfEmpty();
     }
     // dla wychowanków Internatu
     else if(this.typ === "Internat") {
