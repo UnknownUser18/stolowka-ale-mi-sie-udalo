@@ -117,3 +117,7 @@ select {
     background-color: #9FFFCB;
     color: #1B1F3B;
 }
+.zsti > div > label {
+    cursor: pointer;
+    user-select: none;
+}

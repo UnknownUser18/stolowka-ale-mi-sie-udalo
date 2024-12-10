@@ -4,13 +4,13 @@
   <section>
     <button (click)="rozwin($event, 3, false)">ZSTI<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
     <ol (click)="show($event)" >
-      <li *ngFor="let element of StudentListZstiData; let i = index" [attr.data-index]="i"><span>{{element.imie}} {{element.nazwisko}}</span></li>
+      <li *ngFor="let element of sorted_zsti_users; let i = index" [attr.data-index]="i"><span>{{element.imie}} {{element.nazwisko}}</span></li>
     </ol>
   </section>
   <section>
     <button (click)="rozwin($event, 4, false)">Internat<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
     <ol (click)="show($event)">
-      <li *ngFor="let element of StudentListInternatData; let i = index" [attr.data-index]="i"><span>{{element.imie}} {{element.nazwisko}}</span></li>
+      <li *ngFor="let element of sorted_internat_users; let i = index" [attr.data-index]="i"><span>{{element.imie}} {{element.nazwisko}}</span></li>
     </ol>
   </section>
 </nav>

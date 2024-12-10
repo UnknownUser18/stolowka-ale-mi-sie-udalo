@@ -61,7 +61,7 @@ export class DataBaseService {
       this.Initialize()
     }
     this.socket.onerror = (event: Event) => {
-      console.log('WebSocket connection error')
+      console.error('WebSocket connection error')
       setTimeout(()=>{
         this.initWebSocket()
       },1000)
@@ -154,34 +154,34 @@ export class DataBaseService {
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
     this.StudentType.next(type)
-    console.log("Change student call")
-    console.log(Id, type)
+    // console.log("Change student call")
+    // console.log(Id, type)
     if (this.StudentType.value === "ZSTI") {
       this.getStudentDeclarationZsti()
-      console.log(this.StudentDeclarationInternat.value, "NMIGER")
-      console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
+      // console.log(this.StudentDeclarationInternat.value, "NMIGER")
+      // console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentZstiDays()
       this.getStudentDisabledZstiDays()
       if(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
         this.CurrentStudentCardZsti.next(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
       else
         this.CurrentStudentCardZsti.next(this.nullKarta)
-      console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
+      // console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
     }
     else{
-      console.log("Checking internat cards:")
+      // console.log("Checking internat cards:")
       this.getStudentDeclarationInternat()
-      console.log(this.StudentDeclarationInternat.value, "NMIGER")
-      console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
+      // console.log(this.StudentDeclarationInternat.value, "NMIGER")
+      // console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentInternatDays()
       this.getStudentDisabledInternatDays()
-      console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
+      // console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
       if(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
         this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
       else
         this.CurrentStudentCardInternat.next(this.nullKarta)
     }
-    console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
+    // console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
   }
 
   send(query:string)
@@ -203,21 +203,21 @@ export class DataBaseService {
             this.StudentDeclarationZsti.next(this.lastValue.params.value );
             this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any)=> element.id_osoby == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
             this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value))
-            console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
+            // console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
             break;
           case 'StudentDeclarationInternat':
             this.StudentDeclarationInternat.next(this.lastValue.params.value );
             this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
             this.AllStudentDeclarations.next(this.StudentDeclarationInternat.value.find((element:any) => element.osoby_internat_id == this.CurrentStudentId.value))
-            console.log("StudentDeclarationInternat: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
+            // console.log("StudentDeclarationInternat: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
             break;
           case 'StudentListZsti':
             this.StudentListZsti.next(this.lastValue.params.value);
-            console.log("StudentListZsti: ", this.lastValue.params.value);
+            // console.log("StudentListZsti: ", this.lastValue.params.value);
             break;
           case 'StudentListInternat':
             this.StudentListInternat.next(this.lastValue.params.value);
-            console.log("StudentListInternat: ", this.lastValue.params.value);
+            // console.log("StudentListInternat: ", this.lastValue.params.value);
             break;
           case 'StudentZstiDays':
             this.StudentZstiDays.next(this.lastValue.params.value);
@@ -226,7 +226,7 @@ export class DataBaseService {
                 tempArray.push(element)
             })
             this.CurrentZstiDays.next(tempArray);
-            console.log("StudentZstiDays: ", this.lastValue.params.value);
+            // console.log("StudentZstiDays: ", this.lastValue.params.value);
             break;
           case 'StudentDisabledZstiDays':
             this.StudentDisabledZstiDays.next(this.lastValue.params.value);
@@ -235,7 +235,7 @@ export class DataBaseService {
                 tempArray.push(element)
             })
             this.CurrentDisabledZstiDays.next(tempArray);
-            console.log("StudentDisabledZstiDays: ", this.lastValue.params.value);
+            // console.log("StudentDisabledZstiDays: ", this.lastValue.params.value);
             break;
           case 'StudentInternatDays':
             this.StudentInternatDays.next(this.lastValue.params.value);
@@ -244,7 +244,7 @@ export class DataBaseService {
                 tempArray.push(element)
             })
             this.CurrentInternatDays.next(tempArray);
-            console.log("StudentInternatDays: ", this.lastValue.params.value);
+            // console.log("StudentInternatDays: ", this.lastValue.params.value);
             break;
           case 'StudentDisabledInternatDays':
             this.StudentDisabledInternatDays.next(this.lastValue.params.value);
@@ -253,11 +253,11 @@ export class DataBaseService {
                 tempArray.push(element)
             })
             this.CurrentDisabledInternatDays.next(tempArray);
-            console.log("StudentDisabledInternatDays: ", this.lastValue.params.value);
+            // console.log("StudentDisabledInternatDays: ", this.lastValue.params.value);
             break;
           case 'DisabledDays':
             this.DisabledDays.next(this.lastValue.params.value);
-            console.log("DisabledDays: ", this.lastValue.params.value);
+            // console.log("DisabledDays: ", this.lastValue.params.value);
             break;
           case 'SchoolYears':
             this.SchoolYears.next(this.lastValue.params.value);
@@ -274,12 +274,12 @@ export class DataBaseService {
           case 'CardsZsti':
             this.CardsZsti.next(this.lastValue.params.value);
             this.CurrentStudentCardZsti.next(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
-            console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
+            // console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
             break;
           case 'CardsInternat':
             this.CardsInternat.next(this.lastValue.params.value);
             this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
-            console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
+            // console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
             break;
         }
       })

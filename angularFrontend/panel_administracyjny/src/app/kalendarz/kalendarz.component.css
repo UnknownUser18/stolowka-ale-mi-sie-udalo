@@ -31,19 +31,19 @@
 #sending button {
     height: fit-content;
 }
-#sending  ul {
+#sending ul {
     display: flex;
 }
-#sending  ul > li {
+#sending ul > li {
     list-style-type: none;
     margin: 0 10px;
 }
-#sending > div > h2 {
+#sending div > h2 {
     text-align: center;
-    font-size: 1.7em;
+    font-size: 1.5em;
     margin: 0.4em 0;
 }
-#sending > div > ul > li {
+#sending div > ul > li {
     background-color: var(--background-color);
     padding: 5px 10px;
     border-radius: 7px;
@@ -102,8 +102,8 @@
     cursor: default;
     justify-content: space-evenly;
     flex-direction: column;
-    height: 80px;
-    width: 80px;
+    height: 75px;
+    width: 75px;
 }
 input:disabled {
     cursor: default !important;
@@ -332,7 +332,19 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='yah'] > la
     width: 20px;
     height: 20px;
 }
+.logs > li {
+    border: 0 !important;
+    width: 140px !important;
+    margin: 2px 5px !important;
+    text-align: center;
+    padding: 0 !important;
+    height: fit-content !important;
+}
 .logs {
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    max-height: 50%;
+    overflow: scroll;
     background-color: var(--background-color);
     border: 1px solid var(--border-color);
     border-radius: 7px;
@@ -343,6 +355,33 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='yah'] > la
 .logs.empty {
     background-color: transparent;
     border: 0;
+}
+#zsti_diff {
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+}
+#zsti_diff h4 {
+    text-align: center;
+    font-size: 1.5em;
+    margin: 0;
+}
+#zsti_diff > div {
+    max-width: 60%;
+}
+#internat_diff ul {
+    padding: 0;
+}
+#internat_diff {
+    position: absolute;
+    top: 25%;
+    border-radius: 7px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--box-shadow);
+    right: 0;
+    width: 22%;
+    height: 50%;
+    background-color: var(--primary-color);
 }
 #zmiana label:hover {
     text-decoration: underline;
