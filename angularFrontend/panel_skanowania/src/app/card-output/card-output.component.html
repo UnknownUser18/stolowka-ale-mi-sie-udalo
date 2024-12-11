@@ -4,12 +4,14 @@
     <h1 class="surname">{{ capitalizeFirstChar(currentStudent.nazwisko) }}</h1>
   </header>
   <article class="message">
+    <h1>{{ mealMessage }}</h1>
     <p>{{ message }}</p>
   </article>
   <footer class="buttons">
-    <button class="button green" type="button" (click)="onAccept()">Wpuść</button>
+    <button class="button green" type="button" *ngIf="!disabledAccept" [disabled]="disabledAccept" (click)="onAccept()">Wpuść</button>
     <button class="button red" type="button" (click)="onReject()">Odrzuć</button>
     <button class="button yellow" type="button" (click)="onMoreInfo()">Więcej</button>
+    <button class="button reset" type="button" (click)="onReset()">Wróć</button>
   </footer>
 </section>
 

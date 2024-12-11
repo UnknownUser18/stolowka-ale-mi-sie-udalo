@@ -38,8 +38,8 @@ export class AppComponent {
   handleReset()
   {
     this.toggleVisibility = false;
-    this.el.nativeElement.querySelector('input').focus();
-    (this.el.nativeElement.querySelector('input') as HTMLInputElement ).value = '';
+    this.el.nativeElement.querySelector('app-card-input').nativeElement.querySelector('input[name="cardInput"]').focus()
+    (this.el.nativeElement.querySelector('app-card-input').nativeElement.querySelector('input[name="cardInput"]') as HTMLInputElement ).value = '';
   }
 
 

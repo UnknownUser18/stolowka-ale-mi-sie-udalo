@@ -203,6 +203,12 @@ wss.on('connection', function connection(ws) {
             case 'getScanZsti':
                 getScanZsti(ws);
                 break;
+            case 'addScanInternat':
+                addScanInternat(parameters.cardId, parameters.datetime, parameters.meal);
+                break;
+            case 'getScanInternat':
+                getScanInternat(ws);
+                break;
         }
     });
 });
@@ -247,6 +253,33 @@ database.on('error', function (err) {
         throw err;
     }
 });
+
+function getScanInternat(websocketClient)
+{
+    let query = `SELECT * FROM skany_internat;`;
+    return database.query(query, (err, result) => {
+        if(err)throw err;
+        console.log(result);
+        websocketClient.send(JSON.stringify(
+            {
+                action: "response",
+                params: {
+                    variable: 'ScanInternat',
+                    value: result
+                }
+            }
+        ))
+    })
+}
+
+function addScanInternat(cardId, datetime, meal)
+{
+    let query = `INSERT INTO skany_internat (id_karty, czas, posilek) values(${cardId}, '${datetime}', ${meal})`;
+    return database.query(query, (err, result) => {
+        if (err) throw err;
+        console.log(result)
+    })
+}
 
 
 function getScanZsti(websocketClient)
