@@ -51,7 +51,6 @@ export class PanelComponent implements OnInit, OnChanges {
     }
   }
   select(event: MouseEvent) {
-    console.log(this.DOMelement.querySelector('app-panel > main'));
     let target = event.target as HTMLElement;
     let text = target.innerText;
     let kalendarz = this.DOMelement.querySelector('app-kalendarz');
@@ -85,7 +84,6 @@ export class PanelComponent implements OnInit, OnChanges {
         this.renderer.addClass(target, 'selected');
         break;
       case 'Płatności':
-        console.log("PLATNOSCI")
         this.contents = ['Płatności']
         this.renderer.setStyle(kalendarz, 'display', 'none');
         this.renderer.setStyle(karty, 'display', 'none')
@@ -98,7 +96,6 @@ export class PanelComponent implements OnInit, OnChanges {
         this.renderer.addClass(target, 'selected');
         break;
       case 'Karty':
-        console.log("KARTY")
         this.contents = ['Karty']
         this.renderer.setStyle(kalendarz, 'display', 'none');
         this.renderer.setStyle(edycja, 'display', 'none');
@@ -111,7 +108,6 @@ export class PanelComponent implements OnInit, OnChanges {
         this.renderer.addClass(target, 'selected');
         break;
       case 'Deklaracje':
-        console.log("DEKLARACJE")
         this.contents = ['deklaracje']
         this.renderer.setStyle(kalendarz, 'display', 'none');
         this.renderer.setStyle(edycja, 'display', 'none');

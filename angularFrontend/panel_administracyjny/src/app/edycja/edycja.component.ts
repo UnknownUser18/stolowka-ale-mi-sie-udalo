@@ -84,8 +84,7 @@ export class EdycjaComponent implements OnChanges {
     }
     this.dataService.changeDeclarationDataSaved(true)
     this.declaration = this.dataService.CurrentStudentDeclaration.value;
-    if(this.dataService.StudentType.value === 'ZSTI')
-    {
+    if(this.dataService.StudentType.value === 'ZSTI' && this.declaration.dni !== undefined) {
       this.declaration.dni = this.declaration.dni!.data[0]
       this.declaration.dniString = this.toBinary(this.declaration.dni!, 5)
     }
@@ -95,7 +94,6 @@ export class EdycjaComponent implements OnChanges {
     this.declaration.data_od = `${dateBegin.getFullYear()}-${dateBegin.getMonth() + 1}-${dateBegin.getDate()}`
     this.declaration.data_do = `${dateEnd.getFullYear()}-${dateEnd.getMonth() + 1}-${dateEnd.getDate()}`
     this.declaration.rok_szkolny = this.dataService.SchoolYears.value.find((element:any) => element.id === this.declaration.rok_szkolny_id).rok_szkolny
-    console.log("Update Declaration", this.dataService.CurrentStudentDeclaration.value)
     let temp = JSON.stringify(this.declaration);
     this.editedDeclaration = JSON.parse(temp);
     console.log(this.editedDeclaration, temp, this.declaration)
@@ -113,12 +111,11 @@ export class EdycjaComponent implements OnChanges {
       let data_do = new Date(this.formatDate(this.declaration.data_do));
       this.DOMelement.querySelector('input[name="data_do"]').value = this.formatDate(`${data_do.getFullYear()}-${data_do.getMonth() + 1}-${data_do.getDate()}`)
 
-      console.log("Test daty: ", data_do, this.formatDate(this.declaration.data_do) ,data_od, this.formatDate(this.declaration.data_od));
       if(this.dataService.StudentType.value === 'Internat')
-        this.DOMelement.querySelector('input[name="typ_posilku"]').value = this.declaration.wersja
+        if(this.DOMelement.querySelector('input[name="typ_posilku"]'))this.DOMelement.querySelector('input[name="typ_posilku"]').value = this.declaration.wersja
       else{
         dni.forEach((element:any)=>{
-          element.checked = (this.declaration.dniString[dni.indexOf(element)] === '1')
+          if(this.declaration.dniString !== undefined) element.checked = (this.declaration.dniString[dni.indexOf(element)] === '1')
         })
       }
       this.DOMelement.querySelector('input[name="rok_szkolny"]').value = this.declaration.rok_szkolny
@@ -138,9 +135,7 @@ export class EdycjaComponent implements OnChanges {
     let value = ''
     dni.forEach((element:any)=>{
       value += element.checked ? '1' : '0';
-      console.log(element.checked ? '1' : '0')
     })
-    console.log(value, this.toBinary(parseInt(value, 2), 5))
     this.editedDeclaration.dni = parseInt(value, 2);
     this.editedDeclaration.dniString = this.toBinary(parseInt(value, 2), 5);
     if(this.dataService.StudentType.value === 'Internat')
@@ -157,10 +152,6 @@ export class EdycjaComponent implements OnChanges {
       this.editedStudent.klasa === this.student.klasa,
       this.editedStudent.uczeszcza === this.student.uczeszcza,
     ]
-    conditions.forEach(condition => {
-      console.log(condition)
-    })
-    console.log(this.editedStudent.imie, this.student.imie, this.editedStudent.nazwisko, this.student.nazwisko, this.editedStudent.typ_osoby_id, this.student.typ_osoby_id, this.editedStudent.klasa, this.student.klasa, this.editedStudent.uczeszcza, this.student.uczeszcza)
     this.dataService.changePersonalDataSaved(!conditions.includes(false))
     return conditions
   }

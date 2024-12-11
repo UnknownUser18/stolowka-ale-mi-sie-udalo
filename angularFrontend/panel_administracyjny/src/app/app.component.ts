@@ -29,26 +29,39 @@ export class AppComponent implements OnInit {
     nazwisko: []
   }
   ];
+  sorted_zsti_users: Array<{imie: string, nazwisko: string}> = [];
+  sorted_internat_users: Array<{imie: string, nazwisko: string}> = [];
   StudentListZstiData:any = null;
   StudentListInternatData:any = null;
   constructor(private dataService:DataBaseService, private el: ElementRef, private dialog: MatDialog) {
     this.DOMelement = this.el.nativeElement
   }
   ngOnInit() {
-    this.dataService.StudentListZstiData.subscribe((data: any) => {
-      this.StudentListZstiData = data;
-      if(this.StudentListZstiData != null) {
-        this.zsti_users[0].imie = this.StudentListZstiData.map((element: any) => element.imie.toLowerCase());
-        this.zsti_users[0].nazwisko = this.StudentListZstiData.map((element: any) => element.nazwisko.toLowerCase());
-      }
-    });
-    this.dataService.StudentListInternatData.subscribe((data: any) => {
-      this.StudentListInternatData = data;
-      if(this.StudentListInternatData != null) {
-        this.internat_users[0].imie = this.StudentListInternatData.map((element: any) => element.imie.toLowerCase());
-        this.internat_users[0].nazwisko = this.StudentListInternatData.map((element: any) => element.nazwisko.toLowerCase());
-      }
-    });
+  this.dataService.StudentListZstiData.subscribe((data: any) => {
+    this.StudentListZstiData = data;
+    if (this.StudentListZstiData != null) {
+      this.zsti_users[0].imie = this.StudentListZstiData.map((element: any) => element.imie);
+      this.zsti_users[0].nazwisko = this.StudentListZstiData.map((element: any) => element.nazwisko);
+      let zsti_users_flat: Array<{ imie: string, nazwisko: string }> = this.zsti_users[0].imie.map((imie, index) => {
+        return { imie, nazwisko: this.zsti_users[0].nazwisko[index] };
+      });
+      zsti_users_flat.sort((a, b) => a.nazwisko.localeCompare(b.nazwisko));
+      this.sorted_zsti_users = zsti_users_flat;
+    }
+  });
+
+  this.dataService.StudentListInternatData.subscribe((data: any) => {
+    this.StudentListInternatData = data;
+    if (this.StudentListInternatData != null) {
+      this.internat_users[0].imie = this.StudentListInternatData.map((element: any) => element.imie);
+      this.internat_users[0].nazwisko = this.StudentListInternatData.map((element: any) => element.nazwisko);
+      let internat_users_flat: Array<{ imie: string, nazwisko: string }> = this.internat_users[0].imie.map((imie, index) => {
+        return { imie, nazwisko: this.internat_users[0].nazwisko[index] };
+      });
+      internat_users_flat.sort((a, b) => a.nazwisko.localeCompare(b.nazwisko));
+      this.sorted_internat_users = internat_users_flat;
+    }
+});
   }
   szukaj() {
     const searchTerm = this.el.nativeElement.querySelector('#wyszukaj > input').value.toLowerCase();

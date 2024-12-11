@@ -67,7 +67,6 @@ export class PlatnosciComponent implements OnChanges{
     if(changes.value)
       changes = changes.value
     changes.forEach((element:any) => {
-      console.log(element)
       if(element.id_ucznia === this.dataService.CurrentStudentId.value && element.id_ucznia !== null)
         this.PaymentZsti.push(element);
     })
