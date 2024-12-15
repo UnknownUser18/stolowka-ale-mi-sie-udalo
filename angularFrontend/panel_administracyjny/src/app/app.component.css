@@ -46,6 +46,7 @@ ol {
     counter-reset: list-counter;
 }
 li {
+    cursor: pointer;
     width: 87%;
     margin: 10px 0;
     background-color: var(--secondary-color);

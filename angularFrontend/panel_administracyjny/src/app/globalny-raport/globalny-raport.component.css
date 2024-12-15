@@ -38,25 +38,58 @@ main {
     height: 100%;
     z-index: 3;
 }
-main > section > img {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 50px;
-    height: 50px;
+main > section {
+    display: flex;
+}
+nav {
+    width: 25%;
+    height: 100%;
+    background-color: var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid var(--border-color);
+}
+nav ol {
+    counter-reset: item;
+}
+nav ol li {
+    list-style: none;
+    font-size: 1.5em;
+    width: 87%;
+    margin: 10px 0;
+    background-color: var(--secondary-color);
+    padding: 10px 10px 10px calc(1.2em + 10px);
+    border-radius: 5px;
     cursor: pointer;
+    position: relative;
+}
+nav ol li::before {
+    content: counter(item) ". ";
+    counter-increment: item;
+    position: absolute;
+    left: 0;
+    padding-left: 10px;
+    font-size: 1em;
+}
+nav h2 {
+    font-size: 2.5em;
+    cursor: pointer;
+    margin: 30px 0 10px 0;
+    text-align: center;
+}
+nav h2:hover {
+    text-decoration: underline;
+}
+#content {
+    width: 75%;
+    margin-left: 20px;
+    height: 100%;
 }
 main > section {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    background-color: var(--primary-color);
-    width: 90%;
-    border-radius: 10px;
-    box-shadow: var(--box-shadow);
+    background-color: var(--background-color);
+    width: 100%;
     height: 100%;
-    margin: 5% auto;
 }
 main > section h1 {
     text-align: center;
@@ -66,26 +99,29 @@ main > section h1 {
 form {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: fit-content;
-    margin: 0 auto;
 }
-input {
-    font-family: inherit;
-    outline: 0;
-    border: 0;
-    border-radius: 10px;
+label {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+}
+h2 {
+    font-size: 1.7em;
+    margin: 0.4em 0 0.8em 0;
+}
+input, select {
+    margin: 0.5em 0;
     padding: 10px;
-    margin: 10px;
-    transition: all 30ms ease-in-out;
     font-size: 1em;
+    font-family: inherit;
+    border: 0;
+    border-radius: 5px;
+    transition: 30ms ease-in-out all;
 }
 input:focus {
     outline: 2px solid var(--accent-color);
 }
 button {
-    display: inline-block;
     margin: 0.5em auto;
     padding: 10px 20px;
     font-size: 1.1em;
@@ -100,17 +136,12 @@ button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
-select {
-    border-radius: 10px;
-    border: 0;
-    background-color: var(--background-color);
-    padding: 10px;
-    font-size: 1.1em;
-    font-family: inherit;
-    margin: 0.5em 10px;
+#raport {
+    max-height: 30%;
+    overflow-y: auto;
 }
 table {
-    width: 100%;
+    width: 98%;
     border-collapse: collapse;
     margin: 10px 0;
     border-radius: 10px;

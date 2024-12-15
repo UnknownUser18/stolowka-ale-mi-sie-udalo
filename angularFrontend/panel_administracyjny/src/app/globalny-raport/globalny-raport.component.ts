@@ -1,13 +1,10 @@
 import { Component, ElementRef, Renderer2 } from '@angular/core';
-import {NgOptimizedImage} from '@angular/common';
 import * as XLS from 'xlsx';
 
 @Component({
   selector: 'app-globalny-raport',
   standalone: true,
-  imports: [
-    NgOptimizedImage
-  ],
+  imports: [],
   templateUrl: './globalny-raport.component.html',
   styleUrl: './globalny-raport.component.css'
 })
@@ -16,8 +13,6 @@ export class GlobalnyRaportComponent {
   constructor(private renderer: Renderer2, private el: ElementRef) {
     this.DOMelement = this.el.nativeElement;
   }
-
-  miesiac : string = '';
   miesiace : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   osoby_zsti : string[] = ['Jacek Gyatterek', 'Wojtek Skibidi', 'Agata Tobolewska', 'Pozdrawiam AT']
   osoby_internat : string[] = ['Wege Crashout','Julka Chaber','JC + DW','Pozdrawiam JC + DW'] // ostatnie podpowiedział ai nie ja 🦅🦅
@@ -25,8 +20,214 @@ export class GlobalnyRaportComponent {
   show() : void {
     this.renderer.setStyle(this.DOMelement.querySelector('main'), 'display', 'flex');
   }
+  generateToExcel(name : string, data : string, okres : boolean) : void {
+    let button_excel : HTMLButtonElement = this.renderer.createElement('button');
+    if(okres) button_excel.innerHTML = `Zapisz raport za okres ${data} do pliku Excel`;
+    else button_excel.innerHTML = `Zapisz raport za ${data} do pliku Excel`;
+    button_excel.addEventListener('click', () : void => {
+      let table, ws;
+      if(okres) {
+        table = XLS.utils.table_to_book(document.getElementById('raport_table'), {sheet: `Raport za okres ${data}`});
+        ws = table.Sheets[`Raport za okres ${data}`];
+      }
+      else {
+        table = XLS.utils.table_to_book(document.getElementById('raport_table'), {sheet: `Raport za ${data}`});
+        ws = table.Sheets[`Raport za ${data}`];
+      }
+
+
+      ws['!cols'] = [{wch: 20}, {wch: 20}, {wch: 20}, {wch: 20}];
+
+      const range = XLS.utils.decode_range(<string>ws['!ref']);
+      for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const cellAddress = XLS.utils.encode_cell({r: row, c: col});
+          if (!ws[cellAddress]) continue;
+          if (!ws[cellAddress].s) ws[cellAddress].s = {};
+          if (!ws[cellAddress].s.alignment) ws[cellAddress].s.alignment = {};
+          ws[cellAddress].s.alignment.horizontal = 'center';
+          ws[cellAddress].s.alignment.vertical = 'center';
+        }
+      }
+      if(okres) XLS.writeFile(table, `raport_${name}_okres_${data}.xlsx`);
+      else XLS.writeFile(table, `raport_${name}_${data}.xlsx`);
+    });
+    this.DOMelement.querySelector('#content').appendChild(button_excel);
+  }
+  show_raport(event : MouseEvent) {
+    let element : HTMLElement = event.target as HTMLElement;
+    if(element.tagName !== 'LI') return;
+    let id : number | null = parseInt(<string>element.getAttribute('data-id'));
+    let content : HTMLElement = this.DOMelement.querySelector('#content');
+    content.innerHTML = `<form name="data"></form>`;
+    let form : HTMLFormElement = this.DOMelement.querySelector('form[name="data"]');
+    form.method = 'POST';
+    switch (id) {
+      case 1:
+      let h2 : HTMLHeadingElement = this.renderer.createElement('h2');
+      h2.innerHTML = 'Wybierz okres';
+      form.appendChild(h2);
+
+      let labelMonth : HTMLElement = this.renderer.createElement('label');
+      labelMonth.innerHTML = 'Miesiąc:';
+      let inputMonth : HTMLInputElement = this.renderer.createElement('input');
+      inputMonth.type = 'month';
+      inputMonth.name = 'month';
+      inputMonth.placeholder = 'YYYY-MM';
+      labelMonth.appendChild(inputMonth);
+      form.appendChild(labelMonth);
+      let p : HTMLParagraphElement = this.renderer.createElement('p');
+      p.innerHTML = 'lub';
+      form.appendChild(p);
+      let labelDateRange : HTMLElement = this.renderer.createElement('label');
+      labelDateRange.innerHTML = 'Określony okres dat:';
+      let inputDateFrom : HTMLInputElement = this.renderer.createElement('input');
+      inputDateFrom.type = 'date';
+      inputDateFrom.name = 'data-od';
+      labelDateRange.appendChild(inputDateFrom);
+      let inputDateTo : HTMLInputElement = this.renderer.createElement('input');
+      inputDateTo.type = 'date';
+      inputDateTo.name = 'data-do';
+      labelDateRange.appendChild(inputDateTo);
+      form.appendChild(labelDateRange);
+      let h3 : HTMLHeadingElement = this.renderer.createElement('h3');
+      h3.innerHTML = 'Typ raportu';
+      form.appendChild(h3);
+      let select : HTMLSelectElement = this.renderer.createElement('select');
+      let options : string[] = ['ZSTI', 'Internat', 'Obie'];
+      select.name = 'typ';
+      options.forEach((element : string) : void => {
+        let option : HTMLOptionElement = this.renderer.createElement('option');
+        option.value = element;
+        option.innerHTML = element;
+        select.appendChild(option);
+      });
+      form.appendChild(select);
+      break;
+    }
+    let button : HTMLButtonElement = this.renderer.createElement('button');
+    button.innerHTML = 'Generuj raport';
+    button.addEventListener('click', (event : Event) : void => {
+      if(this.DOMelement.querySelector('#content > button')) this.DOMelement.querySelector('#content > button').remove();
+      this.DOMelement.querySelector('#raport').innerHTML = '';
+      switch (id) {
+        case 1:
+          this.korekty(event);
+          break;
+      }
+    });
+    form.appendChild(button);
+    let raport : HTMLElement = this.renderer.createElement('div');
+    raport.setAttribute('id', 'raport');
+    raport.innerHTML = '';
+    content.appendChild(raport);
+  }
+  checkDate(date : string) : boolean {
+    if(date.length != 7) return false;
+    let myslnik : number = 0;
+    for(let i : number = 0 ; i < date.length ; i++) {
+      if(date[0] === '-') myslnik++;
+    }
+    if(date !== '' && (parseInt(date.split('-')[1]) >= 13 || parseInt(date.split('-')[1]) == 0)) return false;
+    if(date !== '' && date.length != 7) return false;
+    if(myslnik > 1) return false;
+    for (let i : number = 0 ; i < date.length ; i++) {
+      if(((i < 4 || i > 5) && (date[i] < '0' || date[i] > '9')) || (i == 4 && date[i] != '-')) return false;
+    }
+    return true;
+  }
   close() : void {
     this.renderer.setStyle(this.DOMelement.querySelector('main'), 'display', 'none');
+  }
+  korekty(event : Event) : void | string {
+    event.preventDefault();
+    let date : string = this.DOMelement.querySelector('input[name="month"]').value;
+    let data_od : string = this.DOMelement.querySelector('input[name="data-od"]').value;
+    let data_do : string = this.DOMelement.querySelector('input[name="data-do"]').value
+    let typ : string = this.DOMelement.querySelector('select[name="typ"]').value;
+    let raport : HTMLElement = this.DOMelement.querySelector('#raport');
+    if (date === '' && (data_od === '' || data_do === '')) return raport.innerHTML = 'Wprowadź datę!';
+    if (date !== '' && (data_od !== '' || data_do !== '')) return raport.innerHTML = 'Wprowadź tylko jedną datę!';
+    if (date !== '' && !this.checkDate(date)) return raport.innerHTML = 'Niepoprawny format daty!';
+    if(data_do < data_od) return raport.innerHTML = 'Data od nie może być większa niż data od!';
+    let table : HTMLElement = this.renderer.createElement('table');
+    table.setAttribute('id', 'raport_table');
+    let columns : string[] = ['Imię','Grupa','Wersja','Należność','Uwagi/Podpis']
+    let tr : HTMLElement = this.renderer.createElement('tr');
+    for(let i : number = 0 ; i < 5 ; i++) {
+      let th : HTMLElement = this.renderer.createElement('th');
+      th.innerHTML = columns[i];
+      tr.appendChild(th);
+    }
+    table.appendChild(tr);
+    switch (typ) {
+      case 'ZSTI':
+        this.osoby_zsti.forEach((osoba : string) : void => {
+          let tr : HTMLElement = this.renderer.createElement('tr');
+          let td : HTMLElement = this.renderer.createElement('td');
+          td.innerHTML = osoba;
+          tr.appendChild(td);
+          let td2 : HTMLElement = this.renderer.createElement('td');
+          td2.innerHTML = 'szkoła';
+          tr.appendChild(td2);
+          let td3 : HTMLElement = this.renderer.createElement('td');
+          td3.innerHTML = 'obiady';
+          tr.appendChild(td3);
+          let td4 : HTMLElement = this.renderer.createElement('td');
+          td4.innerHTML = '9 zł'; //! pobierać z bazy danych ilość blokad obiadów * 9
+          tr.appendChild(td4);
+          let td5 : HTMLElement = this.renderer.createElement('td');
+          td5.innerHTML = 'placeholder';
+          tr.appendChild(td5);
+          table.appendChild(tr);
+        })
+        break;
+      case 'Internat':
+        this.osoby_internat.forEach((osoba : string) : void => {
+          let tr : HTMLElement = this.renderer.createElement('tr');
+          let td : HTMLElement = this.renderer.createElement('td');
+          td.innerHTML = osoba;
+          tr.appendChild(td);
+          let td2 : HTMLElement = this.renderer.createElement('td');
+          td2.innerHTML = 'internat'; //! pobierać grupe z baz danych
+          tr.appendChild(td2);
+          let td3 : HTMLElement = this.renderer.createElement('td');
+          td3.innerHTML = 'wersja posiłku'; //! pobierać wersje posiłku z bazy danych
+          tr.appendChild(td3);
+          let td4 : HTMLElement = this.renderer.createElement('td');
+          td4.innerHTML = 'należność'; //! pobierać z bazy danych
+          tr.appendChild(td4);
+          let td5 : HTMLElement = this.renderer.createElement('td');
+          td5.innerHTML = 'placeholder';
+          tr.appendChild(td5);
+          table.appendChild(tr);
+        })
+        break;
+        case 'Obie':
+          let osoby : string[] = this.osoby_zsti.concat(this.osoby_internat);
+          osoby.forEach((osoba : string) : void => {
+            let tr : HTMLElement = this.renderer.createElement('tr');
+            let td : HTMLElement = this.renderer.createElement('td');
+            td.innerHTML = osoba;
+            tr.appendChild(td);
+            let td2 : HTMLElement = this.renderer.createElement('td');
+            this.osoby_zsti.includes(osoba) ? td2.innerHTML = 'szkoła' : td2.innerHTML = 'internat';
+            tr.appendChild(td2);
+            let td3 : HTMLElement = this.renderer.createElement('td');
+            this.osoby_zsti.includes(osoba) ? td3.innerHTML = 'obiady' : td3.innerHTML = 'wersja posiłku'; //! pobierać wersje posiłku z bazy danych
+            tr.appendChild(td3);
+            let td4 : HTMLElement = this.renderer.createElement('td');
+            td4.innerHTML = 'należność'; //! pobierać z bazy danych
+            tr.appendChild(td4);
+            let td5 : HTMLElement = this.renderer.createElement('td');
+            td5.innerHTML = 'placeholder';
+            tr.appendChild(td5);
+            table.appendChild(tr);
+          })
+    }
+    raport.appendChild(table);
+    if(data_od !== '' || data_do !== '') this.generateToExcel('korekty', `${data_od} — ${data_do}`, true);
+    else this.generateToExcel('korekty', date, false);
   }
   generuj(event : Event) : void | string {
     event.preventDefault();
@@ -49,7 +250,6 @@ export class GlobalnyRaportComponent {
     }
 
     // generating raport
-    this.miesiac = this.miesiace[parseInt(date.split('-')[1], 10) - 1] + ' ' + date.split('-')[0];
     let typ : string = this.DOMelement.querySelector('form[name="miesiac"] select[name="typ"]').value;
     let table : HTMLElement = this.renderer.createElement('table');
     table.setAttribute('id', 'raport_table');
@@ -57,29 +257,6 @@ export class GlobalnyRaportComponent {
     let first_day : number = new Date(parseInt(date.split('-')[0], 10), parseInt(date.split('-')[1], 10) - 1, 1).getDay();
     let weekend_days : number = 0;
 
-    let button : HTMLButtonElement = this.renderer.createElement('button');
-    button.innerHTML = `Zapisz raport za ${this.miesiac} do pliku Excel`;
-    button.addEventListener('click', () : void => {
-      console.log('click', this.miesiac);
-
-      let table = XLS.utils.table_to_book(document.getElementById('raport_table'), {sheet: `Raport za ${this.miesiac}`});
-      let ws = table.Sheets[`Raport za ${this.miesiac}`];
-
-      ws['!cols'] = [{wch: 20}, {wch: 20}, {wch: 20}, {wch: 20}];
-
-      const range = XLS.utils.decode_range(<string>ws['!ref']);
-      for (let row = range.s.r; row <= range.e.r; row++) {
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddress = XLS.utils.encode_cell({r: row, c: col});
-          if (!ws[cellAddress]) continue;
-          if (!ws[cellAddress].s) ws[cellAddress].s = {};
-          if (!ws[cellAddress].s.alignment) ws[cellAddress].s.alignment = {};
-          ws[cellAddress].s.alignment.horizontal = 'center';
-          ws[cellAddress].s.alignment.vertical = 'center';
-        }
-      }
-      XLS.writeFile(table, `raport_${this.miesiac.split(' ')[0].toLowerCase()}_${this.miesiac.split(' ')[1]}.xlsx`);
-    });
 
     for(let i : number = 0; i < days_in_month; i++) {
       if((first_day + i) % 7 == 0 || (first_day + i) % 7 == 6) weekend_days++;
@@ -265,6 +442,5 @@ export class GlobalnyRaportComponent {
     }
     raport.innerHTML = '';
     raport.appendChild(table);
-    raport.appendChild(button);
   }
 }

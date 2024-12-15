@@ -4,18 +4,24 @@
 </section>
 <main>
   <section>
-    <h1>Raport z miesiąca {{ miesiac }}</h1>
-    <img ngSrc="../../assets/x.svg" alt="Zamknij" (click)="close()" height="48" width="48">
-    <form name="miesiac" (submit)="generuj($event)" method="post">
-      <div>
-        <label>Miesiąc: <input type="month" name="month" [value]="date.getFullYear()+'-'+(date.getMonth()+1)" placeholder="YYYY-MM"></label>
-        <label><select required name="typ">
-          <option value="ZSTI">ZSTI</option>
-          <option value="Internat">Internat</option>
-        </select></label>
-        <button type="submit">Generuj</button>
-      </div>
-      <div id="raport"></div>
-    </form>
+    <nav>
+      <h2 (click)="close()">Powrót</h2>
+      <ol (click)="show_raport($event)">
+        <li data-id="1">Korekty</li>
+      </ol>
+    </nav>
+    <div id="content"></div>
+<!--    <h1>Raport z miesiąca {{ miesiac }}</h1>-->
+<!--    <form name="miesiac" (submit)="generuj($event)" method="post">-->
+<!--      <div>-->
+<!--        <label>Miesiąc: <input type="month" name="month" [value]="date.getFullYear()+'-'+(date.getMonth()+1)" placeholder="YYYY-MM"></label>-->
+<!--        <label><select required name="typ">-->
+<!--          <option value="ZSTI">ZSTI</option>-->
+<!--          <option value="Internat">Internat</option>-->
+<!--        </select></label>-->
+<!--        <button type="submit">Generuj</button>-->
+<!--      </div>-->
+<!--      <div id="raport"></div>-->
+<!--    </form>-->
   </section>
 </main>

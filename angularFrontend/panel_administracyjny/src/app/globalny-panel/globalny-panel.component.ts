@@ -257,8 +257,7 @@ export class GlobalnyPanelComponent implements OnInit {
       nazwisko:thisElement.querySelector('input[name="nazwisko"]').value,
       uczeszcza: true
     }
-    if(thisElement.querySelector('select[name="typ"]').value === 'ZSTI')
-    {
+    if(thisElement.querySelector('select[name="typ"]').value === 'ZSTI') {
       this.editedStudent.typ_osoby_id = thisElement.querySelector('select[name="typ_zsti"]').value
       this.editedStudent.klasa = thisElement.querySelector('input[name="klasa"]').value
       this.dataService.send(JSON.stringify({
@@ -273,7 +272,7 @@ export class GlobalnyPanelComponent implements OnInit {
         }
       }))
     }
-    else{
+    else {
       this.dataService.send(JSON.stringify({
         action: "request",
         params: {
@@ -392,7 +391,6 @@ export class GlobalnyPanelComponent implements OnInit {
   }
 
   change_form() {
-    console.log('change_form');
     const typ = this.DOMelement.querySelector('form[name="dodaj"] select[name="typ"]').value;
     switch(typ) {
       case 'wybierz':
@@ -401,7 +399,6 @@ export class GlobalnyPanelComponent implements OnInit {
         })
         this.DOMelement.querySelector('form[name="dodaj"]').style.width = '20%';
         this.DOMelement.querySelector('form[name="dodaj"] > :nth-last-child(2)').style.display = 'none';
-
         break;
       case 'ZSTI':
         this.DOMelement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
