@@ -1,5 +1,6 @@
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import * as XLS from 'xlsx';
+import {DataBaseService} from '../data-base.service';
 
 @Component({
   selector: 'app-globalny-raport',
@@ -10,16 +11,60 @@ import * as XLS from 'xlsx';
 })
 export class GlobalnyRaportComponent {
   DOMelement : any | undefined;
-  constructor(private renderer: Renderer2, private el: ElementRef) {
+  constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
     this.DOMelement = this.el.nativeElement;
+    this.dataService.CurrentDisabledZstiDays.asObservable().subscribe((data : any) => this.nieobecnosciZsti = data);
+    this.dataService.CurrentDisabledInternatDays.asObservable().subscribe((data : any) => this.nieobecnosciInternat = data);
+    this.dataService.StudentListZsti.asObservable().subscribe((data : any) => this.uczniowieZsti = data);
+    this.dataService.StudentListInternat.asObservable().subscribe((data : any) => this.uczniowieInternat = data);
+    this.dataService.StudentDeclarationZsti.asObservable().subscribe((data : any) => this.deklaracjeZsti = data);
+    this.dataService.StudentDeclarationInternat.asObservable().subscribe((data : any) => this.deklaracjeInternat = data);
+    this.getDataBaseInfo();
+    setTimeout(() => {
+      this.generateSomething();
+    })
   }
   miesiace : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   osoby_zsti : string[] = ['Jacek Gyatterek', 'Wojtek Skibidi', 'Agata Tobolewska', 'Pozdrawiam AT']
-  osoby_internat : string[] = ['Wege Crashout','Julka Chaber','JC + DW','Pozdrawiam JC + DW'] // ostatnie podpowiedział ai nie ja 🦅🦅
+  osoby_internat : string[] = ['Wege Crashout','Julka Chaber','JC + DW','Pozdrawiam JC + DW'] // ostatnie podpowiedział ai nie ja 🦅🦅 - ta jasne :3
   date : Date = new Date();
+
+  // Zrobilem ci proste lokalne zmienne
+  //  |
+  //  v
+
+  uczniowieZsti: any;
+  uczniowieInternat: any;
+  deklaracjeZsti: any;
+  deklaracjeInternat: any;
+  nieobecnosciZsti: any;
+  nieobecnosciInternat: any;
+
+  // Możesz zawsze używa np. this.dataService.StudentListZsti.value zamiast this.uczniowieZsti
+  // Ale to jak chcesz
+
+  // Funkcja: Odnowienie danych z bazydanych
+  getDataBaseInfo()
+  {
+    this.dataService.getStudentDeclarationInternat()
+    this.dataService.getStudentDeclarationZsti()
+    this.dataService.getStudentList()
+    this.dataService.getStudentInternatDays()
+    this.dataService.getStudentZstiDays()
+  }
+
+  // Funckja: Przyklad wykorzystania danych z zmiennych lokalnych
+  generateSomething()
+  {
+    let value: string = this.uczniowieZsti + this.uczniowieInternat + this.deklaracjeZsti + this.deklaracjeInternat + this.nieobecnosciZsti + this.nieobecnosciInternat;
+    console.log(value, this.uczniowieZsti, this.uczniowieInternat, this.deklaracjeZsti, this.deklaracjeInternat, this.nieobecnosciZsti, this.nieobecnosciInternat);
+    this.getDataBaseInfo()
+  }
+
   show() : void {
     this.renderer.setStyle(this.DOMelement.querySelector('main'), 'display', 'flex');
   }
+
   generateToExcel(name : string, data : string, okres : boolean) : void {
     let button_excel : HTMLButtonElement = this.renderer.createElement('button');
     if(okres) button_excel.innerHTML = `Zapisz raport za okres ${data} do pliku Excel`;
