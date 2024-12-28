@@ -1,6 +1,6 @@
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import * as XLS from 'xlsx';
-import {DataBaseService} from '../data-base.service';
+import { DataBaseService } from '../data-base.service';
 
 @Component({
   selector: 'app-globalny-raport',
@@ -13,7 +13,7 @@ export class GlobalnyRaportComponent {
   DOMelement : any | undefined;
   constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
     this.DOMelement = this.el.nativeElement;
-    this.dataService.CurrentDisabledZstiDays.asObservable().subscribe((data : any) => this.nieobecnosciZsti = data);
+    this.dataService.AllStudentZstiDisabledDays.asObservable().subscribe((data: any) => this.nieobecnosciZsti = data);
     this.dataService.CurrentDisabledInternatDays.asObservable().subscribe((data : any) => this.nieobecnosciInternat = data);
     this.dataService.StudentListZsti.asObservable().subscribe((data : any) => this.uczniowieZsti = data);
     this.dataService.StudentListInternat.asObservable().subscribe((data : any) => this.uczniowieInternat = data);
@@ -51,6 +51,8 @@ export class GlobalnyRaportComponent {
     this.dataService.getStudentList()
     this.dataService.getStudentInternatDays()
     this.dataService.getStudentZstiDays()
+    this.dataService.getStudentDisabledZstiDays()
+    this.dataService.getStudentDisabledInternatDays()
   }
 
   // Funckja: Przyklad wykorzystania danych z zmiennych lokalnych
@@ -64,7 +66,6 @@ export class GlobalnyRaportComponent {
   show() : void {
     this.renderer.setStyle(this.DOMelement.querySelector('main'), 'display', 'flex');
   }
-
   generateToExcel(name : string, data : string, okres : boolean) : void {
     let button_excel : HTMLButtonElement = this.renderer.createElement('button');
     if(okres) button_excel.innerHTML = `Zapisz raport za okres ${data} do pliku Excel`;
@@ -197,34 +198,42 @@ export class GlobalnyRaportComponent {
     if(data_do < data_od) return raport.innerHTML = 'Data od nie może być większa niż data od!';
     let table : HTMLElement = this.renderer.createElement('table');
     table.setAttribute('id', 'raport_table');
-    let columns : string[] = ['Imię','Grupa','Wersja','Należność','Uwagi/Podpis']
+    let columns : string[] = ['Lp.','Imię i Nazwisko','Grupa','Wersja','Należność','Uwagi/Podpis']
     let tr : HTMLElement = this.renderer.createElement('tr');
-    for(let i : number = 0 ; i < 5 ; i++) {
+    columns.forEach((column : string) : void => {
       let th : HTMLElement = this.renderer.createElement('th');
-      th.innerHTML = columns[i];
+      th.innerHTML = column;
       tr.appendChild(th);
-    }
+    })
     table.appendChild(tr);
     switch (typ) {
       case 'ZSTI':
-        this.osoby_zsti.forEach((osoba : string) : void => {
+        let i : number = 1;
+        this.uczniowieZsti.forEach((osoba : Object) : void => {
           let tr : HTMLElement = this.renderer.createElement('tr');
           let td : HTMLElement = this.renderer.createElement('td');
-          td.innerHTML = osoba;
+          td.innerHTML = i.toString() + '.';
           tr.appendChild(td);
           let td2 : HTMLElement = this.renderer.createElement('td');
-          td2.innerHTML = 'szkoła';
+          // @ts-ignore
+          td2.innerHTML = osoba['imie'] + ' ' + osoba['nazwisko'];
           tr.appendChild(td2);
           let td3 : HTMLElement = this.renderer.createElement('td');
-          td3.innerHTML = 'obiady';
+          td3.innerHTML = 'szkoła';
           tr.appendChild(td3);
           let td4 : HTMLElement = this.renderer.createElement('td');
-          td4.innerHTML = '9 zł'; //! pobierać z bazy danych ilość blokad obiadów * 9
+          td4.innerHTML = 'obiady';
           tr.appendChild(td4);
           let td5 : HTMLElement = this.renderer.createElement('td');
-          td5.innerHTML = 'placeholder';
+          // @ts-ignore
+          console.log(this.dataService.CurrentDisabledZstiDays.value);
+          td5.innerHTML = '9 zł'; //! pobierać z bazy danych ilość blokad obiadów * 9
           tr.appendChild(td5);
+          let td6 : HTMLElement = this.renderer.createElement('td');
+          td6.innerHTML = 'placeholder';
+          tr.appendChild(td6);
           table.appendChild(tr);
+          i++;
         })
         break;
       case 'Internat':
@@ -248,7 +257,7 @@ export class GlobalnyRaportComponent {
           table.appendChild(tr);
         })
         break;
-        case 'Obie':
+      case 'Obie':
           let osoby : string[] = this.osoby_zsti.concat(this.osoby_internat);
           osoby.forEach((osoba : string) : void => {
             let tr : HTMLElement = this.renderer.createElement('tr');
