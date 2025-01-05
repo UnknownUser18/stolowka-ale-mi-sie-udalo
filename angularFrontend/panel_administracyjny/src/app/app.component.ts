@@ -63,108 +63,70 @@ export class AppComponent implements OnInit {
     }
 });
   }
-  szukaj() {
+  szukaj() : void {
     const searchTerm = this.el.nativeElement.querySelector('#wyszukaj > input').value.toLowerCase();
-    if(searchTerm === '') {
-      this.DOMelement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
+    const sections = this.DOMelement.querySelectorAll('section > ol > li');
+    sections.forEach((element: HTMLElement) => {
+      element.style.display = element.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
+    });
+    if (searchTerm === '') {
+      sections.forEach((element: HTMLElement) => {
         element.style.display = 'block';
-      })
-      this.DOMelement.querySelectorAll('section:nth-of-type(2) > ol > li').forEach((element : HTMLElement) => {
-        element.style.display = 'block';
-      })
-      return;
+      });
+    } else {
+      this.rozwin(new Event('click'));
+      this.rozwin(new Event('click'));
     }
-    this.rozwin(this.DOMelement.querySelector('section:nth-of-type(1) > button'), 3, true);
-    this.rozwin(this.DOMelement.querySelector('section:nth-of-type(2) > button'), 4, true);
-    this.DOMelement.querySelectorAll('section:nth-of-type(1) > ol > li').forEach((element : HTMLElement) => {
-      !element.textContent?.toLowerCase().includes(searchTerm) ? element.style.display = 'none' : element.style.display = 'block';
-    })
-    this.el.nativeElement.querySelectorAll('section:nth-of-type(2) > ol > li').forEach((element : HTMLElement) => {
-      !element.textContent?.toLowerCase().includes(searchTerm) ? element.style.display = 'none' : element.style.display = 'block';
-    })
-  }
-  cantDoThat(func:Function)
-  {
-    const dialogRef = this.dialog.open(UnsavedChangesDialogComponent, {
+}
+  cantDoThat(func:Function) {
+    const dialogRef = this.dialog?.open(UnsavedChangesDialogComponent, {
       width: '400px',
     });
-    // Obsługa zamknięcia dialogu
     dialogRef.afterClosed().subscribe((result) => {
       if (result === 'proceed') {
-        console.log('Użytkownik zdecydował się kontynuować mimo niezapisanych zmian.');
         this.dataService.SavedList.forEach((element:any) => {
           element.next(true)
         })
         func();
-      } else {
-        console.log('Użytkownik anulował akcję.');
       }
-      console.log(this.dataService.SavedList)
     });
   }
 
   osoba : string | undefined;
   title: string = 'panel_administracyjny';
   typ : string | undefined;
-  show(event: Event) {
-    let ifRet = false
-    this.dataService.SavedList.forEach((element)=>{
-      if(!element.value)
-        ifRet = true
-    })
-    let func = () => {
-      let target = event.target as HTMLElement;
-      if(target.tagName != 'OL') {
-        if(target.tagName == "SPAN") {
-          target = target.parentElement as HTMLElement;
-        }
-        this.DOMelement.querySelector('app-globalny-panel').style.display = 'none';
-        this.DOMelement.querySelector('app-panel').style.display = 'block';
-        let daneTarget = target;
-        this.osoba = target.querySelector('span')?.textContent!;
-        target = target.parentElement as HTMLElement;
-        target = target.parentElement as HTMLElement;
-        target = target.querySelector('button') as HTMLElement;
-        this.typ = target.textContent!;
-        // @ts-ignore
-        if(!this.StudentListZstiData[daneTarget.getAttribute('data-index')]) return
-        const index : number = parseInt(daneTarget.getAttribute('data-index')!, 10);
-        if (this.typ === "ZSTI") {
-          if (this.StudentListZstiData && this.StudentListZstiData[index]) this.dataService.changeStudent(this.StudentListZstiData[index].id, this.typ);
-        } else {
-          if (this.StudentListInternatData && this.StudentListInternatData[index]) this.dataService.changeStudent(this.StudentListInternatData[index].id, this.typ);
-        }
-      }
-    }
-    if(ifRet) {
-      this.cantDoThat(func)
+  show(event: Event): void {
+    if (this.dataService.SavedList.some(element => !element.value)) {
+      this.cantDoThat(() => this.show(event));
       return;
     }
-    func()
-  }
-  rozwin(event: Event, number: number, szukaj : boolean) {
-    let target = szukaj ? event : (event.target as HTMLElement);
-    // @ts-ignore
-    target = target.parentElement as HTMLElement;
-    target = target.parentElement as HTMLElement;
-    let img = target.querySelector(`:nth-child(${number}) > button img`) as HTMLElement;
-    target = target.querySelector(`:nth-child(${number}) > ol`) as HTMLElement;
-    if(target.style.opacity === '1' && !szukaj) {
-      target.style.opacity = '0';
-      target.style.maxHeight = '0';
-      target.style.overflow = 'hidden';
-      img.classList.remove('rotate');
-      return;
+    let target = event.target as HTMLElement;
+    if (target.tagName === 'OL') return;
+    if (target.tagName === 'SPAN') {
+      target = target.parentElement as HTMLElement;
     }
-    else {
-      target.style.opacity = '1';
-      target.style.maxHeight = 'fit-content';
-      target.style.overflow = 'visible';
-      img.classList.add('rotate');
+    this.DOMelement.querySelector('app-globalny-panel').style.display = 'none';
+    this.DOMelement.querySelector('app-panel').style.display = 'block';
+    this.osoba = target.querySelector('span')?.textContent!;
+    const index = parseInt(target.getAttribute('data-index')!, 10);
+    const studentData = this.typ === 'ZSTI' ? this.StudentListZstiData : this.StudentListInternatData;
+    if (studentData && studentData[index] && this.typ) {
+      this.dataService.changeStudent(studentData[index].id, this.typ);
     }
   }
-  protected readonly JSON = JSON;
-  main_menu() {
+  rozwin(event: Event): void {
+    let target = event.target as HTMLElement;
+    while (target.tagName !== 'BUTTON') {
+      target = target.parentElement as HTMLElement;
+    }
+    const img = target.querySelector('img') as HTMLElement;
+    const ol = target.nextElementSibling as HTMLElement;
+    if (!ol) return;
+    ol.classList.toggle('show');
+    img.classList.toggle('rotate');
+  }
+  protected readonly JSON : JSON = JSON;
+  main_menu() : void {
     this.DOMelement.querySelector('app-globalny-panel').style.display = 'block';
     this.DOMelement.querySelector('app-panel').style.display = 'none';
   }

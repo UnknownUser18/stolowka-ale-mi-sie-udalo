@@ -104,6 +104,11 @@ button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
+.show {
+    opacity: 1;
+    max-height: fit-content;
+    overflow: visible;
+}
 @media (min-width: 1280px) and (max-width: 1800px) {
     nav {
         font-size: 1.4em;

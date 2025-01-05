@@ -1,8 +1,7 @@
-import {Component, ElementRef, Input} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {DataBaseService} from '../data-base.service';
-import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
-import {CardDisplayComponent} from '../card-display/card-display.component';
+import { Component, ElementRef, Input } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DataBaseService } from '../data-base.service';
+import { NgOptimizedImage } from '@angular/common';
 
 @Component({
   selector: 'app-karty',
