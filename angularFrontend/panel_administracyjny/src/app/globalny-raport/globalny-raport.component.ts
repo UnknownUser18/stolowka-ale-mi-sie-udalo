@@ -81,6 +81,17 @@ export class GlobalnyRaportComponent {
     table.setAttribute('id', 'raport_table');
     return table;
   }
+  create_data_row(data : string[], table : HTMLTableElement, bolded : boolean) : HTMLTableRowElement {
+    let tr : HTMLTableRowElement = this.renderer.createElement('tr');
+    data.forEach((text : string) : void => {
+      let cell : HTMLElement;
+      bolded ? cell = this.renderer.createElement('th') : cell = this.renderer.createElement('td');
+      cell.textContent = text;
+      tr.appendChild(cell);
+    });
+    table.appendChild(tr);
+    return tr;
+  }
   sort_by_surname(array : string[]) : string[] {
     return array.sort((a : string, b : string) : number => {
       let a_surname : string = a.split(' ')[1];
@@ -198,7 +209,6 @@ export class GlobalnyRaportComponent {
           this.korekty(event);
           break;
         case 2:
-          console.log('Wersje posiłków');
           this.wersje_posilkow(event);
           break;
       }
@@ -228,24 +238,17 @@ export class GlobalnyRaportComponent {
     let tr_header : HTMLTableRowElement = this.renderer.createElement('tr');
     let th : HTMLTableCellElement = this.renderer.createElement('th');
     th.colSpan = 6;
-    th.textContent = `Lista korzystających ze stołówki ZSTI za ${this.miesiace[parseInt(date.split('-')[1]) - 1]} ${date.split('-')[0]}`;
+    if(data_od !== '' || data_do !== '') th.textContent = `Lista korzystających ze stołówki ZSTI za okres od ${data_od} do ${data_do}`;
+    else th.textContent = `Lista korzystających ze stołówki ZSTI za ${this.miesiace[parseInt(date.split('-')[1]) - 1]} ${date.split('-')[0]}`;
     tr_header.appendChild(th);
     table.appendChild(tr_header);
 
     let columns : string[] = ['Lp.','Imię i Nazwisko','Grupa','Wersja','Należność','Uwagi/Podpis']
-    let tr : HTMLTableRowElement = this.renderer.createElement('tr');
+    this.create_data_row(columns, table, true);
     let index : number = 1;
-    columns.forEach((column : string) : void => {
-      let th : HTMLTableElement = this.renderer.createElement('th');
-      th.textContent = column;
-      tr.appendChild(th);
-    })
-    table.appendChild(tr);
-
     switch (typ) {
       case 'ZSTI':
         this.uczniowieZsti.forEach((osoba : string) : void => {
-          let tr : HTMLTableRowElement = this.renderer.createElement('tr');
           let data : string[] = [
             `${index}.`,
             `${osoba}`,
@@ -254,30 +257,19 @@ export class GlobalnyRaportComponent {
             '9 zł', // pobierać z bazy danych ilość blokad obiadów * 9
             'placeholder'
           ];
-          data.forEach((text : string) : void  => {
-            let td : HTMLTableElement = this.renderer.createElement('td');
-            td.textContent = text;
-            tr.appendChild(td);
-          });
-
-          table.appendChild(tr);
+          this.create_data_row(data, table, false);
           index++;
         });
         break;
       case 'Internat':
         this.uczniowieInternat.forEach((osoba : string) : void => {
-          let tr : HTMLTableRowElement = this.renderer.createElement('tr');
           let data : string[] = [
             `${index}.`,
             `${osoba}`,
             'grupa_internat', // pobierać z bazy danych
             'wersja posiłku', // pobierać z bazy danych
           ];
-          data.forEach((text : string) : void => {
-            let td : HTMLElement = this.renderer.createElement('td');
-            td.textContent = text;
-            tr.appendChild(td);
-          });
+          let tr : HTMLTableRowElement = this.create_data_row(data, table, false);
 
           let td_naleznosc : HTMLElement = this.renderer.createElement('td');
           let ilosc_nieobecnosci : number = 1; //! pobierać z bazy danych
@@ -296,29 +288,30 @@ export class GlobalnyRaportComponent {
         let osoby : string[] = this.uczniowieZsti.concat(this.uczniowieInternat);
         osoby = this.sort_by_surname(osoby);
         osoby.forEach((osoba : string) : void => {
-          let tr : HTMLTableRowElement = this.renderer.createElement('tr');
           let data : string[] = [
             `${index}.`,
             `${osoba}`,
           ];
-          data.forEach((text : string) : void => {
-            let td : HTMLElement = this.renderer.createElement('td');
-            td.textContent = text;
-            tr.appendChild(td);
-          });
-
-          let td_grupa : HTMLTableElement = this.renderer.createElement('td');
+          let tr : HTMLTableRowElement = this.create_data_row(data, table, false);
+          let td_grupa : HTMLElement = this.renderer.createElement('td');
           let td_wersja : HTMLElement = this.renderer.createElement('td');
+          let td_naleznosc : HTMLElement = this.renderer.createElement('td');
+          let ilosc_nieobecnosci : number = 1; //! pobierać z bazy danych
+          let td_uwagi : HTMLElement = this.renderer.createElement('td');
           if (this.uczniowieZsti.includes(osoba)) {
             td_grupa.textContent = 'szkoła';
             td_wersja.textContent = 'obiady';
-          }
-          else {
+            td_naleznosc.textContent = (ilosc_nieobecnosci * 9).toString() + ' zł';
+          } else {
             td_grupa.textContent = 'grupa_internat'; //! pobierać z bazy danych
             td_wersja.textContent = 'wersja posiłku'; //! pobierać z bazy danych
+            td_naleznosc.textContent = (ilosc_nieobecnosci * 23).toString() + ' zł';
           }
+          td_uwagi.textContent = 'placeholder';
           tr.appendChild(td_grupa);
           tr.appendChild(td_wersja);
+          tr.appendChild(td_naleznosc);
+          tr.appendChild(td_uwagi);
           table.appendChild(tr);
           index++;
         })
@@ -349,14 +342,7 @@ export class GlobalnyRaportComponent {
     let table : HTMLTableElement = this.create_table();
 
     let columns : string[] = ['Lp.','Imię i Nazwisko', 'Grupa', 'Wersja']
-    let tr : HTMLTableRowElement = this.renderer.createElement('tr');
-    columns.forEach((column : string) : void => {
-      let th : HTMLTableElement = this.renderer.createElement('th');
-      th.textContent = column;
-      tr.appendChild(th);
-    });
-    table.appendChild(tr);
-
+    this.create_data_row(columns, table, true);
     let index : number = 1;
     this.uczniowieInternat.forEach((osoba : string) : void => {
       let data : string[] = [
@@ -365,14 +351,7 @@ export class GlobalnyRaportComponent {
         'grupa_internat', // pobierać z bazy danych
         'wersja posiłku' // pobierać z bazy danych
       ];
-      let tr : HTMLTableRowElement = this.renderer.createElement('tr');
-      data.forEach((text : string) : void => {
-        let td : HTMLTableElement = this.renderer.createElement('td');
-        td.textContent = text;
-        tr.appendChild(td);
-      });
-
-      table.appendChild(tr);
+      this.create_data_row(data, table, false);
       index++;
     });
     raport.appendChild(table);
