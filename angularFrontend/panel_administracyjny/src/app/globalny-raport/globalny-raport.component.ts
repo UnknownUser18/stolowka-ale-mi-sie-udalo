@@ -1,4 +1,4 @@
-import { Component, ElementRef, Renderer2 } from '@angular/core';
+import { Component, ElementRef, Renderer2, OnInit } from '@angular/core';
 import * as XLS from 'xlsx';
 // import { DataBaseService } from '../data-base.service';
 
@@ -34,12 +34,12 @@ export class GlobalnyRaportComponent {
     // this.dataService.StudentDeclarationInternat.asObservable().subscribe((data : any) => this.deklaracjeInternat = data);
     // this.getDataBaseInfo();
   }
+  ngOnInit() {
+    this.uczniowieZsti = this.sort_by_surname(this.uczniowieZsti);
+    this.uczniowieInternat = this.sort_by_surname(this.uczniowieInternat);
+  }
   miesiace : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   date : Date = new Date();
-
-  // Zrobilem ci proste lokalne zmienne
-  //  |
-  //  v
   //! zmienic, aby pobierało z bazy danych
   uczniowieZsti: string[] = ['Jacek Gyatterek', 'Wojtek Skibidi', 'Agata Tobolewska', 'Pozdrawiam AT'];
   uczniowieInternat: string[] = ['Wege Crashout','Julka Chaber','JC + DW','Pozdrawiam JC + DW'];
@@ -62,6 +62,25 @@ export class GlobalnyRaportComponent {
   //   this.dataService.getStudentDisabledZstiDays()
   //   this.dataService.getStudentDisabledInternatDays()
   // }
+  checkDate(date : string) : boolean {
+    if(date.length != 7) return false;
+    let myslnik : number = 0;
+    for(let i : number = 0 ; i < date.length ; i++) {
+      if(date[0] === '-') myslnik++;
+    }
+    if(date !== '' && (parseInt(date.split('-')[1]) >= 13 || parseInt(date.split('-')[1]) == 0)) return false;
+    if(date !== '' && date.length != 7) return false;
+    if(myslnik > 1) return false;
+    for (let i : number = 0 ; i < date.length ; i++) {
+      if(((i < 4 || i > 5) && (date[i] < '0' || date[i] > '9')) || (i == 4 && date[i] != '-')) return false;
+    }
+    return true;
+  }
+  create_table() : HTMLTableElement {
+    let table : HTMLTableElement = this.renderer.createElement('table');
+    table.setAttribute('id', 'raport_table');
+    return table;
+  }
   sort_by_surname(array : string[]) : string[] {
     return array.sort((a : string, b : string) : number => {
       let a_surname : string = a.split(' ')[1];
@@ -73,8 +92,8 @@ export class GlobalnyRaportComponent {
   }
   generateToExcel(name : string, data : string, okres : boolean) : void {
     let button_excel : HTMLButtonElement = this.renderer.createElement('button');
-    if(okres) button_excel.innerHTML = `Zapisz raport za okres ${data} do pliku Excel`;
-    else button_excel.innerHTML = `Zapisz raport za ${data} do pliku Excel`;
+    if(okres) button_excel.textContent = `Zapisz raport za okres ${data} do pliku Excel`;
+    else button_excel.textContent = `Zapisz raport za ${data} do pliku Excel`;
     button_excel.addEventListener('click', () : void => {
       let table, ws;
       if(okres) {
@@ -105,7 +124,7 @@ export class GlobalnyRaportComponent {
     });
     this.DOMelement.querySelector('#content').appendChild(button_excel);
   }
-  show_raport(event : MouseEvent) {
+  show_raport(event : MouseEvent) : void {
     let element : HTMLElement = event.target as HTMLElement;
     if(element.tagName !== 'LI') return;
 
@@ -114,6 +133,7 @@ export class GlobalnyRaportComponent {
     let form : HTMLFormElement = this.renderer.createElement('form');
     form.name = 'data';
     form.method = 'POST';
+    content.textContent = '';
     switch (id) {
       case 1:
         let h2 : HTMLHeadingElement = this.renderer.createElement('h2');
@@ -153,51 +173,43 @@ export class GlobalnyRaportComponent {
         h3.innerHTML = 'Typ raportu';
         form.appendChild(h3);
 
-        let select : HTMLSelectElement = this.renderer.createElement('select');
-        let options : string[] = ['ZSTI', 'Internat', 'Obie'];
-        select.name = 'typ';
-        options.forEach((element : string) : void => {
+        let select_type : HTMLSelectElement = this.renderer.createElement('select');
+        let options_type : string[] = ['ZSTI', 'Internat', 'Obie'];
+        select_type.name = 'typ';
+        options_type.forEach((element : string) : void => {
           let option : HTMLOptionElement = this.renderer.createElement('option');
           option.value = element;
           option.textContent = element;
-          select.appendChild(option);
+          select_type.appendChild(option);
         });
-        form.appendChild(select);
+        form.appendChild(select_type);
         break;
       case 2:
         break;
     }
+    content.appendChild(form);
     let button : HTMLButtonElement = this.renderer.createElement('button');
     button.innerHTML = 'Generuj raport';
     button.addEventListener('click', (event : Event) : void => {
       if(this.DOMelement.querySelector('#content > button')) this.DOMelement.querySelector('#content > button').remove();
-      this.DOMelement.querySelector('#raport').innerHTML = '';
+      this.DOMelement.querySelector('#raport').textContent = '';
       switch (id) {
         case 1:
           this.korekty(event);
+          break;
+        case 2:
+          console.log('Wersje posiłków');
+          this.wersje_posilkow(event);
           break;
       }
     });
     form.appendChild(button);
     let raport : HTMLElement = this.renderer.createElement('div');
     raport.setAttribute('id', 'raport');
-    raport.innerHTML = '';
+    raport.textContent = '';
     content.appendChild(raport);
   }
-  checkDate(date : string) : boolean {
-    if(date.length != 7) return false;
-    let myslnik : number = 0;
-    for(let i : number = 0 ; i < date.length ; i++) {
-      if(date[0] === '-') myslnik++;
-    }
-    if(date !== '' && (parseInt(date.split('-')[1]) >= 13 || parseInt(date.split('-')[1]) == 0)) return false;
-    if(date !== '' && date.length != 7) return false;
-    if(myslnik > 1) return false;
-    for (let i : number = 0 ; i < date.length ; i++) {
-      if(((i < 4 || i > 5) && (date[i] < '0' || date[i] > '9')) || (i == 4 && date[i] != '-')) return false;
-    }
-    return true;
-  }
+
   korekty(event : Event) : void | string {
     event.preventDefault();
     let date : string = this.DOMelement.querySelector('input[name="month"]').value;
@@ -211,8 +223,7 @@ export class GlobalnyRaportComponent {
     if (date !== '' && !this.checkDate(date)) return raport.textContent = 'Niepoprawny format daty!';
     if(data_do < data_od) return raport.textContent = 'Data od nie może być większa niż data od!';
 
-    let table : HTMLTableElement = this.renderer.createElement('table');
-    table.setAttribute('id', 'raport_table');
+    let table : HTMLTableElement = this.create_table();
 
     let tr_header : HTMLTableRowElement = this.renderer.createElement('tr');
     let th : HTMLTableCellElement = this.renderer.createElement('th');
@@ -233,12 +244,11 @@ export class GlobalnyRaportComponent {
 
     switch (typ) {
       case 'ZSTI':
-        this.uczniowieZsti = this.sort_by_surname(this.uczniowieZsti);
         this.uczniowieZsti.forEach((osoba : string) : void => {
           let tr : HTMLTableRowElement = this.renderer.createElement('tr');
           let data : string[] = [
             `${index}.`,
-            `${osoba}`, // pobierać z bazy danych
+            `${osoba}`,
             'szkoła',
             'obiady',
             '9 zł', // pobierać z bazy danych ilość blokad obiadów * 9
@@ -249,18 +259,17 @@ export class GlobalnyRaportComponent {
             td.textContent = text;
             tr.appendChild(td);
           });
+
           table.appendChild(tr);
           index++;
         });
         break;
       case 'Internat':
-        this.uczniowieInternat = this.sort_by_surname(this.uczniowieInternat);
         this.uczniowieInternat.forEach((osoba : string) : void => {
           let tr : HTMLTableRowElement = this.renderer.createElement('tr');
-          console.log(osoba)
           let data : string[] = [
             `${index}.`,
-            `${osoba}`, // pobierać z bazy danych
+            `${osoba}`,
             'grupa_internat', // pobierać z bazy danych
             'wersja posiłku', // pobierać z bazy danych
           ];
@@ -269,13 +278,16 @@ export class GlobalnyRaportComponent {
             td.textContent = text;
             tr.appendChild(td);
           });
+
           let td_naleznosc : HTMLElement = this.renderer.createElement('td');
           let ilosc_nieobecnosci : number = 1; //! pobierać z bazy danych
           td_naleznosc.textContent = (ilosc_nieobecnosci * 23).toString() + ' zł';
           tr.appendChild(td_naleznosc);
+
           let td_uwagi : HTMLElement = this.renderer.createElement('td');
           td_uwagi.textContent = 'placeholder';
           tr.appendChild(td_uwagi);
+
           table.appendChild(tr);
           index++;
         })
@@ -294,6 +306,7 @@ export class GlobalnyRaportComponent {
             td.textContent = text;
             tr.appendChild(td);
           });
+
           let td_grupa : HTMLTableElement = this.renderer.createElement('td');
           let td_wersja : HTMLElement = this.renderer.createElement('td');
           if (this.uczniowieZsti.includes(osoba)) {
@@ -329,5 +342,40 @@ export class GlobalnyRaportComponent {
     table.appendChild(tr_2);
     if(data_od !== '' || data_do !== '') this.generateToExcel('korekty', `${data_od} — ${data_do}`, true);
     else this.generateToExcel('korekty', date, false);
+  }
+  wersje_posilkow(event : Event) {
+    event.preventDefault();
+    let raport : HTMLElement = this.DOMelement.querySelector('#raport');
+    let table : HTMLTableElement = this.create_table();
+
+    let columns : string[] = ['Lp.','Imię i Nazwisko', 'Grupa', 'Wersja']
+    let tr : HTMLTableRowElement = this.renderer.createElement('tr');
+    columns.forEach((column : string) : void => {
+      let th : HTMLTableElement = this.renderer.createElement('th');
+      th.textContent = column;
+      tr.appendChild(th);
+    });
+    table.appendChild(tr);
+
+    let index : number = 1;
+    this.uczniowieInternat.forEach((osoba : string) : void => {
+      let data : string[] = [
+        `${index}.`,
+        `${osoba}`,
+        'grupa_internat', // pobierać z bazy danych
+        'wersja posiłku' // pobierać z bazy danych
+      ];
+      let tr : HTMLTableRowElement = this.renderer.createElement('tr');
+      data.forEach((text : string) : void => {
+        let td : HTMLTableElement = this.renderer.createElement('td');
+        td.textContent = text;
+        tr.appendChild(td);
+      });
+
+      table.appendChild(tr);
+      index++;
+    });
+    raport.appendChild(table);
+    this.generateToExcel('wersje_posilkow', '2025-01', false);
   }
 }
