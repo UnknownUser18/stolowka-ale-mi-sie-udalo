@@ -29,19 +29,19 @@ export class AppComponent implements OnInit {
     nazwisko: []
   }
   ];
-  sorted_zsti_users: Array<{imie: string, nazwisko: string}> = [];
-  sorted_internat_users: Array<{imie: string, nazwisko: string}> = [];
-  StudentListZstiData:any = null;
-  StudentListInternatData:any = null;
+  sorted_zsti_users: Array<{ imie : string, nazwisko : string}> = [];
+  sorted_internat_users: Array<{ imie: string, nazwisko : string}> = [];
+  StudentListZstiData : Array<{ id : number, imie : string, nazwisko : string}> | null = null;
+  StudentListInternatData: Array<{ id : number, imie : string, nazwisko : string }> | null = null;
   constructor(private dataService:DataBaseService, private el: ElementRef, private dialog: MatDialog) {
-    this.DOMelement = this.el.nativeElement
+   this.DOMelement = this.el.nativeElement ? this.el.nativeElement : undefined;
   }
   ngOnInit() {
-  this.dataService.StudentListZstiData.subscribe((data: any) => {
+  this.dataService.StudentListZstiData.subscribe((data: Array<{ id : number, imie : string, nazwisko : string }>) => {
     this.StudentListZstiData = data;
     if (this.StudentListZstiData != null) {
-      this.zsti_users[0].imie = this.StudentListZstiData.map((element: any) => element.imie);
-      this.zsti_users[0].nazwisko = this.StudentListZstiData.map((element: any) => element.nazwisko);
+      this.zsti_users[0].imie = this.StudentListZstiData.map((element) => element.imie);
+      this.zsti_users[0].nazwisko = this.StudentListZstiData.map((element) => element.nazwisko);
       let zsti_users_flat: Array<{ imie: string, nazwisko: string }> = this.zsti_users[0].imie.map((imie, index) => {
         return { imie, nazwisko: this.zsti_users[0].nazwisko[index] };
       });
@@ -112,8 +112,7 @@ export class AppComponent implements OnInit {
       if(!element.value)
         ifRet = true
     })
-    let func = () =>
-    {
+    let func = () => {
       let target = event.target as HTMLElement;
       if(target.tagName != 'OL') {
         if(target.tagName == "SPAN") {
@@ -128,18 +127,16 @@ export class AppComponent implements OnInit {
         target = target.querySelector('button') as HTMLElement;
         this.typ = target.textContent!;
         // @ts-ignore
-        if(!this.StudentListZstiData[daneTarget.getAttribute('data-index')])
-          return
-        if(this.typ === "ZSTI") {
-          this.dataService.changeStudent(this.StudentListZstiData[daneTarget.getAttribute('data-index')!].id, this.typ)
-        }
-        else {
-          this.dataService.changeStudent(this.StudentListInternatData[daneTarget.getAttribute('data-index')!].id, this.typ)
+        if(!this.StudentListZstiData[daneTarget.getAttribute('data-index')]) return
+        const index : number = parseInt(daneTarget.getAttribute('data-index')!, 10);
+        if (this.typ === "ZSTI") {
+          if (this.StudentListZstiData && this.StudentListZstiData[index]) this.dataService.changeStudent(this.StudentListZstiData[index].id, this.typ);
+        } else {
+          if (this.StudentListInternatData && this.StudentListInternatData[index]) this.dataService.changeStudent(this.StudentListInternatData[index].id, this.typ);
         }
       }
     }
-    if(ifRet)
-    {
+    if(ifRet) {
       this.cantDoThat(func)
       return;
     }
@@ -170,6 +167,5 @@ export class AppComponent implements OnInit {
   main_menu() {
     this.DOMelement.querySelector('app-globalny-panel').style.display = 'block';
     this.DOMelement.querySelector('app-panel').style.display = 'none';
-    // żydon zrób żeby usunąc zaznaczoną osobę po tym kliknięciu ^
   }
 }
