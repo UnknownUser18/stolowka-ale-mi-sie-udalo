@@ -14,7 +14,7 @@ import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  DOMelement: any;
+  DOMelement: HTMLElement | null;
   sorted_zsti_users: Array<{ imie: string, nazwisko: string }> = [];
   sorted_internat_users: Array<{ imie: string, nazwisko: string }> = [];
   StudentListZstiData: Array<{ id: number, imie: string, nazwisko: string }> | null = null;
@@ -24,7 +24,7 @@ export class AppComponent implements OnInit {
   typ: string | undefined;
 
   constructor(private dataService: DataBaseService, private el: ElementRef, private dialog: MatDialog) {
-    this.DOMelement = this.el.nativeElement;
+    this.DOMelement = this.el.nativeElement as HTMLElement | null;
   }
 
   ngOnInit() {
@@ -44,23 +44,25 @@ export class AppComponent implements OnInit {
 
   sortUsers(data: Array<{ id: number, imie: string, nazwisko: string }>) {
     return data.map(user => ({ imie: user.imie, nazwisko: user.nazwisko }))
-               .sort((a, b) => a.nazwisko.localeCompare(b.nazwisko));
+      .sort((a, b) => a.nazwisko.localeCompare(b.nazwisko));
   }
 
-  szukaj(): void {
-    const searchTerm = this.el.nativeElement.querySelector('#wyszukaj > input').value.toLowerCase();
-    const sections = this.DOMelement.querySelectorAll('section > ol > li');
-    sections.forEach((element: HTMLElement) => {
-      element.style.display = element.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
+szukaj() : void {
+  const searchTerm = this.el.nativeElement.querySelector('#wyszukaj > input')?.value.toLowerCase() || '';
+  const sections = this.DOMelement?.querySelectorAll('section > ol > li');
+  sections?.forEach((element: Element) => {
+    const htmlElement = element as HTMLElement;
+    htmlElement.style.display = htmlElement.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
+  });
+  if (searchTerm === '') {
+    sections?.forEach((element: Element) => {
+      const htmlElement = element as HTMLElement;
+      htmlElement.style.display = 'block';
     });
-    if (searchTerm === '') {
-      sections.forEach((element: HTMLElement) => {
-        element.style.display = 'block';
-      });
-    } else {
-      this.toggleSections();
-    }
+  } else {
+    this.toggleSections();
   }
+}
 
   toggleSections() {
     this.rozwin(new Event('click'));
@@ -97,8 +99,10 @@ export class AppComponent implements OnInit {
   }
 
   displayPanels(target: HTMLElement) {
-    this.DOMelement.querySelector('app-globalny-panel').style.display = 'none';
-    this.DOMelement.querySelector('app-panel').style.display = 'block';
+    const globalnyPanel = this.DOMelement?.querySelector('app-globalny-panel') as HTMLElement | null;
+    const panel = this.DOMelement?.querySelector('app-panel') as HTMLElement | null;
+    if (globalnyPanel) globalnyPanel.style.display = 'none';
+    if (panel) panel.style.display = 'block';
     this.osoba = target.querySelector('span')?.textContent!;
   }
 
@@ -123,7 +127,9 @@ export class AppComponent implements OnInit {
   }
 
   main_menu(): void {
-    this.DOMelement.querySelector('app-globalny-panel').style.display = 'block';
-    this.DOMelement.querySelector('app-panel').style.display = 'none';
+    const globalnyPanel = this.DOMelement?.querySelector('app-globalny-panel') as HTMLElement | null;
+    const panel = this.DOMelement?.querySelector('app-panel') as HTMLElement | null;
+    if (globalnyPanel) globalnyPanel.style.display = 'block';
+    if (panel) panel.style.display = 'none';
   }
 }
