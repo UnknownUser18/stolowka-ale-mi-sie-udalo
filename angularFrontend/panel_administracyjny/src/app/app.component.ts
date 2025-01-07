@@ -33,6 +33,7 @@ export class AppComponent implements OnInit {
   }
 
   updateUserList(data: Array<{ id: number, imie: string, nazwisko: string }>, type: string) {
+    this.typ = type; // to linijka zabrała mi 1 godzine na naprawnienie błędu 🦅🦅🦅🦅🦅🦅⭐⭐⭐🐷🍖🐻
     if (type === 'ZSTI') {
       this.StudentListZstiData = data;
       this.sorted_zsti_users = this.sortUsers(data);
@@ -43,7 +44,7 @@ export class AppComponent implements OnInit {
   }
 
   sortUsers(data: Array<{ id: number, imie: string, nazwisko: string }>) {
-    return data.map(user => ({ imie: user.imie, nazwisko: user.nazwisko }))
+    return data?.map(user => ({ imie: user.imie, nazwisko: user.nazwisko }))
       .sort((a, b) => a.nazwisko.localeCompare(b.nazwisko));
   }
 
@@ -109,6 +110,7 @@ szukaj() : void {
   updateStudentData(target: HTMLElement) {
     const index = parseInt(target.getAttribute('data-index')!, 10);
     const studentData = this.typ === 'ZSTI' ? this.StudentListZstiData : this.StudentListInternatData;
+    console.log(studentData, this.typ);
     if (studentData && studentData[index] && this.typ) {
       this.dataService.changeStudent(studentData[index].id, this.typ);
     }

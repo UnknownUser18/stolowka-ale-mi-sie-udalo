@@ -52,11 +52,10 @@ export class KartyComponent {
 
   updateCard(change:any)
   {
-    console.log("Karta pierwsza zmiana" + this.CurrentKarta, change)
+    // console.log("Karta pierwsza zmiana" + this.CurrentKarta, change)
     if(change === null) return console.warn("Null karta!")
     if(typeof change != 'object' || change.id === -1)
     {
-      console.log("Null karta!")
       this.CurrentKarta = this.nullKarta;
       this.clearData();
       return

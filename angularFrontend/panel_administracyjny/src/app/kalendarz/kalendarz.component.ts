@@ -175,7 +175,6 @@ export class KalendarzComponent implements OnChanges, OnInit {
       });
       this.dataService.getDisabledDays();
       this.show_calendar();
-      console.log("Typ: ", this.typ)
       if(this.typ === 'Internat') {
         this.DOMelement.querySelector('#zsti_diff').style.display = 'none';
         this.DOMelement.querySelectorAll('.internat_logs').forEach((element : HTMLElement) : void => {
@@ -380,6 +379,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
     return binary;
   }
   checkVersion(dayOfTheWeek:number, mealId:number) {
+    if(!this.CurrentStudentDeclaration) return;
     this.dni = [];
     this.dni.push(this.toBinary(this.CurrentStudentDeclaration.poniedzialek.data[0], 3));
     this.dni.push(this.toBinary(this.CurrentStudentDeclaration.wtorek.data[0], 3))

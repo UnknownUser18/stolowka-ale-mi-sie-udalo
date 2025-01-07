@@ -112,8 +112,13 @@ export class GlobalnyPanelComponent implements OnInit {
         month,
         disabled: !disabledMonths.has(index + 1)
       }));
-      if(this.day - 7 < 1) {
-        this.miesiace[this.month-1] = { month: this.miesiace[this.month-1].month, disabled: false };
+      if(this.day - 7 < 1 ) {
+        if(this.month === 0) {
+          this.miesiace[11] = { month: this.miesiace[11].month, disabled: false };
+        }
+        else {
+          this.miesiace[this.month-1] = { month: this.miesiace[this.month-1].month, disabled: false };
+        }
         this.minDay = new Date(this.year, this.month + 1, 0).getDate() - 7;
       }
       else {

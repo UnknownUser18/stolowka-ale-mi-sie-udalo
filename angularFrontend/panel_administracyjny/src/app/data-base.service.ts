@@ -7,6 +7,7 @@ import {BehaviorSubject} from 'rxjs';
 })
 export class DataBaseService {
   socket: WebSocket | undefined;
+  DisabledZstiDays = new BehaviorSubject<any>(null);
   StudentDeclarationZsti = new BehaviorSubject<any>(null);
   CurrentStudentDeclaration = new BehaviorSubject<any>(null);
   StudentDeclarationInternat = new BehaviorSubject<any>(null);
@@ -140,7 +141,10 @@ export class DataBaseService {
   {
     this.send(JSON.stringify({action: "request", params: {method: "getSchoolYears"}}));
   }
-
+  getDisabledZstiDays()
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getDisabledZstiDays"}}));
+  }
   getCardsZsti()
   {
     this.send(JSON.stringify({action: "request", params: {method: "getKartyZsti"}}))
@@ -237,6 +241,10 @@ export class DataBaseService {
             this.CurrentDisabledZstiDays.next(tempArray);
             // console.log("StudentDisabledZstiDays: ", this.lastValue.params.value);
             break;
+            case 'DisabledZstiDays':
+            this.DisabledZstiDays.next(this.lastValue.params.value);
+            // console.log("DisabledZstiDays: ", this.lastValue.params.value);
+            break;
           case 'StudentInternatDays':
             this.StudentInternatDays.next(this.lastValue.params.value);
             this.StudentInternatDays.value.forEach((element:any)=> {
@@ -287,6 +295,7 @@ export class DataBaseService {
     this.getCardsInternat();
     this.getStudentList();
     this.getDisabledDays();
+    this.getDisabledZstiDays();
     this.getSchoolYears();
     this.getPaymentZsti();
     this.getPaymentInternat();

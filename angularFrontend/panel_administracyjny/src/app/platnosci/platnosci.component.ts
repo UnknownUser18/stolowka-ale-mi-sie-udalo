@@ -187,6 +187,6 @@ export class PlatnosciComponent implements OnChanges{
   }
   showPayment()
   {
-    console.log(this.PaymentZsti)
+    // console.log(this.PaymentZsti)
   }
 }

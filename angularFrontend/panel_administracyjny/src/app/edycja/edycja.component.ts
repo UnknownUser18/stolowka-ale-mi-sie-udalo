@@ -44,7 +44,6 @@ export class EdycjaComponent implements OnChanges {
     let temp = JSON.stringify(this.student);
     this.editedStudent = JSON.parse(temp);
     this.checkStudents()
-    console.log("Updated")
 
     setTimeout(()=>{
       this.DOMelement.querySelector('input[name="imie"]').value = this.student.imie;
@@ -193,9 +192,9 @@ export class EdycjaComponent implements OnChanges {
     if(this.dataService.StudentType.value === 'Internat')
       conditions.push(this.editedDeclaration.wersja === this.declaration.wersja)
     conditions.forEach(condition => {
-      console.log(condition)
+      // console.log(condition)
     })
-    console.log(this.editedDeclaration.id_osoby, this.declaration.id_osoby, new Date(this.editedDeclaration.data_od), new Date(this.declaration.data_od), new Date(this.editedDeclaration.data_do), new Date(this.declaration.data_do), this.editedDeclaration.rok_szkolny_id, this.declaration.rok_szkolny_id, this.editedDeclaration.dni, this.declaration.dni, this.editedDeclaration.wersja, this.declaration.wersja)
+    // console.log(this.editedDeclaration.id_osoby, this.declaration.id_osoby, new Date(this.editedDeclaration.data_od), new Date(this.declaration.data_od), new Date(this.editedDeclaration.data_do), new Date(this.declaration.data_do), this.editedDeclaration.rok_szkolny_id, this.declaration.rok_szkolny_id, this.editedDeclaration.dni, this.declaration.dni, this.editedDeclaration.wersja, this.declaration.wersja)
 
     this.dataService.changeDeclarationDataSaved(!conditions.includes(false))
     if(!this.dataService.CurrentStudentDeclaration.value)

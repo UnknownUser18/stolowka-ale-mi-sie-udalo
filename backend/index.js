@@ -83,6 +83,7 @@ function handleRequest(ws,params) {
         "getStudentListInternat": () => getStudentListInternat(ws),
         "getStudentZstiDays": () => getStudentZstiDays(ws, params.studentId),
         "getStudentDisabledZstiDays": () => getStudentDisabledZstiDays(ws, params.studentId),
+        "getDisabledZstiDays": () => getDisabledZstiDays(ws),
         "getStudentInternatDays": () => getStudentInternatDays(ws, params.studentId),
         "getStudentDisabledInternatDays": () => getStudentDisabledInternatDays(ws, params.studentId),
         "AddZstiDays": () => AddZstiDays(params.studentId, params.date, params.schoolYearId),
@@ -347,7 +348,10 @@ function DeleteInternatDays(StudentId, Date, mealId) {
 }
 
 function getStudentDisabledZstiDays(ws, StudentId) {
-    executeQuery(`SELECT * FROM obencosci_zsti WHERE osoby_zsti_id = ${StudentId};`, result => sendResponse(ws, 'StudentDisabledZstiDays', result));
+    executeQuery(`SELECT * FROM nieobecnosci_zsti WHERE osoby_zsti_id = ${StudentId};`, result => sendResponse(ws, 'StudentDisabledZstiDays', result));
+}
+function getDisabledZstiDays(ws) {
+    executeQuery(`SELECT * FROM nieobecnosci_zsti;`, result => sendResponse(ws, 'DisabledZstiDays', result));
 }
 
 function getStudentDisabledInternatDays(ws, StudentId) {

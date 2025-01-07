@@ -1,7 +1,29 @@
 import { Component, ElementRef, Renderer2, OnInit } from '@angular/core';
 import * as XLS from 'xlsx';
-// import { DataBaseService } from '../data-base.service';
+import { DataBaseService } from '../data-base.service';
 
+class OsobaZSTI {
+  constructor(
+    public id: number,
+    public imie : string,
+    public nazwisko : string,
+    public klasa : string
+  ) {}
+}
+class DeklaracjaZSTI {
+  constructor(
+    public id_osoby : number,
+    public data_do : string,
+    public data_od : string,
+  ) {}
+}
+class GetZSTIDisabledDays {
+  constructor(
+    public dzien_wypisania : string,
+    public osoby_zsti_id : number,
+    public uwagi : string
+  ) {}
+}
 @Component({
   selector: 'app-globalny-raport',
   standalone: true,
@@ -24,44 +46,50 @@ export class GlobalnyRaportComponent {
   //! Za każdy dzień odwołany odejmować 23 zł, i tak kwota może być ujemna, co oznacza nadpłatę. - według pani.
   //  let naleznosc : number = wersje_posilkow_map.get(wersja_posilku) || 0;
   // let wersja_posilku : number = data[2] === 'wersja posiłku' ? 1 : 2; //! Pobierać z bazy danych, wersja posiłku po to na placeholder.
-  // private dataService: DataBaseService <--- do konstruktora
-  constructor(protected renderer: Renderer2, private el: ElementRef, ) {
+  constructor(protected renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService ) {
     this.DOMelement = this.el.nativeElement;
-    // this.dataService.CurrentDisabledInternatDays.asObservable().subscribe((data : any) => this.nieobecnosciInternat = data);
-    // this.dataService.StudentListZsti.asObservable().subscribe((data : any) => this.uczniowieZsti = data);
-    // this.dataService.StudentListInternat.asObservable().subscribe((data : any) => this.uczniowieInternat = data);
-    // this.dataService.StudentDeclarationZsti.asObservable().subscribe((data : any) => this.deklaracjeZsti = data);
-    // this.dataService.StudentDeclarationInternat.asObservable().subscribe((data : any) => this.deklaracjeInternat = data);
-    // this.getDataBaseInfo();
+    this.getDataBaseInfo();
   }
-  ngOnInit() {
-    this.uczniowieZsti = this.sort_by_surname(this.uczniowieZsti);
-    this.uczniowieInternat = this.sort_by_surname(this.uczniowieInternat);
+  ngOnInit() : void {
+    // if(this.uczniowieZsti)
+    // this.uczniowieZsti = this.sort_by_surname(this.uczniowieZsti);
+    // if(this.uczniowieInternat)
+    // this.uczniowieInternat = this.sort_by_surname(this.uczniowieInternat);
   }
   miesiace : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   date : Date = new Date();
   //! zmienic, aby pobierało z bazy danych
-  uczniowieZsti: string[] = ['Jacek Gyatterek', 'Wojtek Skibidi', 'Agata Tobolewska', 'Pozdrawiam AT'];
+  uczniowieZsti: Array<OsobaZSTI> = [];
   uczniowieInternat: string[] = ['Wege Crashout','Julka Chaber','JC + DW','Pozdrawiam JC + DW'];
-  // deklaracjeZsti: any;
-  // deklaracjeInternat: any;
-  // nieobecnosciZsti: any;
-  // nieobecnosciInternat: any;
+  deklaracjeZsti: any;
+  deklaracjeInternat: any;
+  nieobecnosciZsti: any;
+  nieobecnosciInternat: any;
 
   // Możesz zawsze używa np. this.dataService.StudentListZsti.value zamiast this.uczniowieZsti
   // Ale to jak chcesz
 
   // Funkcja: Odnowienie danych z bazydanych
-  // getDataBaseInfo()
-  // {
-  //   this.dataService.getStudentDeclarationInternat()
-  //   this.dataService.getStudentDeclarationZsti()
-  //   this.dataService.getStudentList()
-  //   this.dataService.getStudentInternatDays()
-  //   this.dataService.getStudentZstiDays()
-  //   this.dataService.getStudentDisabledZstiDays()
-  //   this.dataService.getStudentDisabledInternatDays()
-  // }
+
+  getDataBaseInfo() : void {
+    this.dataService.CurrentDisabledInternatDays.asObservable().subscribe((data : any) => this.nieobecnosciInternat = data);
+    this.dataService.DisabledZstiDays.asObservable().subscribe((data : any[]) => {
+      if(data) {
+        this.nieobecnosciZsti = data.map(item => {
+          console.log(item);
+          return new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi)});
+        console.log(this.nieobecnosciZsti);
+      }
+    });
+    this.dataService.StudentListZsti.asObservable().subscribe((data: any[]) => {
+    this.uczniowieZsti = data?.map(item => new OsobaZSTI(item.id, item.imie, item.nazwisko, item.klasa));
+    });
+    this.dataService.StudentListInternat.asObservable().subscribe((data : any) => this.uczniowieInternat = data);
+    this.dataService.StudentDeclarationZsti.asObservable().subscribe((data : any[]) => {
+      this.deklaracjeZsti = data?.map(item => new DeklaracjaZSTI(item.id_osoby, item.data_do, item.data_od));
+    });
+    this.dataService.StudentDeclarationInternat.asObservable().subscribe((data : any) => this.deklaracjeInternat = data);
+  }
   checkDate(date : string) : boolean {
     if(date.length != 7) return false;
     let myslnik : number = 0;
@@ -248,14 +276,41 @@ export class GlobalnyRaportComponent {
     let index : number = 1;
     switch (typ) {
       case 'ZSTI':
-        this.uczniowieZsti.forEach((osoba : string) : void => {
+        this.uczniowieZsti.forEach((osoba : OsobaZSTI) : void => {
+          let declaration_start : string = '';
+          let declaration_end : string = '';
+          this.deklaracjeZsti.forEach((declaration : DeklaracjaZSTI) : void => {
+            if(declaration.id_osoby === osoba.id) {
+              declaration_start = declaration.data_od.split('T')[0];
+              declaration_end = declaration.data_do.split('T')[0];
+            }
+          });
+          let min_day : string = '';
+          let max_day : string = '';
+          if (data_od && data_do) {
+            min_day = declaration_start < data_od ? data_od : declaration_start;
+            max_day = declaration_end > data_do ? data_do : declaration_end;
+          } else {
+            min_day = declaration_start < date ? `${date}-01` : declaration_start;
+            max_day = declaration_end > date ? new Date(Number(date.split('-')[0]), Number(date.split('-')[1]), 1).toISOString().split('T')[0] : declaration_end;
+          }
+          let ilosc_nieobecnosci : number = 0;
+          this.nieobecnosciZsti.forEach((nieobecnosc : GetZSTIDisabledDays) : void => {
+            if(nieobecnosc.osoby_zsti_id === osoba.id) {
+              if(nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) {
+                ilosc_nieobecnosci++;
+              }
+            }
+          })
+          console.log(osoba.imie, osoba.nazwisko, osoba.klasa, ilosc_nieobecnosci);
+          if(ilosc_nieobecnosci === 0) return;
           let data : string[] = [
             `${index}.`,
-            `${osoba}`,
+            `${osoba.imie} ${osoba.nazwisko} (${osoba.klasa})`,
             'szkoła',
             'obiady',
-            '9 zł', // pobierać z bazy danych ilość blokad obiadów * 9
-            'placeholder'
+            `${ilosc_nieobecnosci * 9} zł`,
+            `placeholder`
           ];
           this.create_data_row(data, table, false);
           index++;
@@ -285,6 +340,7 @@ export class GlobalnyRaportComponent {
         })
         break;
       case 'Obie':
+        // @ts-ignore
         let osoby : string[] = this.uczniowieZsti.concat(this.uczniowieInternat);
         osoby = this.sort_by_surname(osoby);
         osoby.forEach((osoba : string) : void => {
@@ -298,6 +354,7 @@ export class GlobalnyRaportComponent {
           let td_naleznosc : HTMLElement = this.renderer.createElement('td');
           let ilosc_nieobecnosci : number = 1; //! pobierać z bazy danych
           let td_uwagi : HTMLElement = this.renderer.createElement('td');
+          // @ts-ignore
           if (this.uczniowieZsti.includes(osoba)) {
             td_grupa.textContent = 'szkoła';
             td_wersja.textContent = 'obiady';
@@ -335,6 +392,7 @@ export class GlobalnyRaportComponent {
     table.appendChild(tr_2);
     if(data_od !== '' || data_do !== '') this.generateToExcel('korekty', `${data_od} — ${data_do}`, true);
     else this.generateToExcel('korekty', date, false);
+    this.getDataBaseInfo();
   }
   wersje_posilkow(event : Event) {
     event.preventDefault();
