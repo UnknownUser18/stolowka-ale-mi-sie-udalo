@@ -1,5 +1,5 @@
-import mysql from "mysql";
-import ws from "ws";
+const mysql = require('mysql');
+const ws = require('ws');
 
 const wss = new ws.WebSocketServer({
   port: 8080,
