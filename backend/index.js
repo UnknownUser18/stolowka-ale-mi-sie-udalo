@@ -11,7 +11,7 @@ const wss = new ws.WebSocketServer({
       memLevel: 7
     },
     zlibInflateOptions: {
-      chunkSize: 10 * 1024
+      chunkSize: 10240
     },
     // Other options settable:
     clientNoContextTakeover: true, // Defaults to negotiated value.

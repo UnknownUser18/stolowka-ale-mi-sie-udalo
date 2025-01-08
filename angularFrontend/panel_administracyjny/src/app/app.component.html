@@ -1,10 +1,18 @@
 <nav>
   <h2 (click)="main_menu()">Spis Osób</h2>
   <label id="wyszukaj"><input type="text" (input)="szukaj()" placeholder="Szukaj..."></label>
-  <section *ngFor="let userType of ['ZSTI', 'Internat']">
-    <button (click)="rozwin($event)">{{userType}}<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
-    <ol (click)="show($event)">
-      <li *ngFor="let element of (userType === 'ZSTI' ? sorted_zsti_users : sorted_internat_users); let i = index" [attr.data-index]="i">
+  <section>
+    <button (click)="rozwin($event)">ZSTI<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
+    <ol (click)="show($event, 'ZSTI')">
+      <li *ngFor="let element of StudentListZstiData; let i = index" [attr.data-index]="i">
+        <span>{{element.imie}} {{element.nazwisko}}</span>
+      </li>
+    </ol>
+  </section>
+  <section>
+    <button (click)="rozwin($event)">Internat<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
+    <ol (click)="show($event, 'Internat')">
+      <li *ngFor="let element of StudentListInternatData; let i = index" [attr.data-index]="i">
         <span>{{element.imie}} {{element.nazwisko}}</span>
       </li>
     </ol>

@@ -80,9 +80,10 @@ szukaj() : void {
     });
   }
 
-  show(event: Event): void {
+  show(event: Event, typ : string | null): void {
+    if(typ) this.typ = typ;
     if (this.dataService.SavedList.some(element => !element.value)) {
-      this.cantDoThat(() => this.show(event));
+      this.cantDoThat(() => this.show(event, null));
       return;
     }
     let target = this.getEventTarget(event);
