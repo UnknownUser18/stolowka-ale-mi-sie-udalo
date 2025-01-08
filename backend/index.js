@@ -306,11 +306,11 @@ function changeStudentDeclarationZsti(StudentId, schoolYearId, days, beginDate, 
 }
 
 function getStudentListZsti(ws) {
-    executeQuery(`SELECT * FROM osoby_zsti`, result => sendResponse(ws, 'StudentListZsti', result));
+    executeQuery(`SELECT * FROM osoby_zsti ORDER BY nazwisko, imie`, result => sendResponse(ws, 'StudentListZsti', result));
 }
 
 function getStudentListInternat(ws) {
-    executeQuery(`SELECT * FROM osoby_internat`, result => sendResponse(ws, 'StudentListInternat', result));
+    executeQuery(`SELECT * FROM osoby_internat ORDER BY nazwisko, imie`, result => sendResponse(ws, 'StudentListInternat', result));
 }
 
 function getStudentZstiDays(ws, StudentId) {
