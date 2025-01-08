@@ -8,6 +8,7 @@ import {BehaviorSubject} from 'rxjs';
 export class DataBaseService {
   socket: WebSocket | undefined;
   DisabledZstiDays = new BehaviorSubject<any>(null);
+  DisabledInternatDays = new BehaviorSubject<any>(null);
   StudentDeclarationZsti = new BehaviorSubject<any>(null);
   CurrentStudentDeclaration = new BehaviorSubject<any>(null);
   StudentDeclarationInternat = new BehaviorSubject<any>(null);
@@ -145,6 +146,9 @@ export class DataBaseService {
   {
     this.send(JSON.stringify({action: "request", params: {method: "getDisabledZstiDays"}}));
   }
+  getDisabledInternatDays() {
+    this.send(JSON.stringify({action: "request", params: {method: "getDisabledInternatDays"}}));
+  }
   getCardsZsti()
   {
     this.send(JSON.stringify({action: "request", params: {method: "getKartyZsti"}}))
@@ -179,6 +183,7 @@ export class DataBaseService {
       // console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentInternatDays()
       this.getStudentDisabledInternatDays()
+      this.getDisabledInternatDays();
       // console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
       if(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
         this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
@@ -263,6 +268,10 @@ export class DataBaseService {
             this.CurrentDisabledInternatDays.next(tempArray);
             // console.log("StudentDisabledInternatDays: ", this.lastValue.params.value);
             break;
+            case 'DisabledInternatDays':
+              this.DisabledInternatDays.next(this.lastValue.params.value);
+              // console.log("DisabledInternatDays: ", this.lastValue.params.value);
+              break;
           case 'DisabledDays':
             this.DisabledDays.next(this.lastValue.params.value);
             // console.log("DisabledDays: ", this.lastValue.params.value);
@@ -296,6 +305,7 @@ export class DataBaseService {
     this.getStudentList();
     this.getDisabledDays();
     this.getDisabledZstiDays();
+    this.getDisabledInternatDays();
     this.getSchoolYears();
     this.getPaymentZsti();
     this.getPaymentInternat();

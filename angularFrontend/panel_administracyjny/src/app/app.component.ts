@@ -15,8 +15,6 @@ import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-
 })
 export class AppComponent implements OnInit {
   DOMelement: HTMLElement | null;
-  sorted_zsti_users: Array<{ imie: string, nazwisko: string }> = [];
-  sorted_internat_users: Array<{ imie: string, nazwisko: string }> = [];
   StudentListZstiData: Array<{ id: number, imie: string, nazwisko: string }> | null = null;
   StudentListInternatData: Array<{ id: number, imie: string, nazwisko: string }> | null = null;
   osoba: string | undefined;
@@ -36,38 +34,29 @@ export class AppComponent implements OnInit {
     this.typ = type; // to linijka zabrała mi 1 godzine na naprawnienie błędu 🦅🦅🦅🦅🦅🦅⭐⭐⭐🐷🍖🐻
     if (type === 'ZSTI') {
       this.StudentListZstiData = data;
-      this.sorted_zsti_users = this.sortUsers(data);
-    } else {
+    } else if(type === 'Internat') {
       this.StudentListInternatData = data;
-      this.sorted_internat_users = this.sortUsers(data);
+    }
+    else {
+      console.error('Invalid type at updateUserList');
     }
   }
 
-  sortUsers(data: Array<{ id: number, imie: string, nazwisko: string }>) {
-    return data?.map(user => ({ imie: user.imie, nazwisko: user.nazwisko }))
-      .sort((a, b) => a.nazwisko.localeCompare(b.nazwisko));
-  }
-
-szukaj() : void {
-  const searchTerm = this.el.nativeElement.querySelector('#wyszukaj > input')?.value.toLowerCase() || '';
-  const sections = this.DOMelement?.querySelectorAll('section > ol > li');
-  sections?.forEach((element: Element) => {
-    const htmlElement = element as HTMLElement;
-    htmlElement.style.display = htmlElement.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
-  });
-  if (searchTerm === '') {
+  szukaj() : void {
+    const searchTerm : string = this.el.nativeElement.querySelector('#wyszukaj > input')?.value.toLowerCase() || '';
+    const sections = this.DOMelement?.querySelectorAll('section > ol > li');
     sections?.forEach((element: Element) => {
       const htmlElement = element as HTMLElement;
-      htmlElement.style.display = 'block';
+      htmlElement.style.display = htmlElement.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
     });
-  } else {
-    this.toggleSections();
-  }
-}
-
-  toggleSections() {
-    this.rozwin(new Event('click'));
-    this.rozwin(new Event('click'));
+    if (searchTerm === '') {
+      sections?.forEach((element: Element) => {
+        const htmlElement = element as HTMLElement;
+        htmlElement.style.display = 'block';
+      });
+    } else {
+      this.rozwin(new Event('click'));
+    }
   }
 
   cantDoThat(func: Function) {

@@ -1,4 +1,4 @@
-import { Component, ElementRef, Renderer2, OnInit } from '@angular/core';
+import { Component, ElementRef, Renderer2 } from '@angular/core';
 import * as XLS from 'xlsx';
 import { DataBaseService } from '../data-base.service';
 
@@ -10,18 +10,49 @@ class OsobaZSTI {
     public klasa : string
   ) {}
 }
-class DeklaracjaZSTI {
+class OsobaInternat {
+  constructor(
+    public id : number,
+    public imie : string,
+    public nazwisko : string,
+    public grupa : string
+  ) {}
+}
+class Deklaracja {
   constructor(
     public id_osoby : number,
     public data_do : string,
-    public data_od : string,
+    public data_od : string
   ) {}
 }
-class GetZSTIDisabledDays {
+class DeklaracjaInternat extends Deklaracja {
   constructor(
+    public osoby_internat_id : number, //! w bazie danych zmienic aby było na id_osoby, gdyż nie ma sensu na 2 różne nazwy kolumn
+    id_osoby : number,
+    data_do: string,
+    data_od: string,
+    public wersja: number
+  ) {
+    super(id_osoby, data_do, data_od);
+  }
+}
+interface GetDisabledDays {
+  dzien_wypisania: string;
+  uwagi: string;
+}
+class GetZSTIDisabledDays implements GetDisabledDays {
+  constructor(
+    public dzien_wypisania: string,
+    public osoby_zsti_id: number,
+    public uwagi: string
+  ) {}
+}
+class GetInternatDisabledDays implements GetDisabledDays {
+  constructor(
+    public posilki_id : string,
     public dzien_wypisania : string,
-    public osoby_zsti_id : number,
-    public uwagi : string
+    public osoby_internat_id : number,
+    public uwagi : string,
   ) {}
 }
 @Component({
@@ -50,21 +81,15 @@ export class GlobalnyRaportComponent {
     this.DOMelement = this.el.nativeElement;
     this.getDataBaseInfo();
   }
-  ngOnInit() : void {
-    // if(this.uczniowieZsti)
-    // this.uczniowieZsti = this.sort_by_surname(this.uczniowieZsti);
-    // if(this.uczniowieInternat)
-    // this.uczniowieInternat = this.sort_by_surname(this.uczniowieInternat);
-  }
   miesiace : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   date : Date = new Date();
   //! zmienic, aby pobierało z bazy danych
   uczniowieZsti: Array<OsobaZSTI> = [];
-  uczniowieInternat: string[] = ['Wege Crashout','Julka Chaber','JC + DW','Pozdrawiam JC + DW'];
-  deklaracjeZsti: any;
-  deklaracjeInternat: any;
-  nieobecnosciZsti: any;
-  nieobecnosciInternat: any;
+  uczniowieInternat: Array<OsobaInternat> = [];
+  deklaracjeZsti: Array<Deklaracja> = [];
+  deklaracjeInternat: Array<DeklaracjaInternat> = [];
+  nieobecnosciZsti: Array<GetZSTIDisabledDays> = [];
+  nieobecnosciInternat: Array<GetInternatDisabledDays> = [];
 
   // Możesz zawsze używa np. this.dataService.StudentListZsti.value zamiast this.uczniowieZsti
   // Ale to jak chcesz
@@ -72,23 +97,28 @@ export class GlobalnyRaportComponent {
   // Funkcja: Odnowienie danych z bazydanych
 
   getDataBaseInfo() : void {
-    this.dataService.CurrentDisabledInternatDays.asObservable().subscribe((data : any) => this.nieobecnosciInternat = data);
-    this.dataService.DisabledZstiDays.asObservable().subscribe((data : any[]) => {
-      if(data) {
-        this.nieobecnosciZsti = data.map(item => {
-          console.log(item);
-          return new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi)});
-        console.log(this.nieobecnosciZsti);
-      }
+    this.dataService.DisabledInternatDays.asObservable().subscribe((data: Array<GetInternatDisabledDays>) : void => {
+      this.nieobecnosciInternat = data?.map(item => new GetInternatDisabledDays(item.posilki_id, item.dzien_wypisania, item.osoby_internat_id, item.uwagi));
     });
-    this.dataService.StudentListZsti.asObservable().subscribe((data: any[]) => {
-    this.uczniowieZsti = data?.map(item => new OsobaZSTI(item.id, item.imie, item.nazwisko, item.klasa));
+    this.dataService.DisabledZstiDays.asObservable().subscribe((data: Array<GetZSTIDisabledDays>): void => {
+      this.nieobecnosciZsti = data?.map(item => new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi));
     });
-    this.dataService.StudentListInternat.asObservable().subscribe((data : any) => this.uczniowieInternat = data);
-    this.dataService.StudentDeclarationZsti.asObservable().subscribe((data : any[]) => {
-      this.deklaracjeZsti = data?.map(item => new DeklaracjaZSTI(item.id_osoby, item.data_do, item.data_od));
+
+    this.dataService.StudentListZsti.asObservable().subscribe((data: Array<OsobaZSTI>): void => {
+      this.uczniowieZsti = data?.map(item => new OsobaZSTI(item.id, item.imie, item.nazwisko, item.klasa));
     });
-    this.dataService.StudentDeclarationInternat.asObservable().subscribe((data : any) => this.deklaracjeInternat = data);
+
+    this.dataService.StudentListInternat.asObservable().subscribe((data: Array<OsobaInternat>): void => {
+      this.uczniowieInternat = data?.map(item => new OsobaInternat(item.id, item.imie, item.nazwisko, item.grupa));
+    });
+
+    this.dataService.StudentDeclarationZsti.asObservable().subscribe((data: Array<Deklaracja>): void => {
+      this.deklaracjeZsti = data?.map(item => new Deklaracja(item.id_osoby, item.data_do, item.data_od));
+    });
+
+    this.dataService.StudentDeclarationInternat.asObservable().subscribe((data: Array<DeklaracjaInternat>): void => {
+      this.deklaracjeInternat = data?.map(item => new DeklaracjaInternat(item.osoby_internat_id, item.id_osoby, item.data_do, item.data_od, item.wersja));
+    });
   }
   checkDate(date : string) : boolean {
     if(date.length != 7) return false;
@@ -250,6 +280,18 @@ export class GlobalnyRaportComponent {
 
   korekty(event : Event) : void | string {
     event.preventDefault();
+    function setDate(declaration_start : string, declaration_end : string) : string[] {
+      let min_day : string = '';
+      let max_day : string = '';
+      if (data_od && data_do) {
+        min_day = declaration_start < data_od ? data_od : declaration_start;
+        max_day = declaration_end > data_do ? data_do : declaration_end;
+      } else {
+        min_day = declaration_start < date ? `${date}-01` : declaration_start;
+        max_day = declaration_end > date ? new Date(Number(date.split('-')[0]), Number(date.split('-')[1]), 1).toISOString().split('T')[0] : declaration_end;
+      }
+      return [min_day, max_day];
+    }
     let date : string = this.DOMelement.querySelector('input[name="month"]').value;
     let data_od : string = this.DOMelement.querySelector('input[name="data-od"]').value;
     let data_do : string = this.DOMelement.querySelector('input[name="data-do"]').value
@@ -279,63 +321,80 @@ export class GlobalnyRaportComponent {
         this.uczniowieZsti.forEach((osoba : OsobaZSTI) : void => {
           let declaration_start : string = '';
           let declaration_end : string = '';
-          this.deklaracjeZsti.forEach((declaration : DeklaracjaZSTI) : void => {
+          this.deklaracjeZsti.forEach((declaration : Deklaracja) : void => {
             if(declaration.id_osoby === osoba.id) {
               declaration_start = declaration.data_od.split('T')[0];
               declaration_end = declaration.data_do.split('T')[0];
             }
           });
-          let min_day : string = '';
-          let max_day : string = '';
-          if (data_od && data_do) {
-            min_day = declaration_start < data_od ? data_od : declaration_start;
-            max_day = declaration_end > data_do ? data_do : declaration_end;
-          } else {
-            min_day = declaration_start < date ? `${date}-01` : declaration_start;
-            max_day = declaration_end > date ? new Date(Number(date.split('-')[0]), Number(date.split('-')[1]), 1).toISOString().split('T')[0] : declaration_end;
-          }
           let ilosc_nieobecnosci : number = 0;
+          let uwagi : string = '';
+          let min_day : string = setDate(declaration_start, declaration_end)[0];
+          let max_day : string = setDate(declaration_start, declaration_end)[1];
           this.nieobecnosciZsti.forEach((nieobecnosc : GetZSTIDisabledDays) : void => {
             if(nieobecnosc.osoby_zsti_id === osoba.id) {
               if(nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) {
                 ilosc_nieobecnosci++;
+                if(nieobecnosc.uwagi !== null) uwagi += `${nieobecnosc.uwagi}, `;
               }
             }
           })
-          console.log(osoba.imie, osoba.nazwisko, osoba.klasa, ilosc_nieobecnosci);
           if(ilosc_nieobecnosci === 0) return;
+          uwagi === '' ? uwagi = 'Brak' : uwagi = uwagi.slice(0, -2);
           let data : string[] = [
             `${index}.`,
             `${osoba.imie} ${osoba.nazwisko} (${osoba.klasa})`,
             'szkoła',
             'obiady',
             `${ilosc_nieobecnosci * 9} zł`,
-            `placeholder`
+            `${uwagi}`
           ];
           this.create_data_row(data, table, false);
           index++;
         });
         break;
       case 'Internat':
-        this.uczniowieInternat.forEach((osoba : string) : void => {
+        // @ts-ignore
+        this.uczniowieInternat.forEach((osoba : OsobaInternat) : void => {
+          //? czy kiedy osoba ma dzień nieobecny, to odejmuje się mu 23 zł, czy osobno po każdym z posiłku?
+          let ilosc_wersji_nieobecnych : Array<Array<number>> = [
+            [1,0],
+            [2,0],
+            [3,0],
+          ]
+          // zrobię na drugą wersję
+          let wersja_posilku : number = 0;
+          let declaration_start : string = '';
+          let declaration_end : string = '';
+          this.deklaracjeInternat.forEach((declaration : DeklaracjaInternat) : void => {
+            if(declaration.osoby_internat_id === osoba.id) {
+              declaration_start = declaration.data_od.split('T')[0];
+              declaration_end = declaration.data_do.split('T')[0];
+              wersja_posilku = declaration.wersja;
+            }
+          });
+          let min_day : string = setDate(declaration_start, declaration_end)[0];
+          let max_day : string = setDate(declaration_start, declaration_end)[1];
+          let uwagi : string = '';
+          this.nieobecnosciInternat.forEach((nieobecnosc : GetInternatDisabledDays) : void => {
+            if(nieobecnosc.osoby_internat_id === osoba.id) {
+              if(nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) {
+                ilosc_wersji_nieobecnych[Number(nieobecnosc.posilki_id) - 1][1]++;
+                if(nieobecnosc.uwagi !== null) uwagi += `${nieobecnosc.uwagi}, `;
+              }
+            }
+          });
+          if(ilosc_wersji_nieobecnych[0][1] === 0 && ilosc_wersji_nieobecnych[1][1] === 0 && ilosc_wersji_nieobecnych[2][1] === 0) return;
+          uwagi === '' ? uwagi = 'Brak' : uwagi = uwagi.slice(0, -2);
           let data : string[] = [
             `${index}.`,
-            `${osoba}`,
-            'grupa_internat', // pobierać z bazy danych
-            'wersja posiłku', // pobierać z bazy danych
+            `${osoba.imie} ${osoba.nazwisko}`,
+            `${osoba.grupa}`,
+            `${wersja_posilku}`,
+            `${(ilosc_wersji_nieobecnych[0][1] * 7) + (ilosc_wersji_nieobecnych[1][1] * 9) + (ilosc_wersji_nieobecnych[2][1] * 7)} zł`,
+            `${uwagi}`
           ];
-          let tr : HTMLTableRowElement = this.create_data_row(data, table, false);
-
-          let td_naleznosc : HTMLElement = this.renderer.createElement('td');
-          let ilosc_nieobecnosci : number = 1; //! pobierać z bazy danych
-          td_naleznosc.textContent = (ilosc_nieobecnosci * 23).toString() + ' zł';
-          tr.appendChild(td_naleznosc);
-
-          let td_uwagi : HTMLElement = this.renderer.createElement('td');
-          td_uwagi.textContent = 'placeholder';
-          tr.appendChild(td_uwagi);
-
-          table.appendChild(tr);
+          this.create_data_row(data, table, false);
           index++;
         })
         break;
@@ -402,6 +461,7 @@ export class GlobalnyRaportComponent {
     let columns : string[] = ['Lp.','Imię i Nazwisko', 'Grupa', 'Wersja']
     this.create_data_row(columns, table, true);
     let index : number = 1;
+    // @ts-ignore
     this.uczniowieInternat.forEach((osoba : string) : void => {
       let data : string[] = [
         `${index}.`,

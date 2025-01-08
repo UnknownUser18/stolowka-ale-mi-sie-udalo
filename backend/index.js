@@ -84,6 +84,7 @@ function handleRequest(ws,params) {
         "getStudentZstiDays": () => getStudentZstiDays(ws, params.studentId),
         "getStudentDisabledZstiDays": () => getStudentDisabledZstiDays(ws, params.studentId),
         "getDisabledZstiDays": () => getDisabledZstiDays(ws),
+        "getDisabledInternatDays": () => getDisabledInternatDays(ws),
         "getStudentInternatDays": () => getStudentInternatDays(ws, params.studentId),
         "getStudentDisabledInternatDays": () => getStudentDisabledInternatDays(ws, params.studentId),
         "AddZstiDays": () => AddZstiDays(params.studentId, params.date, params.schoolYearId),
@@ -353,7 +354,9 @@ function getStudentDisabledZstiDays(ws, StudentId) {
 function getDisabledZstiDays(ws) {
     executeQuery(`SELECT * FROM nieobecnosci_zsti;`, result => sendResponse(ws, 'DisabledZstiDays', result));
 }
-
+function getDisabledInternatDays(ws) {
+    executeQuery(`SELECT * FROM nieobecnosci_internat;`, result => sendResponse(ws, 'DisabledInternatDays', result));
+}
 function getStudentDisabledInternatDays(ws, StudentId) {
     executeQuery(`SELECT * FROM obencosci_internat WHERE osoby_internat_id = ${StudentId};`, result => sendResponse(ws, 'StudentDisabledInternatDays', result));
 }
@@ -393,37 +396,3 @@ function QueryExecute(ws, query, pass, responseBool, variable) {
     executeQuery(query, result => sendResponse(ws, variable, result));
 }
 
-function StudentList(ws, condition) {
-    let query = "SELECT * FROM uczniowie";
-    if(condition !== "") query += " WHERE " + condition;
-    query += ";"
-    executeQuery(query, result => sendResponse(ws, 'StudentList', result));
-}
-
-function CalendarStudent(ws, studentId, relationBool, isAll) {
-    let query = "SELECT * FROM kalendarz";
-    if(relationBool)
-        query += " JOIN uczniowie ON kalendarz.id_uczniowie = uczniowie.id"
-    if(!isAll)
-        query += " WHERE id_uczniowie = " + studentId
-    query += ";";
-    executeQuery(query, result => sendResponse(ws, 'CalendarStudent', result));
-}
-
-function StudentMeal(ws, studentId) {
-    executeQuery(`SELECT id_posilki FROM uczniowie WHERE id = ${studentId};`, result => sendResponse(ws, 'StudentMeal', result));
-}
-
-function CalendarAdd(ws, studentId, date, mealId) {
-    executeQuery(`INSERT INTO kalendarz Values(${studentId}, '${date}', ${mealId});`, result => console.log(result));
-}
-
-function CalendarDelete(ws, studentId, date, mealId) {
-    executeQuery(`DELETE FROM kalendarz WHERE id_uczniowie = ${studentId} AND dzien_wypisania = '${date}' AND typ_posilku = ${mealId};`, result => console.log(result));
-}
-function UpdateStudent(ws, studentId, name, surname, mealId) {
-    executeQuery(`UPDATE uczniowie SET imie = '${name}', nazwisko = '${surname}', id_posilki = ${mealId} WHERE id = ${studentId};`, result => console.log(result));
-}
-function DeleteStudent(websocketClient, studentId) {
-    executeQuery(`DELETE FROM uczniowie WHERE id = ${studentId};`, result => console.log(result));
-}
