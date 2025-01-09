@@ -2,20 +2,27 @@ import { Component, ElementRef, Renderer2 } from '@angular/core';
 import * as XLS from 'xlsx';
 import { DataBaseService } from '../data-base.service';
 
-class OsobaZSTI {
+
+interface Osoba {
+  id: number;
+  imie: string;
+  nazwisko: string;
+}
+
+class OsobaZSTI implements Osoba {
   constructor(
     public id: number,
-    public imie : string,
-    public nazwisko : string,
-    public klasa : string
+    public imie: string,
+    public nazwisko: string,
+    public klasa: string
   ) {}
 }
-class OsobaInternat {
+class OsobaInternat implements Osoba {
   constructor(
-    public id : number,
-    public imie : string,
-    public nazwisko : string,
-    public grupa : string
+    public id: number,
+    public imie: string,
+    public nazwisko: string,
+    public grupa: string
   ) {}
 }
 class Deklaracja {
@@ -49,7 +56,7 @@ class GetZSTIDisabledDays implements GetDisabledDays {
 }
 class GetInternatDisabledDays implements GetDisabledDays {
   constructor(
-    public posilki_id : string,
+    public posilki_id : number,
     public dzien_wypisania : string,
     public osoby_internat_id : number,
     public uwagi : string,
@@ -77,13 +84,8 @@ export class GlobalnyRaportComponent {
   //! Za każdy dzień odwołany odejmować 23 zł, i tak kwota może być ujemna, co oznacza nadpłatę. - według pani.
   //  let naleznosc : number = wersje_posilkow_map.get(wersja_posilku) || 0;
   // let wersja_posilku : number = data[2] === 'wersja posiłku' ? 1 : 2; //! Pobierać z bazy danych, wersja posiłku po to na placeholder.
-  constructor(protected renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService ) {
-    this.DOMelement = this.el.nativeElement;
-    this.getDataBaseInfo();
-  }
   miesiace : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   date : Date = new Date();
-  //! zmienic, aby pobierało z bazy danych
   uczniowieZsti: Array<OsobaZSTI> = [];
   uczniowieInternat: Array<OsobaInternat> = [];
   deklaracjeZsti: Array<Deklaracja> = [];
@@ -91,48 +93,46 @@ export class GlobalnyRaportComponent {
   nieobecnosciZsti: Array<GetZSTIDisabledDays> = [];
   nieobecnosciInternat: Array<GetInternatDisabledDays> = [];
 
-  // Możesz zawsze używa np. this.dataService.StudentListZsti.value zamiast this.uczniowieZsti
-  // Ale to jak chcesz
+  constructor(protected renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService ) {
+    this.DOMelement = this.el.nativeElement;
+    this.getDataBaseInfo();
 
-  // Funkcja: Odnowienie danych z bazydanych
+  }
 
-  getDataBaseInfo() : void {
-    this.dataService.DisabledInternatDays.asObservable().subscribe((data: Array<GetInternatDisabledDays>) : void => {
+  sort_users(array: Array<Osoba>): void {
+    array.sort((a: Osoba, b: Osoba): number => {
+      if (a.nazwisko.toLowerCase() < b.nazwisko.toLowerCase()) return -1;
+      if (a.nazwisko.toLowerCase() > b.nazwisko.toLowerCase()) return 1;
+      if (a.imie.toLowerCase() < b.imie.toLowerCase()) return -1;
+      if (a.imie.toLowerCase() > b.imie.toLowerCase()) return 1;
+      return 0;
+    });
+}
+  getDataBaseInfo(): void {
+    this.dataService.DisabledInternatDays.asObservable().subscribe((data: Array<GetInternatDisabledDays>): void => {
       this.nieobecnosciInternat = data?.map(item => new GetInternatDisabledDays(item.posilki_id, item.dzien_wypisania, item.osoby_internat_id, item.uwagi));
     });
     this.dataService.DisabledZstiDays.asObservable().subscribe((data: Array<GetZSTIDisabledDays>): void => {
       this.nieobecnosciZsti = data?.map(item => new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi));
     });
-
     this.dataService.StudentListZsti.asObservable().subscribe((data: Array<OsobaZSTI>): void => {
       this.uczniowieZsti = data?.map(item => new OsobaZSTI(item.id, item.imie, item.nazwisko, item.klasa));
     });
-
     this.dataService.StudentListInternat.asObservable().subscribe((data: Array<OsobaInternat>): void => {
       this.uczniowieInternat = data?.map(item => new OsobaInternat(item.id, item.imie, item.nazwisko, item.grupa));
     });
-
     this.dataService.StudentDeclarationZsti.asObservable().subscribe((data: Array<Deklaracja>): void => {
       this.deklaracjeZsti = data?.map(item => new Deklaracja(item.id_osoby, item.data_do, item.data_od));
     });
-
     this.dataService.StudentDeclarationInternat.asObservable().subscribe((data: Array<DeklaracjaInternat>): void => {
       this.deklaracjeInternat = data?.map(item => new DeklaracjaInternat(item.osoby_internat_id, item.id_osoby, item.data_do, item.data_od, item.wersja));
     });
   }
-  checkDate(date : string) : boolean {
-    if(date.length != 7) return false;
-    let myslnik : number = 0;
-    for(let i : number = 0 ; i < date.length ; i++) {
-      if(date[0] === '-') myslnik++;
-    }
-    if(date !== '' && (parseInt(date.split('-')[1]) >= 13 || parseInt(date.split('-')[1]) == 0)) return false;
-    if(date !== '' && date.length != 7) return false;
-    if(myslnik > 1) return false;
-    for (let i : number = 0 ; i < date.length ; i++) {
-      if(((i < 4 || i > 5) && (date[i] < '0' || date[i] > '9')) || (i == 4 && date[i] != '-')) return false;
-    }
-    return true;
+  checkDate(date: string): boolean {
+    if (date.length !== 7) return false;
+    const [year, month] = date.split('-');
+    return !(!year || !month || isNaN(Number(year)) || isNaN(Number(month)) || Number(month) < 1 || Number(month) > 12);
+
   }
   create_table() : HTMLTableElement {
     let table : HTMLTableElement = this.renderer.createElement('table');
@@ -142,45 +142,43 @@ export class GlobalnyRaportComponent {
   create_data_row(data : string[], table : HTMLTableElement, bolded : boolean) : HTMLTableRowElement {
     let tr : HTMLTableRowElement = this.renderer.createElement('tr');
     data.forEach((text : string) : void => {
-      let cell : HTMLElement;
-      bolded ? cell = this.renderer.createElement('th') : cell = this.renderer.createElement('td');
+      const cell: HTMLElement = bolded ? this.renderer.createElement('th') : this.renderer.createElement('td');
       cell.textContent = text;
       tr.appendChild(cell);
     });
     table.appendChild(tr);
     return tr;
   }
-  sort_by_surname(array : string[]) : string[] {
-    return array.sort((a : string, b : string) : number => {
-      let a_surname : string = a.split(' ')[1];
-      let b_surname : string = b.split(' ')[1];
-      if(a_surname < b_surname) return -1;
-      if(a_surname > b_surname) return 1;
-      return 0;
-    });
+  validate_dates(date: string, data_od: string, data_do: string, raport: HTMLElement): boolean {
+    if (date === '' && (data_od === '' || data_od === '')) {
+      raport.textContent = 'Wprowadź datę!';
+      return false;
+    }
+    if (date !== '' && (data_od !== '' || data_do !== '')) {
+      raport.textContent = 'Wprowadź tylko jedną datę!';
+      return false;
+    }
+    if (date !== '' && !this.checkDate(date)) {
+      raport.textContent = 'Niepoprawny format daty!';
+      return false;
+    }
+    if (data_do < data_od) {
+      raport.textContent = 'Data od nie może być większa niż data do!';
+      return false;
+    }
+    return true;
   }
-  generateToExcel(name : string, data : string, okres : boolean) : void {
-    let button_excel : HTMLButtonElement = this.renderer.createElement('button');
-    if(okres) button_excel.textContent = `Zapisz raport za okres ${data} do pliku Excel`;
-    else button_excel.textContent = `Zapisz raport za ${data} do pliku Excel`;
-    button_excel.addEventListener('click', () : void => {
-      let table, ws;
-      if(okres) {
-        table = XLS.utils.table_to_book(document.getElementById('raport_table'), {sheet: `Raport za okres ${data}`});
-        ws = table.Sheets[`Raport za okres ${data}`];
-      }
-      else {
-        table = XLS.utils.table_to_book(document.getElementById('raport_table'), {sheet: `Raport za ${data}`});
-        ws = table.Sheets[`Raport za ${data}`];
-      }
-
-
-      ws['!cols'] = [{wch: 20}, {wch: 20}, {wch: 20}, {wch: 20}];
-
+  generateToExcel(name: string, data: string, okres: boolean): void {
+    const buttonExcel: HTMLButtonElement = this.renderer.createElement('button');
+    buttonExcel.textContent = okres ? `Zapisz raport za okres ${data} do pliku Excel` : `Zapisz raport za ${data} do pliku Excel`;
+    buttonExcel.addEventListener('click', (): void => {
+      const table = XLS.utils.table_to_book(document.getElementById('raport_table'), { sheet: okres ? `Raport za okres ${data}` : `Raport za ${data}` });
+      const ws = table.Sheets[okres ? `Raport za okres ${data}` : `Raport za ${data}`];
+      ws['!cols'] = [{ wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
       const range = XLS.utils.decode_range(<string>ws['!ref']);
       for (let row = range.s.r; row <= range.e.r; row++) {
         for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddress = XLS.utils.encode_cell({r: row, c: col});
+          const cellAddress = XLS.utils.encode_cell({ r: row, c: col });
           if (!ws[cellAddress]) continue;
           if (!ws[cellAddress].s) ws[cellAddress].s = {};
           if (!ws[cellAddress].s.alignment) ws[cellAddress].s.alignment = {};
@@ -188,10 +186,9 @@ export class GlobalnyRaportComponent {
           ws[cellAddress].s.alignment.vertical = 'center';
         }
       }
-      if(okres) XLS.writeFile(table, `raport_${name}_okres_${data}.xlsx`);
-      else XLS.writeFile(table, `raport_${name}_${data}.xlsx`);
+      XLS.writeFile(table, okres ? `raport_${name}_okres_${data}.xlsx` : `raport_${name}_${data}.xlsx`);
     });
-    this.DOMelement.querySelector('#content').appendChild(button_excel);
+    this.DOMelement.querySelector('#content').appendChild(buttonExcel);
   }
   show_raport(event : MouseEvent) : void {
     let element : HTMLElement = event.target as HTMLElement;
@@ -281,8 +278,8 @@ export class GlobalnyRaportComponent {
   korekty(event : Event) : void | string {
     event.preventDefault();
     function setDate(declaration_start : string, declaration_end : string) : string[] {
-      let min_day : string = '';
-      let max_day : string = '';
+      let min_day : string;
+      let max_day : string;
       if (data_od && data_do) {
         min_day = declaration_start < data_od ? data_od : declaration_start;
         max_day = declaration_end > data_do ? data_do : declaration_end;
@@ -292,17 +289,41 @@ export class GlobalnyRaportComponent {
       }
       return [min_day, max_day];
     }
+
+    const findNieobecnosci = (osoba: Osoba, min_day: string, max_day: string): (string | Array<Array<number>>)[] => {
+      let ilosc_nieobecnosci: number = 0;
+      let ilosc_wersji_nieobecnych: Array<Array<number>> = [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+      ];
+      let uwagi: string = '';
+      if (osoba instanceof OsobaZSTI) {
+        this.nieobecnosciZsti.forEach((nieobecnosc: GetZSTIDisabledDays): void => {
+          if (nieobecnosc.osoby_zsti_id === osoba.id) {
+            if (nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) ilosc_nieobecnosci++;
+            if(nieobecnosc.uwagi !== null) uwagi += `${nieobecnosc.uwagi}, `;
+          }
+        });
+      } else if (osoba instanceof OsobaInternat) {
+        this.nieobecnosciInternat.forEach((nieobecnosc: GetInternatDisabledDays): void => {
+          if (nieobecnosc.osoby_internat_id === osoba.id) {
+            if (nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) {
+              ilosc_wersji_nieobecnych[nieobecnosc.posilki_id - 1][1]++;
+              if (nieobecnosc.uwagi !== null) uwagi += `${nieobecnosc.uwagi}, `;
+            }
+          }
+        });
+      }
+      return [ilosc_nieobecnosci.toString(), uwagi, ilosc_wersji_nieobecnych];
+    };
     let date : string = this.DOMelement.querySelector('input[name="month"]').value;
     let data_od : string = this.DOMelement.querySelector('input[name="data-od"]').value;
     let data_do : string = this.DOMelement.querySelector('input[name="data-do"]').value
     let typ : string = this.DOMelement.querySelector('select[name="typ"]').value;
     let raport : HTMLElement = this.DOMelement.querySelector('#raport');
 
-    if (date === '' && (data_od === '' || data_do === '')) return raport.textContent = 'Wprowadź datę!';
-    if (date !== '' && (data_od !== '' || data_do !== '')) return raport.textContent = 'Wprowadź tylko jedną datę!';
-    if (date !== '' && !this.checkDate(date)) return raport.textContent = 'Niepoprawny format daty!';
-    if(data_do < data_od) return raport.textContent = 'Data od nie może być większa niż data od!';
-
+    if(!this.validate_dates(date, data_od, data_do, raport)) return;
     let table : HTMLTableElement = this.create_table();
 
     let tr_header : HTMLTableRowElement = this.renderer.createElement('tr');
@@ -312,7 +333,6 @@ export class GlobalnyRaportComponent {
     else th.textContent = `Lista korzystających ze stołówki ZSTI za ${this.miesiace[parseInt(date.split('-')[1]) - 1]} ${date.split('-')[0]}`;
     tr_header.appendChild(th);
     table.appendChild(tr_header);
-
     let columns : string[] = ['Lp.','Imię i Nazwisko','Grupa','Wersja','Należność','Uwagi/Podpis']
     this.create_data_row(columns, table, true);
     let index : number = 1;
@@ -327,20 +347,12 @@ export class GlobalnyRaportComponent {
               declaration_end = declaration.data_do.split('T')[0];
             }
           });
-          let ilosc_nieobecnosci : number = 0;
-          let uwagi : string = '';
           let min_day : string = setDate(declaration_start, declaration_end)[0];
           let max_day : string = setDate(declaration_start, declaration_end)[1];
-          this.nieobecnosciZsti.forEach((nieobecnosc : GetZSTIDisabledDays) : void => {
-            if(nieobecnosc.osoby_zsti_id === osoba.id) {
-              if(nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) {
-                ilosc_nieobecnosci++;
-                if(nieobecnosc.uwagi !== null) uwagi += `${nieobecnosc.uwagi}, `;
-              }
-            }
-          })
+          let ilosc_nieobecnosci : number = Number(findNieobecnosci(osoba, min_day, max_day)[0]);
+          let uwagi : string = findNieobecnosci(osoba, min_day, max_day)[1] as string;
           if(ilosc_nieobecnosci === 0) return;
-          uwagi === '' ? uwagi = 'Brak' : uwagi = uwagi.slice(0, -2);
+          uwagi === '' ? uwagi = '-' : uwagi = uwagi.slice(0, -2);
           let data : string[] = [
             `${index}.`,
             `${osoba.imie} ${osoba.nazwisko} (${osoba.klasa})`,
@@ -354,14 +366,8 @@ export class GlobalnyRaportComponent {
         });
         break;
       case 'Internat':
-        // @ts-ignore
         this.uczniowieInternat.forEach((osoba : OsobaInternat) : void => {
           //? czy kiedy osoba ma dzień nieobecny, to odejmuje się mu 23 zł, czy osobno po każdym z posiłku?
-          let ilosc_wersji_nieobecnych : Array<Array<number>> = [
-            [1,0],
-            [2,0],
-            [3,0],
-          ]
           // zrobię na drugą wersję
           let wersja_posilku : number = 0;
           let declaration_start : string = '';
@@ -375,17 +381,10 @@ export class GlobalnyRaportComponent {
           });
           let min_day : string = setDate(declaration_start, declaration_end)[0];
           let max_day : string = setDate(declaration_start, declaration_end)[1];
-          let uwagi : string = '';
-          this.nieobecnosciInternat.forEach((nieobecnosc : GetInternatDisabledDays) : void => {
-            if(nieobecnosc.osoby_internat_id === osoba.id) {
-              if(nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) {
-                ilosc_wersji_nieobecnych[Number(nieobecnosc.posilki_id) - 1][1]++;
-                if(nieobecnosc.uwagi !== null) uwagi += `${nieobecnosc.uwagi}, `;
-              }
-            }
-          });
+          let ilosc_wersji_nieobecnych : Array<Array<number>> = findNieobecnosci(osoba, min_day, max_day)[2] as Array<Array<number>>;
+          let uwagi : string = findNieobecnosci(osoba, min_day, max_day)[1] as string;
           if(ilosc_wersji_nieobecnych[0][1] === 0 && ilosc_wersji_nieobecnych[1][1] === 0 && ilosc_wersji_nieobecnych[2][1] === 0) return;
-          uwagi === '' ? uwagi = 'Brak' : uwagi = uwagi.slice(0, -2);
+          uwagi === '' ? uwagi = '-' : uwagi = uwagi.slice(0, -2);
           let data : string[] = [
             `${index}.`,
             `${osoba.imie} ${osoba.nazwisko}`,
@@ -399,36 +398,58 @@ export class GlobalnyRaportComponent {
         })
         break;
       case 'Obie':
-        // @ts-ignore
-        let osoby : string[] = this.uczniowieZsti.concat(this.uczniowieInternat);
-        osoby = this.sort_by_surname(osoby);
-        osoby.forEach((osoba : string) : void => {
+        let osoby : (OsobaZSTI | OsobaInternat)[] =  [...this.uczniowieZsti, ...this.uczniowieInternat];
+        this.sort_users(osoby);
+        osoby.forEach((osoba : Osoba) : void => {
+          let osoba_indetifier : string = '';
+          let grupa : string = '-';
+          let wersja : string = '-';
+          let declaration_start : string = '';
+          let declaration_end : string = '';
+          if(osoba instanceof OsobaZSTI) {
+            grupa = 'szkoła';
+            wersja = 'obiady';
+            osoba_indetifier = `${osoba.imie} ${osoba.nazwisko} (${osoba.klasa})`;
+            this.deklaracjeZsti.forEach((declaration : Deklaracja) : void => {
+              if(declaration.id_osoby === osoba.id) {
+                declaration_start = declaration.data_od.split('T')[0];
+                declaration_end = declaration.data_do.split('T')[0];
+              }
+            });
+          }
+          else if(osoba instanceof OsobaInternat) {
+            grupa = `${osoba.grupa}`;
+            osoba_indetifier = `${osoba.imie} ${osoba.nazwisko}`;
+            this.deklaracjeInternat.forEach((declaration : DeklaracjaInternat) : void => {
+              if(declaration.osoby_internat_id === osoba.id) {
+                declaration_start = declaration.data_od.split('T')[0];
+                declaration_end = declaration.data_do.split('T')[0];
+                wersja = `${declaration.wersja}`;
+              }
+            });
+          }
+          let min_day : string = setDate(declaration_start, declaration_end)[0];
+          let max_day : string = setDate(declaration_start, declaration_end)[1];
+          let ilosc_nieobecnosci : number = Number(findNieobecnosci(osoba, min_day, max_day)[0]);
+          let ilosc_wersji_nieobecnych : Array<Array<number>> = findNieobecnosci(osoba, min_day, max_day)[2] as Array<Array<number>>;
+          let uwagi : string = findNieobecnosci(osoba, min_day, max_day)[1] as string;
           let data : string[] = [
             `${index}.`,
-            `${osoba}`,
+            `${osoba_indetifier}`,
+            `${grupa}`,
+            `${wersja}`,
           ];
-          let tr : HTMLTableRowElement = this.create_data_row(data, table, false);
-          let td_grupa : HTMLElement = this.renderer.createElement('td');
-          let td_wersja : HTMLElement = this.renderer.createElement('td');
-          let td_naleznosc : HTMLElement = this.renderer.createElement('td');
-          let ilosc_nieobecnosci : number = 1; //! pobierać z bazy danych
-          let td_uwagi : HTMLElement = this.renderer.createElement('td');
-          // @ts-ignore
-          if (this.uczniowieZsti.includes(osoba)) {
-            td_grupa.textContent = 'szkoła';
-            td_wersja.textContent = 'obiady';
-            td_naleznosc.textContent = (ilosc_nieobecnosci * 9).toString() + ' zł';
+          console.log(ilosc_wersji_nieobecnych, ilosc_nieobecnosci);
+          if (ilosc_nieobecnosci !== 0) {
+            data.push(`${ilosc_nieobecnosci * 9} zł`);
+          } else if (ilosc_wersji_nieobecnych[0][1] !== 0 || ilosc_wersji_nieobecnych[1][1] !== 0 || ilosc_wersji_nieobecnych[2][1] !== 0) {
+            data.push(`${(ilosc_wersji_nieobecnych[0][1] * 7) + (ilosc_wersji_nieobecnych[1][1] * 9) + (ilosc_wersji_nieobecnych[2][1] * 7)} zł`);
           } else {
-            td_grupa.textContent = 'grupa_internat'; //! pobierać z bazy danych
-            td_wersja.textContent = 'wersja posiłku'; //! pobierać z bazy danych
-            td_naleznosc.textContent = (ilosc_nieobecnosci * 23).toString() + ' zł';
+            return;
           }
-          td_uwagi.textContent = 'placeholder';
-          tr.appendChild(td_grupa);
-          tr.appendChild(td_wersja);
-          tr.appendChild(td_naleznosc);
-          tr.appendChild(td_uwagi);
-          table.appendChild(tr);
+          uwagi === '' ? uwagi = '-' : uwagi = uwagi.slice(0, -2);
+          data.push(`${uwagi}`);
+          this.create_data_row(data, table, false);
           index++;
         })
         break;
