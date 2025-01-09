@@ -277,7 +277,25 @@ export class GlobalnyRaportComponent {
 
   korekty(event : Event) : void | string {
     event.preventDefault();
-    function setDate(declaration_start : string, declaration_end : string) : string[] {
+    const setDate = (osoba : Osoba) : string[] => {
+      let declaration_start : string = '';
+      let wersja_posilku : number = 0;
+      let declaration_end : string = '';
+      if(osoba instanceof OsobaZSTI) {
+        const declaration = this.deklaracjeZsti.find(declaration => declaration.id_osoby === osoba.id);
+        if (declaration) {
+          declaration_start = declaration.data_od.split('T')[0];
+          declaration_end = declaration.data_do.split('T')[0];
+        }
+      }
+      else if(osoba instanceof OsobaInternat) {
+        const declaration = this.deklaracjeInternat.find(declaration => declaration.id_osoby === osoba.id);
+        if(declaration) {
+            declaration_start = declaration.data_od.split('T')[0];
+            declaration_end = declaration.data_do.split('T')[0];
+            wersja_posilku = declaration.wersja;
+        }
+      }
       let min_day : string;
       let max_day : string;
       if (data_od && data_do) {
@@ -287,9 +305,8 @@ export class GlobalnyRaportComponent {
         min_day = declaration_start < date ? `${date}-01` : declaration_start;
         max_day = declaration_end > date ? new Date(Number(date.split('-')[0]), Number(date.split('-')[1]), 1).toISOString().split('T')[0] : declaration_end;
       }
-      return [min_day, max_day];
+      return [min_day, max_day, wersja_posilku.toString()];
     }
-
     const findNieobecnosci = (osoba: Osoba, min_day: string, max_day: string): (string | Array<Array<number>>)[] => {
       let ilosc_nieobecnosci: number = 0;
       let ilosc_wersji_nieobecnych: Array<Array<number>> = [
@@ -339,16 +356,8 @@ export class GlobalnyRaportComponent {
     switch (typ) {
       case 'ZSTI':
         this.uczniowieZsti.forEach((osoba : OsobaZSTI) : void => {
-          let declaration_start : string = '';
-          let declaration_end : string = '';
-          this.deklaracjeZsti.forEach((declaration : Deklaracja) : void => {
-            if(declaration.id_osoby === osoba.id) {
-              declaration_start = declaration.data_od.split('T')[0];
-              declaration_end = declaration.data_do.split('T')[0];
-            }
-          });
-          let min_day : string = setDate(declaration_start, declaration_end)[0];
-          let max_day : string = setDate(declaration_start, declaration_end)[1];
+          let min_day : string = setDate(osoba)[0];
+          let max_day : string = setDate(osoba)[1];
           let ilosc_nieobecnosci : number = Number(findNieobecnosci(osoba, min_day, max_day)[0]);
           let uwagi : string = findNieobecnosci(osoba, min_day, max_day)[1] as string;
           if(ilosc_nieobecnosci === 0) return;
@@ -369,18 +378,9 @@ export class GlobalnyRaportComponent {
         this.uczniowieInternat.forEach((osoba : OsobaInternat) : void => {
           //? czy kiedy osoba ma dzień nieobecny, to odejmuje się mu 23 zł, czy osobno po każdym z posiłku?
           // zrobię na drugą wersję
-          let wersja_posilku : number = 0;
-          let declaration_start : string = '';
-          let declaration_end : string = '';
-          this.deklaracjeInternat.forEach((declaration : DeklaracjaInternat) : void => {
-            if(declaration.osoby_internat_id === osoba.id) {
-              declaration_start = declaration.data_od.split('T')[0];
-              declaration_end = declaration.data_do.split('T')[0];
-              wersja_posilku = declaration.wersja;
-            }
-          });
-          let min_day : string = setDate(declaration_start, declaration_end)[0];
-          let max_day : string = setDate(declaration_start, declaration_end)[1];
+          let min_day : string = setDate(osoba)[0];
+          let max_day : string = setDate(osoba)[1];
+          let wersja_posilku : string = setDate(osoba)[2];
           let ilosc_wersji_nieobecnych : Array<Array<number>> = findNieobecnosci(osoba, min_day, max_day)[2] as Array<Array<number>>;
           let uwagi : string = findNieobecnosci(osoba, min_day, max_day)[1] as string;
           if(ilosc_wersji_nieobecnych[0][1] === 0 && ilosc_wersji_nieobecnych[1][1] === 0 && ilosc_wersji_nieobecnych[2][1] === 0) return;
@@ -404,32 +404,18 @@ export class GlobalnyRaportComponent {
           let osoba_indetifier : string = '';
           let grupa : string = '-';
           let wersja : string = '-';
-          let declaration_start : string = '';
-          let declaration_end : string = '';
           if(osoba instanceof OsobaZSTI) {
             grupa = 'szkoła';
             wersja = 'obiady';
             osoba_indetifier = `${osoba.imie} ${osoba.nazwisko} (${osoba.klasa})`;
-            this.deklaracjeZsti.forEach((declaration : Deklaracja) : void => {
-              if(declaration.id_osoby === osoba.id) {
-                declaration_start = declaration.data_od.split('T')[0];
-                declaration_end = declaration.data_do.split('T')[0];
-              }
-            });
           }
           else if(osoba instanceof OsobaInternat) {
             grupa = `${osoba.grupa}`;
             osoba_indetifier = `${osoba.imie} ${osoba.nazwisko}`;
-            this.deklaracjeInternat.forEach((declaration : DeklaracjaInternat) : void => {
-              if(declaration.osoby_internat_id === osoba.id) {
-                declaration_start = declaration.data_od.split('T')[0];
-                declaration_end = declaration.data_do.split('T')[0];
-                wersja = `${declaration.wersja}`;
-              }
-            });
+            wersja = setDate(osoba)[2];
           }
-          let min_day : string = setDate(declaration_start, declaration_end)[0];
-          let max_day : string = setDate(declaration_start, declaration_end)[1];
+          let min_day : string = setDate(osoba)[0];
+          let max_day : string = setDate(osoba)[1];
           let ilosc_nieobecnosci : number = Number(findNieobecnosci(osoba, min_day, max_day)[0]);
           let ilosc_wersji_nieobecnych : Array<Array<number>> = findNieobecnosci(osoba, min_day, max_day)[2] as Array<Array<number>>;
           let uwagi : string = findNieobecnosci(osoba, min_day, max_day)[1] as string;
@@ -439,7 +425,6 @@ export class GlobalnyRaportComponent {
             `${grupa}`,
             `${wersja}`,
           ];
-          console.log(ilosc_wersji_nieobecnych, ilosc_nieobecnosci);
           if (ilosc_nieobecnosci !== 0) {
             data.push(`${ilosc_nieobecnosci * 9} zł`);
           } else if (ilosc_wersji_nieobecnych[0][1] !== 0 || ilosc_wersji_nieobecnych[1][1] !== 0 || ilosc_wersji_nieobecnych[2][1] !== 0) {
