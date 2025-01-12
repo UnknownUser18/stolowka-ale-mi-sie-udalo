@@ -100,7 +100,6 @@ export class AppComponent implements OnInit {
   updateStudentData(target: HTMLElement) {
     const index = parseInt(target.getAttribute('data-index')!, 10);
     const studentData = this.typ === 'ZSTI' ? this.StudentListZstiData : this.StudentListInternatData;
-    console.log(studentData, this.typ);
     if (studentData && studentData[index] && this.typ) {
       this.dataService.changeStudent(studentData[index].id, this.typ);
     }

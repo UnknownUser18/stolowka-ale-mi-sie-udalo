@@ -36,7 +36,7 @@ export class DeklaracjeComponent implements OnChanges {
     if (Array.isArray(declarations)) {
       this.Declarations = declarations.filter((d: any) => d.id_ucznia === this.dataService.CurrentStudentId.value);
     } else {
-      console.error('Expected declarations   to be an array, but got:', declarations);
+      // console.error('Expected declarations   to be an array, but got:', declarations);
     }
   }
 

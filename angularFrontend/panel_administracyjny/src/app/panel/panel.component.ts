@@ -13,115 +13,62 @@ import {DeklaracjeComponent} from '../deklaracje/deklaracje.component';
   styleUrls: ['./panel.component.css']
 })
 export class PanelComponent implements OnInit, OnChanges {
-  DOMelement: any | undefined;
+  DOMelement: HTMLElement | null;
   @Input() name: string | undefined;
   @Input() typ: string | undefined;
-
+  apps : { name : string, selector : string }[]  = [
+    {name : 'Kalendarz', selector: 'app-kalendarz'},
+    {name : 'Edytuj', selector: 'app-edycja'},
+    {name : 'Płatności', selector: 'app-platnosci'},
+    {name : 'Karty', selector: 'app-karty'},
+    {name : 'Deklaracje', selector: 'app-deklaracje'}
+  ]
+  changeDisplay(index : number) : void {
+    for(let i = 0; i < this.apps.length; i++) {
+      if(i === index) {
+        this.renderer.setStyle(this.DOMelement?.querySelector(this.apps[i].selector), 'display', 'block');
+      }
+      else {
+        this.renderer.setStyle(this.DOMelement?.querySelector(this.apps[i].selector), 'display', 'none');
+      }
+    }
+  }
   constructor(private renderer: Renderer2, private el: ElementRef) {
+    this.DOMelement = this.el.nativeElement as HTMLElement | null;
   }
 
-  ngOnInit() {
-    this.DOMelement = this.el.nativeElement;
+  ngOnInit() : void {
     this.updateMainDisplay();
-    let kalendarz = this.DOMelement.querySelector('app-kalendarz');
-    let edycja = this.DOMelement.querySelector('app-edycja');
-    let platnosci = this.DOMelement.querySelector('app-platnosci')
-    let karty = this.DOMelement.querySelector('app-karty')
-    let deklaracje = this.DOMelement.querySelector('app-deklaracje')
-    this.renderer.setStyle(kalendarz, 'display', 'block');
-    this.renderer.setStyle(edycja, 'display', 'none');
-    this.renderer.setStyle(platnosci, 'display', 'none')
-    this.renderer.setStyle(karty, 'display', 'none')
-    this.renderer.setStyle(deklaracje, 'display', 'none')
+    this.changeDisplay(0)
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges) : void {
     if (changes['name']) {
       this.updateMainDisplay();
     }
   }
 
-  private updateMainDisplay() {
-    if(this.DOMelement === undefined) return;
-    const main = this.DOMelement.querySelector('main');
+  private updateMainDisplay() : void {
+    const main : HTMLElement | null | undefined = this.DOMelement?.querySelector('main');
     if (this.name === undefined) {
       this.renderer.setStyle(main, 'display', 'none');
     } else {
       this.renderer.setStyle(main, 'display', 'flex');
     }
   }
-  select(event: MouseEvent) {
-    let target = event.target as HTMLElement;
-    let text = target.innerText;
-    let kalendarz = this.DOMelement.querySelector('app-kalendarz');
-    let edycja = this.DOMelement.querySelector('app-edycja');
-    let platnosci = this.DOMelement.querySelector('app-platnosci')
-    let karty = this.DOMelement.querySelector('app-karty')
-    let deklaracje = this.DOMelement.querySelector('app-deklaracje')
-    switch (text) {
-      case 'Kalendarz':
-        this.contents = ['kalendarz'];
-        this.renderer.setStyle(kalendarz, 'display', 'block');
-        this.renderer.setStyle(edycja, 'display', 'none');
-        this.renderer.setStyle(platnosci, 'display', 'none')
-        this.renderer.setStyle(deklaracje, 'display', 'none')
-        this.renderer.setStyle(karty, 'display', 'none')
-        Array.from((target.parentElement as HTMLElement).children).forEach((element: any) => {
-          this.renderer.removeClass(element, 'selected');
-        })
-        this.renderer.addClass(target, 'selected');
-        break;
-      case 'Edytuj':
-        this.contents = ['edycja'];
-        this.renderer.setStyle(kalendarz, 'display', 'none');
-        this.renderer.setStyle(karty, 'display', 'none')
-        this.renderer.setStyle(platnosci, 'display', 'none')
-        this.renderer.setStyle(deklaracje, 'display', 'none')
-        this.renderer.setStyle(edycja, 'display', 'block');
-        Array.from((target.parentElement as HTMLElement).children).forEach((element: any) => {
-          this.renderer.removeClass(element, 'selected');
-        })
-        this.renderer.addClass(target, 'selected');
-        break;
-      case 'Płatności':
-        this.contents = ['Płatności']
-        this.renderer.setStyle(kalendarz, 'display', 'none');
-        this.renderer.setStyle(karty, 'display', 'none')
-        this.renderer.setStyle(edycja, 'display', 'none');
-        this.renderer.setStyle(deklaracje, 'display', 'none')
-        this.renderer.setStyle(platnosci, 'display', 'block')
-        Array.from((target.parentElement as HTMLElement).children).forEach((element: any) => {
-            this.renderer.removeClass(element, 'selected');
-        })
-        this.renderer.addClass(target, 'selected');
-        break;
-      case 'Karty':
-        this.contents = ['Karty']
-        this.renderer.setStyle(kalendarz, 'display', 'none');
-        this.renderer.setStyle(edycja, 'display', 'none');
-        this.renderer.setStyle(platnosci, 'display', 'none')
-        this.renderer.setStyle(deklaracje, 'display', 'none')
-        this.renderer.setStyle(karty, 'display', 'block')
-        Array.from((target.parentElement as HTMLElement).children).forEach((element: any) => {
-          this.renderer.removeClass(element, 'selected');
-        })
-        this.renderer.addClass(target, 'selected');
-        break;
-      case 'Deklaracje':
-        this.contents = ['deklaracje']
-        this.renderer.setStyle(kalendarz, 'display', 'none');
-        this.renderer.setStyle(edycja, 'display', 'none');
-        this.renderer.setStyle(platnosci, 'display', 'none')
-        this.renderer.setStyle(deklaracje, 'display', 'block')
-        this.renderer.setStyle(karty, 'display', 'none')
-        Array.from((target.parentElement as HTMLElement).children).forEach((element: any) => {
-          this.renderer.removeClass(element, 'selected');
-        })
-        this.renderer.addClass(target, 'selected');
-        break;
-      default:
-        break;
+  select(event: MouseEvent) : void  {
+    let target : HTMLElement = event.target as HTMLElement;
+    if(target.tagName !== 'BUTTON') return;
+    let text : string = target.innerText;
+    const appIndex : number = this.apps.findIndex(app => app.name === text);
+    if (appIndex !== -1) {
+      this.contents = [this.apps[appIndex].selector];
+      this.changeDisplay(appIndex);
     }
+    Array.from(target.parentElement?.children || []).forEach((element: Element) : void => {
+      this.renderer.removeClass(element, 'selected');
+    })
+    this.renderer.addClass(target, 'selected');
   }
-  contents = ['kalendarz']
+  contents : string[] = ['kalendarz']
 }

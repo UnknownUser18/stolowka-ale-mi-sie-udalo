@@ -2,6 +2,99 @@ import {Component, Input, SimpleChanges, ElementRef, OnChanges} from '@angular/c
 import {DataBaseService} from '../data-base.service';
 import {FormsModule} from '@angular/forms';
 
+interface Osoba {
+  imie : string | undefined;
+  nazwisko : string | undefined;
+  uczeszcza : number | undefined;
+}
+class OsobaZSTI implements Osoba {
+  imie: string | undefined;
+  nazwisko: string | undefined;
+  typ_osoby_id: number | undefined;
+  klasa: string | undefined;
+  uczeszcza: number | undefined;
+  constructor(imie?: string, nazwisko?: string, typ_osoby_id?: number, klasa?: string, uczeszcza?: number) {
+    this.imie = imie;
+    this.nazwisko = nazwisko;
+    this.typ_osoby_id = typ_osoby_id;
+    this.klasa = klasa;
+    this.uczeszcza = uczeszcza;
+  }
+  assignValues(student : any) : void {
+    this.imie = student.imie;
+    this.nazwisko = student.nazwisko;
+    this.typ_osoby_id = student.typ_osoby_id;
+    this.klasa = student.klasa;
+    this.uczeszcza = student.uczeszcza;
+  }
+}
+class OsobaInternat implements Osoba {
+  imie: string | undefined;
+  nazwisko: string | undefined;
+  uczeszcza: number | undefined;
+  constructor(imie?: string, nazwisko?: string, uczeszcza?: number) {
+    this.imie = imie;
+    this.nazwisko = nazwisko;
+    this.uczeszcza = uczeszcza;
+  }
+  assignValues(student : any) : void {
+    this.imie = student.imie;
+    this.nazwisko = student.nazwisko;
+    this.uczeszcza = student.uczeszcza;
+  }
+}
+interface Deklaracja {
+  data_od : string | undefined;
+  data_do : string | undefined;
+  rok_szkolny_id : number | undefined;
+  rok_szkolny : string | undefined;
+  id_osoby : number | undefined;
+}
+class DeklaracjaZSTI implements Deklaracja {
+  data_od: string | undefined;
+  data_do: string | undefined;
+  rok_szkolny_id: number | undefined;
+  rok_szkolny: string | undefined;
+  id_osoby: number | undefined;
+  dni: {type : string, data : number[] }| undefined;
+  constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number, dni?: {type : string, data : number[] }) {
+    this.data_od = data_od;
+    this.data_do = data_do;
+    this.rok_szkolny_id = rok_szkolny_id;
+    this.id_osoby = id_osoby;
+    this.dni = dni;
+  }
+  assignValues(declaration : any) : void {
+    this.data_od = declaration.data_od;
+    this.data_do = declaration.data_do;
+    this.rok_szkolny_id = declaration.rok_szkolny_id;
+    this.id_osoby = declaration.id_osoby;
+    this.dni = declaration.dni;
+  }
+}
+class DeklaracjaInternat implements Deklaracja {
+  data_od: string | undefined;
+  data_do: string | undefined;
+  rok_szkolny_id: number | undefined;
+  rok_szkolny: string | undefined;
+  id_osoby: number | undefined;
+  wersja: number | undefined;
+  constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number, wersja?: number) {
+    this.data_od = data_od;
+    this.data_do = data_do;
+    this.rok_szkolny_id = rok_szkolny_id;
+    this.id_osoby = id_osoby;
+    this.wersja = wersja;
+  }
+  assignValues(declaration : any) : void {
+    this.data_od = declaration.data_od;
+    this.data_do = declaration.data_do;
+    this.rok_szkolny_id = declaration.rok_szkolny_id;
+    this.id_osoby = declaration.id_osoby;
+    this.wersja = declaration.wersja;
+  }
+}
+
 @Component({
   selector: 'app-edycja',
   standalone: true,
@@ -13,508 +106,302 @@ import {FormsModule} from '@angular/forms';
 })
 export class EdycjaComponent implements OnChanges {
   @Input() typ: string | undefined;
-  DOMelement : any | undefined;
+  DOMelement: HTMLElement | null;
+
   constructor(private el: ElementRef, private dataService: DataBaseService) {
-    this.dataService.StudentListZsti.asObservable().subscribe(()=>this.updateStudent(this.dataService.CurrentStudentId))
-    this.dataService.CurrentStudentId.asObservable().subscribe((newStudent:any)=>this.updateStudent(newStudent));
-    this.dataService.StudentType.asObservable().subscribe((newStudent:any)=>this.updateStudent(this.dataService.CurrentStudentId));
-    this.DOMelement = this.el.nativeElement;
-    this.dataService.CurrentStudentDeclaration.asObservable().subscribe(()=>this.updateDeclaration())
+    this.dataService.StudentListZsti.asObservable().subscribe(() : void => this.updateStudent(this.dataService.CurrentStudentId))
+    this.dataService.CurrentStudentId.asObservable().subscribe((newStudent: any) : void => this.updateStudent(newStudent));
+    this.dataService.StudentType.asObservable().subscribe(() : void => this.updateStudent(this.dataService.CurrentStudentId));
+    this.DOMelement = this.el.nativeElement as HTMLElement | null;
+    this.dataService.CurrentStudentDeclaration.asObservable().subscribe(() : void => this.updateDeclaration())
   }
 
-  student: { imie: string, nazwisko:string, typ_osoby_id:number, klasa:string, uczeszcza:boolean} = {imie:'', nazwisko:'', typ_osoby_id: 0, klasa:'', uczeszcza:false}
-  editedStudent: { imie: string, nazwisko:string, typ_osoby_id:number, klasa:string, uczeszcza:boolean} = {imie:'', nazwisko:'', typ_osoby_id: 0, klasa:'', uczeszcza:false}
+  student: OsobaZSTI | OsobaInternat | undefined
+  declaration: DeklaracjaZSTI | DeklaracjaInternat | undefined
+  dni: string[] = ['poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek']
 
-  nullDeclaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string ,osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
-  declaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string ,osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
-  editedDeclaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string, osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
-
-  updateStudent(change:any)
-  {
-    this.student = {imie:'', nazwisko:'', typ_osoby_id: 0, klasa:'', uczeszcza:false}
-    if(this.dataService.StudentType.value === 'Internat')
-    {
-      this.student = this.dataService.StudentListInternat.value.find((element:any) => element.id === change.value)
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['typ']) {
+      if (this.typ === 'ZSTI') {
+        this.DOMelement?.querySelectorAll('.internat').forEach((element: Element) : void => {
+          (element as HTMLElement).style.display = 'none';
+        })
+        this.DOMelement?.querySelectorAll('.zsti').forEach((element: Element) : void => {
+          (element as HTMLElement).style.display = 'flex';
+        })
+        this.updateStudent(this.dataService.CurrentStudentId)
+      } else if (this.typ === 'Internat') {
+        this.DOMelement?.querySelectorAll('.zsti').forEach((element: Element) : void => {
+          (element as HTMLElement).style.display = 'none';
+        })
+        this.DOMelement?.querySelectorAll('.internat').forEach((element: Element) : void => {
+          (element as HTMLElement).style.display = 'flex';
+        })
+        this.updateStudent(this.dataService.CurrentStudentId)
+      }
     }
-    else if(this.dataService.StudentType.value === 'ZSTI')
-    {
-      this.student = this.dataService.StudentListZsti.value.find((element:any) => element.id === change.value)
-    }
-
-    let temp = JSON.stringify(this.student);
-    this.editedStudent = JSON.parse(temp);
-    this.checkStudents()
-
-    setTimeout(()=>{
-      this.DOMelement.querySelector('input[name="imie"]').value = this.student.imie;
-      this.DOMelement.querySelector('input[name="nazwisko"]').value = this.student.nazwisko;
-      this.DOMelement.querySelectorAll('input[name="typ"]').forEach((element:any)=>{
-        if(element.value == this.student.typ_osoby_id)
-          element.checked = 'checked';
-      })
-      this.DOMelement.querySelector('input[name="klasa"]').value = this.student.klasa;
-      this.DOMelement.querySelector('input[name="uczeszcza"]').checked = this.student.uczeszcza ? 'checked' : '';
-
-    },100)
-
   }
 
-  toBinary(num : number, len : number)
-  {
-    let binary = Number(num).toString(2)
-    for(let i = 0 ; i < len - binary.length; i++)
-    {
+  updateStudent(change: any): void {
+    if (this.dataService.StudentType.value === 'Internat') {
+      this.student = new OsobaInternat()
+      this.student.assignValues(this.dataService.StudentListInternat.value.find((element: any) : boolean => element.id === change.value))
+
+    } else if (this.dataService.StudentType.value === 'ZSTI') {
+      this.student = new OsobaZSTI()
+      this.student.assignValues(this.dataService.StudentListZsti.value.find((element: any) : boolean => element.id === change.value))
+    }
+
+    if(this.student === undefined) return;
+    (this.DOMelement?.querySelector('input[name="imie"]') as HTMLInputElement).value = this.student.imie || '';
+    (this.DOMelement?.querySelector('input[name="nazwisko"]') as HTMLInputElement).value = this.student.nazwisko || '';
+    if(this.student instanceof OsobaZSTI) {
+      (this.DOMelement?.querySelectorAll('input[name="typ"]') as NodeListOf<HTMLInputElement>).forEach((element: HTMLInputElement): void => {
+        if (element.value == (this.student as OsobaZSTI)?.typ_osoby_id?.toString()) {
+          element.checked = true;
+        }
+      });
+      (this.DOMelement?.querySelector('input[name="klasa"]') as HTMLInputElement).value = this.student.klasa || '';
+    }
+    (this.DOMelement?.querySelector('input[name="uczeszcza"]') as HTMLInputElement).checked = !!this.student.uczeszcza;
+  }
+
+  toBinary(num: number, len: number): string {
+    let binary : string = Number(num).toString(2)
+    for (let i : number = 0; i < len - binary.length; i++) {
       binary = '0' + binary
     }
     return binary;
   }
 
 
-  updateDeclaration():void {
-    if(!(this.dataService.CurrentStudentDeclaration.value))
-    {
+  updateDeclaration(): void {
+    if(this.dataService.CurrentStudentId.value === -1) return;
+    if (this.dataService.CurrentStudentDeclaration.value === undefined) {
+
+      console.warn(`${(this.DOMelement?.querySelector('input[name="imie"]') as HTMLInputElement).value} ${(this.DOMelement?.querySelector('input[name="nazwisko"]') as HTMLInputElement).value} has no declaration`)
       this.clear_data('deklaracja')
-      this.declaration = this.nullDeclaration;
       this.dataService.changeDeclarationDataSaved(true);
       return
     }
-    else{
-      console.log("PRAWDZIWE")
+    if (this.dataService.StudentType.value === 'ZSTI') {
+      this.declaration = new DeklaracjaZSTI()
+    } else if (this.dataService.StudentType.value === 'Internat') {
+      this.declaration = new DeklaracjaInternat()
     }
     this.dataService.changeDeclarationDataSaved(true)
-    this.declaration = this.dataService.CurrentStudentDeclaration.value;
-    if(this.dataService.StudentType.value === 'ZSTI' && this.declaration.dni !== undefined) {
-      this.declaration.dni = this.declaration.dni!.data[0]
-      this.declaration.dniString = this.toBinary(this.declaration.dni!, 5)
-    }
-    let dateBegin = new Date(this.declaration.data_od)
-    let dateEnd = new Date(this.declaration.data_do)
-
-    this.declaration.data_od = `${dateBegin.getFullYear()}-${dateBegin.getMonth() + 1}-${dateBegin.getDate()}`
-    this.declaration.data_do = `${dateEnd.getFullYear()}-${dateEnd.getMonth() + 1}-${dateEnd.getDate()}`
-    this.declaration.rok_szkolny = this.dataService.SchoolYears.value.find((element:any) => element.id === this.declaration.rok_szkolny_id).rok_szkolny
-    let temp = JSON.stringify(this.declaration);
-    this.editedDeclaration = JSON.parse(temp);
-    console.log(this.editedDeclaration, temp, this.declaration)
-    let dni = [
-      this.DOMelement.querySelector('input[name="poniedziałek"]'),
-      this.DOMelement.querySelector('input[name="wtorek"]'),
-      this.DOMelement.querySelector('input[name="środa"]'),
-      this.DOMelement.querySelector('input[name="czwartek"]'),
-      this.DOMelement.querySelector('input[name="piątek"]')
-    ]
-
-    setTimeout(()=>{
-      let data_od = new Date(this.formatDate(this.declaration.data_od));
-      this.DOMelement.querySelector('input[name="data_od"]').value = this.formatDate(`${data_od.getFullYear()}-${data_od.getMonth() + 1}-${data_od.getDate()}`);
-      let data_do = new Date(this.formatDate(this.declaration.data_do));
-      this.DOMelement.querySelector('input[name="data_do"]').value = this.formatDate(`${data_do.getFullYear()}-${data_do.getMonth() + 1}-${data_do.getDate()}`)
-
-      if(this.dataService.StudentType.value === 'Internat')
-        if(this.DOMelement.querySelector('input[name="typ_posilku"]'))this.DOMelement.querySelector('input[name="typ_posilku"]').value = this.declaration.wersja
-      else{
-        dni.forEach((element:any)=>{
-          if(this.declaration.dniString !== undefined) element.checked = (this.declaration.dniString[dni.indexOf(element)] === '1')
-        })
+    if (this.declaration && this.DOMelement) {
+      this.declaration?.assignValues(this.dataService.CurrentStudentDeclaration.value)
+      if (this.declaration instanceof DeklaracjaZSTI) {
+        if (this.declaration.dni) {
+          let dni_binary: string = this.toBinary(this.declaration.dni['data'][0], 5)
+          this.dni.forEach((element: string, index: number): void => {
+            (this.DOMelement?.querySelector(`input[name="${element}"]`) as HTMLInputElement).checked = dni_binary[index] === '1'
+          })
+        }
+      } else {
+        (this.DOMelement?.querySelector('input[name="typ_posilku"]') as HTMLInputElement).setAttribute('value', this.declaration.wersja?.toString() || '')
       }
-      this.DOMelement.querySelector('input[name="rok_szkolny"]').value = this.declaration.rok_szkolny
-    },100)
-
-  }
-
-  changeDeclaration()
-  {
-    let dni = [
-      this.DOMelement.querySelector('input[name="poniedziałek"]'),
-      this.DOMelement.querySelector('input[name="wtorek"]'),
-      this.DOMelement.querySelector('input[name="środa"]'),
-      this.DOMelement.querySelector('input[name="czwartek"]'),
-      this.DOMelement.querySelector('input[name="piątek"]')
-    ]
-    let value = ''
-    dni.forEach((element:any)=>{
-      value += element.checked ? '1' : '0';
-    })
-    this.editedDeclaration.dni = parseInt(value, 2);
-    this.editedDeclaration.dniString = this.toBinary(parseInt(value, 2), 5);
-    if(this.dataService.StudentType.value === 'Internat')
-      this.editedDeclaration.wersja = parseInt(this.editedDeclaration.wersja!.toString());
-    this.logChangesDeclaration()
-  }
-
-  checkStudents()
-  {
-    const conditions = [
-      this.editedStudent.imie === this.student.imie,
-      this.editedStudent.nazwisko === this.student.nazwisko,
-      this.editedStudent.typ_osoby_id === this.student.typ_osoby_id,
-      this.editedStudent.klasa === this.student.klasa,
-      this.editedStudent.uczeszcza === this.student.uczeszcza,
-    ]
-    this.dataService.changePersonalDataSaved(!conditions.includes(false))
-    return conditions
-  }
-
-  formatDate(dateStr: string): string {
-    const [year, month, day] = dateStr.split('-');
-    const formattedMonth = month.padStart(2, '0');
-    const formattedDay = day.padStart(2, '0');
-
-    return `${year}-${formattedMonth}-${formattedDay}`;
-  }
-
-  checkDeclaration()
-  {
-    if(!this.dataService.CurrentStudentDeclaration.value)
-      this.dataService.changeDeclarationDataSaved(true);
-    if(this.declaration === this.nullDeclaration)
-    {
-      this.dataService.changeDeclarationDataSaved(false);
-      return [false];
+      let dateBegin: string = this.declaration.data_od?.split('T')[0] || '';
+      let dateEnd: string = this.declaration.data_do?.split('T')[0] || '';
+      (this.DOMelement.querySelector('input[name="data_od"]') as HTMLInputElement).value = dateBegin;
+      (this.DOMelement.querySelector('input[name="data_do"]') as HTMLInputElement).value = dateEnd;
+      this.declaration.rok_szkolny = this.dataService.SchoolYears.value.find((element: any) : boolean => element.id === this.declaration?.rok_szkolny_id)?.rok_szkolny || '';
+      (this.DOMelement.querySelector('input[name="rok_szkolny"]') as HTMLInputElement).value = this.declaration.rok_szkolny || '';
     }
-    let conditions = [
-      this.editedDeclaration.id_osoby === this.declaration.id_osoby,
-      this.editedDeclaration.rok_szkolny_id === this.declaration.rok_szkolny_id
-    ]
+  }
 
-
-    if(this.editedDeclaration.data_od !== '')
-    {
-      conditions.push(this.formatDate(this.editedDeclaration.data_od) === this.formatDate(this.declaration.data_od))
+  clear_data(typ : string) : void {
+    if(this.DOMelement === null) return;
+    if (typ === 'podstawowe') {
+      const fieldset : HTMLFieldSetElement = this.DOMelement.querySelectorAll('fieldset')[0];
+      fieldset.querySelectorAll('input').forEach((input : HTMLInputElement): void => {
+        input.value = '';
+      })
+      this.student = undefined;
+    } else if (typ === 'deklaracja') {
+      const fieldset : HTMLFieldSetElement = this.DOMelement.querySelectorAll('fieldset')[1];
+      fieldset.querySelectorAll('input').forEach((input : HTMLInputElement): void => {
+        if(input.type === 'checkbox') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      })
+      this.declaration = undefined;
     }
-    if(this.editedDeclaration.data_do !== '')
-    {
-      conditions.push(this.formatDate(this.editedDeclaration.data_do) === this.formatDate(this.declaration.data_do))
-    }
-
-    if(this.dataService.StudentType.value === 'ZSTI')
-      conditions.push(this.editedDeclaration.dni === this.declaration.dni)
-    if(this.dataService.StudentType.value === 'Internat')
-      conditions.push(this.editedDeclaration.wersja === this.declaration.wersja)
-    conditions.forEach(condition => {
-      // console.log(condition)
-    })
-    // console.log(this.editedDeclaration.id_osoby, this.declaration.id_osoby, new Date(this.editedDeclaration.data_od), new Date(this.declaration.data_od), new Date(this.editedDeclaration.data_do), new Date(this.declaration.data_do), this.editedDeclaration.rok_szkolny_id, this.declaration.rok_szkolny_id, this.editedDeclaration.dni, this.declaration.dni, this.editedDeclaration.wersja, this.declaration.wersja)
-
-    this.dataService.changeDeclarationDataSaved(!conditions.includes(false))
-    if(!this.dataService.CurrentStudentDeclaration.value)
-      this.dataService.changeDeclarationDataSaved(true);
-    return conditions
   }
 
-  logChangesPersonal() {
-    console.log('Edited student:', this.editedStudent, ", Normal Student: ", this.student );
-    this.checkStudents()
-  }
-
-  logChangesDeclaration() {
-    console.log('Edited declaration:', this.editedDeclaration, ", Normal Declaration: ", this.declaration );
-    this.checkDeclaration()
-  }
-
-  sendChangesDeclaration()
-  {
-    let rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny == this.editedDeclaration.rok_szkolny)
-    if(!rokSzkolny)
-    {
+    sendChangesDeclaration() {
+    let change : boolean = false;
+    let rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny == this.declaration?.rok_szkolny);
+    if(!rokSzkolny) {
       this.dataService.send(JSON.stringify(
         {
           action: "request",
           params: {
             method: "addSchoolYear",
-            year: this.editedDeclaration.rok_szkolny
+            year: this.declaration?.rok_szkolny
           }
         }))
-      console.log(JSON.stringify(
-        {
-          action: "request",
-          params: {
-            method: "addSchoolYear",
-            year: this.editedDeclaration.rok_szkolny
-          }
-        }))
-      this.dataService.getSchoolYears()
+      this.dataService.getSchoolYears();
     }
-    let IntervalSchoolYear = setInterval(()=>{
-      rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny === this.editedDeclaration.rok_szkolny)
-      if(rokSzkolny.id)
-      {
-        clearInterval(IntervalSchoolYear)
-        this.editedDeclaration.rok_szkolny_id = rokSzkolny.id
-        if(!this.checkDeclaration().includes(false))
-        {
-          console.log("Nie ma po co wysylac");
-          return
-        }
-        this.afterSendDeclaration()
-      }
-    }, 500)
-  }
-  afterSendDeclaration()
-  {
-    if(this.dataService.StudentType.value === 'ZSTI')
-    {
-      console.log(this.declaration, this.editedDeclaration)
-      if(this.declaration === this.nullDeclaration)
-      {
-        this.dataService.send(JSON.stringify(
-          {
-            action: "request",
-            params: {
-              method: "addZstiDeclaration",
-              studentId: this.dataService.CurrentStudentId.value,
-              schoolYearId: this.editedDeclaration.rok_szkolny_id,
-              days: this.editedDeclaration.dni,
-              beginDate: this.editedDeclaration.data_od,
-              endDate: this.editedDeclaration.data_do
-            }
-          }
-        ))
-        console.log(JSON.stringify(
-          {
-            action: "request",
-            params: {
-              method: "addZstiDeclaration",
-              studentId: this.dataService.CurrentStudentId.value,
-              schoolYearId: this.editedDeclaration.rok_szkolny_id,
-              days: this.editedDeclaration.dni,
-              beginDate: this.editedDeclaration.data_od,
-              endDate: this.editedDeclaration.data_do
-            }
-          }
-        ))
-      }
-      else{
-        this.dataService.send(JSON.stringify(
-          {
-            action: "request",
-            params: {
-              method: "changeStudentDeclarationZsti",
-              studentId: this.dataService.CurrentStudentId.value,
-              schoolYearId: this.editedDeclaration.rok_szkolny_id,
-              days: this.editedDeclaration.dni,
-              beginDate: this.editedDeclaration.data_od,
-              endDate: this.editedDeclaration.data_do
-            }
-          }
-        ))
-        console.log(JSON.stringify(
-          {
-            action: "request",
-            params: {
-              method: "changeStudentDeclarationZsti",
-              studentId: this.dataService.CurrentStudentId.value,
-              schoolYearId: this.editedDeclaration.rok_szkolny_id,
-              days: this.editedDeclaration.dni,
-              beginDate: this.editedDeclaration.data_od,
-              endDate: this.editedDeclaration.data_do
-            }
-          }
-        ))
-      }
-      this.dataService.getStudentDeclarationZsti()
+    let data_od : string = (this.DOMelement?.querySelector('input[name="data_od"]') as HTMLInputElement).value;
+    let data_do : string = (this.DOMelement?.querySelector('input[name="data_do"]') as HTMLInputElement).value;
+    let rok_szkolny : string = (this.DOMelement?.querySelector('input[name="rok_szkolny"]') as HTMLInputElement).value;
+    let dni;
+    if(this.declaration instanceof DeklaracjaZSTI) dni = this.dni.map((element: string): number => {
+      return (this.DOMelement?.querySelector(`input[name="${element}"]`) as HTMLInputElement).checked ? 1 : 0;
+    }).join(',');
+    dni = (dni as string).replace(/,/g, '');
+    dni = parseInt(dni, 2);
+    let wersja;
+    if(this.declaration instanceof DeklaracjaInternat) wersja = parseInt((this.DOMelement?.querySelector('input[name="typ_posilku"]') as HTMLInputElement).value);
+    let editedDeclaration : DeklaracjaZSTI | DeklaracjaInternat;
+    if(this.declaration instanceof DeklaracjaZSTI) {
+      // @ts-ignore
+      editedDeclaration = new DeklaracjaZSTI(data_od, data_do, rokSzkolny.id, this.dataService.CurrentStudentId.value, dni)
+    } else {
+      editedDeclaration = new DeklaracjaInternat(data_od, data_do, rokSzkolny.id, this.dataService.CurrentStudentId.value, wersja)
     }
-    else if (this.dataService.StudentType.value === 'Internat')
-    {
-      if(this.declaration === this.nullDeclaration)
-      {
-        this.dataService.send(JSON.stringify(
-          {
-            action: "request",
-            params: {
-              method: "addInternatDeclaration",
-              studentId: this.dataService.CurrentStudentId.value,
-              schoolYearId: this.editedDeclaration.rok_szkolny_id,
-              wersja: this.editedDeclaration.wersja,
-              beginDate: this.editedDeclaration.data_od,
-              endDate: this.editedDeclaration.data_do
-            }
-          }
-        ))
-        console.log(JSON.stringify(
-          {
-            action: "request",
-            params: {
-              method: "addInternatDeclaration",
-              studentId: this.dataService.CurrentStudentId.value,
-              schoolYearId: this.editedDeclaration.rok_szkolny_id,
-              wersja: this.editedDeclaration.wersja,
-              beginDate: this.editedDeclaration.data_od,
-              endDate: this.editedDeclaration.data_do
-            }
-          }
-        ))
+    for (const key in editedDeclaration) {
+      // @ts-ignore
+      if (editedDeclaration[key] !== this.declaration[key]) {
+        change = true;
+        break;
       }
-      else{
-        this.dataService.send(JSON.stringify(
-          {
-            action: "request",
-            params: {
-              method: "changeStudentDeclarationInternat",
-              studentId: this.dataService.CurrentStudentId.value,
-              schoolYearId: this.editedDeclaration.rok_szkolny_id,
-              wersja: this.editedDeclaration.wersja,
-              beginDate: this.editedDeclaration.data_od,
-              endDate: this.editedDeclaration.data_do
-            }
-          }
-        ))
-        console.log(JSON.stringify(
-          {
-            action: "request",
-            params: {
-              method: "changeStudentDeclarationInternat",
-              studentId: this.dataService.CurrentStudentId.value,
-              schoolYearId: this.editedDeclaration.rok_szkolny_id,
-              wersja: this.editedDeclaration.wersja,
-              beginDate: this.editedDeclaration.data_od,
-              endDate: this.editedDeclaration.data_do
-            }
-          }
-        ))
-      }
-
-      this.dataService.getStudentDeclarationInternat()
     }
-  }
-  sendChangesPersonal()
-  {
-    if(!this.checkStudents().includes(false))
-    {
-      alert("Nic się nie zmieniło")
+    if(!change) {
+      alert('Nic się nie zmieniło')
       return
     }
-    if(this.dataService.StudentType.value === 'ZSTI')
-    {
-      this.dataService.send(JSON.stringify(
+    if(editedDeclaration instanceof DeklaracjaZSTI) {
+      if(this.declaration === undefined) {
+        this.dataService.send(JSON.stringify({
+            action: "request",
+            params: {
+              method: "addZstiDeclaration",
+              studentId: this.dataService.CurrentStudentId.value,
+              schoolYearId: editedDeclaration.rok_szkolny_id,
+              days: editedDeclaration.dni,
+              beginDate: editedDeclaration.data_od,
+              endDate: editedDeclaration.data_do
+            }
+          }
+        ))
+      } else {
+        this.dataService.send(JSON.stringify(
           {
             action: "request",
             params: {
-              method: "changeStudentZsti",
+              method: "changeStudentDeclarationZsti",
               studentId: this.dataService.CurrentStudentId.value,
-              name: this.editedStudent.imie,
-              surname: this.editedStudent.nazwisko,
-              attends: this.editedStudent.uczeszcza,
-              class: this.editedStudent.klasa,
-              type: this.editedStudent.typ_osoby_id
+              schoolYearId: editedDeclaration.rok_szkolny_id,
+              days: editedDeclaration.dni,
+              beginDate: editedDeclaration.data_od,
+              endDate: editedDeclaration.data_do
             }
           }
-      ))
-      console.log(          {
-        action: "request",
-        params: {
-          method: "changeStudentZsti",
-          studentId: this.dataService.CurrentStudentId.value,
-          name: this.editedStudent.imie,
-          surname: this.editedStudent.nazwisko,
-          attends: this.editedStudent.uczeszcza,
-          class: this.editedStudent.klasa,
-          type: this.editedStudent.typ_osoby_id
-        }
-      })
-    }
-    else if (this.dataService.StudentType.value === 'Internat')
-    {
-      this.dataService.send(JSON.stringify(
-          {
+        ))
+      }
+    } else {
+      if(this.declaration === undefined) {
+        this.dataService.send(JSON.stringify({
             action: "request",
             params: {
-              method: "changeStudentInternat",
+              method: "addInternatDeclaration",
               studentId: this.dataService.CurrentStudentId.value,
-              name: this.editedStudent.imie,
-              surname: this.editedStudent.nazwisko,
-              attends: this.editedStudent.uczeszcza,
+              schoolYearId: editedDeclaration.rok_szkolny_id,
+              wersja: editedDeclaration.wersja,
+              beginDate: editedDeclaration.data_od,
+              endDate: editedDeclaration.data_do
             }
           }
-      ))
-      console.log(          {
-        action: "request",
-        params: {
-          method: "changeStudentInternat",
-          studentId: this.dataService.CurrentStudentId.value,
-          name: this.editedStudent.imie,
-          surname: this.editedStudent.nazwisko,
-          attends: this.editedStudent.uczeszcza,
+        ))
+      } else {
+        this.dataService.send(JSON.stringify({
+            action: "request",
+            params: {
+              method: "changeStudentDeclarationInternat",
+              studentId: this.dataService.CurrentStudentId.value,
+              schoolYearId: editedDeclaration.rok_szkolny_id,
+              wersja: editedDeclaration.wersja,
+              beginDate: editedDeclaration.data_od,
+              endDate: editedDeclaration.data_do
+            }
+          }
+        ))
+      }
+    }
+    this.dataService.getStudentList();
+    }
+    sendChangesPersonal() : void {
+      console.warn('sendChangesPersonal')
+      console.log(this.student)
+      let change : boolean = false;
+      let editedStudent : OsobaZSTI | OsobaInternat | undefined;
+      let typ_osoby_id : number | undefined;
+      let klasa : string | undefined;
+
+      if(this.student === undefined) return;
+
+      let imie: string = (this.DOMelement?.querySelector('input[name="imie"]') as HTMLInputElement).value;
+      let nazwisko: string = (this.DOMelement?.querySelector('input[name="nazwisko"]') as HTMLInputElement).value;
+      if (this.student instanceof OsobaZSTI) {
+        typ_osoby_id = parseInt((this.DOMelement?.querySelector('input[name="typ"]:checked') as HTMLInputElement).value);
+        klasa = (this.DOMelement?.querySelector('input[name="klasa"]') as HTMLInputElement).value;
+      }
+      let uczeszcza: number = Number((this.DOMelement?.querySelector('input[name="uczeszcza"]') as HTMLInputElement).checked);
+
+      if(this.student instanceof OsobaZSTI) {
+        editedStudent = new OsobaZSTI(imie, nazwisko, typ_osoby_id, klasa, uczeszcza)
+      }
+      else {
+        editedStudent = new OsobaInternat(imie, nazwisko, uczeszcza)
+      }
+      if(editedStudent === undefined) return;
+      console.log(editedStudent)
+      for (const key in editedStudent) {
+        // @ts-ignore
+        if (editedStudent[key] !== this.student![key]) {
+          change = true;
+          break;
         }
-      })
-    }
-    this.dataService.getStudentList()
-    console.log("Zmiana")
-  }
-
-
-  ngOnChanges(changes : SimpleChanges) {
-    if(changes['typ']) {
-      if(this.typ === 'ZSTI') {
-        this.DOMelement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
-          element.style.display = 'none';
-        })
-        this.DOMelement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
-          element.style.display = 'flex';
-        })
-        this.updateStudent(this.dataService.CurrentStudentId)
       }
-      else if(this.typ === 'Internat') {
-        this.DOMelement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
-          element.style.display = 'none';
-        })
-        this.DOMelement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
-          element.style.display = 'flex';
-        })
-        this.updateStudent(this.dataService.CurrentStudentId)
+      if(!change) {
+        alert('Nic się nie zmieniło')
+        return
       }
-    }
-  }
-  clear_data(typ : string) {
-    if(typ === 'podstawowe') {
-      this.DOMelement.querySelectorAll('form[name="osoba"] > fieldset')[0].childNodes.forEach((element : HTMLFieldSetElement) => {
-        console.log(element);
-        element.childNodes.forEach((child : ChildNode) => {
-          if(child.nodeName === 'INPUT') {
-            (child as HTMLInputElement).value = '';
+      console.log('sendChangesPersonal', editedStudent, editedStudent.imie, editedStudent.nazwisko, editedStudent.uczeszcza)
+      if (editedStudent instanceof OsobaZSTI) {
+        this.dataService.send(JSON.stringify({
+          action: "request",
+          params: {
+            method: "changeStudentZsti",
+            studentId: this.dataService.CurrentStudentId.value,
+            name: editedStudent.imie,
+            surname: editedStudent.nazwisko,
+            attends: editedStudent.uczeszcza,
+            class: editedStudent.klasa,
+            type: editedStudent.typ_osoby_id
           }
-        })
-      })
-      this.student.imie = '';
-      this.student.uczeszcza = false;
-      this.student.nazwisko = '';
-      this.student.klasa = '';
-      this.student.typ_osoby_id = 0;
-      this.checkStudents()
-    }
-    else if(typ === 'deklaracja') {
-      this.DOMelement.querySelectorAll('form[name="osoba"] > fieldset')[1].childNodes.forEach((element : HTMLFieldSetElement) => {
-        element.childNodes.forEach((child : ChildNode) => {
-          // console.log(child);
-          if(child.nodeName === 'INPUT') {
-            (child as HTMLInputElement).value = '';
+        }));
+      } else {
+        this.dataService.send(JSON.stringify({
+          action: "request",
+          params: {
+            method: "changeStudentInternat",
+            studentId: this.dataService.CurrentStudentId.value,
+            name: editedStudent.imie,
+            surname: editedStudent.nazwisko,
+            attends:editedStudent.uczeszcza
           }
-          else if(child.nodeName === 'DIV') {
-            child.childNodes.forEach((child2 : ChildNode) => {
-              if(child2.nodeName === 'LABEL') {
-                (child2.childNodes[0] as HTMLInputElement).checked = false;
-              }
-            })
-          }
-        })
-      })
-      this.editedDeclaration.data_od = '';
-      this.editedDeclaration.data_do = '';
-      this.editedDeclaration.dni = 0;
-      this.editedDeclaration.wersja = 0;
-      this.editedDeclaration.rok_szkolny_id = 0;
-      this.editedDeclaration.rok_szkolny = '';
-      this.editedDeclaration.dniString = '';
-      this.editedDeclaration.poniedzialek = '';
-      this.editedDeclaration.wtorek = '';
-      this.editedDeclaration.sroda = '';
-      this.editedDeclaration.czwartek ='';
-      this.editedDeclaration.piatek = '';
-      this.checkDeclaration()
-    }
-  }
-  remove_user() {
+        }));
+      }
+      this.dataService.getStudentList();
+      }
+    remove_user() {
 
-    console.log('remove user');
+      console.log('remove user');
+    }
   }
-}

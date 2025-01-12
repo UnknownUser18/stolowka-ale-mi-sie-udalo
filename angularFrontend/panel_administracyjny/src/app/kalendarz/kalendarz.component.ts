@@ -211,7 +211,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
     return weeks;
   }
   changeDeclaration(change:any) {
-    console.log("Neew declaration: ", change)
+    // console.log("Neew declaration: ", change)
     this.CurrentStudentDeclaration = change
     if(this.DOMelement !== undefined) this.show_calendar()
   }

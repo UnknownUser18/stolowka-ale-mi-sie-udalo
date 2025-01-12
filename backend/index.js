@@ -267,12 +267,13 @@ function getSchoolYears(ws) {
 }
 
 function changeStudentZsti(studentId, type, name, surname, klasa, attends) {
-    let query = "UPDATE osoby_zsti SET typ_osoby_id = " + type + ", imie = '" + name + "', nazwisko = '" + surname + "', klasa = '" + klasa + "', uczeszcza = " + attends + " WHERE id = " + studentId + ";"
+    console.error(type, name, surname, klasa, attends)
+    let query = `UPDATE osoby_zsti SET typ_osoby_id = ${type}, imie = '${name}', nazwisko = '${surname}', klasa = '${klasa}', uczeszcza = ${attends} WHERE id = ${studentId};`
     executeQuery(query, result => console.log(result));
 }
 
 function changeStudentInternat(studentId, name, surname, attends) {
-    let query = "UPDATE osoby_internat SET imie = '" + name + "', nazwisko = '" + surname + "', uczeszcza = " + attends + " WHERE id = " + studentId + ";"
+    let query = `UPDATE osoby_internat SET imie = '${name}', nazwisko = '${surname}', uczeszcza = ${attends} WHERE id = ${studentId};`
     executeQuery(query, result => console.log(result));
 }
 

@@ -210,9 +210,13 @@ export class DataBaseService {
         switch (this.lastValue.params.variable) {
           case 'StudentDeclarationZsti':
             this.StudentDeclarationZsti.next(this.lastValue.params.value );
-            this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any)=> element.id_osoby == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
+            this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any) => {
+              // console.log("StudentDeclarationZsti: ", element.id_osoby, this.CurrentStudentId.value, element.id.osoby === this.CurrentStudentId.value)
+              return element.id_osoby == this.CurrentStudentId.value
+            }
+            ));
             this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value))
-            // console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
+            console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
             break;
           case 'StudentDeclarationInternat':
             this.StudentDeclarationInternat.next(this.lastValue.params.value );
