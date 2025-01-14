@@ -145,11 +145,15 @@ export class EdycjaComponent implements OnChanges {
   updateStudent(change: any): void {
     if (this.dataService.StudentType.value === 'Internat') {
       this.student = new OsobaInternat()
-      this.student.assignValues(this.dataService.StudentListInternat.value.find((element: any) : boolean => element.id === change.value))
+      const studentData : OsobaInternat = this.dataService.StudentListInternat.value.find((element: any): boolean => element.id === change.value);
+      if(!studentData) return;
+      this.student.assignValues(studentData)
 
     } else if (this.dataService.StudentType.value === 'ZSTI') {
-      this.student = new OsobaZSTI()
-      this.student.assignValues(this.dataService.StudentListZsti.value.find((element: any) : boolean => element.id === change.value))
+      this.student = new OsobaZSTI();
+      const studentData : OsobaInternat = this.dataService.StudentListZsti.value.find((element: any): boolean => element.id === change.value);
+      if(!studentData) return;
+      this.student.assignValues(studentData)
     }
 
     if(this.student === undefined) return;
@@ -200,7 +204,7 @@ export class EdycjaComponent implements OnChanges {
           })
         }
       } else {
-        (this.DOMelement?.querySelector('input[name="typ_posilku"]') as HTMLInputElement).setAttribute('value', this.declaration.wersja?.toString() || '')
+        (this.DOMelement?.querySelector('input[name="typ_posilku"]') as HTMLInputElement)?.setAttribute('value', this.declaration.wersja?.toString() || '')
       }
       let dateBegin: string = this.declaration.data_od?.split('T')[0] || '';
       let dateEnd: string = this.declaration.data_do?.split('T')[0] || '';

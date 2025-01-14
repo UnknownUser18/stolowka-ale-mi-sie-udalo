@@ -5,7 +5,7 @@
     <button (click)="rozwin($event)">ZSTI<img ngSrc="../assets/arrow.svg" alt="strzałka" width="48" height="48"></button>
     <ol (click)="show($event, 'ZSTI')">
       <li *ngFor="let element of StudentListZstiData; let i = index" [attr.data-index]="i">
-        <span>{{element.imie}} {{element.nazwisko}}</span>
+        <span>{{element.imie}} {{element.nazwisko}} <span *ngIf="element.klasa">({{element.klasa}})</span><span *ngIf="!element.klasa">n.</span></span>
       </li>
     </ol>
   </section>

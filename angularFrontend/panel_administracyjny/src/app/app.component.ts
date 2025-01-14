@@ -1,6 +1,6 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
 import { PanelComponent } from './panel/panel.component';
-import { NgForOf, NgOptimizedImage } from '@angular/common';
+import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import { DataBaseService } from './data-base.service';
 import { GlobalnyPanelComponent } from './globalny-panel/globalny-panel.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,12 +10,12 @@ import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: true,
-  imports: [PanelComponent, NgOptimizedImage, NgForOf, GlobalnyPanelComponent],
+  imports: [PanelComponent, NgOptimizedImage, NgForOf, GlobalnyPanelComponent, NgIf],
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
   DOMelement: HTMLElement | null;
-  StudentListZstiData: Array<{ id: number, imie: string, nazwisko: string }> | null = null;
+  StudentListZstiData: Array<{ id: number, imie: string, nazwisko: string , klasa: string}> | null = null;
   StudentListInternatData: Array<{ id: number, imie: string, nazwisko: string }> | null = null;
   osoba: string | undefined;
   title: string = 'panel_administracyjny';
@@ -25,12 +25,12 @@ export class AppComponent implements OnInit {
     this.DOMelement = this.el.nativeElement as HTMLElement | null;
   }
 
-  ngOnInit() {
+  ngOnInit() : void {
     this.dataService.StudentListZstiData.subscribe(data => this.updateUserList(data, 'ZSTI'));
     this.dataService.StudentListInternatData.subscribe(data => this.updateUserList(data, 'Internat'));
   }
 
-  updateUserList(data: Array<{ id: number, imie: string, nazwisko: string }>, type: string) {
+  updateUserList(data: Array<{ id: number, imie: string, nazwisko: string, klasa : string }>, type: string) {
     this.typ = type; // to linijka zabrała mi 1 godzine na naprawnienie błędu 🦅🦅🦅🦅🦅🦅⭐⭐⭐🐷🍖🐻
     if (type === 'ZSTI') {
       this.StudentListZstiData = data;
@@ -43,19 +43,40 @@ export class AppComponent implements OnInit {
   }
 
   szukaj() : void {
+    console.log('szukaj');
     const searchTerm : string = this.el.nativeElement.querySelector('#wyszukaj > input')?.value.toLowerCase() || '';
-    const sections = this.DOMelement?.querySelectorAll('section > ol > li');
-    sections?.forEach((element: Element) => {
-      const htmlElement = element as HTMLElement;
-      htmlElement.style.display = htmlElement.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
-    });
-    if (searchTerm === '') {
-      sections?.forEach((element: Element) => {
-        const htmlElement = element as HTMLElement;
-        htmlElement.style.display = 'block';
+    const sectionsZsti = this.DOMelement?.querySelectorAll('section:nth-of-type(1) > ol > li');
+    const sectionsInternat = this.DOMelement?.querySelectorAll('section:nth-of-type(2) > ol > li');
+    if(!sectionsZsti || !sectionsInternat) {
+      console.error('Sections not found');
+      return;
+    }
+    const filterSections = (sections: NodeListOf<Element> | null) : void => {
+      console.log('filterSections', sections);
+      sections?.forEach((element: Element) : void => {
+        let htmlElement : HTMLElement = element as HTMLElement;
+        htmlElement.style.display = htmlElement.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
+        if (htmlElement.style.display === 'block') {
+          htmlElement = htmlElement.parentElement?.parentElement as HTMLElement;
+          const ol = htmlElement.querySelector('ol');
+          const img = htmlElement.querySelector('img');
+          if (ol) ol.classList.add('show');
+          if (img) img.classList.add('rotate');
+        }
       });
-    } else {
-      this.rozwin(new Event('click'));
+    };
+    filterSections(sectionsZsti);
+    filterSections(sectionsInternat);
+    if (searchTerm === '') {
+      const showAllSections = (sections: NodeListOf<Element> | null) => {
+        sections?.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement;
+          htmlElement.style.display = 'block';
+        });
+      };
+
+      showAllSections(sectionsZsti);
+      showAllSections(sectionsInternat);
     }
   }
 
@@ -75,38 +96,28 @@ export class AppComponent implements OnInit {
       this.cantDoThat(() => this.show(event, null));
       return;
     }
-    let target = this.getEventTarget(event);
-    if (target.tagName === 'OL') return;
-    this.displayPanels(target);
-    this.updateStudentData(target);
-  }
-
-  getEventTarget(event: Event): HTMLElement {
     let target = event.target as HTMLElement;
-    if (target.tagName === 'SPAN') {
+    if (target.tagName === 'OL') return;
+    while (target.tagName !== 'LI') {
       target = target.parentElement as HTMLElement;
     }
-    return target;
-  }
-
-  displayPanels(target: HTMLElement) {
     const globalnyPanel = this.DOMelement?.querySelector('app-globalny-panel') as HTMLElement | null;
     const panel = this.DOMelement?.querySelector('app-panel') as HTMLElement | null;
     if (globalnyPanel) globalnyPanel.style.display = 'none';
     if (panel) panel.style.display = 'block';
     this.osoba = target.querySelector('span')?.textContent!;
-  }
 
-  updateStudentData(target: HTMLElement) {
-    const index = parseInt(target.getAttribute('data-index')!, 10);
+    const index : number = parseInt(target.getAttribute('data-index')!, 10);
     const studentData = this.typ === 'ZSTI' ? this.StudentListZstiData : this.StudentListInternatData;
     if (studentData && studentData[index] && this.typ) {
       this.dataService.changeStudent(studentData[index].id, this.typ);
     }
   }
 
-  rozwin(event: Event): void {
-    let target = event.target as HTMLElement;
+
+
+  rozwin(event: Event) : void {
+    let target : HTMLElement = event.target as HTMLElement;
     while (target.tagName !== 'BUTTON') {
       target = target.parentElement as HTMLElement;
     }

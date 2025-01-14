@@ -368,6 +368,7 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='yah'] > la
 }
 #zsti_diff > div {
     max-width: 60%;
+    max-height: 30vh;
 }
 #internat_diff ul {
     padding: 0;
@@ -474,5 +475,47 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='yah'] > la
     #zmiana button {
         font-size: 1.2em;
         padding: 5px 10px;
+    }
+}
+@media (min-width: 768px) and (max-width: 1280px) {
+    .day {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2em;
+    }
+    .day.empty {
+        width: 30px;
+        height: 30px;
+    }
+    .day.internat {
+        height: 70px;
+        width: 70px;
+    }
+    .day > div > input {
+        width: 15px;
+        height: 15px;
+    }
+    .week {
+        margin: 20px 0;
+    }
+    #dni {
+        font-size: 1.2em;
+        margin-left: 5em;
+    }
+    #zaznacz input {
+        width: 45px;
+        height: 45px;
+    }
+    #zaznacz span {
+        background-size: 40px;
+        width: 40px;
+        height: 40px;
+    }
+    #zaznacz > abbr > .zaznacz_internat {
+        background-size: 25px !important;
+    }
+    #zmiana {
+        width: 30vw;
+        font-size: 0.8em;
     }
 }
