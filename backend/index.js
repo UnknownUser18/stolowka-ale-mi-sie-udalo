@@ -170,11 +170,11 @@ function addScanZsti(cardId, datetime) {
 }
 
 function getStudentFromCardZsti(ws, keyCard) {
-    executeQuery(`SELECT * FROM karty_zsti WHERE key_card = ${keyCard}`, result => sendResponse(ws, 'StudentCardZsti', result));
+    executeQuery(`select karty_zsti.id, karty_zsti.id_ucznia, karty_zsti.key_card, karty_zsti.data_wydania, karty_zsti.ostatnie_uzycie, osoby_zsti.imie, osoby_zsti.nazwisko, osoby_zsti.uczeszcza from karty_zsti join osoby_zsti on karty_zsti.id_ucznia = osoby_zsti.id WHERE karty_zsti.key_card = ${keyCard};`, result => sendResponse(ws, 'StudentCardZsti', result));
 }
 
 function getStudentFromCardInternat(ws, keyCard) {
-    executeQuery(`SELECT * FROM karty_internat WHERE key_card = ${keyCard}`, result => sendResponse(ws, 'StudentCardInternat', result));
+    executeQuery(`select karty_internat.id, karty_internat.id_ucznia, karty_internat.key_card, karty_internat.data_wydania, karty_internat.ostatnie_uzycie, osoby_internat.imie, osoby_internat.nazwisko, osoby_internat.uczeszcza, osoby_internat.grupa from karty_internat join osoby_internat on karty_internat.id_ucznia = osoby_internat.id WHERE karty_internat.key_card = ${keyCard};`, result => sendResponse(ws, 'StudentCardInternat', result));
 }
 
 

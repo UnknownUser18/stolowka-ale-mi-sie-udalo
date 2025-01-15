@@ -342,12 +342,20 @@ export class DataBaseService {
           this.CurrentStudentScan.next(this.lastValue.params.value.filter((element:any)=>element.id_karty == this.CurrentStudentCardFromKeyCard.value.id));
           break;
         case 'StudentCardZsti':
-          this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value);
-          console.warn('niga')
+          if(this.lastValue.params.value.length)
+          {
+            this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value[0]);
+            console.warn('niga', this.lastValue.params.value.length);
+            this.StudentType.next("ZSTI")
+          }
           break;
         case 'StudentCardInternat':
-          this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value);
-          console.warn('niga')
+          if(this.lastValue.params.value.length)
+          {
+            this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value[0]);
+            console.warn('niga', this.lastValue.params.value.length)
+            this.StudentType.next("Internat")
+          }
           break;
       }
     })
