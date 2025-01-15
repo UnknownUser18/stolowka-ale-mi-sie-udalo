@@ -81,9 +81,25 @@ export class CardOutputComponent {
     this.isViable = this.dataService.StudentType.value === 'ZSTI' ? this.checkStudentZsti() : this.checkStudentInternat();
   }
 
+  init()
+  {
+    this.message = "Nie Zapłacił"
+    this.today = new Date();
+    this.currentStudentScan = this.dataService.ScanZsti.value.filter((element:any) => element.id_karty == this.dataService.CurrentStudentCardFromKeyCard.value.id)
+    this.currentStudent = this.dataService.StudentListZsti.value.find((element:any) => element.id == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia)
+  }
+
 
   checkStudentInternat(): boolean
   {
+    let value = false;
+    let payments = null;
+    this.init()
+    if(this.dataService.PaymentZsti.value)
+      payments = this.dataService.PaymentZsti.value.filter((element:any) => element.id_ucznia == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia);
+    else
+      payments = {};
+
     return true
   }
 
@@ -92,21 +108,11 @@ export class CardOutputComponent {
     let value = false;
     let payments = null;
     this.message = "Nie Zapłacił"
-    this.today = new Date();
-    this.currentStudentScan = this.dataService.ScanZsti.value.filter((element:any) => element.id_karty == this.dataService.CurrentStudentCardFromKeyCard.value.id)
-    this.currentStudent = this.dataService.StudentListZsti.value.find((element:any) => element.id == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia)
+    this.init()
     if(this.dataService.PaymentZsti.value)
       payments = this.dataService.PaymentZsti.value.filter((element:any) => element.id_ucznia == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia);
     else
       payments = {};
-    // else
-    // {
-    //   this.currentStudent = this.dataService.StudentListZsti.value.find((element:any) => element.id == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia)
-    //   if(this.dataService.PaymentInternat.value)
-    //     payments = this.dataService.PaymentInternat.value.filter((element:any) => element.id_ucznia == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia);
-    //   else
-    //     payments = {};
-    // }
     if(this.today.getDate() <= 10)
     {
       this.message = "Nie zapłacił - Data Przed 10";
@@ -139,7 +145,6 @@ export class CardOutputComponent {
         this.backgroundColor = 'lightcoral'
       }
     })
-    // zmien tlo na kolor :3
     this.dataService.getScanZsti();
     return value;
   }

@@ -41,6 +41,7 @@ export class DataBaseService {
   CardsInternat = new BehaviorSubject<any>(null);
   CurrentStudentCardInternat = new BehaviorSubject<any>(null)
   AllStudentDeclarations = new BehaviorSubject<any>(null);
+  ListOfGroups = new BehaviorSubject<any>(null);
   nullKarta = {
     id: -1,
     id_ucznia: -1,
@@ -159,6 +160,10 @@ export class DataBaseService {
     this.send(JSON.stringify({action: "request", params: {method: "getKartyInternat"}}))
   }
 
+  getGroups()
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getGroups"}}));
+  }
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
     this.StudentType.next(type)
@@ -298,6 +303,10 @@ export class DataBaseService {
             this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
             // console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
             break;
+          case 'ListOfGroups':
+            this.ListOfGroups.next(this.lastValue.params.value);
+            console.warn(this.ListOfGroups.value)
+            break;
         }
       })
     this.getCardsZsti();
@@ -311,6 +320,7 @@ export class DataBaseService {
     this.getPaymentInternat();
     this.getStudentDeclarationZsti();
     this.getStudentDeclarationInternat();
+    this.getGroups()
   }
 
   sendDeclaration(declaration: {end_date: any; begin_date: any; dni_tygodnia: any[]; wersja_posilku: any; opis: any}) {

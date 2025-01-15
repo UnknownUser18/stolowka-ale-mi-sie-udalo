@@ -77,7 +77,7 @@ function handleRequest(ws,params) {
         "getStudentDeclarationZsti": () => getStudentDeclarationZsti(ws),
         "changeStudentDeclarationInternat": () => changeStudentDeclarationInternat(params.studentId, params.schoolYearId, params.wersja, params.beginDate, params.endDate),
         "changeStudentDeclarationZsti": () => changeStudentDeclarationZsti(params.studentId, params.schoolYearId, params.days, params.beginDate, params.endDate),
-        "changeStudentInternat": () => changeStudentInternat(params.studentId, params.name, params.surname, params.attends),
+        "changeStudentInternat": () => changeStudentInternat(params.studentId, params.name, params.surname, params.attends, params.group),
         "changeStudentZsti": () => changeStudentZsti(params.studentId, params.type, params.name, params.surname, params.class, params.attends),
         "getStudentListZsti": () => getStudentListZsti(ws),
         "getStudentListInternat": () => getStudentListInternat(ws),
@@ -122,7 +122,8 @@ function handleRequest(ws,params) {
         "addScanZsti": () => addScanZsti(params.cardId, params.datetime),
         "getScanZsti": () => getScanZsti(ws),
         "addScanInternat": () => addScanInternat(params.cardId, params.datetime, params.meal),
-        "getScanInternat": () => getScanInternat(ws)
+        "getScanInternat": () => getScanInternat(ws),
+        "getGroups": () => getGroups(ws)
     }
     if(actions[params.method]) {
         actions[params.method]();
@@ -145,6 +146,12 @@ function sendResponse(ws, variable, value) {
         }
     ))
 }
+
+function getGroups(ws)
+{
+    executeQuery(`select * from slownik_grupy;`, result => sendResponse(ws, "ListOfGroups", result));
+}
+
 function getScanInternat(ws) {
     executeQuery(`SELECT * FROM skany_internat;`, result => sendResponse(ws, 'ScanInternat', result));
 }
@@ -272,8 +279,10 @@ function changeStudentZsti(studentId, type, name, surname, klasa, attends) {
     executeQuery(query, result => console.log(result));
 }
 
-function changeStudentInternat(studentId, name, surname, attends) {
-    let query = `UPDATE osoby_internat SET imie = '${name}', nazwisko = '${surname}', uczeszcza = ${attends} WHERE id = ${studentId};`
+function changeStudentInternat(studentId, name, surname, attends, group) {
+    let query = `UPDATE osoby_internat SET imie = '${name}', nazwisko = '${surname}', uczeszcza = ${attends}`
+    if(group !== undefined) query += `, grupa = ${group}`
+    query += ` WHERE id = ${studentId};`
     executeQuery(query, result => console.log(result));
 }
 
@@ -312,7 +321,7 @@ function getStudentListZsti(ws) {
 }
 
 function getStudentListInternat(ws) {
-    executeQuery(`SELECT * FROM osoby_internat ORDER BY nazwisko, imie`, result => sendResponse(ws, 'StudentListInternat', result));
+    executeQuery(`SELECT * FROM osoby_internat LEFT JOIN slownik_grupy ON osoby_internat.grupa = slownik_grupy.idGrupy ORDER BY nazwisko, imie`, result => sendResponse(ws, 'StudentListInternat', result));
 }
 
 function getStudentZstiDays(ws, StudentId) {

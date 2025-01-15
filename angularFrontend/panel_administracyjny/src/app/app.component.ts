@@ -28,10 +28,12 @@ export class AppComponent implements OnInit {
   ngOnInit() : void {
     this.dataService.StudentListZstiData.subscribe(data => this.updateUserList(data, 'ZSTI'));
     this.dataService.StudentListInternatData.subscribe(data => this.updateUserList(data, 'Internat'));
+    // this.dataService.StudentType.asObservable().subscribe((data:any) => this.typ = data)
   }
 
   updateUserList(data: Array<{ id: number, imie: string, nazwisko: string, klasa : string }>, type: string) {
-    this.typ = type; // to linijka zabrała mi 1 godzine na naprawnienie błędu 🦅🦅🦅🦅🦅🦅⭐⭐⭐🐷🍖🐻
+    this.typ = this.dataService.StudentType.value; // to linijka zabrała mi 1 godzine na naprawnienie błędu 🦅🦅🦅🦅🦅🦅⭐⭐⭐🐷🍖🐻
+    // Ta kurwa linijka wszystko psuła 😀😀😉😚😶😯😶🙂😎😎🙂😏😣😥😌😔😓😓🙁😧🥵😡😠🤧🧐👻👻😼🐱‍🐉🐱‍👓🐱‍👓🐺
     if (type === 'ZSTI') {
       this.StudentListZstiData = data;
     } else if(type === 'Internat') {

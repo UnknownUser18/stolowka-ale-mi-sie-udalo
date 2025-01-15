@@ -10,6 +10,11 @@
     </div></label>
     <label class="zsti">Klasa: <input type="text"  name="klasa"></label>
     <label>Uczęszcza: <input type="checkbox" name="uczeszcza"></label>
+    <label class="internat">Grupa: <select name="grupa" id="grupa">
+      <option *ngFor="let group of dataService.ListOfGroups.value" [value]="group.idGrupy">
+        {{ group.nazwaGrupy }}
+      </option>
+    </select></label>
   </fieldset>
 <!--  <fieldset (change)="changeDeclaration()">-->
   <fieldset>

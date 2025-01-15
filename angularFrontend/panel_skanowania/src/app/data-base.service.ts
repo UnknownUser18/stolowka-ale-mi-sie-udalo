@@ -7,6 +7,8 @@ import {BehaviorSubject} from 'rxjs';
 })
 export class DataBaseService {
   socket: WebSocket | undefined;
+  DisabledZstiDays = new BehaviorSubject<any>(null);
+  DisabledInternatDays = new BehaviorSubject<any>(null);
   StudentDeclarationZsti = new BehaviorSubject<any>(null);
   CurrentStudentDeclaration = new BehaviorSubject<any>(null);
   StudentDeclarationInternat = new BehaviorSubject<any>(null);
@@ -42,6 +44,8 @@ export class DataBaseService {
   ScanZsti = new BehaviorSubject<any>(null);
   ScanInternat = new BehaviorSubject<any>(null);
   CurrentStudentScan = new BehaviorSubject<any>(null);
+  AllStudentDeclarations = new BehaviorSubject<any>(null);
+  ListOfGroups = new BehaviorSubject<any>(null);
   nullKarta = {
     id: -1,
     id_ucznia: -1,
@@ -64,7 +68,7 @@ export class DataBaseService {
       this.Initialize()
     }
     this.socket.onerror = (event: Event) => {
-      console.log('WebSocket connection error')
+      console.error('WebSocket connection error')
       setTimeout(()=>{
         this.initWebSocket()
       },1000)
@@ -143,7 +147,13 @@ export class DataBaseService {
   {
     this.send(JSON.stringify({action: "request", params: {method: "getSchoolYears"}}));
   }
-
+  getDisabledZstiDays()
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getDisabledZstiDays"}}));
+  }
+  getDisabledInternatDays() {
+    this.send(JSON.stringify({action: "request", params: {method: "getDisabledInternatDays"}}));
+  }
   getCardsZsti()
   {
     this.send(JSON.stringify({action: "request", params: {method: "getKartyZsti"}}))
@@ -154,14 +164,9 @@ export class DataBaseService {
     this.send(JSON.stringify({action: "request", params: {method: "getKartyInternat"}}))
   }
 
-  getStudentFromCardZsti(keyCard:number)
+  getGroups()
   {
-    this.send(JSON.stringify({action: "request", params: {method: "getStudentFromCardZsti", keyCard: keyCard}}));
-  }
-
-  getStudentFromCardInternat(keyCard:number)
-  {
-    this.send(JSON.stringify({action: "request", params: {method: "getStudentFromCardInternat", keyCard: keyCard}}));
+    this.send(JSON.stringify({action: "request", params: {method: "getGroups"}}));
   }
 
   getScanZsti()
@@ -177,34 +182,35 @@ export class DataBaseService {
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
     this.StudentType.next(type)
-    console.log("Change student call")
-    console.log(Id, type)
+    // console.log("Change student call")
+    // console.log(Id, type)
     if (this.StudentType.value === "ZSTI") {
       this.getStudentDeclarationZsti()
-      console.log(this.StudentDeclarationInternat.value, "NMIGER")
-      console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
+      // console.log(this.StudentDeclarationInternat.value, "NMIGER")
+      // console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentZstiDays()
       this.getStudentDisabledZstiDays()
       if(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
         this.CurrentStudentCardZsti.next(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
       else
         this.CurrentStudentCardZsti.next(this.nullKarta)
-      console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
+      // console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
     }
     else{
-      console.log("Checking internat cards:")
+      // console.log("Checking internat cards:")
       this.getStudentDeclarationInternat()
-      console.log(this.StudentDeclarationInternat.value, "NMIGER")
-      console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
+      // console.log(this.StudentDeclarationInternat.value, "NMIGER")
+      // console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentInternatDays()
       this.getStudentDisabledInternatDays()
-      console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
+      this.getDisabledInternatDays();
+      // console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
       if(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
         this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
       else
         this.CurrentStudentCardInternat.next(this.nullKarta)
     }
-    console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
+    // console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
   }
 
   send(query:string)
@@ -224,21 +230,23 @@ export class DataBaseService {
       switch (this.lastValue.params.variable) {
         case 'StudentDeclarationZsti':
           this.StudentDeclarationZsti.next(this.lastValue.params.value );
-          this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any)=> element.id_osoby == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
-          console.log("StudentDeclarationZsti: ", this.lastValue.params.value);
+          this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value));
+          this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value))
+          // console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
           break;
         case 'StudentDeclarationInternat':
           this.StudentDeclarationInternat.next(this.lastValue.params.value );
           this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
-          console.log("StudentDeclarationInternat: ", this.lastValue.params.value);
+          this.AllStudentDeclarations.next(this.StudentDeclarationInternat.value.find((element:any) => element.osoby_internat_id == this.CurrentStudentId.value))
+          // console.log("StudentDeclarationInternat: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
           break;
         case 'StudentListZsti':
           this.StudentListZsti.next(this.lastValue.params.value);
-          console.log("StudentListZsti: ", this.lastValue.params.value);
+          // console.log("StudentListZsti: ", this.lastValue.params.value);
           break;
         case 'StudentListInternat':
           this.StudentListInternat.next(this.lastValue.params.value);
-          console.log("StudentListInternat: ", this.lastValue.params.value);
+          // console.log("StudentListInternat: ", this.lastValue.params.value);
           break;
         case 'StudentZstiDays':
           this.StudentZstiDays.next(this.lastValue.params.value);
@@ -247,7 +255,7 @@ export class DataBaseService {
               tempArray.push(element)
           })
           this.CurrentZstiDays.next(tempArray);
-          console.log("StudentZstiDays: ", this.lastValue.params.value);
+          // console.log("StudentZstiDays: ", this.lastValue.params.value);
           break;
         case 'StudentDisabledZstiDays':
           this.StudentDisabledZstiDays.next(this.lastValue.params.value);
@@ -256,7 +264,11 @@ export class DataBaseService {
               tempArray.push(element)
           })
           this.CurrentDisabledZstiDays.next(tempArray);
-          console.log("StudentDisabledZstiDays: ", this.lastValue.params.value);
+          // console.log("StudentDisabledZstiDays: ", this.lastValue.params.value);
+          break;
+        case 'DisabledZstiDays':
+          this.DisabledZstiDays.next(this.lastValue.params.value);
+          // console.log("DisabledZstiDays: ", this.lastValue.params.value);
           break;
         case 'StudentInternatDays':
           this.StudentInternatDays.next(this.lastValue.params.value);
@@ -265,7 +277,7 @@ export class DataBaseService {
               tempArray.push(element)
           })
           this.CurrentInternatDays.next(tempArray);
-          console.log("StudentInternatDays: ", this.lastValue.params.value);
+          // console.log("StudentInternatDays: ", this.lastValue.params.value);
           break;
         case 'StudentDisabledInternatDays':
           this.StudentDisabledInternatDays.next(this.lastValue.params.value);
@@ -274,11 +286,15 @@ export class DataBaseService {
               tempArray.push(element)
           })
           this.CurrentDisabledInternatDays.next(tempArray);
-          console.log("StudentDisabledInternatDays: ", this.lastValue.params.value);
+          // console.log("StudentDisabledInternatDays: ", this.lastValue.params.value);
+          break;
+        case 'DisabledInternatDays':
+          this.DisabledInternatDays.next(this.lastValue.params.value);
+          // console.log("DisabledInternatDays: ", this.lastValue.params.value);
           break;
         case 'DisabledDays':
           this.DisabledDays.next(this.lastValue.params.value);
-          console.log("DisabledDays: ", this.lastValue.params.value);
+          // console.log("DisabledDays: ", this.lastValue.params.value);
           break;
         case 'SchoolYears':
           this.SchoolYears.next(this.lastValue.params.value);
@@ -295,26 +311,16 @@ export class DataBaseService {
         case 'CardsZsti':
           this.CardsZsti.next(this.lastValue.params.value);
           this.CurrentStudentCardZsti.next(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
-          console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
+          // console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
           break;
         case 'CardsInternat':
           this.CardsInternat.next(this.lastValue.params.value);
           this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
-          console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
+          // console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
           break;
-        case 'StudentCardInternat':
-          if(this.lastValue.params.value.length === 0)
-            break;
-          this.changeStudent(this.lastValue.params.value[0].id_ucznia, 'Internat')
-          this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value[0]);
-          console.log("ZMIANA KARTY INTERNAT: ", this.lastValue.params.value, this.CurrentStudentCardFromKeyCard.value);
-          break;
-        case 'StudentCardZsti':
-          if(this.lastValue.params.value.length === 0)
-            break;
-          this.changeStudent(this.lastValue.params.value[0].id_ucznia, 'ZSTI')
-          this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value[0]);
-          console.log("ZMIANA KARTY ZSTI: ", this.lastValue.params.value, this.CurrentStudentCardFromKeyCard.value);
+        case 'ListOfGroups':
+          this.ListOfGroups.next(this.lastValue.params.value);
+          console.warn(this.ListOfGroups.value)
           break;
         case 'ScanZsti':
           this.ScanZsti.next(this.lastValue.params.value);
@@ -330,10 +336,21 @@ export class DataBaseService {
     this.getCardsInternat();
     this.getStudentList();
     this.getDisabledDays();
+    this.getDisabledZstiDays();
+    this.getDisabledInternatDays();
     this.getSchoolYears();
     this.getPaymentZsti();
     this.getPaymentInternat();
-    this.getScanZsti();
-    this.getScanInternat();
+    this.getStudentDeclarationZsti();
+    this.getStudentDeclarationInternat();
+    this.getGroups()
+  }
+
+  sendDeclaration(declaration: {end_date: any; begin_date: any; dni_tygodnia: any[]; wersja_posilku: any; opis: any}) {
+
+  }
+
+  deleteDeclaration(id: number) {
+
   }
 }

@@ -1,6 +1,7 @@
 import {Component, Input, SimpleChanges, ElementRef, OnChanges} from '@angular/core';
 import {DataBaseService} from '../data-base.service';
 import {FormsModule} from '@angular/forms';
+import {NgForOf} from '@angular/common';
 
 interface Osoba {
   imie : string | undefined;
@@ -32,15 +33,21 @@ class OsobaInternat implements Osoba {
   imie: string | undefined;
   nazwisko: string | undefined;
   uczeszcza: number | undefined;
-  constructor(imie?: string, nazwisko?: string, uczeszcza?: number) {
+  grupa: number | undefined;
+  nazwaGrupy: string | undefined;
+  constructor(imie?: string, nazwisko?: string, uczeszcza?: number, grupa?: number, nazwaGrupy?: string) {
     this.imie = imie;
     this.nazwisko = nazwisko;
     this.uczeszcza = uczeszcza;
+    if(grupa !== undefined) this.grupa = grupa;
+    if(nazwaGrupy !== undefined) this.nazwaGrupy = nazwaGrupy;
   }
   assignValues(student : any) : void {
     this.imie = student.imie;
     this.nazwisko = student.nazwisko;
     this.uczeszcza = student.uczeszcza;
+    if(student.grupa !== undefined) this.grupa = student.grupa;
+    if(student.nazwaGrupy !== undefined) this.nazwaGrupy = student.nazwaGrupy;
   }
 }
 interface Deklaracja {
@@ -99,7 +106,8 @@ class DeklaracjaInternat implements Deklaracja {
   selector: 'app-edycja',
   standalone: true,
   imports: [
-    FormsModule
+    FormsModule,
+    NgForOf
   ],
   templateUrl: './edycja.component.html',
   styleUrl: './edycja.component.css'
@@ -107,9 +115,10 @@ class DeklaracjaInternat implements Deklaracja {
 export class EdycjaComponent implements OnChanges {
   @Input() typ: string | undefined;
   DOMelement: HTMLElement | null;
-
-  constructor(private el: ElementRef, private dataService: DataBaseService) {
+  // zmian
+  constructor(private el: ElementRef, protected dataService: DataBaseService) {
     this.dataService.StudentListZsti.asObservable().subscribe(() : void => this.updateStudent(this.dataService.CurrentStudentId))
+    this.dataService.StudentListInternat.asObservable().subscribe(() : void => this.updateStudent(this.dataService.CurrentStudentId))
     this.dataService.CurrentStudentId.asObservable().subscribe((newStudent: any) : void => this.updateStudent(newStudent));
     this.dataService.StudentType.asObservable().subscribe(() : void => this.updateStudent(this.dataService.CurrentStudentId));
     this.DOMelement = this.el.nativeElement as HTMLElement | null;
@@ -166,6 +175,10 @@ export class EdycjaComponent implements OnChanges {
         }
       });
       (this.DOMelement?.querySelector('input[name="klasa"]') as HTMLInputElement).value = this.student.klasa || '';
+    }
+    if(this.student instanceof OsobaInternat) {
+      // @ts-ignore
+      if(this.student.grupa !== undefined) (this.DOMelement?.querySelector('select[name="grupa"]') as HTMLInputElement).value = this.student.grupa || "";
     }
     (this.DOMelement?.querySelector('input[name="uczeszcza"]') as HTMLInputElement).checked = !!this.student.uczeszcza;
   }
@@ -361,7 +374,8 @@ export class EdycjaComponent implements OnChanges {
         editedStudent = new OsobaZSTI(imie, nazwisko, typ_osoby_id, klasa, uczeszcza)
       }
       else {
-        editedStudent = new OsobaInternat(imie, nazwisko, uczeszcza)
+        let grupa = (this.DOMelement?.querySelector('select[name="grupa"]') as HTMLInputElement).value;
+        editedStudent = new OsobaInternat(imie, nazwisko, uczeszcza, parseInt(grupa))
       }
       if(editedStudent === undefined) return;
       console.log(editedStudent)
@@ -398,7 +412,8 @@ export class EdycjaComponent implements OnChanges {
             studentId: this.dataService.CurrentStudentId.value,
             name: editedStudent.imie,
             surname: editedStudent.nazwisko,
-            attends:editedStudent.uczeszcza
+            attends:editedStudent.uczeszcza,
+            group:editedStudent.grupa
           }
         }));
       }
