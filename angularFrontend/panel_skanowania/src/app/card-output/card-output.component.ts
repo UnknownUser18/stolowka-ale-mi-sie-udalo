@@ -70,7 +70,7 @@ export class CardOutputComponent {
   }
 
   capitalizeFirstChar(str: string): string {
-    if (str.length === 0) return str;
+    if (str.length == 0) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
@@ -81,26 +81,48 @@ export class CardOutputComponent {
     this.isViable = this.dataService.StudentType.value === 'ZSTI' ? this.checkStudentZsti() : this.checkStudentInternat();
   }
 
-  init()
+  initZsti()
   {
     this.message = "Nie Zapłacił"
     this.today = new Date();
     this.currentStudentScan = this.dataService.ScanZsti.value.filter((element:any) => element.id_karty == this.dataService.CurrentStudentCardFromKeyCard.value.id)
     this.currentStudent = this.dataService.StudentListZsti.value.find((element:any) => element.id == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia)
+    // this.currentStudentScan = this.currentStudentScan.filter((element:any) => (new Date()).setHours(0, 0, 0, 0) <= element.czas && element.czas <= (new Date()).setHours(23, 59, 59))
   }
 
-
-  checkStudentInternat(): boolean
+  initInternat()
   {
-    let value = false;
-    let payments = null;
-    this.init()
-    if(this.dataService.PaymentZsti.value)
-      payments = this.dataService.PaymentZsti.value.filter((element:any) => element.id_ucznia == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia);
-    else
-      payments = {};
+    this.message = "Nie Zapłacił"
+    this.today = new Date();
+    this.currentStudentScan = this.dataService.ScanInternat.value.filter((element:any) => element.id_karty == this.dataService.CurrentStudentCardFromKeyCard.value.id)
+    this.currentStudent = this.dataService.StudentListInternat.value.find((element:any) => element.id == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia)
+    this.currentStudentScan = this.currentStudentScan.filter((element:any) => (new Date()).setHours(0, 0, 0, 0) <= element.czas && element.czas <= (new Date()).setHours(23, 59, 59))
+  }
 
-    return true
+  checkStudentInternat(): boolean {
+    return true;
+    // let value = false;
+    // let payments = null;
+    // this.initInternat()
+    // if (this.dataService.PaymentZsti.value)
+    //   payments = this.dataService.PaymentInternat.value.filter((element: any) => element.id_ucznia == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia);
+    // else
+    //   payments = {};
+    // if (this.checkMeal(new Date()) == 0) {
+    //   this.message = "Pomiędzy Godzinami";
+    //   this.value = false;
+    //   this.backgroundColor = 'lightcoral'
+    // }
+    // else if(payments.length > 0)
+    //     if(payments.find((element:any) => element.miesiac == (this.today.getMonth() + 1) && element.rok == this.today.getFullYear()))
+    //       value = this.checkInDirectInternat()
+    //
+    // return value
+  }
+
+  checkInDirectInternat(): boolean{
+
+    return false
   }
 
   checkStudentZsti(): boolean
@@ -108,7 +130,7 @@ export class CardOutputComponent {
     let value = false;
     let payments = null;
     this.message = "Nie Zapłacił"
-    this.init()
+    this.initZsti()
     if(this.dataService.PaymentZsti.value)
       payments = this.dataService.PaymentZsti.value.filter((element:any) => element.id_ucznia == this.dataService.CurrentStudentCardFromKeyCard.value.id_ucznia);
     else
@@ -125,11 +147,6 @@ export class CardOutputComponent {
         value = true;
         this.message = "Zapłacił"
         this.backgroundColor = 'lightgreen'
-      }
-    else if((payments.miesiac == (this.today.getMonth() + 1) && payments.rok == this.today.getFullYear())) {
-        value = true
-        this.backgroundColor = 'lightgreen'
-        this.message = "Zapłacił"
       }
 
     console.log(this.currentStudentScan)

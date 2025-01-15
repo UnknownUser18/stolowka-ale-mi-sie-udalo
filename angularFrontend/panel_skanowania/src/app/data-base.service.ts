@@ -179,6 +179,17 @@ export class DataBaseService {
     this.send(JSON.stringify({action: "request", params: {method: "getScanInternat"}}));
   }
 
+  getStudentFromCardZsti(keyCard:number)
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentFromCardZsti", keyCard: keyCard}}));
+  }
+
+  getStudentFromCardInternat(keyCard:number)
+  {
+    this.send(JSON.stringify({action: "request", params: {method: "getStudentFromCardInternat", keyCard: keyCard}}));
+  }
+
+
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
     this.StudentType.next(type)
@@ -329,6 +340,14 @@ export class DataBaseService {
         case 'ScanInternat':
           this.ScanInternat.next(this.lastValue.params.value);
           this.CurrentStudentScan.next(this.lastValue.params.value.filter((element:any)=>element.id_karty == this.CurrentStudentCardFromKeyCard.value.id));
+          break;
+        case 'StudentCardZsti':
+          this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value);
+          console.warn('niga')
+          break;
+        case 'StudentCardInternat':
+          this.CurrentStudentCardFromKeyCard.next(this.lastValue.params.value);
+          console.warn('niga')
           break;
       }
     })
