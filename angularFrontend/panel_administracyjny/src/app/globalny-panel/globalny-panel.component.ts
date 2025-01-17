@@ -19,6 +19,9 @@ export class GlobalnyPanelComponent implements OnInit {
   constructor(private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.DisabledDays.asObservable().subscribe((change:any)=>this.updateDays(change));
     this.dataService.getDisabledDays()
+    this.dataService.StudentListZsti.asObservable().subscribe((data: any): void => {
+      this.uczniowieZsti = data;
+    });
     // this.dataService.LastStudentInsertId.asObservable().subscribe((change:any)=>this.sendDeclaration(change));
     this.DOMelement = this.el.nativeElement;
   }
@@ -31,7 +34,7 @@ export class GlobalnyPanelComponent implements OnInit {
   editedDeclaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string, osoby_internat_id?:number, id_osoby?:number, dniString?: string, dni?:any, wersja?:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
 
   insertedDeclaration:boolean = true;
-
+  uczniowieZsti : any = [];
   day: number = new Date().getDate();
   month: number = new Date().getMonth();
   year: number = new Date().getFullYear();
@@ -255,6 +258,10 @@ export class GlobalnyPanelComponent implements OnInit {
   close_os() {
     this.DOMelement.querySelector('#dodaj_osobe').style.display = 'none';
   }
+  getDatabaseInfo() {
+    this.dataService.getStudentList();
+    this.uczniowieZsti = this.dataService.StudentListZsti.value;
+  }
   dodaj_osobe() {
     let thisElement = this.DOMelement;
     this.editedStudent = {
@@ -290,6 +297,7 @@ export class GlobalnyPanelComponent implements OnInit {
     }
     this.insertedDeclaration = false;
     console.log('dodaj_osobe');
+    this.afterSendDeclaration()
     this.close_os()
   }
   //! is it really needed?
@@ -346,10 +354,19 @@ export class GlobalnyPanelComponent implements OnInit {
 
   afterSendDeclaration()
   {
+    console.log('WOjtek')
     let thisElement = this.DOMelement;
     if(thisElement.querySelector('select[name="typ"]').value === 'ZSTI')
     {
-      this.editedDeclaration.id_osoby = this.dataService.LastStudentInsertId.value.insertId;
+      this.editedDeclaration = {
+        rok_szkolny_id: 1,
+        data_od : this.DOMelement.querySelector('input[name="data_od"]').value,
+        data_do : this.DOMelement.querySelector('input[name="data_do"]').value,
+      }
+      console.log(this.uczniowieZsti)
+      this.getDatabaseInfo();
+      this.editedDeclaration.id_osoby = this.uczniowieZsti.find((element:any) => element.imie === this.editedStudent.imie && element.nazwisko === this.editedStudent.nazwisko).id_osoby
+      console.log(this.editedDeclaration.id_osoby)
       let dni = [
         this.DOMelement.querySelector('input[name="poniedzialek"]'),
         this.DOMelement.querySelector('input[name="wtorek"]'),
@@ -367,7 +384,8 @@ export class GlobalnyPanelComponent implements OnInit {
         action: "request",
         params: {
           method: "addZstiDeclaration",
-          studentId: this.editedDeclaration.id_osoby,
+          // @ts-ignore
+          studentId: (this.editedDeclaration.id_osoby + 1),
           schoolYearId: this.editedDeclaration.rok_szkolny_id,
           beginDate: this.editedDeclaration.data_od,
           endDate: this.editedDeclaration.data_do,
@@ -375,6 +393,7 @@ export class GlobalnyPanelComponent implements OnInit {
         }
       }))
       this.dataService.getStudentDeclarationZsti()
+      this.dataService.getStudentList()
     }
     else{
       this.editedDeclaration.osoby_internat_id = this.dataService.LastStudentInsertId.value.insertId;
@@ -391,8 +410,7 @@ export class GlobalnyPanelComponent implements OnInit {
       }))
       this.dataService.getStudentDeclarationInternat()
     }
-    console.log(this.dataService.LastStudentInsertId.value.insertId)
-    this.dataService.getStudentList()
+    this.getDatabaseInfo();
   }
 
   change_form() {
