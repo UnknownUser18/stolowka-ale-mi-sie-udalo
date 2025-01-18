@@ -52,7 +52,7 @@ export class DeklaracjeComponent implements OnChanges {
     };
 
     if (declaration.begin_date && declaration.end_date && declaration.wersja_posilku) {
-      this.dataService.sendDeclaration(declaration);
+      // this.dataService.sendDeclaration(declaration);
       this.closeDeklaracje();
     }
   }
@@ -66,7 +66,7 @@ export class DeklaracjeComponent implements OnChanges {
   }
 
   deleteDeclaration() {
-    this.dataService.deleteDeclaration(this.CurrentDeclaration.id);
+    // this.dataService.deleteDeclaration(this.CurrentDeclaration.id);
   }
 
   updateDeclaration(event: any) {

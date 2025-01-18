@@ -13,10 +13,8 @@ export class DataBaseService {
   CurrentStudentDeclaration = new BehaviorSubject<any>(null);
   StudentDeclarationInternat = new BehaviorSubject<any>(null);
   StudentListZsti = new BehaviorSubject<any>(null);
-  StudentListZstiData = this.StudentListZsti.asObservable();
   CurrentZstiDays = new BehaviorSubject<any>(null);
   StudentListInternat = new BehaviorSubject<any>(null);
-  StudentListInternatData = this.StudentListInternat.asObservable();
   CurrentInternatDays = new BehaviorSubject<any>(null);
   StudentZstiDays = new BehaviorSubject<any>(null);
   StudentInternatDays = new BehaviorSubject<any>(null);
@@ -58,12 +56,11 @@ export class DataBaseService {
   initWebSocket()
   {
     this.socket = new WebSocket("ws://localhost:8080");
-    // @ts-ignore
-    this.socket.onopen = (event: Event) => {
+    this.socket.onopen = () : void => {
       console.log('WebSocket connection established')
       this.Initialize()
     }
-    this.socket.onerror = (event: Event) => {
+    this.socket.onerror = () : void => {
       console.error('WebSocket connection error')
       setTimeout(()=>{
         this.initWebSocket()
@@ -71,97 +68,75 @@ export class DataBaseService {
     }
   }
   constructor() {
-    setTimeout(()=>{
+    setTimeout(() : void =>{
       this.initWebSocket()
     },500)
 
   }
 
-  public changeSelectedSaved(change:boolean)
-  {
+  public changeSelectedSaved(change:boolean) : void {
     this.SelectedSaved.next(change)
   }
 
-  public changeTypPoslikuSaved(change:boolean)
-  {
+  public changeTypPoslikuSaved(change:boolean) : void {
     this.TypPosilkuSaved.next(change);
   }
 
-  public changePersonalDataSaved(change:boolean)
-  {
-    this.PersonalDataSaved.next(change);
-  }
 
-  public changeDeclarationDataSaved(change:boolean)
-  {
+  public changeDeclarationDataSaved(change:boolean) : void {
     this.DeclarationDataSaved.next(change);
   }
-  getDisabledDays()
-  {
+  getDisabledDays() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getDniNieczynne"}}));
   }
-  getPaymentZsti()
-  {
+  getPaymentZsti() : void {
     this.send(JSON.stringify({action: "request", params: {method: 'getPaymentZsti'}}))
   }
-  getPaymentInternat()
-  {
+  getPaymentInternat() : void {
     this.send(JSON.stringify({action: "request", params: {method: 'getPaymentInternat'}}))
   }
-  getStudentInternatDays()
-  {
+  getStudentInternatDays() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getStudentInternatDays", studentId: this.CurrentStudentId.value}}));
   }
-  getStudentDisabledInternatDays()
-  {
+  getStudentDisabledInternatDays() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getStudentDisabledInternatDays", studentId: this.CurrentStudentId.value}}));
   }
-  getStudentZstiDays()
-  {
+  getStudentZstiDays() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getStudentZstiDays", studentId: this.CurrentStudentId.value}}));
   }
-  getStudentDisabledZstiDays()
-  {
+  getStudentDisabledZstiDays() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getStudentDisabledZstiDays", studentId: this.CurrentStudentId.value}}));
   }
-  getStudentDeclarationZsti()
-  {
+  getStudentDeclarationZsti() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getStudentDeclarationZsti"}}));
   }
-  getStudentDeclarationInternat()
-  {
+  getStudentDeclarationInternat() : void {
     this.send( JSON.stringify({action: "request", params: {method: "getStudentDeclarationInternat"}}));
   }
 
-  getStudentList()
-  {
+  getStudentList() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getStudentListInternat"}}))
     this.send(JSON.stringify({action: "request", params: {method: "getStudentListZsti"}}))
   }
 
-  getSchoolYears()
-  {
+  getSchoolYears() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getSchoolYears"}}));
   }
-  getDisabledZstiDays()
-  {
+  getDisabledZstiDays() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getDisabledZstiDays"}}));
   }
-  getDisabledInternatDays() {
+  getDisabledInternatDays() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getDisabledInternatDays"}}));
   }
-  getCardsZsti()
-  {
+  getCardsZsti() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getKartyZsti"}}))
   }
 
-  getCardsInternat()
-  {
+  getCardsInternat() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getKartyInternat"}}))
   }
 
-  getGroups()
-  {
+  getGroups() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getGroups"}}));
   }
   changeStudent(Id:number, type:string):void {
@@ -322,12 +297,5 @@ export class DataBaseService {
     this.getStudentDeclarationInternat();
     this.getGroups()
   }
-
-  sendDeclaration(declaration: {end_date: any; begin_date: any; dni_tygodnia: any[]; wersja_posilku: any; opis: any}) {
-
-  }
-
-  deleteDeclaration(id: number) {
-
-  }
+  
 }

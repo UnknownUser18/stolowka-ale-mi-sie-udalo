@@ -18,6 +18,7 @@ export interface Osoba {
   imie : string | undefined;
   nazwisko : string | undefined;
   uczeszcza : number | undefined;
+  assignValues(student : any) : this;
 }
 export class OsobaZSTI implements Osoba {
   id: number | undefined;
@@ -34,12 +35,13 @@ export class OsobaZSTI implements Osoba {
     this.klasa = klasa;
     this.uczeszcza = uczeszcza;
   }
-  assignValues(student : OsobaZSTI) : void {
+  assignValues(student : OsobaZSTI) : this {
     this.imie = student.imie;
     this.nazwisko = student.nazwisko;
     this.typ_osoby_id = student.typ_osoby_id;
     this.klasa = student.klasa;
     this.uczeszcza = student.uczeszcza;
+    return this;
   }
 }
 export class OsobaInternat implements Osoba {
@@ -55,10 +57,11 @@ export class OsobaInternat implements Osoba {
     this.uczeszcza = uczeszcza;
     this.grupa = grupa;
   }
-  assignValues(student : OsobaInternat) : void {
+  assignValues(student : OsobaInternat) : this {
     this.imie = student.imie;
     this.nazwisko = student.nazwisko;
     this.uczeszcza = student.uczeszcza;
+    return this;
   }
 }
 export interface Deklaracja {
@@ -67,6 +70,7 @@ export interface Deklaracja {
   rok_szkolny_id : number | undefined;
   rok_szkolny : string | undefined;
   id_osoby : number | undefined;
+  assignValues(declaration : any) : void;
 }
 export class DeklaracjaZSTI implements Deklaracja {
   data_od: string | undefined;
@@ -121,8 +125,8 @@ export class DeklaracjaInternat implements Deklaracja {
 })
 export class AppComponent implements OnInit {
   DOMelement: HTMLElement | null;
-  StudentListZstiData: OsobaZSTI[] | undefined;
-  StudentListInternatData: OsobaInternat[] | undefined;
+  StudentListZsti: OsobaZSTI[] | undefined;
+  StudentListInternat: OsobaInternat[] | undefined;
   osoba: string | undefined;
   title: string = 'panel_administracyjny';
   typ: string | undefined;
@@ -132,54 +136,36 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() : void {
-    this.dataService.StudentListZsti.asObservable().subscribe((data : OsobaZSTI) : void => this.updateUserList(data, 'ZSTI'));
-    this.dataService.StudentListInternat.asObservable().subscribe((data : OsobaInternat) : void => this.updateUserList(data, 'Internat'));
-    // this.dataService.StudentType.asObservable().subscribe((data:any) => this.typ = data)
-  }
-
-  updateUserList(data: unknown, type: string) {
-    this.typ = this.dataService.StudentType.value; // to linijka zabrała mi 1 godzine na naprawnienie błędu 🦅🦅🦅🦅🦅🦅⭐⭐⭐🐷🍖🐻
-    // Ta kurwa linijka wszystko psuła 😀😀😉😚😶😯😶🙂😎😎🙂😏😣😥😌😔😓😓🙁😧🥵😡😠🤧🧐👻👻😼🐱‍🐉🐱‍👓🐱‍👓🐺
-    if (type === 'ZSTI') {
-      this.StudentListZstiData = data as OsobaZSTI[];
-    } else if(type === 'Internat') {
-      this.StudentListInternatData = data as OsobaInternat[];
-    }
-    else {
-      console.error('Invalid type at updateUserList');
-    }
+    this.dataService.StudentListZsti.asObservable().subscribe((data: Array<OsobaZSTI>): void => {
+      this.StudentListZsti = data?.map((student: OsobaZSTI): OsobaZSTI => new OsobaZSTI().assignValues(student));
+    });
+    this.dataService.StudentListInternat.asObservable().subscribe((data : Array<OsobaInternat>) : void => {
+      this.StudentListInternat = data?.map((student: OsobaInternat): OsobaInternat => new OsobaInternat().assignValues(student));
+    });
   }
 
   szukaj() : void {
-    const searchTerm : string = this.el.nativeElement.querySelector('#wyszukaj > input')?.value.toLowerCase() || '';
-    const sectionsZsti = this.DOMelement?.querySelectorAll('section:nth-of-type(1) > ol > li');
-    const sectionsInternat = this.DOMelement?.querySelectorAll('section:nth-of-type(2) > ol > li');
-    if(!sectionsZsti || !sectionsInternat) {
-      console.error('Sections not found');
-      return;
-    }
-    const filterSections = (sections: NodeListOf<Element> | null) : void => {
-      sections?.forEach((element: Element) : void => {
-        let htmlElement : HTMLElement = element as HTMLElement;
-        htmlElement.style.display = htmlElement.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
-        if (htmlElement.style.display === 'block') {
-          htmlElement = htmlElement.parentElement?.parentElement as HTMLElement;
-          const ol = htmlElement.querySelector('ol');
-          const img = htmlElement.querySelector('img');
-          if (ol) ol.classList.add('show');
-          if (img) img.classList.add('rotate');
+    const searchTerm : string = (this.DOMelement?.querySelector('#wyszukaj > input') as HTMLInputElement)?.value.toLowerCase() || '';
+    const sectionsZsti : NodeListOf<HTMLLIElement> = this.DOMelement?.querySelectorAll('section:nth-of-type(1) > ol > li')!;
+    const sectionsInternat : NodeListOf<HTMLLIElement> = this.DOMelement?.querySelectorAll('section:nth-of-type(2) > ol > li')!;
+    function filterSections(sections: NodeListOf<HTMLLIElement>) : void  {
+      sections.forEach((li: HTMLLIElement) : void => {
+        li.style.display = li.textContent?.toLowerCase().includes(searchTerm) ? 'block' : 'none';
+        if (li.style.display === 'block') {
+          const section = li.parentElement?.parentElement as HTMLElement;
+          section.querySelector('ol')!.classList.add('show');
+          section.querySelector('img')!.classList.add('rotate');
         }
       });
-    };
+    }
     filterSections(sectionsZsti);
     filterSections(sectionsInternat);
     if (searchTerm === '') {
-      const showAllSections = (sections: NodeListOf<Element> | null) => {
-        sections?.forEach((element: Element) => {
-          const htmlElement = element as HTMLElement;
-          htmlElement.style.display = 'block';
+      function showAllSections(sections: NodeListOf<HTMLLIElement>) : void {
+        sections.forEach((li: HTMLLIElement) : void => {
+          li.style.display = 'block';
         });
-      };
+      }
 
       showAllSections(sectionsZsti);
       showAllSections(sectionsInternat);
@@ -196,25 +182,23 @@ export class AppComponent implements OnInit {
     });
   }
 
-  show(event: Event, typ : string | null): void {
+  show(event : Event, typ : string | null): void {
     if(typ) this.typ = typ;
     if (this.dataService.SavedList.some(element => !element.value)) {
       this.cantDoThat(() => this.show(event, null));
       return;
     }
-    let target = event.target as HTMLElement;
+    let target : HTMLElement = event.target as HTMLElement;
     if (target.tagName === 'OL') return;
     while (target.tagName !== 'LI') {
       target = target.parentElement as HTMLElement;
     }
-    const globalnyPanel = this.DOMelement?.querySelector('app-globalny-panel') as HTMLElement | null;
-    const panel = this.DOMelement?.querySelector('app-panel') as HTMLElement | null;
-    if (globalnyPanel) globalnyPanel.style.display = 'none';
-    if (panel) panel.style.display = 'block';
+    (this.DOMelement?.querySelector('app-globalny-panel') as HTMLElement).style.display = 'none';
+    (this.DOMelement?.querySelector('app-panel') as HTMLElement).style.display = 'block';
     this.osoba = target.querySelector('span')?.textContent!;
 
     const index : number = parseInt(target.getAttribute('data-index')!, 10);
-    const studentData = this.typ === 'ZSTI' ? this.StudentListZstiData : this.StudentListInternatData;
+    const studentData = this.typ === 'ZSTI' ? this.StudentListZsti : this.StudentListInternat;
     if (studentData && studentData[index].id && this.typ) {
       this.dataService.changeStudent(studentData[index].id, this.typ);
     }
@@ -225,19 +209,14 @@ export class AppComponent implements OnInit {
   rozwin(event: Event) : void {
     let target : HTMLElement = event.target as HTMLElement;
     while (target.tagName !== 'BUTTON') {
-      target = target.parentElement as HTMLElement;
+      target = target.parentElement!;
     }
-    const img = target.querySelector('img') as HTMLElement;
-    const ol = target.nextElementSibling as HTMLElement;
-    if (!ol) return;
-    ol.classList.toggle('show');
-    img.classList.toggle('rotate');
+    target.querySelector('img')!.classList.toggle('rotate');
+    target.nextElementSibling!.classList.toggle('show');
   }
 
   main_menu(): void {
-    const globalnyPanel = this.DOMelement?.querySelector('app-globalny-panel') as HTMLElement | null;
-    const panel = this.DOMelement?.querySelector('app-panel') as HTMLElement | null;
-    if (globalnyPanel) globalnyPanel.style.display = 'block';
-    if (panel) panel.style.display = 'none';
+    (this.DOMelement?.querySelector('app-globalny-panel') as HTMLElement).style.display = 'block';
+    (this.DOMelement?.querySelector('app-panel') as HTMLElement).style.display = 'none';
   }
 }

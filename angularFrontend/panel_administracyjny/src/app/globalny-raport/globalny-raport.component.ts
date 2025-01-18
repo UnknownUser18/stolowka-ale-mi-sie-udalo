@@ -1,48 +1,9 @@
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import * as XLS from 'xlsx';
 import { DataBaseService } from '../data-base.service';
+import {Osoba, OsobaZSTI, OsobaInternat, Deklaracja, DeklaracjaInternat, DeklaracjaZSTI} from '../app.component';
 
 
-interface Osoba {
-  id: number;
-  imie: string;
-  nazwisko: string;
-}
-
-class OsobaZSTI implements Osoba {
-  constructor(
-    public id: number,
-    public imie: string,
-    public nazwisko: string,
-    public klasa: string
-  ) {}
-}
-class OsobaInternat implements Osoba {
-  constructor(
-    public id: number,
-    public imie: string,
-    public nazwisko: string,
-    public grupa: string
-  ) {}
-}
-class Deklaracja {
-  constructor(
-    public id_osoby : number,
-    public data_do : string,
-    public data_od : string
-  ) {}
-}
-class DeklaracjaInternat extends Deklaracja {
-  constructor(
-    public osoby_internat_id : number, //! w bazie danych zmienic aby było na id_osoby, gdyż nie ma sensu na 2 różne nazwy kolumn
-    id_osoby : number,
-    data_do: string,
-    data_od: string,
-    public wersja: number
-  ) {
-    super(id_osoby, data_do, data_od);
-  }
-}
 interface GetDisabledDays {
   dzien_wypisania: string;
   uwagi: string;
@@ -100,11 +61,16 @@ export class GlobalnyRaportComponent {
   }
 
   sort_users(array: Array<Osoba>): void {
+    if(array.length <= 1) return;
     array.sort((a: Osoba, b: Osoba): number => {
-      if (a.nazwisko.toLowerCase() < b.nazwisko.toLowerCase()) return -1;
-      if (a.nazwisko.toLowerCase() > b.nazwisko.toLowerCase()) return 1;
-      if (a.imie.toLowerCase() < b.imie.toLowerCase()) return -1;
-      if (a.imie.toLowerCase() > b.imie.toLowerCase()) return 1;
+      let nazwisko_pierwsze : string  = a.nazwisko?.toLowerCase() ?? '';
+      let nazwisko_drugie : string = b.nazwisko?.toLowerCase() ?? '';
+      let imie_pierwsze : string = a.imie?.toLowerCase() ?? '';
+      let imie_drugie : string = b.imie?.toLowerCase() ?? '';
+      if (nazwisko_pierwsze < nazwisko_drugie) return -1;
+      if (nazwisko_pierwsze > nazwisko_drugie) return 1;
+      if (imie_pierwsze < imie_drugie) return -1;
+      if (imie_pierwsze > imie_drugie) return 1;
       return 0;
     });
 }
@@ -116,16 +82,16 @@ export class GlobalnyRaportComponent {
       this.nieobecnosciZsti = data?.map(item => new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi));
     });
     this.dataService.StudentListZsti.asObservable().subscribe((data: Array<OsobaZSTI>): void => {
-      this.uczniowieZsti = data?.map(item => new OsobaZSTI(item.id, item.imie, item.nazwisko, item.klasa));
+      this.uczniowieZsti = data?.map(item => new OsobaZSTI(item.id, item.imie, item.nazwisko, item.typ_osoby_id, item.klasa));
     });
     this.dataService.StudentListInternat.asObservable().subscribe((data: Array<OsobaInternat>): void => {
-      this.uczniowieInternat = data?.map(item => new OsobaInternat(item.id, item.imie, item.nazwisko, item.grupa));
+      this.uczniowieInternat = data?.map(item => new OsobaInternat(item.id, item.imie, item.nazwisko,item.uczeszcza, item.grupa));
     });
-    this.dataService.StudentDeclarationZsti.asObservable().subscribe((data: Array<Deklaracja>): void => {
-      this.deklaracjeZsti = data?.map(item => new Deklaracja(item.id_osoby, item.data_do, item.data_od));
+    this.dataService.StudentDeclarationZsti.asObservable().subscribe((data: Array<DeklaracjaZSTI>): void => {
+      this.deklaracjeZsti = data?.map(item => new DeklaracjaZSTI(item.data_do, item.data_od, item.rok_szkolny_id, item.id_osoby));
     });
     this.dataService.StudentDeclarationInternat.asObservable().subscribe((data: Array<DeklaracjaInternat>): void => {
-      this.deklaracjeInternat = data?.map(item => new DeklaracjaInternat(item.osoby_internat_id, item.id_osoby, item.data_do, item.data_od, item.wersja));
+      this.deklaracjeInternat = data?.map(item => new DeklaracjaInternat(item.data_do, item.data_od, item.id_osoby, item.rok_szkolny_id, item.wersja));
     });
   }
   checkDate(date: string): boolean {
@@ -282,19 +248,16 @@ export class GlobalnyRaportComponent {
       let wersja_posilku : number = 0;
       let declaration_end : string = '';
       if(osoba instanceof OsobaZSTI) {
-        const declaration = this.deklaracjeZsti.find(declaration => declaration.id_osoby === osoba.id);
-        if (declaration) {
-          declaration_start = declaration.data_od.split('T')[0];
-          declaration_end = declaration.data_do.split('T')[0];
-        }
+        const declaration : Deklaracja = this.deklaracjeZsti.find(declaration => declaration.id_osoby === osoba.id) ?? new DeklaracjaZSTI('', '', 0, 0);
+        declaration_start = declaration.data_od?.split('T')[0] ?? '';
+        declaration_end = declaration.data_do?.split('T')[0] ?? '';
       }
       else if(osoba instanceof OsobaInternat) {
-        const declaration = this.deklaracjeInternat.find(declaration => declaration.id_osoby === osoba.id);
-        if(declaration) {
-            declaration_start = declaration.data_od.split('T')[0];
-            declaration_end = declaration.data_do.split('T')[0];
-            wersja_posilku = declaration.wersja;
-        }
+        const declaration: DeklaracjaInternat = this.deklaracjeInternat.find(declaration => declaration.id_osoby === osoba.id) ?? new DeklaracjaInternat('', '', 0, 0, 0);
+        console.log(declaration, this.deklaracjeInternat);
+        declaration_start = declaration.data_od?.split('T')[0] ?? '';
+        declaration_end = declaration.data_do?.split('T')[0] ?? '';
+        wersja_posilku = declaration?.wersja ?? 0;
       }
       let min_day : string;
       let max_day : string;
@@ -318,14 +281,14 @@ export class GlobalnyRaportComponent {
       if (osoba instanceof OsobaZSTI) {
         this.nieobecnosciZsti.forEach((nieobecnosc: GetZSTIDisabledDays): void => {
           if (nieobecnosc.osoby_zsti_id === osoba.id) {
-            if (nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) ilosc_nieobecnosci++;
+            if (nieobecnosc.dzien_wypisania.split('T')[0] <= min_day && nieobecnosc.dzien_wypisania.split('T')[0] >= max_day) ilosc_nieobecnosci++;
             if(nieobecnosc.uwagi !== null) uwagi += `${nieobecnosc.uwagi}, `;
           }
         });
       } else if (osoba instanceof OsobaInternat) {
         this.nieobecnosciInternat.forEach((nieobecnosc: GetInternatDisabledDays): void => {
           if (nieobecnosc.osoby_internat_id === osoba.id) {
-            if (nieobecnosc.dzien_wypisania >= min_day && nieobecnosc.dzien_wypisania <= max_day) {
+            if (nieobecnosc.dzien_wypisania.split('T')[0] <= min_day && nieobecnosc.dzien_wypisania.split('T')[0] >= max_day) {
               ilosc_wersji_nieobecnych[nieobecnosc.posilki_id - 1][1]++;
               if (nieobecnosc.uwagi !== null) uwagi += `${nieobecnosc.uwagi}, `;
             }
@@ -355,11 +318,13 @@ export class GlobalnyRaportComponent {
     let index : number = 1;
     switch (typ) {
       case 'ZSTI':
+        console.log(this.uczniowieZsti);
         this.uczniowieZsti.forEach((osoba : OsobaZSTI) : void => {
           let min_day : string = setDate(osoba)[0];
           let max_day : string = setDate(osoba)[1];
           let ilosc_nieobecnosci : number = Number(findNieobecnosci(osoba, min_day, max_day)[0]);
           let uwagi : string = findNieobecnosci(osoba, min_day, max_day)[1] as string;
+          console.log(ilosc_nieobecnosci, uwagi);
           if(ilosc_nieobecnosci === 0) return;
           uwagi === '' ? uwagi = '-' : uwagi = uwagi.slice(0, -2);
           let data : string[] = [
@@ -380,6 +345,7 @@ export class GlobalnyRaportComponent {
           // zrobię na drugą wersję
           let min_day : string = setDate(osoba)[0];
           let max_day : string = setDate(osoba)[1];
+          console.log(osoba, min_day, max_day);
           let wersja_posilku : string = setDate(osoba)[2];
           let ilosc_wersji_nieobecnych : Array<Array<number>> = findNieobecnosci(osoba, min_day, max_day)[2] as Array<Array<number>>;
           let uwagi : string = findNieobecnosci(osoba, min_day, max_day)[1] as string;
