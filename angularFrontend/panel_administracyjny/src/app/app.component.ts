@@ -64,55 +64,44 @@ export class OsobaInternat implements Osoba {
     return this;
   }
 }
-export interface Deklaracja {
+export class Deklaracja {
   data_od : string | undefined;
   data_do : string | undefined;
   rok_szkolny_id : number | undefined;
   rok_szkolny : string | undefined;
   id_osoby : number | undefined;
-  assignValues(declaration : any) : void;
-}
-export class DeklaracjaZSTI implements Deklaracja {
-  data_od: string | undefined;
-  data_do: string | undefined;
-  rok_szkolny_id: number | undefined;
-  rok_szkolny: string | undefined;
-  id_osoby: number | undefined;
-  dni: {type : string, data : number[] }| undefined;
-  constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number, dni?: {type : string, data : number[] }) {
+  constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number) {
     this.data_od = data_od;
     this.data_do = data_do;
     this.rok_szkolny_id = rok_szkolny_id;
     this.id_osoby = id_osoby;
-    this.dni = dni;
   }
-  assignValues(declaration : any) : void {
+  assignValues(declaration : DeklaracjaZSTI | DeklaracjaInternat) : void {
     this.data_od = declaration.data_od;
     this.data_do = declaration.data_do;
     this.rok_szkolny_id = declaration.rok_szkolny_id;
     this.id_osoby = declaration.id_osoby;
+  }
+}
+export class DeklaracjaZSTI extends Deklaracja {
+  dni: {type : string, data : number[] }| undefined;
+  constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number, dni?: {type : string, data : number[] }) {
+    super(data_od, data_do, rok_szkolny_id, id_osoby);
+    this.dni = dni;
+  }
+  override assignValues(declaration : DeklaracjaZSTI) : void {
+    super.assignValues(declaration);
     this.dni = declaration.dni;
   }
 }
-export class DeklaracjaInternat implements Deklaracja {
-  data_od: string | undefined;
-  data_do: string | undefined;
-  rok_szkolny_id: number | undefined;
-  rok_szkolny: string | undefined;
-  id_osoby: number | undefined;
+export class DeklaracjaInternat extends Deklaracja {
   wersja: number | undefined;
   constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number, wersja?: number) {
-    this.data_od = data_od;
-    this.data_do = data_do;
-    this.rok_szkolny_id = rok_szkolny_id;
-    this.id_osoby = id_osoby;
+    super(data_od, data_do, rok_szkolny_id, id_osoby);
     this.wersja = wersja;
   }
-  assignValues(declaration : any) : void {
-    this.data_od = declaration.data_od;
-    this.data_do = declaration.data_do;
-    this.rok_szkolny_id = declaration.rok_szkolny_id;
-    this.id_osoby = declaration.id_osoby;
+  override assignValues(declaration : DeklaracjaInternat) : void {
+    super.assignValues(declaration);
     this.wersja = declaration.wersja;
   }
 }
