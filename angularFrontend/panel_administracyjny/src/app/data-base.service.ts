@@ -147,7 +147,6 @@ export class DataBaseService {
     if (this.StudentType.value === "ZSTI") {
       this.getStudentDeclarationZsti()
       // console.log(this.StudentDeclarationInternat.value, "NMIGER")
-      // console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentZstiDays()
       this.getStudentDisabledZstiDays()
       if(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
@@ -190,6 +189,7 @@ export class DataBaseService {
         switch (this.lastValue.params.variable) {
           case 'StudentDeclarationZsti':
             this.StudentDeclarationZsti.next(this.lastValue.params.value );
+            // console.log(this.CurrentStudentId.value);
             this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value));
             this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value))
             // console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
@@ -280,7 +280,6 @@ export class DataBaseService {
             break;
           case 'ListOfGroups':
             this.ListOfGroups.next(this.lastValue.params.value);
-            console.warn(this.ListOfGroups.value)
             break;
         }
       })
@@ -297,5 +296,5 @@ export class DataBaseService {
     this.getStudentDeclarationInternat();
     this.getGroups()
   }
-  
+
 }

@@ -2,6 +2,7 @@ import {Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChange
 import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from "@angular/forms";
 import {DataBaseService} from '../data-base.service';
+import {OsobaZSTI, OsobaInternat, DeklaracjaZSTI, DeklaracjaInternat, toBinary, GetZSTIDisabledDays, GetInternatDisabledDays} from '../app.component';
 
 @Component({
   selector: 'app-kalendarz',
@@ -16,10 +17,10 @@ export class KalendarzComponent implements OnChanges, OnInit {
   @Input() name: string | undefined;
   currentDate: string | undefined;
   date: Date = new Date();
-  CurrentStudentDeclaration: any;
-  StudentZstiDays: any;
+  CurrentStudentDeclaration: DeklaracjaZSTI | DeklaracjaInternat | void | undefined;
+  StudentZstiDays: Array<GetZSTIDisabledDays> | undefined;
   dbCopyZstiDays: any[] = [];
-  StudentInternatDays: any;
+  StudentInternatDays: Array<GetInternatDisabledDays> | undefined;
   diff_selected_zsti: string[] = [];
   diff_undo_selected_zsti: string[] = [];
   months : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
@@ -56,10 +57,30 @@ export class KalendarzComponent implements OnChanges, OnInit {
   ];
   numer_week: number = 0;
   constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
-    this.StudentInternatDays = this.dataService.StudentInternatDays.asObservable()
-    this.StudentZstiDays = this.dataService.StudentZstiDays.asObservable()
-    this.CurrentStudentDeclaration = this.dataService.CurrentStudentDeclaration.asObservable()
-    this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change))
+    this.DOMelement = this.el.nativeElement;
+    console.log("Data service: ", this.dataService.StudentType.value)
+    switch (this.dataService.StudentType.value) {
+      case "ZSTI":
+        this.dataService.StudentZstiDays.asObservable().subscribe((data : Array<GetZSTIDisabledDays>) : void => {
+          this.StudentZstiDays = data?.map(item => new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi));
+        });
+        this.dataService.CurrentStudentDeclaration.asObservable().subscribe((data : DeklaracjaZSTI) : void => {
+          console.log("Deklaracja: ", data)
+          this.CurrentStudentDeclaration = data?.assignValues(data);
+        });
+        break;
+      case "Internat":
+        this.dataService.StudentInternatDays.asObservable().subscribe((data : Array<GetInternatDisabledDays>) : void => {
+          this.StudentInternatDays = data?.map(item => new GetInternatDisabledDays(item.posilki_id, item.dzien_wypisania, item.osoby_internat_id, item.uwagi));
+        });
+        this.dataService.CurrentStudentDeclaration.asObservable().subscribe((data : DeklaracjaInternat) : void => {
+          this.CurrentStudentDeclaration = data?.assignValues(data);
+        });
+        break;
+      default:
+        console.error("Nie wybrano typu ucznia");
+        break;
+    }
     this.month_next = this.months[new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getFullYear()
     this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
     this.DOMelement = this.el.nativeElement;
@@ -71,6 +92,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
         this.show_calendar()
         return
       }
+      console.log("Zarejestrowane dni: ", this.dataService.CurrentZstiDays.value)
       this.dataService.CurrentZstiDays.value.forEach((element:any) => {
         let data : Date = new Date(element.dzien_wypisania)
         let value = data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate()
@@ -80,8 +102,6 @@ export class KalendarzComponent implements OnChanges, OnInit {
       this.show_calendar()
     })
     this.dataService.CurrentInternatDays.asObservable().subscribe(() => {
-
-
       this.dodanie.forEach((element)=>{
         element.array = []
       })
@@ -123,6 +143,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
         this.show_calendar()
         return
       }
+
       this.dataService.DisabledDays.value.forEach((element: any) => {
         let data : Date = new Date(element.dzien)
         let value = data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate()
@@ -131,7 +152,6 @@ export class KalendarzComponent implements OnChanges, OnInit {
       this.show_calendar()
     })
   };
-
   checkSelected() {
     let result = true;
     this.selected.forEach(() =>
@@ -162,7 +182,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.dataService.changeTypPoslikuSaved(result);
     console.log("Is everything saved? : ", this.dataService.TypPosilkuSaved.value);
   }
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges) : void   {
     if (changes['typ'] || changes['name']) {
       this.selected = [];
       this.diff_selected_zsti = [];
@@ -173,20 +193,23 @@ export class KalendarzComponent implements OnChanges, OnInit {
       this.dodanie.forEach((element) => {
         element.array = []
       });
+      this.dataService.getStudentZstiDays();
+      this.dataService.getStudentInternatDays();
+      console.log("Typ: ", this.typ)
       this.dataService.getDisabledDays();
       this.show_calendar();
       if(this.typ === 'Internat') {
-        this.DOMelement.querySelector('#zsti_diff').style.display = 'none';
-        this.DOMelement.querySelectorAll('.internat_logs').forEach((element : HTMLElement) : void => {
+        (this.DOMelement?.querySelector('#zsti_diff') as HTMLElement).style.display = 'none';
+        this.DOMelement?.querySelectorAll('.internat_logs')?.forEach((element: HTMLElement) => {
           element.style.display = 'block';
         });
       }
       else if(this.typ === 'ZSTI') {
-        this.DOMelement.querySelector('#zsti_diff').style.display = 'flex';
-        this.DOMelement.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
+        (this.DOMelement?.querySelector('#zsti_diff') as HTMLElement).style.display = 'flex';
+        this.DOMelement?.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
           element.classList.add('empty');
         });
-        this.DOMelement.querySelectorAll('.internat_logs').forEach((element : HTMLElement) : void => {
+        this.DOMelement?.querySelectorAll('.internat_logs').forEach((element : HTMLElement) : void => {
           element.style.display = 'none';
         });
         this.empty_dodanie = true;
@@ -256,7 +279,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
         }
       })
       this.dataService.getStudentZstiDays()
-      this.DOMelement.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
+      this.DOMelement?.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
         element.classList.add('empty');
       });
     }
@@ -305,8 +328,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
   }
   checkIfEmpty() {
     this.diff_selected_zsti = this.selected.filter((element) => !this.dbCopyZstiDays.includes(element));
-    let ul_1 : HTMLElement = this.DOMelement.querySelectorAll('.logs')[0];
-    let ul_2 : HTMLElement = this.DOMelement.querySelectorAll('.logs')[1];
+    let ul_1 = this.DOMelement?.querySelectorAll('.logs')[0] as HTMLElement;
+    let ul_2 = this.DOMelement?.querySelectorAll('.logs')[1] as HTMLElement;
     this.diff_selected_zsti.length === 0 ? ul_1.classList.add('empty') : ul_1.classList.remove('empty');
     this.diff_undo_selected_zsti = this.dbCopyZstiDays.filter((element ) => !this.selected.includes(element));
     console.log("Diff undo: ", this.diff_undo_selected_zsti)
@@ -316,7 +339,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.week_number();
     this.show_calendar()
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change));
-    this.DOMelement.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
+    this.DOMelement?.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
       element.classList.add('empty');
     });
     this.checkIfEmpty();
@@ -328,31 +351,32 @@ export class KalendarzComponent implements OnChanges, OnInit {
     });
   }
   //@ts-ignore
-isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | undefined => {
+isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
 
     let dayOfTheWeek = date.getDay();
     if(dayOfTheWeek === 0)
       dayOfTheWeek = 7
     dayOfTheWeek--
-    if(typ === 'ZSTI')
+    if(!this.CurrentStudentDeclaration) {
+      if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
+        button.disabled = true;
+      }
+      else {
+        button.disabled = true;
+        button.classList.add('disabled-for-person')
+      }
+      return true;
+    }
+    if(typ === 'ZSTI' && this.CurrentStudentDeclaration)
     {
+      this.CurrentStudentDeclaration = this.CurrentStudentDeclaration as DeklaracjaZSTI;
       if( dayOfTheWeek === 5 || dayOfTheWeek === 6)
       {
-        (button as HTMLButtonElement).disabled = true;
+        button.disabled = true;
         return true;
       }
-      if(!(this.dataService.CurrentStudentDeclaration.value))
-      {
-        if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
-          button.disabled = true;
-        }
-        else {
-          button.disabled = true;
-          button.classList.add('disabled-for-person')
-        }
-        return true;
-      }
-      if (this.toBinary(this.dataService.CurrentStudentDeclaration.value.dni,5)[dayOfTheWeek] === '0')
+      const data : number = Number(this.CurrentStudentDeclaration?.dni?.['data']);
+      if (toBinary(data,5)[dayOfTheWeek] === '0')
       {
         button.disabled = true;
         button.classList.add('disabled-for-person')
@@ -370,22 +394,14 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
       return false;
     }
   }
-  toBinary(num : number, len : number) {
-    let binary = Number(num).toString(2)
-    for(let i = 0 ; i < len - binary.length; i++)
-    {
-      binary = '0' + binary
-    }
-    return binary;
-  }
   checkVersion(dayOfTheWeek:number, mealId:number) {
     if(!this.CurrentStudentDeclaration) return;
     this.dni = [];
-    this.dni.push(this.toBinary(this.CurrentStudentDeclaration.poniedzialek.data[0], 3));
-    this.dni.push(this.toBinary(this.CurrentStudentDeclaration.wtorek.data[0], 3))
-    this.dni.push(this.toBinary(this.CurrentStudentDeclaration.sroda.data[0], 3))
-    this.dni.push(this.toBinary(this.CurrentStudentDeclaration.czwartek.data[0], 3))
-    this.dni.push(this.toBinary(this.CurrentStudentDeclaration.piatek.data[0], 3))
+    // this.dni.push(toBinary(this.CurrentStudentDeclaration.poniedzialek.data[0], 3));
+    // this.dni.push(toBinary(this.CurrentStudentDeclaration.wtorek.data[0], 3))
+    // this.dni.push(toBinary(this.CurrentStudentDeclaration.sroda.data[0], 3))
+    // this.dni.push(toBinary(this.CurrentStudentDeclaration.czwartek.data[0], 3))
+    // this.dni.push(toBinary(this.CurrentStudentDeclaration.piatek.data[0], 3))
     if(dayOfTheWeek === 0)
       dayOfTheWeek = 7
     dayOfTheWeek--
@@ -403,9 +419,9 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
   }
 
 
-  show_calendar() {
-    const calendar_content: HTMLElement = this.DOMelement.querySelector('#kalendarz');
-    if(calendar_content !== undefined) calendar_content.innerHTML = '';
+  show_calendar() : void {
+    const calendar_content: HTMLElement = this.DOMelement?.querySelector('#kalendarz')!;
+    calendar_content.textContent = '';
     let year = this.date.getFullYear();
     let month = this.date.getMonth();
     let month_days = new Date(year, month + 1, 0).getDate();
@@ -413,38 +429,36 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
 
     this.currentDate = this.months[month] + ' ' + year;
     let weekcount = 0;
-    const weekDiv = this.renderer.createElement('div');
+    const weekDiv : HTMLElement = this.renderer.createElement('div');
     this.renderer.addClass(weekDiv, 'week');
-    if(calendar_content !== undefined) this.renderer.appendChild(calendar_content, weekDiv);
+    this.renderer.appendChild(calendar_content, weekDiv);
 
 
     for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
-      let week = this.DOMelement.getElementsByClassName('week')[weekcount];
+      let week : HTMLElement = this.DOMelement?.getElementsByClassName('week')[weekcount];
       if (i < first_day_week) {
-        const dayDiv = this.renderer.createElement('div');
+        const dayDiv : HTMLElement = this.renderer.createElement('div');
         this.renderer.addClass(dayDiv, 'day');
         this.renderer.addClass(dayDiv, 'empty');
-        if(dayDiv !== undefined && week !== undefined) this.renderer.appendChild(week, dayDiv);
+        this.renderer.appendChild(week, dayDiv);
       } else {
-        const dayButton = this.renderer.createElement('button');
+        const dayButton : HTMLButtonElement = this.renderer.createElement('button');
         this.renderer.addClass(dayButton, 'day');
-        this.renderer.setProperty(dayButton, 'innerHTML', (i - first_day_week + 1).toString());
+        dayButton.textContent = (i - first_day_week + 1).toString();
         this.selected.includes(`${year}-${month+1}-${i - first_day_week + 1}`) || this.selectedDisabled.includes(`${year}-${month+1}-${i - first_day_week + 1}`) ? this.renderer.addClass(dayButton, 'selected') : null;
         if(this.typ !== 'Internat')
         {
           this.isWeekend(new Date(this.formatDate(`${year}-${month+1}-${i - first_day_week + 1}`)), dayButton, this.typ!);
-          if(this.DisabledDays) {
-            if(this.DisabledDays.includes(`${year}-${month + 1}-${i - first_day_week + 1}`)) {
-              dayButton.classList.add('disabled-day-global')
-              dayButton.setAttribute('disabled', 'true');
-            }
+          if(this.DisabledDays?.includes(`${year}-${month + 1}-${i - first_day_week + 1}`)) {
+            dayButton.classList.add('disabled-day-global')
+            dayButton.setAttribute('disabled', 'true');
           }
         }
         if(this.typ === 'Internat') {
-          const typy = ['sniadanie','obiad','kolacja']
-          const checkboxes = this.renderer.createElement('div');
-          typy.forEach((element) => {
-            const checkbox = this.renderer.createElement('input');
+          const typy : string[] = ['sniadanie','obiad','kolacja']
+          const checkboxes : HTMLElement = this.renderer.createElement('div');
+          typy.forEach((element : string) : void => {
+            const checkbox : HTMLInputElement = this.renderer.createElement('input');
             this.renderer.setAttribute(checkbox, 'type', 'checkbox');
             this.renderer.setAttribute(checkbox, 'value', element);
 
@@ -463,24 +477,24 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
             this.renderer.appendChild(dayButton, checkboxes);
           this.renderer.addClass(dayButton,'internat');
         }
-        if(week !== undefined) this.renderer.appendChild(week, dayButton);
+        this.renderer.appendChild(week, dayButton);
       }
       if (i % 7 === 0) {
         weekcount++;
         // create week div
         const weekDiv = this.renderer.createElement('div');
         this.renderer.addClass(weekDiv, 'week');
-        if(calendar_content !== undefined) this.renderer.appendChild(calendar_content, weekDiv);
+        this.renderer.appendChild(calendar_content, weekDiv);
       }
     }
-    const dni = this.DOMelement.querySelector('#dni');
-    if(dni !== undefined) dni.innerHTML = '';
+    const dni = this.DOMelement?.querySelector('#dni') as HTMLElement;
+    if(dni !== undefined) dni.textContent = '';
     for (let i = 0; i < 7; i++) {
       const daySpan = this.renderer.createElement('span');
-      this.renderer.setProperty(daySpan, 'innerHTML', ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i]);
+      daySpan.textContent = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i];
       if(dni !== undefined) this.renderer.appendChild(dni, daySpan);
     }
-    Array.from(this.DOMelement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
+    Array.from(this.DOMelement?.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
       if (week.children.length < 7) {
         for (let i = week.children.length; i < 7; i++) {
           const dayDiv = this.renderer.createElement('div');
@@ -491,19 +505,21 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
       }
     });
 
-    Array.from(this.DOMelement.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week : HTMLElement) => {
+    Array.from(this.DOMelement?.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week : HTMLElement) => {
       // @ts-ignore
       const isEmpty = Array.from(week.children).every((day: HTMLElement) => day.classList.contains('empty'));
       if (isEmpty) week.remove();
     });
     let week = this.week_number()[month];
-    const zaznacz: HTMLElement = this.DOMelement.querySelector('#zaznacz');
-    if(zaznacz !== undefined) zaznacz.innerHTML = '';
-    let week_length = this.DOMelement.getElementsByClassName('week').length;
+    const zaznacz: HTMLElement = this.DOMelement?.querySelector('#zaznacz') as HTMLElement;
+    if(zaznacz !== undefined) zaznacz.textContent = '';
+    let week_length = this.DOMelement?.getElementsByClassName('week').length!;
     for (let i = 0; i < week_length; i++) {
       let selected_days = 0;
       let days = 0;
-      Array.from(this.DOMelement.getElementsByClassName('week')[i].children as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
+
+      // @ts-ignore
+      Array.from(this.DOMelement?.getElementsByClassName('week')[i]?.children ?? []).forEach((day: Element) => {
         if(!day.classList.contains('empty')) {
           if(day.classList.contains('selected')) selected_days++;
           days++;
@@ -569,7 +585,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
           const week_number = Array.from((target.parentElement!).parentElement!.children as unknown as NodeListOf<HTMLElement>).indexOf(target.parentElement as HTMLElement);
           if (target.classList.contains('selected')) {
             if(isFullWeekSelected(target.parentElement as HTMLElement)) {
-              this.DOMelement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`).checked = false;
+              (this.DOMelement?.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`) as HTMLInputElement).checked = false;
             }
             if(target.classList.contains('disabled-for-person')) {
               this.selectedDisabled.splice(this.selectedDisabled.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`), 1);
@@ -589,7 +605,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
               this.checkSelected()
             }
             if(isFullWeekSelected(target.parentElement as HTMLElement)) {
-              this.DOMelement.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`).checked = true;
+              (this.DOMelement?.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`) as HTMLInputElement).checked = true;
             }
           }
         }
@@ -606,7 +622,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
           let grandparent : HTMLElement = parent.parentElement as HTMLElement;
           let parent_index : number = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
           let target_index : number = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
-          const div : HTMLElement = this.DOMelement.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`);
+          const div : HTMLElement = this.DOMelement?.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`) as HTMLElement;
           let all : number = 0;
           let checked : number = 0
           let unchecked : number = 0
@@ -694,10 +710,10 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
     if(this.typ === "ZSTI") {
       let target = element.target as HTMLElement;
       if(target.tagName === 'INPUT') {
-        const week = this.DOMelement.getElementsByClassName('week')[Array.from(this.DOMelement.querySelectorAll('.zaznacz')).indexOf(target)];
+        const week = this.DOMelement?.getElementsByClassName('week')[Array.from(this.DOMelement.querySelectorAll('.zaznacz')).indexOf(target)]!;
         if((target as HTMLInputElement).checked) {
           for(let i = 0; i < week.children.length; i++) {
-            if(!week.children[i].classList.contains('empty') && !week.children[i].disabled && !week.children[i].classList.contains('disabled-for-person')) {
+            if(!week.children[i].classList.contains('empty') && !(week.children[i] as HTMLInputElement).disabled && !week.children[i].classList.contains('disabled-for-person')) {
               week.children[i].classList.add('selected');
               if(!this.selected.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`)) {
                 this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`);
@@ -708,7 +724,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
         }
         else {
           for(let i = 0; i < week.children.length; i++) {
-            if(!week.children[i].classList.contains('empty') && !week.children[i].disabled && !week.children[i].classList.contains('disabled-for-person')) {
+            if(!week.children[i].classList.contains('empty') && !(week.children[i] as HTMLInputElement).disabled && !week.children[i].classList.contains('disabled-for-person')) {
               week.children[i].classList.remove('selected');
               this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`), 1);
               this.checkSelected();
@@ -725,13 +741,13 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
         let parent = target.parentElement as HTMLElement;
         let grandparent = parent.parentElement as HTMLElement;
         this.numer_week = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
-        this.DOMelement.querySelector('#zmiana_posilku').style.display = 'flex';
+        (this.DOMelement?.querySelector('#zmiana_posilku') as HTMLElement).style.display = 'flex';
       }
     }
   }
   // close change meal
   close() {
-    this.DOMelement.querySelector('#zmiana_posilku').style.display = 'none';
+    (this.DOMelement?.querySelector('#zmiana_posilku') as HTMLElement).style.display = 'none';
   }
 
   formatDate(dateStr: string): string {
@@ -745,11 +761,11 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
 
   // zmien
   zmien_posilek($event: MouseEvent) {
-    this.DOMelement.querySelector('#zmiana_posilku').style.display = 'none';
+    (this.DOMelement?.querySelector('#zmiana_posilku') as HTMLElement).style.display = 'none';
     const grandparent = ($event.target as HTMLElement).parentElement!.parentElement as HTMLElement;
     let typ = grandparent.querySelectorAll('form')[0] as HTMLElement;
-    const formularz = this.DOMelement.querySelector(`form[name="yah"]`) as HTMLFormElement;
-    const wszystko : HTMLInputElement = this.DOMelement.querySelector('input[value="wszystko"]').checked;
+    const formularz = this.DOMelement?.querySelector(`form[name="yah"]`) as HTMLFormElement;
+    const wszystko : boolean = (this.DOMelement?.querySelector('input[value="wszystko"]') as HTMLInputElement).checked;
     const checkbox_function = (switch_value: string, checkyMeal: any) => {
       let meal = this.dodanie.find(meal => meal.id === checkyMeal.value)!;
       const typy = ['sniadanie','obiad','kolacja']
@@ -780,7 +796,7 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean | unde
       }
     }
     Array.from(typ.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>).forEach((dziecko:any) => {
-      let week = this.DOMelement.getElementsByClassName('week')[this.numer_week];
+      let week = this.DOMelement?.getElementsByClassName('week')[this.numer_week]!;
       Array.from(week.querySelectorAll('.day:not(.empty) div') as NodeListOf<HTMLElement>).forEach((div:any) => {
         // @ts-ignore
         let nieobecnosc = formularz.elements['na']

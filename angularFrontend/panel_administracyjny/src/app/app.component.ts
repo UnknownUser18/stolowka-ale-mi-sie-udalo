@@ -6,14 +6,14 @@ import { GlobalnyPanelComponent } from './globalny-panel/globalny-panel.componen
 import { MatDialog } from '@angular/material/dialog';
 import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-changes-dialog.component';
 
-
 export function toBinary(num: number, len: number): string {
-    let binary : string = Number(num).toString(2)
-    for (let i : number = 0; i < len - binary.length; i++) {
-      binary = '0' + binary
-    }
-    return binary;
+  console.log('num: ', num, 'len: ', len);
+  let binary : string = Number(num).toString(2)
+  for (let i : number = 0; i < len - binary.length; i++) {
+    binary = '0' + binary
   }
+  return binary;
+}
 export interface Osoba {
   imie : string | undefined;
   nazwisko : string | undefined;
@@ -36,6 +36,7 @@ export class OsobaZSTI implements Osoba {
     this.uczeszcza = uczeszcza;
   }
   assignValues(student : OsobaZSTI) : this {
+    this.id = student.id;
     this.imie = student.imie;
     this.nazwisko = student.nazwisko;
     this.typ_osoby_id = student.typ_osoby_id;
@@ -63,6 +64,25 @@ export class OsobaInternat implements Osoba {
     this.uczeszcza = student.uczeszcza;
     return this;
   }
+}
+interface GetDisabledDays {
+  dzien_wypisania: string;
+  uwagi: string;
+}
+export class GetZSTIDisabledDays implements GetDisabledDays {
+  constructor(
+    public dzien_wypisania: string,
+    public osoby_zsti_id: number,
+    public uwagi: string
+  ) {}
+}
+export class GetInternatDisabledDays implements GetDisabledDays {
+  constructor(
+    public posilki_id : number,
+    public dzien_wypisania : string,
+    public osoby_internat_id : number,
+    public uwagi : string,
+  ) {}
 }
 export class Deklaracja {
   data_od : string | undefined;
@@ -113,7 +133,7 @@ export class DeklaracjaInternat extends Deklaracja {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  DOMelement: HTMLElement | null;
+  DOMelement: any | undefined;
   StudentListZsti: OsobaZSTI[] | undefined;
   StudentListInternat: OsobaInternat[] | undefined;
   osoba: string | undefined;
@@ -121,7 +141,7 @@ export class AppComponent implements OnInit {
   typ: string | undefined;
 
   constructor(private dataService: DataBaseService, private el: ElementRef, private dialog: MatDialog) {
-    this.DOMelement = this.el.nativeElement as HTMLElement | null;
+    this.DOMelement = this.el.nativeElement;
   }
 
   ngOnInit() : void {
@@ -134,7 +154,7 @@ export class AppComponent implements OnInit {
   }
 
   szukaj() : void {
-    const searchTerm : string = (this.DOMelement?.querySelector('#wyszukaj > input') as HTMLInputElement)?.value.toLowerCase() || '';
+    const searchTerm : string = this.DOMelement?.querySelector('#wyszukaj > input')?.value.toLowerCase() || '';
     const sectionsZsti : NodeListOf<HTMLLIElement> = this.DOMelement?.querySelectorAll('section:nth-of-type(1) > ol > li')!;
     const sectionsInternat : NodeListOf<HTMLLIElement> = this.DOMelement?.querySelectorAll('section:nth-of-type(2) > ol > li')!;
     function filterSections(sections: NodeListOf<HTMLLIElement>) : void  {

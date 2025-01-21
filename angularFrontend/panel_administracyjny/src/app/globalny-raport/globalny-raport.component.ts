@@ -1,28 +1,10 @@
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import * as XLS from 'xlsx';
 import { DataBaseService } from '../data-base.service';
-import {Osoba, OsobaZSTI, OsobaInternat, Deklaracja, DeklaracjaInternat, DeklaracjaZSTI} from '../app.component';
+import {Osoba, OsobaZSTI, OsobaInternat, Deklaracja, DeklaracjaInternat, DeklaracjaZSTI, GetZSTIDisabledDays, GetInternatDisabledDays} from '../app.component';
 
 
-interface GetDisabledDays {
-  dzien_wypisania: string;
-  uwagi: string;
-}
-class GetZSTIDisabledDays implements GetDisabledDays {
-  constructor(
-    public dzien_wypisania: string,
-    public osoby_zsti_id: number,
-    public uwagi: string
-  ) {}
-}
-class GetInternatDisabledDays implements GetDisabledDays {
-  constructor(
-    public posilki_id : number,
-    public dzien_wypisania : string,
-    public osoby_internat_id : number,
-    public uwagi : string,
-  ) {}
-}
+
 @Component({
   selector: 'app-globalny-raport',
   standalone: true,

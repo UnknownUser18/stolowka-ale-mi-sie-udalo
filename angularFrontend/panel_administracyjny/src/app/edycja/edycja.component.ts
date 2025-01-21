@@ -65,12 +65,13 @@ export class EdycjaComponent implements OnChanges {
       const studentData : OsobaZSTI = this.dataService.StudentListZsti.value.find((element: any): boolean => element.id === change.value) ?? new OsobaZSTI();
       this.student.assignValues(studentData)
 
-    } else {
-      return console.error('Nieznany typ ucznia');
+    }
+    else {
+      return;
     }
 
-    (this.DOMelement?.querySelector('input[name="imie"]') as HTMLInputElement).value = this.student.imie || '';
-    (this.DOMelement?.querySelector('input[name="nazwisko"]') as HTMLInputElement).value = this.student.nazwisko || '';
+    (this.DOMelement?.querySelector('input[name="imie"]') as HTMLInputElement).value = this.student?.imie || '';
+    (this.DOMelement?.querySelector('input[name="nazwisko"]') as HTMLInputElement).value = this.student?.nazwisko || '';
     if(this.student instanceof OsobaZSTI) {
       (this.DOMelement?.querySelectorAll('input[name="typ"]') as NodeListOf<HTMLInputElement>).forEach((element: HTMLInputElement): void => {
         if (element.value == (this.student as OsobaZSTI)?.typ_osoby_id?.toString()) {
@@ -82,7 +83,7 @@ export class EdycjaComponent implements OnChanges {
     if(this.student instanceof OsobaInternat) {
       if(this.student.grupa !== undefined) (this.DOMelement?.querySelector('select[name="grupa"]') as HTMLInputElement).value = this.student.grupa || "";
     }
-    (this.DOMelement?.querySelector('input[name="uczeszcza"]') as HTMLInputElement).checked = !!this.student.uczeszcza;
+    (this.DOMelement?.querySelector('input[name="uczeszcza"]') as HTMLInputElement).checked = !!this.student?.uczeszcza;
   }
 
 
