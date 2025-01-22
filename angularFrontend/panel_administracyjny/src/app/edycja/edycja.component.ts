@@ -3,6 +3,7 @@ import {DataBaseService} from '../data-base.service';
 import {FormsModule} from '@angular/forms';
 import {NgForOf} from '@angular/common';
 import {OsobaInternat, OsobaZSTI, DeklaracjaZSTI, DeklaracjaInternat, toBinary} from '../app.component';
+import { Console } from 'node:console';
 
 
 @Component({
@@ -28,8 +29,10 @@ export class EdycjaComponent implements OnChanges {
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe(() : void => this.updateDeclaration())
   }
 
-  student: OsobaZSTI | OsobaInternat | undefined
+  student: OsobaZSTI | OsobaInternat | undefined;
+
   declaration: DeklaracjaZSTI | DeklaracjaInternat | undefined
+  
   dni: string[] = ['poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek']
 
   ngOnChanges(changes: SimpleChanges) {
@@ -162,32 +165,35 @@ export class EdycjaComponent implements OnChanges {
     let data_od : string = (this.DOMelement?.querySelector('input[name="data_od"]') as HTMLInputElement).value;
     let data_do : string = (this.DOMelement?.querySelector('input[name="data_do"]') as HTMLInputElement).value;
     let rok_szkolny : string = (this.DOMelement?.querySelector('input[name="rok_szkolny"]') as HTMLInputElement).value;
-    let dni;
-    if(this.declaration instanceof DeklaracjaZSTI) dni = this.dni.map((element: string): number => {
+    let dni = this.dni.map((element: string): number => {
       return (this.DOMelement?.querySelector(`input[name="${element}"]`) as HTMLInputElement).checked ? 1 : 0;
     }).join(',');
     dni = (dni as string).replace(/,/g, '');
-    dni = parseInt(dni, 2);
-    let wersja;
-    if(this.declaration instanceof DeklaracjaInternat) wersja = parseInt((this.DOMelement?.querySelector('input[name="typ_posilku"]') as HTMLInputElement).value);
+    console.log(dni, this.declaration);
+    // dni = parseInt(Number(dni), 2);
     let editedDeclaration : DeklaracjaZSTI | DeklaracjaInternat;
-    if(this.declaration instanceof DeklaracjaZSTI) {
+    if(this.student instanceof OsobaZSTI) {
       // @ts-ignore
-      editedDeclaration = new DeklaracjaZSTI(data_od, data_do, rokSzkolny.id, this.dataService.CurrentStudentId.value, dni)
+      editedDeclaration = new DeklaracjaZSTI(data_od, data_do, 1, this.dataService.CurrentStudentId.value, dni,5)
     } else {
-      editedDeclaration = new DeklaracjaInternat(data_od, data_do, rokSzkolny.id, this.dataService.CurrentStudentId.value, wersja)
+      let wersja;
+      wersja = parseInt((this.DOMelement?.querySelector('input[name="typ_posilku"]') as HTMLInputElement).value);
+      editedDeclaration = new DeklaracjaInternat(data_od, data_do, 1, this.dataService.CurrentStudentId.value, wersja)
     }
-    for (const key in editedDeclaration) {
-      // @ts-ignore
-      if (editedDeclaration[key] !== this.declaration[key]) {
-        change = true;
-        break;
+    if (this.declaration) {
+      for (const key in editedDeclaration) {
+        // @ts-ignore
+        if (editedDeclaration[key] !== this.declaration[key]) {
+          change = true;
+          break;
+        }
       }
     }
     if(!change) {
       alert('Nic się nie zmieniło')
       return
     }
+    console.log(editedDeclaration);
     if(editedDeclaration instanceof DeklaracjaZSTI) {
       if(this.declaration === undefined) {
         this.dataService.send(JSON.stringify({

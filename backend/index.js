@@ -312,7 +312,7 @@ function changeStudentDeclarationInternat(StudentId, schoolYearId, wersja, begin
 }
 
 function changeStudentDeclarationZsti(StudentId, schoolYearId, days, beginDate, endDate) {
-    let query = `UPDATE deklaracja_zywieniowa_zsti SET rok_szkolny_id = ${schoolYearId}, data_od = '${beginDate}', data_do = '${endDate}', dni = ${days} WHERE id_osoby = ${StudentId}`
+    let query = `UPDATE deklaracja_zywieniowa_zsti SET rok_szkolny_id = ${schoolYearId}, data_od = '${beginDate}', data_do = '${endDate}', dni = 0b${days} WHERE id_osoby = ${StudentId}`
     executeQuery(query, result => console.log(result));
 }
 
