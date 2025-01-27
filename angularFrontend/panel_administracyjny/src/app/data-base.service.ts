@@ -142,7 +142,7 @@ export class DataBaseService {
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
     this.StudentType.next(type)
-    // console.log("Change student call")
+    console.warn("Change student call")
     // console.log(Id, type)
     if (this.StudentType.value === "ZSTI") {
       this.getStudentDeclarationZsti()
@@ -169,7 +169,7 @@ export class DataBaseService {
       else
         this.CurrentStudentCardInternat.next(this.nullKarta)
     }
-    // console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration)
+    // console.log("CURRENT STUDENT DECLARATION: ", this.CurrentStudentDeclaration.value)
   }
 
   send(query:string)
