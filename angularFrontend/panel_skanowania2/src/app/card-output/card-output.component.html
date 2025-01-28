@@ -1,0 +1,16 @@
+<article *ngIf="daneUcznia.znaleziony" [ngStyle]="{'background-color': backgroundColor}">
+  <h1>{{ daneUcznia.name }} {{ daneUcznia.surname }}</h1>
+  <h2>{{ message }}</h2>
+  <div class="button-group">
+    <button class="btn accept" *ngIf="canAccept" (click)="handleSubmit()">Przyjmij</button>
+    <button class="btn decline" (click)="handleReset()">Odrzuć</button>
+    <button class="btn return" (click)="handleReset()">Wróć</button>
+  </div>
+</article>
+<article *ngIf="!daneUcznia.znaleziony">
+  <h1>Nie Znaleziono Ucznia</h1>
+  <h2>{{ message }}</h2>
+  <div class="button-group">
+    <button class="btn return" (click)="handleReset()">Wróć</button>
+  </div>
+</article>

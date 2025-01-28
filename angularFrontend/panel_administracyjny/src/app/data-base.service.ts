@@ -1,7 +1,10 @@
 // (global as any).WebSocket = require('ws');
+// @ts-ignore
 import {Injectable} from '@angular/core';
+// @ts-ignore
 import {BehaviorSubject} from 'rxjs';
 
+// @ts-ignore
 @Injectable({
   providedIn: 'root'
 })
@@ -246,15 +249,12 @@ export class DataBaseService {
                 tempArray.push(element)
             })
             this.CurrentDisabledInternatDays.next(tempArray);
-            // console.log("StudentDisabledInternatDays: ", this.lastValue.params.value);
             break;
             case 'DisabledInternatDays':
               this.DisabledInternatDays.next(this.lastValue.params.value);
-              // console.log("DisabledInternatDays: ", this.lastValue.params.value);
               break;
           case 'DisabledDays':
             this.DisabledDays.next(this.lastValue.params.value);
-            // console.log("DisabledDays: ", this.lastValue.params.value);
             break;
           case 'SchoolYears':
             this.SchoolYears.next(this.lastValue.params.value);

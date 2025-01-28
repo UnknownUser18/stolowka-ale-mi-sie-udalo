@@ -55,6 +55,7 @@ function handleDisconnect() {
     database.on('error', function (err) {
         console.error('Db error: ', err);
         if (err.code === "PROTOCOL_CONNECTION_LOST") {
+            database = mysql.createConnection(dbConfig);
             handleDisconnect();
         } else {
             throw err;
@@ -123,7 +124,8 @@ function handleRequest(ws,params) {
         "getScanZsti": () => getScanZsti(ws),
         "addScanInternat": () => addScanInternat(params.cardId, params.datetime, params.meal),
         "getScanInternat": () => getScanInternat(ws),
-        "getGroups": () => getGroups(ws)
+        "getGroups": () => getGroups(ws),
+        "getScanningInfoZsti": () => getScanningInfoZsti(ws)
     }
     if(actions[params.method]) {
         actions[params.method]();
@@ -145,6 +147,11 @@ function sendResponse(ws, variable, value) {
             }
         }
     ))
+}
+
+function getScanningInfoZsti(ws)
+{
+    executeQuery(`select osoby_zsti.id, typ_osoby_id, imie, nazwisko, klasa, uczeszcza, miasto, key_card, data_wydania, ostatnie_uzycie, karty_zsti.id as id_karty from osoby_zsti LEFT JOIN karty_zsti ON karty_zsti.id_ucznia = osoby_zsti.id;`, result => sendResponse(ws, "ScanningInfoZsti", result))
 }
 
 function getGroups(ws)
