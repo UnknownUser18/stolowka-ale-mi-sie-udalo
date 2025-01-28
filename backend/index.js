@@ -242,7 +242,7 @@ function getPaymentZsti(ws) {
 }
 
 function addPaymentZsti(id, cost, date, month, description) {
-    executeQuery(`INSERT INTO platnosci_zsti (id_ucznia, platnosc, data_platnosci, miesiac, opis) values(${id}, ${cost}, '${date}', ${month}, '${description}')`, result => console.log(result));
+    executeQuery(`INSERT INTO platnosci_zsti (id_ucznia, platnosc, data_platnosci, miesiac, opis, rok) values(${id}, ${cost}, '${date}', ${month}, '${description}', 2025)`, result => console.log(result));
 }
 
 function DeletePaymentZsti(id) {
@@ -254,8 +254,8 @@ function addZstiStudent(ws, name, surname, classa, attends, type) {
     executeQuery(query, result => sendResponse(ws, 'LastStudentInsertId', result));
 }
 
-function addInternatStudent(ws, name, surname, attends) {
-    executeQuery(`INSERT INTO osoby_internat (imie, nazwisko, uczeszcza) VALUES('${name}', '${surname}', ${attends})`, result => sendResponse(ws, 'LastStudentInsertId', result));
+function addInternatStudent(ws, name, surname, attends, grupa) {
+    executeQuery(`INSERT INTO osoby_internat (imie, nazwisko, uczeszcza,grupa) VALUES('${name}', '${surname}', ${attends} , '${grupa}')`, result => sendResponse(ws, 'LastStudentInsertId', result));
 }
 
 function addZstiDeclaration(studentId, schoolYearId, beginDate, endDate, days) {

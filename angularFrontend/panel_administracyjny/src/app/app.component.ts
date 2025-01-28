@@ -6,8 +6,7 @@ import { GlobalnyPanelComponent } from './globalny-panel/globalny-panel.componen
 import { MatDialog } from '@angular/material/dialog';
 import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-changes-dialog.component';
 
-export function toBinary(num: number, len: number): string {
-  console.log('num: ', num, 'len: ', len);
+export function toBinary(num : number, len : number): string {
   let binary : string = Number(num).toString(2)
   for (let i : number = 0; i < len - binary.length; i++) {
     binary = '0' + binary
@@ -59,9 +58,11 @@ export class OsobaInternat implements Osoba {
     this.grupa = grupa;
   }
   assignValues(student : OsobaInternat) : this {
+    this.id = student.id
     this.imie = student.imie;
     this.nazwisko = student.nazwisko;
     this.uczeszcza = student.uczeszcza;
+    this.grupa = student.grupa;
     return this;
   }
 }

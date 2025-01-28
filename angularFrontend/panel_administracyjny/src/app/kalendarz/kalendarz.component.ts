@@ -2,7 +2,7 @@ import {Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChange
 import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from "@angular/forms";
 import {DataBaseService} from '../data-base.service';
-import {OsobaZSTI, OsobaInternat, DeklaracjaZSTI, DeklaracjaInternat, toBinary, GetZSTIDisabledDays, GetInternatDisabledDays} from '../app.component';
+import {DeklaracjaZSTI, DeklaracjaInternat, toBinary, GetZSTIDisabledDays, GetInternatDisabledDays} from '../app.component';
 
 @Component({
   selector: 'app-kalendarz',
@@ -81,6 +81,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
         console.error("Nie wybrano typu ucznia");
         break;
     }
+    console.log("Deklaracja: ", this.CurrentStudentDeclaration)
     this.month_next = this.months[new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getFullYear()
     this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
     this.DOMelement = this.el.nativeElement;
@@ -184,6 +185,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
   }
   ngOnChanges(changes: SimpleChanges) : void   {
     if (changes['typ'] || changes['name']) {
+      console.warn("Typ: ", this.typ)
       this.selected = [];
       this.diff_selected_zsti = [];
       this.diff_undo_selected_zsti = [];
@@ -218,25 +220,22 @@ export class KalendarzComponent implements OnChanges, OnInit {
     }
   }
 
-  week_number(): number[] {
-    const weeks: number[] = [];
-    const year = this.date.getFullYear();
-
-    for (let month = 0; month < 12; month++) {
-      const firstDayOfMonth = new Date(year, month, 1);
-      const tempDate = new Date(firstDayOfMonth.getTime());
-      tempDate.setHours(0, 0, 0, 0);
-      tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
-      const week1 = new Date(tempDate.getFullYear(), 0, 4);
-      const weekNumber = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-      weeks.push(weekNumber);
-    }
-    return weeks;
+  getWeekNumber(date: Date): number {
+    const tempDate: Date = new Date(date.getTime());
+    tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+    const yearStart: Date = new Date(tempDate.getFullYear(), 0, 1);
+    return Math.ceil((((tempDate.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
   }
-  changeDeclaration(change:any) {
-    // console.log("Neew declaration: ", change)
-    this.CurrentStudentDeclaration = change
-    if(this.DOMelement !== undefined) this.show_calendar()
+
+  getStartingWeekNumber(year : number, month : number) : number {
+      const firstDayOfMonth = new Date(year, month - 1, 1);
+      return this.getWeekNumber(firstDayOfMonth);
+  }
+  changeDeclaration(change : DeklaracjaZSTI | DeklaracjaInternat) : void {
+    console.log("Change declaration: ", change)
+    this.CurrentStudentDeclaration = change;
+    //! fix someday...
+    this.show_calendar()
   }
   sendDays() {
     if(this.dataService.StudentType.value === "ZSTI") {
@@ -336,7 +335,6 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.diff_undo_selected_zsti.length === 0 ? ul_2.classList.add('empty') : ul_2.classList.remove('empty');
   }
   ngOnInit() {
-    this.week_number();
     this.show_calendar()
     this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change));
     this.DOMelement?.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
@@ -352,19 +350,14 @@ export class KalendarzComponent implements OnChanges, OnInit {
   }
   //@ts-ignore
 isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
-
     let dayOfTheWeek = date.getDay();
     if(dayOfTheWeek === 0)
       dayOfTheWeek = 7
     dayOfTheWeek--
     if(!this.CurrentStudentDeclaration) {
-      if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
-        button.disabled = true;
-      }
-      else {
-        button.disabled = true;
+      button.disabled = true;
+      if (dayOfTheWeek !== 5 && dayOfTheWeek !== 6)
         button.classList.add('disabled-for-person')
-      }
       return true;
     }
     if(typ === 'ZSTI' && this.CurrentStudentDeclaration)
@@ -395,167 +388,138 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
     }
   }
   checkVersion(dayOfTheWeek:number, mealId:number) {
+    console.log(this.CurrentStudentDeclaration);
     if(!this.CurrentStudentDeclaration) return;
     this.dni = [];
-    // this.dni.push(toBinary(this.CurrentStudentDeclaration.poniedzialek.data[0], 3));
-    // this.dni.push(toBinary(this.CurrentStudentDeclaration.wtorek.data[0], 3))
-    // this.dni.push(toBinary(this.CurrentStudentDeclaration.sroda.data[0], 3))
-    // this.dni.push(toBinary(this.CurrentStudentDeclaration.czwartek.data[0], 3))
-    // this.dni.push(toBinary(this.CurrentStudentDeclaration.piatek.data[0], 3))
+    // @ts-ignore
+    this.dni.push(toBinary(this.CurrentStudentDeclaration.poniedzialek.data[0], 3));
+    // @ts-ignore
+    this.dni.push(toBinary(this.CurrentStudentDeclaration.wtorek.data[0], 3))
+    // @ts-ignore
+    this.dni.push(toBinary(this.CurrentStudentDeclaration.sroda.data[0], 3))
+    // @ts-ignore
+    this.dni.push(toBinary(this.CurrentStudentDeclaration.czwartek.data[0], 3))
+    // @ts-ignore
+    this.dni.push(toBinary(this.CurrentStudentDeclaration.piatek.data[0], 3))
     if(dayOfTheWeek === 0)
       dayOfTheWeek = 7
     dayOfTheWeek--
     return this.dni[dayOfTheWeek][mealId] === '1';
   }
-  checkDayInternat(year:any, month:any, day:any, posilek:any, first_day_week:any, i:any, typy:any):boolean {
-    let date = new Date(year, month-1, day);
-    if(date.getDay() === 0 || date.getDay() === 6)
-      return false;
-    let result:boolean = false;
+  checkDayInternat(year: any, month: any, day: any, posilek: any, first_day_week: any, i: any, typy: any): boolean {
+    const date = new Date(year, month - 1, day);
+    if (date.getDay() === 0 || date.getDay() === 6) return false;
 
-    if(this.checkVersion(date.getDay(), typy.indexOf(posilek)) || this.dodanie.find(meal => meal.id === posilek)?.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`) || this.typy_posilkow_db.array_operacaja.find(meal => meal.id === posilek)!.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`))
-      result = true;
-    return result;
+    const dayString = `${year}-${month + 1}-${i - first_day_week + 1}`;
+    return this.checkVersion(date.getDay(), typy.indexOf(posilek)) ||
+           this.dodanie.find(meal => meal.id === posilek)?.array.includes(dayString) ||
+           this.typy_posilkow_db.array_operacaja.find(meal => meal.id === posilek)!.array.includes(dayString);
   }
 
 
   show_calendar() : void {
+    let data: Date = this.date;
     const calendar_content: HTMLElement = this.DOMelement?.querySelector('#kalendarz')!;
     calendar_content.textContent = '';
-    let year = this.date.getFullYear();
-    let month = this.date.getMonth();
-    let month_days = new Date(year, month + 1, 0).getDate();
-    let first_day_week = new Date(year, month, 1).getDay();
+    let year: number = data.getFullYear();
+    let month: number = data.getMonth();
+    let month_days: number = new Date(year, month + 1, 0).getDate();
+    let first_day_week: number = new Date(year, month, 1).getDay();
 
     this.currentDate = this.months[month] + ' ' + year;
-    let weekcount = 0;
-    const weekDiv : HTMLElement = this.renderer.createElement('div');
-    this.renderer.addClass(weekDiv, 'week');
-    this.renderer.appendChild(calendar_content, weekDiv);
+    let week : HTMLElement = this.renderer.createElement('div');
+    week.classList.add('week');
 
-
-    for (let i = -7; i <= (month_days + first_day_week - 1); i++) {
-      let week : HTMLElement = this.DOMelement?.getElementsByClassName('week')[weekcount];
-      if (i < first_day_week) {
-        const dayDiv : HTMLElement = this.renderer.createElement('div');
-        this.renderer.addClass(dayDiv, 'day');
-        this.renderer.addClass(dayDiv, 'empty');
-        this.renderer.appendChild(week, dayDiv);
+    for (let i : number = -7; i <= (month_days + first_day_week + 6); i++) {
+      let day : HTMLElement | HTMLButtonElement;
+      if (i < first_day_week || i > month_days + first_day_week - 1) {
+        day = this.renderer.createElement('div');
+        day.classList.add('empty');
+        week.appendChild(day);
       } else {
-        const dayButton : HTMLButtonElement = this.renderer.createElement('button');
-        this.renderer.addClass(dayButton, 'day');
-        dayButton.textContent = (i - first_day_week + 1).toString();
-        this.selected.includes(`${year}-${month+1}-${i - first_day_week + 1}`) || this.selectedDisabled.includes(`${year}-${month+1}-${i - first_day_week + 1}`) ? this.renderer.addClass(dayButton, 'selected') : null;
-        if(this.typ !== 'Internat')
-        {
-          this.isWeekend(new Date(this.formatDate(`${year}-${month+1}-${i - first_day_week + 1}`)), dayButton, this.typ!);
-          if(this.DisabledDays?.includes(`${year}-${month + 1}-${i - first_day_week + 1}`)) {
-            dayButton.classList.add('disabled-day-global')
-            dayButton.setAttribute('disabled', 'true');
-          }
-        }
-        if(this.typ === 'Internat') {
-          const typy : string[] = ['sniadanie','obiad','kolacja']
-          const checkboxes : HTMLElement = this.renderer.createElement('div');
-          typy.forEach((element : string) : void => {
-            const checkbox : HTMLInputElement = this.renderer.createElement('input');
-            this.renderer.setAttribute(checkbox, 'type', 'checkbox');
-            this.renderer.setAttribute(checkbox, 'value', element);
+        day = this.renderer.createElement('button');
+        day.classList.add('day');
+        day.textContent = (i - first_day_week + 1).toString();
 
-            !this.isWeekend(new Date(this.formatDate(`${year}-${month + 1}-${i - first_day_week + 1}`)), dayButton, this.typ!) && this.checkDayInternat(year, month+1, i - first_day_week + 1, element, first_day_week, i, typy) ? checkbox.checked = true : checkbox.disabled = true;
-            if(this.typy_posilkow_db.array_operacaja.find(elem=>elem.id === element)!.array.includes(`${year}-${month+1}-${i - first_day_week + 1}`))
-              checkbox.checked = false;
-            dayButton.disabled ? checkbox.disabled = true : null;
-            if(this.DisabledDays.includes(`${year}-${month + 1}-${i - first_day_week + 1}`))
-            {
-              dayButton.classList.add('disabled-day-global')
-              checkbox.checked = false
-            }
-            this.renderer.appendChild(checkboxes,checkbox);
+        if (this.typ === 'Internat') {
+          const typy: string[] = ['sniadanie', 'obiad', 'kolacja'];
+          const checkboxes: HTMLElement = this.renderer.createElement('div');
+          typy.forEach((element: string): void => {
+            const checkbox: HTMLInputElement = this.renderer.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = element;
+            if (this.checkDayInternat(year, month + 1, i - first_day_week + 1, element, first_day_week, i, typy))
+              checkbox.checked = true;
+            if (this.DisabledDays?.includes(`${year}-${month + 1}-${i - first_day_week + 1}`))
+              checkbox.disabled = true;
+            checkboxes.appendChild(checkbox);
           })
-          if(!this.isWeekend(new Date(this.formatDate(`${year}-${month + 1}-${i - first_day_week + 1}`)), dayButton, this.typ!) && !this.DisabledDays.includes(`${year}-${month + 1}-${i - first_day_week + 1}`))
-            this.renderer.appendChild(dayButton, checkboxes);
-          this.renderer.addClass(dayButton,'internat');
-        }
-        this.renderer.appendChild(week, dayButton);
+          day.appendChild(checkboxes);
+          day.classList.add('internat');
+        } else if (this.typ === 'ZSTI' && this.selected.includes(`${year}-${month + 1}-${i - first_day_week + 1}`) || this.selectedDisabled.includes(`${year}-${month + 1}-${i - first_day_week + 1}`))
+          day.classList.add('selected');
       }
+      this.isWeekend(new Date(`${year}-${month + 1}-${i - first_day_week + 1}`), (day as HTMLButtonElement), this.typ!);
+      if (this.DisabledDays?.includes(`${year}-${month + 1}-${i - first_day_week + 1}`)) {
+        (day as HTMLElement).classList.add('disabled-day-global');
+        (day as HTMLButtonElement).disabled = true;
+      }
+      //   !this.isWeekend(new Date(this.formatDate(`${year}-${month + 1}-${i - first_day_week + 1}`)), dayButton, this.typ!) && this.checkDayInternat(year, month+1, i - first_day_week + 1, element, first_day_week, i, typy) ? checkbox.checked = true : checkbox.disabled = true;
+      this.renderer.appendChild(week, day);
       if (i % 7 === 0) {
-        weekcount++;
-        // create week div
-        const weekDiv = this.renderer.createElement('div');
-        this.renderer.addClass(weekDiv, 'week');
-        this.renderer.appendChild(calendar_content, weekDiv);
+        calendar_content.appendChild(week);
+        week = this.renderer.createElement('div');
+        week.classList.add('week');
       }
     }
-    const dni = this.DOMelement?.querySelector('#dni') as HTMLElement;
-    if(dni !== undefined) dni.textContent = '';
-    for (let i = 0; i < 7; i++) {
-      const daySpan = this.renderer.createElement('span');
+    const dni : HTMLElement = this.DOMelement?.querySelector('#dni')!;
+    dni.textContent = '';
+    for (let i : number = 0; i < 7; i++) {
+      const daySpan: HTMLSpanElement = this.renderer.createElement('span');
       daySpan.textContent = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i];
-      if(dni !== undefined) this.renderer.appendChild(dni, daySpan);
+      dni.appendChild(daySpan);
     }
-    Array.from(this.DOMelement?.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week: HTMLElement) => {
-      if (week.children.length < 7) {
-        for (let i = week.children.length; i < 7; i++) {
-          const dayDiv = this.renderer.createElement('div');
-          this.renderer.addClass(dayDiv, 'day');
-          this.renderer.addClass(dayDiv, 'empty');
-          this.renderer.appendChild(week, dayDiv);
-        }
-      }
+    this.DOMelement?.querySelectorAll('.week')?.forEach((week : HTMLElement) : void => {
+      if (!Array.from(week.children).some((child: Element) : boolean => (child as HTMLElement).classList.contains('day')))
+        week.remove();
     });
-
-    Array.from(this.DOMelement?.querySelectorAll('.week') as NodeListOf<HTMLElement>).forEach((week : HTMLElement) => {
-      // @ts-ignore
-      const isEmpty = Array.from(week.children).every((day: HTMLElement) => day.classList.contains('empty'));
-      if (isEmpty) week.remove();
-    });
-    let week = this.week_number()[month];
-    const zaznacz: HTMLElement = this.DOMelement?.querySelector('#zaznacz') as HTMLElement;
-    if(zaznacz !== undefined) zaznacz.textContent = '';
-    let week_length = this.DOMelement?.getElementsByClassName('week').length!;
-    for (let i = 0; i < week_length; i++) {
-      let selected_days = 0;
-      let days = 0;
-
-      // @ts-ignore
-      Array.from(this.DOMelement?.getElementsByClassName('week')[i]?.children ?? []).forEach((day: Element) => {
-        if(!day.classList.contains('empty')) {
-          if(day.classList.contains('selected')) selected_days++;
+    let week_number : number = this.getStartingWeekNumber(year, month + 1);
+    const zaznacz: HTMLElement = this.DOMelement?.querySelector('#zaznacz')!;
+    zaznacz.textContent = '';
+    for (let i : number = 0; i < this.DOMelement?.getElementsByClassName('week').length!; i++) {
+      let selected_days : number = 0;
+      let days : number = 0;
+      Array.from(this.DOMelement?.getElementsByClassName('week')[i]?.children as HTMLCollectionOf<HTMLElement>).forEach((day: HTMLElement): void => {
+        if (!day.classList.contains('empty')) {
+          if (day.classList.contains('selected'))
+            selected_days++;
           days++;
         }
       });
-      let zaznacz_ = this.renderer.createElement('div');
-      let number = week + i;
-      if(number > 52) number = 1;
-      this.renderer.setProperty(zaznacz_, 'innerHTML', `${number}`);
-      let zaznaczAbbr = this.renderer.createElement('abbr');
-      let zaznaczElement = this.renderer.createElement('input');
-      let zaznaczSpan = this.renderer.createElement('span');
-      // dla wychowanków Internatu
-      if(this.typ === 'Internat') {
+      let zaznacz_ : HTMLElement = this.renderer.createElement('div');
+      let number : number = week_number + i;
+      if (number > 52) number = 1;
+      zaznacz_.textContent = number.toString();
+      let zaznaczAbbr : HTMLElement = this.renderer.createElement('abbr');
+      let zaznaczElement : HTMLInputElement = this.renderer.createElement('input');
+      let zaznaczSpan : HTMLElement = this.renderer.createElement('span');
+      if (this.typ === 'Internat') {
         this.renderer.addClass(zaznaczSpan, 'zaznacz_internat');
         this.renderer.setProperty(zaznaczAbbr, 'title', 'Kliknij lewym przyciskiem myszy aby zmienić posiłek dla całego tygodnia');
-      }
-      else {
+      } else {
         this.renderer.setProperty(zaznaczAbbr, 'title', 'Kliknij lewy przycisk myszy aby zaznaczyć cały tydzień');
       }
-      this.renderer.addClass(zaznaczElement, 'zaznacz');
-      this.renderer.setAttribute(zaznaczElement, 'type', 'checkbox');
-      // check if the entire array is selected
-      if(selected_days === days && this.typ === 'ZSTI') {
-        this.renderer.setAttribute(zaznaczElement, 'checked', 'true');
+      zaznaczElement.classList.add('zaznacz');
+      zaznaczElement.type = 'checkbox';
+      if (selected_days === days && this.typ === 'ZSTI') {
+        zaznaczElement.checked = true;
       }
-      this.renderer.appendChild(zaznaczAbbr, zaznacz_);
-      this.renderer.appendChild(zaznaczAbbr, zaznaczElement);
-      this.renderer.appendChild(zaznaczAbbr, zaznaczSpan);
-
-      this.renderer.appendChild(zaznacz, zaznaczAbbr);
+      zaznaczAbbr.append(zaznacz_, zaznaczElement, zaznaczSpan);
+      zaznacz.appendChild(zaznaczAbbr);
     }
   }
-
   change_month(number: number) {
-    if(number === 0) {
+    if (number === 0) {
       this.date = new Date();
       this.show_calendar();
       return;
@@ -565,140 +529,129 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
     this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
     this.show_calendar();
   }
-  select(element: MouseEvent) {
-    // dla uczniow zsti
-    if(this.typ === "ZSTI") {
-      let target = element.target as HTMLElement;
-      if (target.classList.contains('day')) {
-        if (target.tagName === 'BUTTON' && !(target as HTMLButtonElement).classList.contains('weekend')) {
-          function isFullWeekSelected(week : HTMLElement) {
-            let selected = 0;
-            let days = 0;
-            Array.from(week.children as unknown as NodeListOf<HTMLElement>).forEach((day: HTMLElement) => {
-              if(!day.classList.contains('empty') && !(day as HTMLButtonElement).disabled) {
-                if(day.classList.contains('selected')) selected++;
-                days++;
-              }
-            });
-            return selected === days;
+  select(element : MouseEvent) : void {
+    if (this.typ === "ZSTI") {
+      let target : HTMLElement = element.target as HTMLElement;
+      if(target.classList.contains('week')) return;
+      function isFullWeekSelected(week : HTMLElement) : boolean {
+        let selected : number = 0;
+        let days : number = 0;
+        week.childNodes.forEach((day : any) : void  => {
+          day = day as HTMLButtonElement;
+          if (!day.classList.contains('empty') && !day.disabled) {
+            if (day.classList.contains('selected')) selected++;
+            days++;
           }
-          const week_number = Array.from((target.parentElement!).parentElement!.children as unknown as NodeListOf<HTMLElement>).indexOf(target.parentElement as HTMLElement);
-          if (target.classList.contains('selected')) {
-            if(isFullWeekSelected(target.parentElement as HTMLElement)) {
-              (this.DOMelement?.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`) as HTMLInputElement).checked = false;
-            }
-            if(target.classList.contains('disabled-for-person')) {
-              this.selectedDisabled.splice(this.selectedDisabled.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`), 1);
-            }
-            else {
-              this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`), 1);
-              this.checkSelected()
-            }
-            target.classList.remove('selected');
-          } else {
-            target.classList.add('selected');
-            if(target.classList.contains('disabled-for-person')) {
-              this.selectedDisabled.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`);
-            }
-            else {
-              this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(target.innerHTML)}`);
-              this.checkSelected()
-            }
-            if(isFullWeekSelected(target.parentElement as HTMLElement)) {
-              (this.DOMelement?.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`) as HTMLInputElement).checked = true;
-            }
-          }
+        });
+        return selected === days;
+      }
+      const week_number: number = Array.from(target.parentElement!.parentElement!.children).indexOf(target.parentElement!);
+      if (target.classList.contains('selected')) {
+        if (isFullWeekSelected(target.parentElement as HTMLElement)) {
+          (this.DOMelement?.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`) as HTMLInputElement).checked = false;
+        }
+        if (target.classList.contains('disabled-for-person')) {
+          this.selectedDisabled.splice(this.selectedDisabled.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`), 1);
+        } else {
+          this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`), 1);
+          this.checkSelected()
+        }
+        target.classList.remove('selected');
+      } else {
+        target.classList.add('selected');
+        if (target.classList.contains('disabled-for-person')) {
+          this.selectedDisabled.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`);
+        } else {
+          this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(target.innerHTML)}`);
+          this.checkSelected()
+        }
+        if (isFullWeekSelected(target.parentElement as HTMLElement)) {
+          (this.DOMelement?.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`) as HTMLInputElement).checked = true;
         }
       }
       this.checkIfEmpty();
     }
     // dla wychowanków Internatu
-    else if(this.typ === "Internat") {
-      if(element.button == 2) {
+    else if (this.typ === "Internat") {
+      if (element.button == 2) {
         element.preventDefault()
-        let target : HTMLElement = element.target as HTMLElement
-        if(target.tagName === "BUTTON" && !(target as HTMLButtonElement).disabled && !target.classList.contains('empty')) {
-          let parent : HTMLElement = target.parentElement as HTMLElement;
-          let grandparent : HTMLElement = parent.parentElement as HTMLElement;
-          let parent_index : number = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
-          let target_index : number = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
-          const div : HTMLElement = this.DOMelement?.querySelector(`.week:nth-child(${parent_index+1}) > .day:nth-child(${target_index+1}) > div`) as HTMLElement;
-          let all : number = 0;
-          let checked : number = 0
-          let unchecked : number = 0
-          const typy = ['sniadanie','obiad','kolacja']
+        let target: HTMLElement = element.target as HTMLElement
+        if (target.tagName === "BUTTON" && !(target as HTMLButtonElement).disabled && !target.classList.contains('empty')) {
+          let parent: HTMLElement = target.parentElement as HTMLElement;
+          let grandparent: HTMLElement = parent.parentElement as HTMLElement;
+          let parent_index: number = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
+          let target_index: number = Array.from(parent.children as unknown as NodeListOf<HTMLElement>).indexOf(target);
+          const div: HTMLElement = this.DOMelement?.querySelector(`.week:nth-child(${parent_index + 1}) > .day:nth-child(${target_index + 1}) > div`) as HTMLElement;
+          let all: number = 0;
+          let checked: number = 0
+          let unchecked: number = 0
+          const typy = ['sniadanie', 'obiad', 'kolacja']
           const getInputElements = (parent: HTMLElement, check: boolean) => {
             // @ts-ignore
             Array.from(parent.children as unknown as NodeListOf<HTMLInputElement>).forEach((dziecko) => {
               dziecko.disabled ? dziecko.checked = false : dziecko.checked = check;
               let value = dziecko.value;
-              if(!check) {
-                let meal = this.dodanie.find(meal => meal.id === value);
-                if(meal) {
-                  // @ts-ignore
-                  this.usuniecie.find(meal => meal.id === value)?.array.splice(this.usuniecie.find(meal => meal.id === value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`),1)
-                  if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`))  && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`).getDay(),typy.indexOf(value))) {
-                    meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`);
+              if (!check) {
+                    let meal = this.dodanie.find(meal => meal.id === value);
+                    if (meal) {
+                      // @ts-ignore
+                      this.usuniecie.find(meal => meal.id === value)?.array.splice(this.usuniecie.find(meal => meal.id === value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`), 1)
+                      if (!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`).getDay(), typy.indexOf(value))) {
+                        meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`);
+                      }
+                    }
+                    this.checkTypPosilkow();
+                  } else {
+                    let meal = this.dodanie.find(meal => meal.id === value);
+                    if (meal) {
+                      meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`), 1);
+                      if ((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`).getDay(), typy.indexOf(value)))
+                        this.usuniecie.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`);
+                    }
+                    this.checkTypPosilkow();
                   }
-                }
-                this.checkTypPosilkow();
-              }
-              else {
-                let meal = this.dodanie.find(meal => meal.id === value);
-                if(meal) {
-                  meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`), 1);
-                  if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`).getDay(),typy.indexOf(value)))
-                    this.usuniecie.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`);
-                }
-                this.checkTypPosilkow();
-              }
             })
           }
           Array.from(div.children as unknown as NodeListOf<HTMLInputElement>).forEach((dziecko) => {
-            if(!dziecko.disabled) {
+            if (!dziecko.disabled) {
               all++;
               dziecko.checked ? checked++ : unchecked++;
             }
           })
-          if(checked === all) {
+          if (checked === all) {
             getInputElements(div, false);
-          }
-          else if(unchecked === all) {
+          } else if (unchecked === all) {
             getInputElements(div, true);
-          }
-          else if(checked < unchecked) {
+          } else if (checked < unchecked) {
             getInputElements(div, false);
-          }
-          else if(checked > unchecked) {
+          } else if (checked > unchecked) {
             getInputElements(div, true);
           }
         }
-      }
-      else {
+      } else {
         let target = element.target as HTMLElement;
         let grandparent = (target.parentElement as HTMLElement).parentElement as HTMLElement;
-        if(target.tagName === "INPUT" && !(grandparent as HTMLButtonElement).disabled) {
+        if (target.tagName === "INPUT" && !(grandparent as HTMLButtonElement).disabled) {
           console.log((target as HTMLInputElement).checked);
           let value = (target as HTMLInputElement).value;
           console.log("Target?: ", target)
-          const typy = ['sniadanie','obiad','kolacja']
-          if(!(target as HTMLInputElement).checked) {
+          const typy = ['sniadanie', 'obiad', 'kolacja']
+          if (!(target as HTMLInputElement).checked) {
             let meal = this.dodanie.find(meal => meal.id === value);
-            if(meal) {
+            if (meal) {
               // @ts-ignore
-              this.usuniecie.find(meal => meal.id === value)?.array.splice(this.usuniecie.find(meal => meal.id === value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${target.textContent}`),1)
-              if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value))) {
-                meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
+              this.usuniecie.find(meal => meal.id === value)?.array.splice(this.usuniecie.find(meal => meal.id === value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`), 1)
+              if (!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`).getDay(), typy.indexOf(value))) {
+                meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`);
               }
             }
             this.checkTypPosilkow();
-          }
-          else {
+          } else {
             let meal = this.dodanie.find(meal => meal.id === value);
-            if(meal) {
-              meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`), 1);
-              if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`).getDay(),typy.indexOf(value)))
-                this.usuniecie.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${grandparent.textContent}`);
+            if (meal) {
+              meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`), 1);
+              if ((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`).getDay(), typy.indexOf(value)))
+                this.usuniecie.find(meal => meal.id === value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`);
             }
             this.checkTypPosilkow();
           }
@@ -706,45 +659,44 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
       }
     }
   }
-  select_row(element : MouseEvent) {
-    if(this.typ === "ZSTI") {
-      let target = element.target as HTMLElement;
-      if(target.tagName === 'INPUT') {
-        const week = this.DOMelement?.getElementsByClassName('week')[Array.from(this.DOMelement.querySelectorAll('.zaznacz')).indexOf(target)]!;
-        if((target as HTMLInputElement).checked) {
-          for(let i = 0; i < week.children.length; i++) {
-            if(!week.children[i].classList.contains('empty') && !(week.children[i] as HTMLInputElement).disabled && !week.children[i].classList.contains('disabled-for-person')) {
-              week.children[i].classList.add('selected');
-              if(!this.selected.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`)) {
-                this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`);
-                this.checkSelected();
+  select_row(element : MouseEvent)
+      {
+        if (this.typ === "ZSTI") {
+          let target = element.target as HTMLElement;
+          if (target.tagName === 'INPUT') {
+            const week = this.DOMelement?.getElementsByClassName('week')[Array.from(this.DOMelement.querySelectorAll('.zaznacz')).indexOf(target)]!;
+            if ((target as HTMLInputElement).checked) {
+              for (let i = 0; i < week.children.length; i++) {
+                if (!week.children[i].classList.contains('empty') && !(week.children[i] as HTMLInputElement).disabled && !week.children[i].classList.contains('disabled-for-person')) {
+                  week.children[i].classList.add('selected');
+                  if (!this.selected.includes(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(week.children[i].innerHTML)}`)) {
+                    this.selected.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(week.children[i].innerHTML)}`);
+                    this.checkSelected();
+                  }
+                }
+              }
+            } else {
+              for (let i = 0; i < week.children.length; i++) {
+                if (!week.children[i].classList.contains('empty') && !(week.children[i] as HTMLInputElement).disabled && !week.children[i].classList.contains('disabled-for-person')) {
+                  week.children[i].classList.remove('selected');
+                  this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${parseInt(week.children[i].innerHTML)}`), 1);
+                  this.checkSelected();
+                }
               }
             }
           }
-        }
-        else {
-          for(let i = 0; i < week.children.length; i++) {
-            if(!week.children[i].classList.contains('empty') && !(week.children[i] as HTMLInputElement).disabled && !week.children[i].classList.contains('disabled-for-person')) {
-              week.children[i].classList.remove('selected');
-              this.selected.splice(this.selected.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${parseInt(week.children[i].innerHTML)}`), 1);
-              this.checkSelected();
-            }
+          console.log(this.selected);
+          this.checkIfEmpty();
+        } else if (this.typ === "Internat") {
+          let target = element.target as HTMLElement;
+          if (target.tagName === 'INPUT') {
+            let parent = target.parentElement as HTMLElement;
+            let grandparent = parent.parentElement as HTMLElement;
+            this.numer_week = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
+            (this.DOMelement?.querySelector('#zmiana_posilku') as HTMLElement).style.display = 'flex';
           }
         }
       }
-      console.log(this.selected);
-      this.checkIfEmpty();
-    }
-    else if(this.typ === "Internat") {
-      let target = element.target as HTMLElement;
-      if(target.tagName === 'INPUT') {
-        let parent = target.parentElement as HTMLElement;
-        let grandparent = parent.parentElement as HTMLElement;
-        this.numer_week = Array.from(grandparent.children as unknown as NodeListOf<HTMLElement>).indexOf(parent);
-        (this.DOMelement?.querySelector('#zmiana_posilku') as HTMLElement).style.display = 'flex';
-      }
-    }
-  }
   // close change meal
   close() {
     (this.DOMelement?.querySelector('#zmiana_posilku') as HTMLElement).style.display = 'none';
