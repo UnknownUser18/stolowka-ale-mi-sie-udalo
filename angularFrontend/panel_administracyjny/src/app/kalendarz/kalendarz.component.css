@@ -124,7 +124,8 @@ input:disabled {
     color: var(--disabled-text-color) !important;
 }
 .day.disabled-day-global {
-    background-color: var(--disabled-global-day);
+    background-color: var(--disabled-global-day) !important;
+    color: var(--text-color);
 }
 #date {
     width: 100%;

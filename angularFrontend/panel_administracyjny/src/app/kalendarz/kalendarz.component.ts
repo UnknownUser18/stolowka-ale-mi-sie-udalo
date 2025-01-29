@@ -46,7 +46,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
     }
   // na zmiane posilków
   usuniecie: Array<{id : string, array : Array<any>}> = [
-    {id: 'sniadanie', array: []},
+    {id: 'sniadanie', array : []},
     {id: 'obiad', array: []},
     {id: 'kolacja', array: []}
   ];
@@ -348,7 +348,6 @@ export class KalendarzComponent implements OnChanges, OnInit {
       element.array = []
     });
   }
-  //@ts-ignore
 isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
     let dayOfTheWeek = date.getDay();
     if(dayOfTheWeek === 0)
@@ -360,47 +359,29 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
         button.classList.add('disabled-for-person')
       return true;
     }
-    if(typ === 'ZSTI' && this.CurrentStudentDeclaration)
-    {
+    if(typ === 'ZSTI') {
       this.CurrentStudentDeclaration = this.CurrentStudentDeclaration as DeklaracjaZSTI;
-      if( dayOfTheWeek === 5 || dayOfTheWeek === 6)
-      {
-        button.disabled = true;
-        return true;
-      }
-      const data : number = Number(this.CurrentStudentDeclaration?.dni?.['data']);
-      if (toBinary(data,5)[dayOfTheWeek] === '0')
-      {
+      if (toBinary(Number(this.CurrentStudentDeclaration?.dni?.['data']),5)[dayOfTheWeek] === '0') {
         button.disabled = true;
         button.classList.add('disabled-for-person')
         return true;
       }
-      return false;
     }
-    else if (typ === 'Internat')
-    {
-      if(dayOfTheWeek === 5 || dayOfTheWeek === 6)
-      {
-        button.disabled = true;
-        return true;
-      }
-      return false;
+    if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
+      button.disabled = true;
+      return true;
     }
+    return false;
   }
   checkVersion(dayOfTheWeek:number, mealId:number) {
-    console.log(this.CurrentStudentDeclaration);
     if(!this.CurrentStudentDeclaration) return;
+    let dni : string[] = ['poniedzialek','wtorek','sroda','czwartek','piatek']
     this.dni = [];
-    // @ts-ignore
-    this.dni.push(toBinary(this.CurrentStudentDeclaration.poniedzialek.data[0], 3));
-    // @ts-ignore
-    this.dni.push(toBinary(this.CurrentStudentDeclaration.wtorek.data[0], 3))
-    // @ts-ignore
-    this.dni.push(toBinary(this.CurrentStudentDeclaration.sroda.data[0], 3))
-    // @ts-ignore
-    this.dni.push(toBinary(this.CurrentStudentDeclaration.czwartek.data[0], 3))
-    // @ts-ignore
-    this.dni.push(toBinary(this.CurrentStudentDeclaration.piatek.data[0], 3))
+    dni.forEach((dzien : string) : void => {
+      // @ts-ignore
+      this.dni.push(toBinary(this.CurrentStudentDeclaration?.[dzien]?.data[0],3))
+      //! really fix someday...
+    })
     if(dayOfTheWeek === 0)
       dayOfTheWeek = 7
     dayOfTheWeek--
@@ -444,16 +425,23 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
         if (this.typ === 'Internat') {
           const typy: string[] = ['sniadanie', 'obiad', 'kolacja'];
           const checkboxes: HTMLElement = this.renderer.createElement('div');
-          typy.forEach((element: string): void => {
+          typy.forEach((typ : string): void => {
+
             const checkbox: HTMLInputElement = this.renderer.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.value = element;
-            if (this.checkDayInternat(year, month + 1, i - first_day_week + 1, element, first_day_week, i, typy))
+            checkbox.value = typ;
+            if (this.checkDayInternat(year, month + 1, i - first_day_week + 1, typ, first_day_week, i, typy))
               checkbox.checked = true;
             if (this.DisabledDays?.includes(`${year}-${month + 1}-${i - first_day_week + 1}`))
               checkbox.disabled = true;
+            this.dodanie[typy.indexOf(typ)].array.forEach((data : string) : void => {
+              console.log(data, `${year}-${month + 1}-${i - first_day_week + 1}`)
+              if(data === `${year}-${month + 1}-${i - first_day_week + 1}`) {
+                checkbox.checked = false;
+              }
+            })
             checkboxes.appendChild(checkbox);
-          })
+          });
           day.appendChild(checkboxes);
           day.classList.add('internat');
         } else if (this.typ === 'ZSTI' && this.selected.includes(`${year}-${month + 1}-${i - first_day_week + 1}`) || this.selectedDisabled.includes(`${year}-${month + 1}-${i - first_day_week + 1}`))
@@ -464,7 +452,6 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
         (day as HTMLElement).classList.add('disabled-day-global');
         (day as HTMLButtonElement).disabled = true;
       }
-      //   !this.isWeekend(new Date(this.formatDate(`${year}-${month + 1}-${i - first_day_week + 1}`)), dayButton, this.typ!) && this.checkDayInternat(year, month+1, i - first_day_week + 1, element, first_day_week, i, typy) ? checkbox.checked = true : checkbox.disabled = true;
       this.renderer.appendChild(week, day);
       if (i % 7 === 0) {
         calendar_content.appendChild(week);
@@ -634,14 +621,16 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
         if (target.tagName === "INPUT" && !(grandparent as HTMLButtonElement).disabled) {
           console.log((target as HTMLInputElement).checked);
           let value = (target as HTMLInputElement).value;
-          console.log("Target?: ", target)
+          console.log("Target?: ", target, value, grandparent.textContent)
           const typy = ['sniadanie', 'obiad', 'kolacja']
           if (!(target as HTMLInputElement).checked) {
             let meal = this.dodanie.find(meal => meal.id === value);
+            console.log(meal)
             if (meal) {
               // @ts-ignore
               this.usuniecie.find(meal => meal.id === value)?.array.splice(this.usuniecie.find(meal => meal.id === value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${target.textContent}`), 1)
               if (!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`).getDay(), typy.indexOf(value))) {
+                console.log("DobraSS")
                 meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth() + 1}-${grandparent.textContent}`);
               }
             }
