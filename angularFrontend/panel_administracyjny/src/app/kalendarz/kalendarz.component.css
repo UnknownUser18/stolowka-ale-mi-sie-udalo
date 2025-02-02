@@ -69,9 +69,11 @@
     border-radius: 12px;
 }
 .day:disabled {
-    background-color: var(--disabled);
     color: var(--disabled-text-color);
     cursor: default;
+}
+.day:not(.disabled-for-person):disabled {
+    background-color: var(--disabled);
 }
 .day:disabled input {
     cursor: default;
