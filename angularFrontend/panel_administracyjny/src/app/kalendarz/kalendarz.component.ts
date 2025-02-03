@@ -660,11 +660,10 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
           }
         }
       }
-      console.log(this.selected);
       this.checkIfEmpty();
     } else if (this.typ === "Internat") {
-      const parent : HTMLElement = target.parentElement as HTMLElement;
-      const grandparent : HTMLElement = parent.parentElement as HTMLElement;
+      const parent : HTMLElement = target.parentElement!;
+      const grandparent : HTMLElement = parent.parentElement!;
       this.numer_week = Array.from(grandparent.children).indexOf(parent);
       let zmiana_posilku : HTMLElement = this.DOMelement?.querySelector('#zmiana_posilku')!;
       zmiana_posilku.style.display = 'flex';
@@ -673,57 +672,58 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
   close() : void {
     (this.DOMelement?.querySelector('#zmiana_posilku') as HTMLElement).style.display = 'none';
   }
-  zmien_posilek($event: MouseEvent) {
-    (this.DOMelement?.querySelector('#zmiana_posilku') as HTMLElement).style.display = 'none';
-    const grandparent = ($event.target as HTMLElement).parentElement!.parentElement as HTMLElement;
-    let typ = grandparent.querySelectorAll('form')[0] as HTMLElement;
-    const formularz = this.DOMelement?.querySelector(`form[name="yah"]`) as HTMLFormElement;
-    const wszystko : boolean = (this.DOMelement?.querySelector('input[value="wszystko"]') as HTMLInputElement).checked;
-    const checkbox_function = (switch_value: string, checkyMeal: any) => {
-      let meal = this.dodanie.find(meal => meal.id === checkyMeal.value)!;
-      const typy = ['sniadanie','obiad','kolacja']
-      switch(switch_value) {
-        case 'być':
-          checkyMeal.checked = true;
-          if(meal) {
-            meal.array.splice(meal.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`), 1);
-            if((this.typy_posilkow_db.array_operacaja.find(meal => meal.id === checkyMeal.value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`)) && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`).getDay(),typy.indexOf(checkyMeal.value)))
-              this.usuniecie.find(meal => meal.id === checkyMeal.value)?.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`);
+  zmien_posilek(event: MouseEvent) : void {
+    let target : HTMLElement = event.target! as HTMLElement;
+    let zmiana_posilku : HTMLElement = this.DOMelement?.querySelector('#zmiana_posilku')!;
+    zmiana_posilku.style.display = 'none';
+    const grandparent : HTMLElement = target.parentElement!.parentElement!;
+    let typ : HTMLElement = grandparent.querySelectorAll('form')[0]!;
+    const formularz : HTMLFormElement = this.DOMelement?.querySelector(`form[name="yah"]`);
+const checkbox_function = (value: string, input: HTMLInputElement): void => {
+  let meal = this.dodanie.find(meal => meal.id === input.value)!;
+  if (input.disabled) return;
+  const typy : string[] = ['sniadanie', 'obiad', 'kolacja'];
+  if (meal) {
+    let date: string = `${this.date.getFullYear()}-${(this.date.getMonth() + 1).toString().padStart(2, '0')}-${input.parentElement!.parentElement!.textContent!.padStart(2, '0')}`;
+    switch (value) {
+      case 'być':
+        input.checked = true;
+        meal.array = meal.array.filter(d => d !== date);
+        if (this.typy_posilkow_db.array_operacaja.find(meal => meal.id === input.value)?.array.includes(date) && this.checkVersion(new Date(date).getDay(), typy.indexOf(input.value))) {
+          let usuniecieMeal = this.usuniecie.find(meal => meal.id === input.value);
+          if (usuniecieMeal && !usuniecieMeal.array.includes(date)) {
+            usuniecieMeal.array.push(date);
           }
-          this.checkTypPosilkow();
-          break;
-        case 'nie_być':
-          checkyMeal.checked = false;
-          if(meal) {
-            // @ts-ignore
-            this.usuniecie.find(meal => meal.id === checkyMeal.value)?.array.splice(this.usuniecie.find(meal => meal.id === checkyMeal.value)?.array.indexOf(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`),1)
-            if(!(this.typy_posilkow_db.array_operacaja.find(meal => meal.id === checkyMeal.value)?.array.includes(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`))  && this.checkVersion(new Date(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`).getDay(),typy.indexOf(checkyMeal.value))) {
-              meal.array.push(`${this.date.getFullYear()}-${this.date.getMonth()+1}-${checkyMeal.parentElement.parentElement.textContent}`);
-            }
+        }
+        break;
+      case 'nie_być':
+        input.checked = false;
+        let usuniecieMeal = this.usuniecie.find(meal => meal.id === input.value);
+        if (usuniecieMeal) {
+          usuniecieMeal.array = usuniecieMeal.array.filter(d => d !== date);
+        }
+        if (!this.typy_posilkow_db.array_operacaja.find(meal => meal.id === input.value)?.array.includes(date) && this.checkVersion(new Date(date).getDay(), typy.indexOf(input.value))) {
+          if (!meal.array.includes(date)) {
+            meal.array.push(date);
           }
-          this.checkTypPosilkow()
-          break;
-        default:
-          console.error('Nieznana wartość');
-          break;
-      }
+        }
+        break;
+      default:
+        console.error('Nieznana wartość');
+        break;
     }
-    Array.from(typ.querySelectorAll('input:checked') as NodeListOf<HTMLInputElement>).forEach((dziecko:any) => {
-      let week = this.DOMelement?.getElementsByClassName('week')[this.numer_week]!;
-      Array.from(week.querySelectorAll('.day:not(.empty) div') as NodeListOf<HTMLElement>).forEach((div:any) => {
-        // @ts-ignore
-        let nieobecnosc = formularz.elements['na']
-        const checkboxes : NodeListOf<HTMLInputElement> = div.querySelectorAll('input');
-        checkboxes.forEach((checkbox : HTMLInputElement) => {
-          if(wszystko) {
-            if (!checkbox.disabled && (checkbox.value === dziecko.value) || dziecko.value === 'wszystko') {
-              checkbox_function(nieobecnosc.value, checkbox);
-            }
-          }
-          else {
-            if(!checkbox.disabled && !div.parentElement!.classList.contains('disabled-for-person') && (checkbox.value === dziecko.value || dziecko.value === 'wszystko')) {
-              checkbox_function(nieobecnosc.value, checkbox);
-            }
+  }
+  this.checkTypPosilkow();
+};
+    typ.querySelectorAll('input:checked').forEach((child : Element) : void => {
+      const input: string = (child as HTMLInputElement).value;
+      let week: HTMLElement = this.DOMelement?.getElementsByClassName('week')[this.numer_week]!;
+      week.querySelectorAll('.day:not(.empty) div').forEach((div: Element): void => {
+        const checkboxes: NodeListOf<HTMLInputElement> = div.querySelectorAll('input');
+        let nieobecnosc: string = (formularz.elements.namedItem('na') as HTMLInputElement).value;
+        checkboxes.forEach((checkboxes: HTMLInputElement): void => {
+          if (checkboxes.value === input || input === 'wszystko') {
+            checkbox_function(nieobecnosc, checkboxes);
           }
         })
       });
