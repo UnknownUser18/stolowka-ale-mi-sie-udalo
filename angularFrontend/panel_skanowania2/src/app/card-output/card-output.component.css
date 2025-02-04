@@ -79,15 +79,16 @@ article h2 {
   gap: 1rem;
 }
 
-.card-input {
+app-auto-complete {
   padding: 1rem;
   font-size: 1.5rem;
-  border: 1px solid #ccc;
+  /*border: 1px solid #ccc;*/
   border-radius: 4px;
   transition: border-color 0.3s;
+  width: 20%;
 }
 
-.card-input:focus {
+app-auto-complete:focus {
   border-color: #007bff;
   outline: none;
 }

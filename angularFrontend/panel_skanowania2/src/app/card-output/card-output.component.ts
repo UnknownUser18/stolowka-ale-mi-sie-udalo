@@ -3,6 +3,7 @@ import {DataBaseService} from '../data-base.service';
 import {toBinary, daneOsobowe} from '../app.component';
 import {NgIf, NgStyle} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {AutoCompleteComponent} from '../auto-complete/auto-complete.component';
 
 @Component({
   selector: 'app-card-output',
@@ -11,7 +12,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
     NgStyle,
     FormsModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    AutoCompleteComponent
   ],
   templateUrl: './card-output.component.html',
   standalone: true,
@@ -32,7 +34,7 @@ export class CardOutputComponent {
   constructor(protected dataService: DataBaseService) {
     this.dataService.keycardInput.asObservable().subscribe((value) => this.findStudent(value))
     console.log("Today: ", this.today, this.today.getDay())
-    this.today.setUTCHours(12, 45, 30, 0);
+    // this.today.setUTCHours(12, 45, 30, 0);
   }
 
   findStudent(keycardInput: any)
@@ -227,11 +229,10 @@ export class CardOutputComponent {
       this.cardInput2.nativeElement.focus();
   }
 
-  handleFormSubmit()
+  handleFormSubmit(inputEvent: number)
   {
-    console.warn(this.cardTextInput)
-    this.dataService.keycardInput.next(this.cardTextInput);
-    this.cardTextInput = '';
+    console.warn(inputEvent.toString())
+    this.dataService.keycardInput.next(inputEvent.toString());
   }
 
   protected readonly JSON = JSON;
