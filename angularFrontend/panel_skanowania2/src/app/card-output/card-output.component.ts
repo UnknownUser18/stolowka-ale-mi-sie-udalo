@@ -1,25 +1,33 @@
-import {Component, EventEmitter, Output} from '@angular/core';
+import {Component, EventEmitter, Output, ViewChild} from '@angular/core';
 import {DataBaseService} from '../data-base.service';
 import {toBinary, daneOsobowe} from '../app.component';
 import {NgIf, NgStyle} from '@angular/common';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-card-output',
   imports: [
     NgIf,
-    NgStyle
+    NgStyle,
+    FormsModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   templateUrl: './card-output.component.html',
+  standalone: true,
   styleUrl: './card-output.component.css'
 })
 export class CardOutputComponent {
   @Output() emitReset = new EventEmitter();
+  @ViewChild('cardInput') cardInput: any;
+  @ViewChild('cardInput2') cardInput2: any;
   currentInfo: any;
-  today: Date = new Date(2025, 0, 9, 12, 45, 30, 0);
+  today: Date = new Date();
   daneUcznia: daneOsobowe = new daneOsobowe('', '');
   canAccept: boolean = false;
   studentScans: any;
   backgroundColor = '#2E3B4E';
+  cardTextInput: string = '';
   message: string = '';
   constructor(protected dataService: DataBaseService) {
     this.dataService.keycardInput.asObservable().subscribe((value) => this.findStudent(value))
@@ -52,6 +60,8 @@ export class CardOutputComponent {
 
   handleStudentZsti(student: any)
   {
+    this.onBlur()
+    this.dataService.getScanZsti()
     this.canAccept = false;
     this.backgroundColor = '#f5a1a1'
     // Sprawdzenie czy dzisiaj nie jest przypadkiem sobota albo poniedzialek
@@ -66,7 +76,7 @@ export class CardOutputComponent {
     // Czy dni w deklaracji istnieja
     if(this.dataService.CurrentStudentDeclaration.value == undefined)
     {
-      this.message = "Błąd w deklaracji ucznia"
+      this.message = "Brak deklaracji ucznia"
       console.warn('Enabled days of stolowka are not found')
       return;
     }
@@ -85,12 +95,12 @@ export class CardOutputComponent {
     }
     this.getStudentScans()
     console.log(this.studentScans, this.today)
-    if(this.studentScans.find((distinctScan: any) => distinctScan.czas.getFullYear() == this.today.getFullYear() && distinctScan.czas.getMonth() == this.today.getMonth() && distinctScan.czas.getDate() == this.today.getDate()))
+    let foundData = this.studentScans.find((distinctScan: any) => distinctScan.czas.getFullYear() == this.today.getFullYear() && distinctScan.czas.getMonth() == this.today.getMonth() && distinctScan.czas.getDate() == this.today.getDate())
+    if(foundData)
     {
       this.studentScans.forEach((distinctScan: any) => console.log(distinctScan.czas, distinctScan.czas.getFullYear() == this.today.getFullYear() && distinctScan.czas.getMonth() == this.today.getMonth() && distinctScan.czas.getDate() == this.today.getDate()))
-      this.message = "Karta została już dziś zeskanowana"
       console.warn('Todays lunch has been retrieved');
-
+      this.message = `Dziś już wydano posiłek: ${foundData.czas.getHours()}:${this.dataService.toLength(foundData.czas.getMinutes().toString(), 2, '0')}`
       return;
     }
 
@@ -102,7 +112,7 @@ export class CardOutputComponent {
 
     if(this.dataService.StudentZstiDays.value.find((distinctDay: any) => distinctDay.dzien_wypisania.getFullYear() == this.today.getFullYear() && distinctDay.dzien_wypisania.getMonth() == this.today.getMonth() && distinctDay.dzien_wypisania.getDate() == this.today.getDate()))
     {
-      this.message = "Uczeń zrezygnował wcześniej z obiadu";
+      this.message = "Uczeń zrezygnował wcześniej z posiłku";
       console.warn('Student refused the lunch earlier')
       return;
     }
@@ -125,11 +135,11 @@ export class CardOutputComponent {
 
 
 
-    this.message = `Wszystkie warunki zostały spełnione - ${new Date().getHours()}:${new Date().getMinutes()}`
+    this.message = `Uczeń może wejść na stołówkę - ${new Date().getHours()}:${new Date().getMinutes()}`
     this.backgroundColor = '#a8e5a1'
     this.canAccept = true;
-
-    console.log('passed payments');
+    setTimeout(() => this.handleSubmit(), 100)
+    console.log('passed payments')
     console.log(this.message);
   }
 
@@ -162,19 +172,21 @@ export class CardOutputComponent {
   isObiad(dataDoSprawdzenia: Date) : boolean
   {
     let obiadStart = new Date(), obiadEnd = new Date();
-    obiadStart.setHours(12, 0, 0, 0);
+    obiadStart.setHours(11, 0, 0, 0);
     obiadEnd.setHours(18, 30, 0, 0);
     console.warn(obiadStart, obiadStart <= dataDoSprawdzenia && dataDoSprawdzenia <= obiadEnd, obiadEnd, dataDoSprawdzenia);
     return obiadStart <= dataDoSprawdzenia && dataDoSprawdzenia <= obiadEnd;
   }
   handleNoStudentFound()
   {
+    setTimeout(() => this.cardInput2.nativeElement.focus(), 200)
     console.warn('Nie znaleziono');
   }
   handleReset() {
     this.dataService.CurrentStudent.next(null);
     this.dataService.StudentType.next('');
     this.dataService.CurrentStudentDeclaration.next(null);
+    this.dataService.getScanZsti()
     this.canAccept = false;
     console.log(this.message);
     this.message = '';
@@ -191,10 +203,35 @@ export class CardOutputComponent {
         datetime: `${tempData.getFullYear()}-${tempData.getMonth() + 1}-${tempData.getDate()} ${tempData.getHours()}:${tempData.getMinutes()}:${tempData.getSeconds()}`,
       },
     })
+    // let sendUse = JSON.stringify({
+    //   action: 'request',
+    //   params: {
+    //     method: 'addScanZsti',
+    //   }
+    // })
     console.warn(sendingData);
     this.dataService.send(sendingData);
     this.dataService.getScanZsti()
-    this.handleReset()
+    // this.handleReset()
+  }
+
+  onBlur()
+  {
+    setTimeout(() => this.focusInput(), 100)
+  }
+
+  focusInput() {
+    if(this.daneUcznia.znaleziony)
+    this.cardInput.nativeElement.focus();
+    else
+      this.cardInput2.nativeElement.focus();
+  }
+
+  handleFormSubmit()
+  {
+    console.warn(this.cardTextInput)
+    this.dataService.keycardInput.next(this.cardTextInput);
+    this.cardTextInput = '';
   }
 
   protected readonly JSON = JSON;

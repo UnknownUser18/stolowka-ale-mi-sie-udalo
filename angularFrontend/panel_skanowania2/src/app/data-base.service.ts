@@ -37,6 +37,9 @@ export class DataBaseService {
     setTimeout((): void => {
       this.initWebSocket();
     }, 50);
+    setInterval(() => {
+      this.Initialize()
+    }, 5000)
   }
   initWebSocket() {
     this.socket = new WebSocket('ws://localhost:8080');
@@ -143,6 +146,7 @@ export class DataBaseService {
       }
       let tempArray: any[] = [];
       this.lastValue = JSON.parse(event.data);
+      console.warn('Coś się zmieniło: ', this.lastValue)
       switch (this.lastValue.params.variable) {
         case 'StudentDeclarationZsti':
           this.StudentDeclarationZsti.next(this.lastValue.params.value);
@@ -246,5 +250,14 @@ export class DataBaseService {
     this.getStudentDeclarationInternat();
     this.getScanInternat();
     this.getScanZsti();
+  }
+
+  toLength(text:string, numChars:number, charReplace: string): string
+  {
+    while(text.length < numChars)
+    {
+      text = charReplace + text;
+    }
+    return text;
   }
 }

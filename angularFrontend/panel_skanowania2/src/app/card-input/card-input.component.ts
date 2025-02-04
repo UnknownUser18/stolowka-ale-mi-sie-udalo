@@ -8,13 +8,14 @@ import {DataBaseService} from '../data-base.service';
     FormsModule
   ],
   templateUrl: './card-input.component.html',
+  standalone: true,
   styleUrl: './card-input.component.css'
 })
 export class CardInputComponent implements AfterViewInit {
   @Output() cardChange = new EventEmitter<string>();
   @ViewChild('cardInput') cardInput: any;
   textInput: any;
-  constructor(private dataService: DataBaseService) {
+  constructor(protected dataService: DataBaseService) {
     // setInterval(() => this.focusInput(), 500);
     // this.focusInput()
     this.onBlur()

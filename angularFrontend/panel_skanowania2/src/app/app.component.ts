@@ -3,11 +3,13 @@ import { RouterOutlet } from '@angular/router';
 import {CardInputComponent} from './card-input/card-input.component';
 import {CardOutputComponent} from './card-output/card-output.component';
 import {DataBaseService} from './data-base.service';
+import {ClockComponent} from './clock/clock.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CardInputComponent, CardOutputComponent],
+  imports: [CardInputComponent, CardOutputComponent, ClockComponent],
   templateUrl: './app.component.html',
+  standalone: true,
   styleUrl: './app.component.css'
 })
 export class AppComponent {
