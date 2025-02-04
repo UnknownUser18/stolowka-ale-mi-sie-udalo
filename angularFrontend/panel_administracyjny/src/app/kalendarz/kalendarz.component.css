@@ -69,9 +69,11 @@
     border-radius: 12px;
 }
 .day:disabled {
-    background-color: var(--disabled);
     color: var(--disabled-text-color);
     cursor: default;
+}
+.day:not(.disabled-for-person):disabled {
+    background-color: var(--disabled);
 }
 .day:disabled input {
     cursor: default;
@@ -124,7 +126,8 @@ input:disabled {
     color: var(--disabled-text-color) !important;
 }
 .day.disabled-day-global {
-    background-color: var(--disabled-global-day);
+    background-color: var(--disabled-global-day) !important;
+    color: var(--text-color);
 }
 #date {
     width: 100%;

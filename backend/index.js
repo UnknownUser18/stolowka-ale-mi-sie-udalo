@@ -70,10 +70,6 @@ function handleRequest(ws,params) {
         "StudentList": () => StudentList(ws, params.condition),
         "CalendarStudent": () => CalendarStudent(ws, params.id_ucznia, params.relationBool, params.isAll),
         "StudentMeal": () => StudentMeal(ws, params.id_ucznia),
-        "CalendarAdd": () => CalendarAdd(ws, params.id_ucznia, params.data, params.mealId),
-        "CalendarDelete": () => CalendarDelete(ws, params.studentId, params.data, params.mealId),
-        "UpdateStudent": () => UpdateStudent(ws, params.studentId, params.name, params.surname, params.mealId),
-        "DeleteStudent": () => DeleteStudent(ws, params.studentId),
         "getStudentDeclarationInternat": () => getStudentDeclarationInternat(ws),
         "getStudentDeclarationZsti": () => getStudentDeclarationZsti(ws),
         "changeStudentDeclarationInternat": () => changeStudentDeclarationInternat(params.studentId, params.schoolYearId, params.wersja, params.beginDate, params.endDate),
@@ -87,15 +83,10 @@ function handleRequest(ws,params) {
         "getDisabledZstiDays": () => getDisabledZstiDays(ws),
         "getDisabledInternatDays": () => getDisabledInternatDays(ws),
         "getStudentInternatDays": () => getStudentInternatDays(ws, params.studentId),
-        "getStudentDisabledInternatDays": () => getStudentDisabledInternatDays(ws, params.studentId),
         "AddZstiDays": () => AddZstiDays(params.studentId, params.date, params.schoolYearId),
-        "AddDisabledZstiDays": () => AddDisabledZstiDays(params.studentId, params.date, params.schoolYearId),
         "AddInternatDays": () => AddInternatDays(params.studentId, params.date, params.mealId, params.schoolYearId),
-        "AddDisabledInternatDays": () => AddDisabledInternatDays(params.studentId, params.date, params.schoolYearId, params.mealId),
         "DeleteZstiDays": () => DeleteZstiDays(params.studentId, params.date),
-        "DeleteDisabledZstiDays": () => DeleteDisabledZstiDays(params.studentId, params.date),
         "DeleteInternatDays": () => DeleteInternatDays(params.studentId, params.date, params.mealId),
-        "DeleteDisabledInternatDays": () => DeleteDisabledInternatDays(params.studentId, params.date, params.mealId),
         "getDniNieczynne": () => getDniNieczynne(ws),
         "DeleteDniNieczynne": () => DeleteDniNieczynne(params.date),
         "AddDniNieczynne": () => AddDniNieczynne(params.date),
@@ -373,35 +364,6 @@ function getDisabledZstiDays(ws) {
 }
 function getDisabledInternatDays(ws) {
     executeQuery(`SELECT * FROM nieobecnosci_internat;`, result => sendResponse(ws, 'DisabledInternatDays', result));
-}
-function getStudentDisabledInternatDays(ws, StudentId) {
-    executeQuery(`SELECT * FROM obencosci_internat WHERE osoby_internat_id = ${StudentId};`, result => sendResponse(ws, 'StudentDisabledInternatDays', result));
-}
-
-function AddDisabledZstiDays(StudentId, Date, schoolYearId) {
-    let query = "INSERT INTO obencosci_zsti (dzien_wypisania, osoby_zsti_id, rok_szkolny_id) VALUES('" + Date + "', " + StudentId
-    if(schoolYearId)
-        query += ", " + schoolYearId + ");"
-    else
-        query += ", null);"
-    executeQuery(query, result => console.log(result));
-}
-
-function AddDisabledInternatDays(StudentId, Date, schoolYearId, mealId) {
-    let query = "INSERT INTO obencosci_internat (dzien_wypisania, osoby_zsti_id, posilki_id,rok_szkolny_id) VALUES('" + Date + "', " + StudentId + ", " + mealId
-    if(schoolYearId)
-        query += ", " + schoolYearId + ");"
-    else
-        query += ", null);"
-    executeQuery(query, result => console.log(result));
-}
-
-function DeleteDisabledZstiDays(StudentId, Date) {
-    executeQuery(`DELETE FROM obencosci_zsti WHERE osoby_zsti_id = ${StudentId} && dzien_wypisania = '${Date}';`, result => console.log(result));
-}
-
-function DeleteDisabledInternatDays(StudentId, Date, mealId) {
-    executeQuery(`DELETE FROM obencosci_internat WHERE osoby_zsti_id = ${StudentId} && dzien_wypisania = '${Date}' && posilki_id = ${mealId};`, result => console.log(result));
 }
 
 function CardScan(cardId, timestamp) {

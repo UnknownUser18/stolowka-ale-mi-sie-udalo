@@ -149,7 +149,6 @@ export class DataBaseService {
     // console.log(Id, type)
     if (this.StudentType.value === "ZSTI") {
       this.getStudentDeclarationZsti()
-      // console.log(this.StudentDeclarationInternat.value, "NMIGER")
       this.getStudentZstiDays()
       this.getStudentDisabledZstiDays()
       if(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
@@ -162,12 +161,11 @@ export class DataBaseService {
       // console.log("Checking internat cards:")
       this.getStudentDeclarationInternat()
       // console.log(this.StudentDeclarationInternat.value, "NMIGER")
-      // console.log(this.CurrentStudentDeclaration, this.CurrentStudentId)
       this.getStudentInternatDays()
       this.getStudentDisabledInternatDays()
       this.getDisabledInternatDays();
       // console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
-      if(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
+      if(this.CardsInternat.value.find((element:any)=> element.id_ucznia == this.CurrentStudentId.value))
         this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
       else
         this.CurrentStudentCardInternat.next(this.nullKarta)
@@ -199,7 +197,7 @@ export class DataBaseService {
             break;
           case 'StudentDeclarationInternat':
             this.StudentDeclarationInternat.next(this.lastValue.params.value );
-            this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value && new Date(element.data_od) <= new Date() && new Date() <= new Date(element.data_do)))
+            this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value))
             this.AllStudentDeclarations.next(this.StudentDeclarationInternat.value.find((element:any) => element.osoby_internat_id == this.CurrentStudentId.value))
             // console.log("StudentDeclarationInternat: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
             break;
