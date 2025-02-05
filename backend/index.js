@@ -78,6 +78,8 @@ function handleRequest(ws,params) {
         "changeStudentZsti": () => changeStudentZsti(params.studentId, params.type, params.name, params.surname, params.class, params.attends),
         "getStudentListZsti": () => getStudentListZsti(ws),
         "getStudentListInternat": () => getStudentListInternat(ws),
+        "DeleteDeclarationZSTI": () => DeleteDeclarationZSTI(params.studentId, params.schoolYearId, params.beginDate, params.endDate),
+        "DeleteDeclarationInternat": () => DeleteDeclarationInternat(params.studentId, params.schoolYearId, params.beginDate, params.endDate),
         "getStudentZstiDays": () => getStudentZstiDays(ws, params.studentId),
         "getStudentDisabledZstiDays": () => getStudentDisabledZstiDays(ws, params.studentId),
         "getDisabledZstiDays": () => getDisabledZstiDays(ws),
@@ -175,7 +177,12 @@ function getStudentFromCardInternat(ws, keyCard) {
     executeQuery(`select karty_internat.id, karty_internat.id_ucznia, karty_internat.key_card, karty_internat.data_wydania, karty_internat.ostatnie_uzycie, osoby_internat.imie, osoby_internat.nazwisko, osoby_internat.uczeszcza, osoby_internat.grupa from karty_internat join osoby_internat on karty_internat.id_ucznia = osoby_internat.id WHERE karty_internat.key_card = ${keyCard};`, result => sendResponse(ws, 'StudentCardInternat', result));
 }
 
-
+function DeleteDeclarationZSTI(studentId, schoolYearId, beginDate, endDate) {
+    executeQuery(`DELETE FROM deklaracja_zywieniowa_zsti WHERE id_osoby = ${studentId} && rok_szkolny_id = ${schoolYearId} && data_od = '${beginDate}' && data_do = '${endDate}';`, result => console.log(result));
+}
+function DeleteDeclarationInternat(studentId, schoolYearId, beginDate, endDate) {
+    executeQuery(`DELETE FROM deklaracja_zywieniowa_internat WHERE osoby_internat_id = ${studentId} && rok_szkolny_id = ${schoolYearId} && data_od = '${beginDate}' && data_do = '${endDate}';`, result => console.log(result));
+}
 function addKartyInternat(studentId, keyCard, beginDate, lastUse) {
     let query;
     if(lastUse) {

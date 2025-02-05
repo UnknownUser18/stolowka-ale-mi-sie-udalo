@@ -177,7 +177,14 @@ export class DataBaseService {
   {
     if(this.socket) this.socket.send(query);
   }
-
+adjustDateTime(dateString: string): string {
+  const date = new Date(dateString);
+  if (date.getUTCHours() >= 20 && date.getUTCMinutes() === 0 && date.getUTCSeconds() === 0) {
+    date.setUTCDate(date.getUTCDate() + 1);
+    date.setUTCHours(0, 0, 0, 0);
+  }
+  return date.toISOString();
+}
   Initialize() {
       this.socket!.addEventListener('message', (event) => {
         // console.log('Message incoming from the server: ', event.data);
@@ -189,13 +196,21 @@ export class DataBaseService {
         this.lastValue = JSON.parse(event.data);
         switch (this.lastValue.params.variable) {
           case 'StudentDeclarationZsti':
+            this.lastValue.params.value.forEach((element:any) => {
+              element.data_od = this.adjustDateTime(element.data_od);
+              element.data_do = this.adjustDateTime(element.data_do);
+            });
             this.StudentDeclarationZsti.next(this.lastValue.params.value );
             // console.log(this.CurrentStudentId.value);
             this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value));
-            this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value))
-            // console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
+            this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.filter((element:any) => element.id_osoby == this.CurrentStudentId.value))
+            console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value, this.AllStudentDeclarations.value);
             break;
           case 'StudentDeclarationInternat':
+            this.lastValue.params.value.forEach((element:any) => {
+              element.data_od = this.adjustDateTime(element.data_od);
+              element.data_do = this.adjustDateTime(element.data_do);
+            });
             this.StudentDeclarationInternat.next(this.lastValue.params.value );
             this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value))
             this.AllStudentDeclarations.next(this.StudentDeclarationInternat.value.find((element:any) => element.osoby_internat_id == this.CurrentStudentId.value))

@@ -97,11 +97,12 @@ export class Deklaracja {
     this.rok_szkolny_id = rok_szkolny_id;
     this.id_osoby = id_osoby;
   }
-  assignValues(declaration : DeklaracjaZSTI | DeklaracjaInternat) : void {
+  assignValues(declaration : DeklaracjaZSTI | DeklaracjaInternat) : this   {
     this.data_od = declaration.data_od;
     this.data_do = declaration.data_do;
     this.rok_szkolny_id = declaration.rok_szkolny_id;
     this.id_osoby = declaration.id_osoby;
+    return this;
   }
 }
 export class DeklaracjaZSTI extends Deklaracja {
@@ -110,9 +111,10 @@ export class DeklaracjaZSTI extends Deklaracja {
     super(data_od, data_do, rok_szkolny_id, id_osoby);
     this.dni = dni;
   }
-  override assignValues(declaration : DeklaracjaZSTI) : void {
+  override assignValues(declaration : DeklaracjaZSTI) : this {
     super.assignValues(declaration);
     this.dni = declaration.dni;
+    return this;
   }
 }
 export class DeklaracjaInternat extends Deklaracja {
@@ -121,9 +123,10 @@ export class DeklaracjaInternat extends Deklaracja {
     super(data_od, data_do, rok_szkolny_id, id_osoby);
     this.wersja = wersja;
   }
-  override assignValues(declaration : DeklaracjaInternat) : void {
+  override assignValues(declaration : DeklaracjaInternat) : this {
     super.assignValues(declaration);
     this.wersja = declaration.wersja;
+    return this;
   }
 }
 @Component({

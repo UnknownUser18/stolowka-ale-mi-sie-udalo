@@ -3,8 +3,6 @@ import {DataBaseService} from '../data-base.service';
 import {FormsModule} from '@angular/forms';
 import {NgForOf} from '@angular/common';
 import {OsobaInternat, OsobaZSTI, DeklaracjaZSTI, DeklaracjaInternat, toBinary} from '../app.component';
-import { Console } from 'node:console';
-
 
 @Component({
   selector: 'app-edycja',
@@ -32,7 +30,7 @@ export class EdycjaComponent implements OnChanges {
   student: OsobaZSTI | OsobaInternat | undefined;
 
   declaration: DeklaracjaZSTI | DeklaracjaInternat | undefined
-  
+
   dni: string[] = ['poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek']
 
   ngOnChanges(changes: SimpleChanges) {
@@ -94,7 +92,6 @@ export class EdycjaComponent implements OnChanges {
   updateDeclaration(): void {
     if(this.dataService.CurrentStudentId.value === -1) return;
     if (this.dataService.CurrentStudentDeclaration.value === undefined) {
-
       console.warn(`${(this.DOMelement?.querySelector('input[name="imie"]') as HTMLInputElement).value} ${(this.DOMelement?.querySelector('input[name="nazwisko"]') as HTMLInputElement).value} has no declaration`)
       this.clear_data('deklaracja')
       this.dataService.changeDeclarationDataSaved(true);

@@ -14,8 +14,22 @@ fieldset > div {
     flex-direction: column;
     justify-content: center;
 }
+.deklaracja {
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.deklaracje {
+    align-items: center;
+    margin: -5px 0 10px 0;
+    padding: 5px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 100%;
+    flex-direction: row;
+}
 label {
-    max-width: 10vw;
+    max-width: 50%;
     display: flex;
     flex-direction: column;
     margin: 10px;
@@ -49,7 +63,7 @@ button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
-input:not(input[type="checkbox"]):focus {
+input:not(input[type="checkbox"],input[type="radio"]):focus {
     outline: var(--border-color) solid 2px;
 }
 legend {
@@ -91,9 +105,16 @@ form[name="dodaj"] > fieldset {
 form[name="dodaj"] > fieldset > div {
     justify-content: start;
 }
+form[name="dodaj"] label {
+    max-width: 90%;
+}
 .zsti > label {
     font-size: 1.2em;
-    display: block;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    max-width: 100%;
+    user-select: none;
 }
 .zsti > label > input {
     margin-right: 5px;

@@ -17,7 +17,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
   @Input() name: string | undefined;
   currentDate: string | undefined;
   date: Date = new Date();
-  CurrentStudentDeclaration: DeklaracjaZSTI | DeklaracjaInternat | void | undefined;
+  CurrentStudentDeclaration: Array<DeklaracjaZSTI> | Array<DeklaracjaInternat> | void | undefined;
   StudentZstiDays: Array<GetZSTIDisabledDays> | undefined;
   dbCopyZstiDays: any[] = [];
   StudentInternatDays: Array<GetInternatDisabledDays> | undefined;
@@ -31,7 +31,6 @@ export class KalendarzComponent implements OnChanges, OnInit {
   DisabledDays: any;
   empty_diff_zsti : boolean = true;
   empty_diff_undo_zsti : boolean = true;
-  // dla wychowanków internatu
   empty_dodanie : boolean = true;
   empty_usuniecie : boolean = true;
   typy_posilkow_db: { operacja: string; array_operacaja: Array<{ id: string; array: Array<any> }> } =
@@ -43,7 +42,6 @@ export class KalendarzComponent implements OnChanges, OnInit {
         {id: 'kolacja', array: []},
       ],
     }
-  // na zmiane posilków
   usuniecie: Array<{id : string, array : Array<any>}> = [
     {id: 'sniadanie', array : []},
     {id: 'obiad', array: []},
@@ -63,17 +61,21 @@ export class KalendarzComponent implements OnChanges, OnInit {
         this.dataService.StudentZstiDays.asObservable().subscribe((data : Array<GetZSTIDisabledDays>) : void => {
           this.StudentZstiDays = data?.map(item => new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi));
         });
-        this.dataService.CurrentStudentDeclaration.asObservable().subscribe((data : DeklaracjaZSTI) : void => {
+        this.dataService.AllStudentDeclarations.asObservable().subscribe((data : Array<DeklaracjaZSTI>) : void => {
           console.log("Deklaracja: ", data)
-          this.CurrentStudentDeclaration = data?.assignValues(data);
+          this.CurrentStudentDeclaration = data.map((d : DeklaracjaZSTI) : DeklaracjaZSTI => {
+            return new DeklaracjaZSTI(d.data_od?.split('T')[0], d.data_do?.split('T')[0], d.rok_szkolny_id, d.id_osoby, d.dni);
+          })
         });
         break;
       case "Internat":
         this.dataService.StudentInternatDays.asObservable().subscribe((data : Array<GetInternatDisabledDays>) : void => {
           this.StudentInternatDays = data?.map(item => new GetInternatDisabledDays(item.posilki_id, item.dzien_wypisania, item.osoby_internat_id, item.uwagi));
         });
-        this.dataService.CurrentStudentDeclaration.asObservable().subscribe((data : DeklaracjaInternat) : void => {
-          this.CurrentStudentDeclaration = data?.assignValues(data);
+        this.dataService.CurrentStudentDeclaration.asObservable().subscribe((data : Array<DeklaracjaInternat>) : void => {
+          this.CurrentStudentDeclaration = data.map((d : DeklaracjaInternat) : DeklaracjaInternat => {
+            return new DeklaracjaInternat(d.data_od?.split('T')[0], d.data_do?.split('T')[0], d.rok_szkolny_id, d.id_osoby, d.wersja);
+          })
         });
         break;
       default:
@@ -99,7 +101,6 @@ export class KalendarzComponent implements OnChanges, OnInit {
         let value : string = data.getFullYear() + "-" + (data.getMonth() + 1).toString().padStart(2, '0') + "-" + data.getDate().toString().padStart(2, '0')
         this.selected.push(value);
         this.dbCopyZstiDays.push(value)
-        console.log(this.dbCopyZstiDays)
       })
       this.show_calendar()
     })
@@ -223,8 +224,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
       const firstDayOfMonth = new Date(year, month - 1, 1);
       return this.getWeekNumber(firstDayOfMonth);
   }
-  changeDeclaration(change : DeklaracjaZSTI | DeklaracjaInternat) : void {
-    console.log("Change declaration: ", change)
+  changeDeclaration(change : Array<DeklaracjaZSTI> | Array<DeklaracjaInternat>) : void {
     this.CurrentStudentDeclaration = change;
     //! fix someday...
     this.show_calendar()
@@ -333,7 +333,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
   }
   ngOnInit() : void  {
     this.show_calendar()
-    this.dataService.CurrentStudentDeclaration.asObservable().subscribe((change) => this.changeDeclaration(change));
+    this.dataService.AllStudentDeclarations.asObservable().subscribe((change) => this.changeDeclaration(change));
     this.DOMelement?.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
       element.classList.add('empty');
     });
@@ -350,6 +350,10 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
     if(dayOfTheWeek === 0)
       dayOfTheWeek = 7
     dayOfTheWeek--
+    if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
+      button.disabled = true;
+      return true;
+    }
     if(!this.CurrentStudentDeclaration) {
       button.disabled = true;
       if (dayOfTheWeek !== 5 && dayOfTheWeek !== 6)
@@ -357,16 +361,22 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
       return true;
     }
     if(typ === 'ZSTI') {
-      this.CurrentStudentDeclaration = this.CurrentStudentDeclaration as DeklaracjaZSTI;
-      if (toBinary(Number(this.CurrentStudentDeclaration?.dni?.['data']),5)[dayOfTheWeek] === '0') {
-        button.disabled = true;
-        button.classList.add('disabled-for-person')
-        return true;
-      }
-    }
-    if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
-      button.disabled = true;
-      return true;
+      this.CurrentStudentDeclaration = this.CurrentStudentDeclaration as Array<DeklaracjaZSTI>;
+      this.CurrentStudentDeclaration.forEach((d : DeklaracjaZSTI) : boolean => {
+        if (date >= new Date(d.data_od!) && date <= new Date(d.data_do!)) {
+          if (toBinary(Number(d.dni?.['data']),5)[dayOfTheWeek] === '0') {
+            button.disabled = true;
+            button.classList.add('disabled-for-person')
+            return true;
+          }
+        }
+        return false;
+      })
+      // if (toBinary(Number(this.CurrentStudentDeclaration?.dni?.['data']),5)[dayOfTheWeek] === '0') {
+      //   button.disabled = true;
+      //   button.classList.add('disabled-for-person')
+      //   return true;
+      // }
     }
     return false;
   }
@@ -421,10 +431,29 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
         day.classList.add('day');
         day.textContent = (i - first_day_week + 1).toString();
         this.isWeekend(new Date(day_number), day, this.typ!);
-
-        if((day_number < this.CurrentStudentDeclaration?.data_od! || day_number > this.CurrentStudentDeclaration?.data_do!) && !this.isWeekend(new Date(day_number), day, this.typ!)) {
-          day.disabled = true;
-          day.classList.add('disabled-for-person');
+        if(this.CurrentStudentDeclaration) {
+          let nearestDeclaration: DeklaracjaZSTI | DeklaracjaInternat | undefined;
+          if(Array.isArray(this.CurrentStudentDeclaration)) {
+            let minDiff : number = Infinity;
+            this.CurrentStudentDeclaration?.forEach((declaration: DeklaracjaZSTI | DeklaracjaInternat) => {
+            const declarationStartDate = new Date(declaration.data_od!);
+            const declarationEndDate = new Date(declaration.data_do!);
+            const startDiff : number = Math.abs(this.date.getTime() - declarationStartDate.getTime());
+            const endDiff : number = Math.abs(this.date.getTime() - declarationEndDate.getTime());
+            const diff : number = Math.min(startDiff, endDiff);
+            if (diff < minDiff) {
+              minDiff = diff;
+              nearestDeclaration = declaration;
+            }
+            });
+          } else {
+            nearestDeclaration = this.CurrentStudentDeclaration as DeklaracjaZSTI | DeklaracjaInternat;
+          }
+          console.log(nearestDeclaration);
+          if ((day_number <= nearestDeclaration?.data_od! || day_number >= nearestDeclaration?.data_do!) || nearestDeclaration === undefined) {
+            day.disabled = true;
+            day.classList.add('disabled-for-person');
+          }
         }
 
         if (this.typ === 'Internat') {
