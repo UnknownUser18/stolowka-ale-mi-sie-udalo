@@ -5,6 +5,7 @@ import { DataBaseService } from './data-base.service';
 import { GlobalnyPanelComponent } from './globalny-panel/globalny-panel.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UnsavedChangesDialogComponent } from './unsaved-changes-dialog/unsaved-changes-dialog.component';
+import {UstawieniaComponent} from './ustawienia/ustawienia.component';
 
 export function toBinary(num : number, len : number): string {
   let binary : string = Number(num).toString(2)
@@ -133,7 +134,7 @@ export class DeklaracjaInternat extends Deklaracja {
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: true,
-  imports: [PanelComponent, NgOptimizedImage, NgForOf, GlobalnyPanelComponent, NgIf],
+  imports: [PanelComponent, NgOptimizedImage, NgForOf, GlobalnyPanelComponent, NgIf, UstawieniaComponent],
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {

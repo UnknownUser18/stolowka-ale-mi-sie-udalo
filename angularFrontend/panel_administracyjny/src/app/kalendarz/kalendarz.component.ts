@@ -12,27 +12,28 @@ import {DeklaracjaZSTI, DeklaracjaInternat, toBinary, GetZSTIDisabledDays, GetIn
   styleUrl: './kalendarz.component.css'
 })
 export class KalendarzComponent implements OnChanges, OnInit {
-  DOMelement : any | undefined;
+  DOMelement: any | undefined;
   @Input() typ: string | undefined;
   @Input() name: string | undefined;
   currentDate: string | undefined;
   date: Date = new Date();
-  CurrentStudentDeclaration: Array<DeklaracjaZSTI> | Array<DeklaracjaInternat> | void | undefined;
+  CurrentStudentDeclaration: Array<DeklaracjaZSTI> | Array<DeklaracjaInternat> | undefined;
   StudentZstiDays: Array<GetZSTIDisabledDays> | undefined;
   dbCopyZstiDays: any[] = [];
   StudentInternatDays: Array<GetInternatDisabledDays> | undefined;
   diff_selected_zsti: string[] = [];
   diff_undo_selected_zsti: string[] = [];
-  months : string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
+  months: string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'];
   month_before: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   month_next: string = this.months[new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getMonth()] + " " + new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).getFullYear();
   selected: Array<string> = [];
   dni: any[] = [];
   DisabledDays: any;
-  empty_diff_zsti : boolean = true;
-  empty_diff_undo_zsti : boolean = true;
-  empty_dodanie : boolean = true;
-  empty_usuniecie : boolean = true;
+  empty_diff_zsti: boolean = true;
+  empty_diff_undo_zsti: boolean = true;
+  empty_dodanie: boolean = true;
+  empty_usuniecie: boolean = true;
+  nearestDeclaration: DeklaracjaZSTI | DeklaracjaInternat | undefined;
   typy_posilkow_db: { operacja: string; array_operacaja: Array<{ id: string; array: Array<any> }> } =
     {
       operacja: 'zarejestrowane',
@@ -42,38 +43,55 @@ export class KalendarzComponent implements OnChanges, OnInit {
         {id: 'kolacja', array: []},
       ],
     }
-  usuniecie: Array<{id : string, array : Array<any>}> = [
-    {id: 'sniadanie', array : []},
+  usuniecie: Array<{ id: string, array: Array<any> }> = [
+    {id: 'sniadanie', array: []},
     {id: 'obiad', array: []},
     {id: 'kolacja', array: []}
   ];
-  dodanie: Array<{id : string, array : Array<any>}> = [
+  dodanie: Array<{ id: string, array: Array<any> }> = [
     {id: 'sniadanie', array: []},
     {id: 'obiad', array: []},
     {id: 'kolacja', array: []}
   ];
   numer_week: number = 0;
+  waitForCurrentStudentDeclaration(): Promise<void> {
+    return new Promise((resolve, reject) : void => {
+      const checkInterval = setInterval(() : void => {
+        if (this.CurrentStudentDeclaration) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+
+      setTimeout(() : void => {
+        clearInterval(checkInterval);
+        if (!this.CurrentStudentDeclaration) {
+          reject(new Error('CurrentStudentDeclaration did not load within 5 seconds'));
+        }
+      }, 5000);
+    });
+  }
   constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
     this.DOMelement = this.el.nativeElement;
     console.log("Data service: ", this.dataService.StudentType.value)
     switch (this.dataService.StudentType.value) {
       case "ZSTI":
-        this.dataService.StudentZstiDays.asObservable().subscribe((data : Array<GetZSTIDisabledDays>) : void => {
+        this.dataService.StudentZstiDays.asObservable().subscribe((data: Array<GetZSTIDisabledDays>): void => {
           this.StudentZstiDays = data?.map(item => new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi));
         });
-        this.dataService.AllStudentDeclarations.asObservable().subscribe((data : Array<DeklaracjaZSTI>) : void => {
+        this.dataService.AllStudentDeclarations.asObservable().subscribe((data: Array<DeklaracjaZSTI>): void => {
           console.log("Deklaracja: ", data)
-          this.CurrentStudentDeclaration = data.map((d : DeklaracjaZSTI) : DeklaracjaZSTI => {
+          this.CurrentStudentDeclaration = data.map((d: DeklaracjaZSTI): DeklaracjaZSTI => {
             return new DeklaracjaZSTI(d.data_od?.split('T')[0], d.data_do?.split('T')[0], d.rok_szkolny_id, d.id_osoby, d.dni);
           })
         });
         break;
       case "Internat":
-        this.dataService.StudentInternatDays.asObservable().subscribe((data : Array<GetInternatDisabledDays>) : void => {
+        this.dataService.StudentInternatDays.asObservable().subscribe((data: Array<GetInternatDisabledDays>): void => {
           this.StudentInternatDays = data?.map(item => new GetInternatDisabledDays(item.posilki_id, item.dzien_wypisania, item.osoby_internat_id, item.uwagi));
         });
-        this.dataService.CurrentStudentDeclaration.asObservable().subscribe((data : Array<DeklaracjaInternat>) : void => {
-          this.CurrentStudentDeclaration = data.map((d : DeklaracjaInternat) : DeklaracjaInternat => {
+        this.dataService.CurrentStudentDeclaration.asObservable().subscribe((data: Array<DeklaracjaInternat>): void => {
+          this.CurrentStudentDeclaration = data.map((d: DeklaracjaInternat): DeklaracjaInternat => {
             return new DeklaracjaInternat(d.data_od?.split('T')[0], d.data_do?.split('T')[0], d.rok_szkolny_id, d.id_osoby, d.wersja);
           })
         });
@@ -82,75 +100,64 @@ export class KalendarzComponent implements OnChanges, OnInit {
         console.error("Nie wybrano typu ucznia");
         break;
     }
-    console.log("Deklaracja: ", this.CurrentStudentDeclaration)
-    this.change_month(0);
-    // this.month_next = this.months[new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getFullYear()
-    // this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
     this.DOMelement = this.el.nativeElement;
-    this.dataService.CurrentZstiDays.asObservable().subscribe(() => {
+    this.dataService.CurrentZstiDays.asObservable().subscribe(() : void => {
       this.selected = []
       this.dbCopyZstiDays = []
-      if(!this.dataService.CurrentZstiDays.value)
-      {
-        this.show_calendar()
+      if (!this.dataService.CurrentZstiDays.value || this.dataService.StudentType.value !== "BRAK") {
         return
       }
       console.log("Zarejestrowane dni: ", this.dataService.CurrentZstiDays.value)
-      this.dataService.CurrentZstiDays.value.forEach((element : GetZSTIDisabledDays) : void  => {
-        let data : Date = new Date(element.dzien_wypisania)
-        let value : string = data.getFullYear() + "-" + (data.getMonth() + 1).toString().padStart(2, '0') + "-" + data.getDate().toString().padStart(2, '0')
+      this.dataService.CurrentZstiDays.value.forEach((element: GetZSTIDisabledDays): void => {
+        let data: Date = new Date(element.dzien_wypisania)
+        let value: string = data.getFullYear() + "-" + (data.getMonth() + 1).toString().padStart(2, '0') + "-" + data.getDate().toString().padStart(2, '0')
         this.selected.push(value);
         this.dbCopyZstiDays.push(value)
       })
       this.show_calendar()
     })
-    this.dataService.CurrentInternatDays.asObservable().subscribe(() => {
-      this.dodanie.forEach((element)=>{
+    this.dataService.CurrentInternatDays.asObservable().subscribe(() : void => {
+      this.dodanie.forEach((element) : void => {
         element.array = []
       })
-      this.usuniecie.forEach((element)=>{
+      this.usuniecie.forEach((element) : void => {
         element.array = []
       })
-      this.typy_posilkow_db.array_operacaja.forEach((element)=>{
+      this.typy_posilkow_db.array_operacaja.forEach((element) : void => {
         element.array = []
       })
-      if(!this.dataService.CurrentInternatDays.value)
-      {
-        this.show_calendar()
+      if (!this.dataService.CurrentInternatDays.value) {
         return
       }
-      this.dataService.CurrentInternatDays.value.forEach((element : GetInternatDisabledDays) : void =>{
-        let data : Date = new Date(element.dzien_wypisania)
-        let value : string = `${data.getFullYear()}-${(data.getMonth() + 1).toString().padStart(2, '0')}-${data.getDate().toString().padStart(2, '0')}`;
-        const mealIndex : number = element.posilki_id - 1;
+      this.dataService.CurrentInternatDays.value.forEach((element: GetInternatDisabledDays): void => {
+        let data: Date = new Date(element.dzien_wypisania)
+        let value: string = `${data.getFullYear()}-${(data.getMonth() + 1).toString().padStart(2, '0')}-${data.getDate().toString().padStart(2, '0')}`;
+        const mealIndex: number = element.posilki_id - 1;
         if (mealIndex >= 0 && mealIndex < this.typy_posilkow_db.array_operacaja.length) {
           this.typy_posilkow_db.array_operacaja[mealIndex].array.push(value);
         }
       })
       console.log("Zarejestrowane dni nieobecnosci: ", this.typy_posilkow_db)
-      this.show_calendar()
     })
 
 
-    this.dataService.DisabledDays.asObservable().subscribe(()=> {
+    this.dataService.DisabledDays.asObservable().subscribe(() : void => {
       this.DisabledDays = [];
-      if(!this.dataService.DisabledDays.value)
-      {
-        this.show_calendar()
+      if (!this.dataService.DisabledDays.value) {
         return
       }
 
-      this.dataService.DisabledDays.value.forEach((element: any) => {
-        let data : Date = new Date(element.dzien)
-        let value = data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate()
+      this.dataService.DisabledDays.value.forEach((element : any) : void => {
+        let data: Date = new Date(element.dzien)
+        let value : string = data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate()
         this.DisabledDays.push(value)
       })
-      this.show_calendar()
     })
   };
-  checkSelected() : void {
-    let result : boolean = true;
-    this.selected.forEach(() : void => {
+
+  checkSelected(): void {
+    let result: boolean = true;
+    this.selected.forEach((): void => {
       result = false
     })
     this.dataService.changeSelectedSaved(result)
@@ -158,17 +165,15 @@ export class KalendarzComponent implements OnChanges, OnInit {
     if (this.empty_diff_undo_zsti) this.empty_diff_undo_zsti = false;
   }
 
-  checkTypPosilkow(){
-    let result = true
-    // dodanie
-    this.dodanie.forEach((element)=>{
-      element.array.forEach(()=>{
+  checkTypPosilkow() : void {
+    let result : boolean = true
+    this.dodanie.forEach((element) : void => {
+      element.array.forEach(() : void => {
         result = false
       })
     })
-    // usuniecie
-    this.usuniecie.forEach((element)=>{
-      element.array.forEach(()=>{
+    this.usuniecie.forEach((element) : void => {
+      element.array.forEach(() : void => {
         result = false
       })
     })
@@ -177,8 +182,19 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.dataService.changeTypPoslikuSaved(result);
     console.log("Is everything saved? : ", this.dataService.TypPosilkuSaved.value);
   }
-  ngOnChanges(changes: SimpleChanges) : void   {
+
+  ngOnChanges(changes: SimpleChanges): void {
     if (changes['typ'] || changes['name']) {
+      if(changes['name'].currentValue === undefined) return;
+      console.warn("Zmiana typu ucznia")
+      this.dataService.getStudentDeclarationInternat();
+      this.dataService.getStudentDeclarationZsti();
+      this.waitForCurrentStudentDeclaration().then((): void => {
+        this.change_month(0);
+        this.show_calendar();
+      }).catch((error: Error): void => {
+        console.error(error.message);
+      });
       this.selected = [];
       this.diff_selected_zsti = [];
       this.diff_undo_selected_zsti = [];
@@ -192,19 +208,17 @@ export class KalendarzComponent implements OnChanges, OnInit {
       this.dataService.getStudentInternatDays();
       console.log("Typ: ", this.typ)
       this.dataService.getDisabledDays();
-      this.show_calendar();
-      if(this.typ === 'Internat') {
+      if (this.typ === 'Internat') {
         (this.DOMelement?.querySelector('#zsti_diff') as HTMLElement).style.display = 'none';
         this.DOMelement?.querySelectorAll('.internat_logs')?.forEach((element: HTMLElement) => {
           element.style.display = 'block';
         });
-      }
-      else if(this.typ === 'ZSTI') {
+      } else if (this.typ === 'ZSTI') {
         (this.DOMelement?.querySelector('#zsti_diff') as HTMLElement).style.display = 'flex';
-        this.DOMelement?.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
+        this.DOMelement?.querySelectorAll('.logs').forEach((element: HTMLElement): void => {
           element.classList.add('empty');
         });
-        this.DOMelement?.querySelectorAll('.internat_logs').forEach((element : HTMLElement) : void => {
+        this.DOMelement?.querySelectorAll('.internat_logs').forEach((element: HTMLElement): void => {
           element.style.display = 'none';
         });
         this.empty_dodanie = true;
@@ -220,19 +234,20 @@ export class KalendarzComponent implements OnChanges, OnInit {
     return Math.ceil((((tempDate.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
   }
 
-  getStartingWeekNumber(year : number, month : number) : number {
-      const firstDayOfMonth = new Date(year, month - 1, 1);
-      return this.getWeekNumber(firstDayOfMonth);
+  getStartingWeekNumber(year: number, month: number): number {
+    const firstDayOfMonth = new Date(year, month - 1, 1);
+    return this.getWeekNumber(firstDayOfMonth);
   }
-  changeDeclaration(change : Array<DeklaracjaZSTI> | Array<DeklaracjaInternat>) : void {
+
+  changeDeclaration(change: Array<DeklaracjaZSTI> | Array<DeklaracjaInternat>): void {
     this.CurrentStudentDeclaration = change;
     //! fix someday...
-    this.show_calendar()
   }
+
   sendDays() {
-    if(this.dataService.StudentType.value === "ZSTI") {
-      this.selected.forEach((element)=>{
-        if(!this.dbCopyZstiDays.includes(element)) {
+    if (this.dataService.StudentType.value === "ZSTI") {
+      this.selected.forEach((element) => {
+        if (!this.dbCopyZstiDays.includes(element)) {
           this.dataService.send(
             JSON.stringify({
               action: "request",
@@ -247,8 +262,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
           console.log("Dodaj element: ", element)
         }
       })
-      this.dbCopyZstiDays.forEach((element: any)=>{
-        if(!this.selected.includes(element)) {
+      this.dbCopyZstiDays.forEach((element: any) => {
+        if (!this.selected.includes(element)) {
           this.dataService.send(
             JSON.stringify({
               action: "request",
@@ -259,7 +274,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
               }
             })
           )
-          console.log("Usun element: ", element,{
+          console.log("Usun element: ", element, {
             action: "request",
             params: {
               method: "DeleteZstiDays",
@@ -270,13 +285,12 @@ export class KalendarzComponent implements OnChanges, OnInit {
         }
       })
       this.dataService.getStudentZstiDays()
-      this.DOMelement?.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
+      this.DOMelement?.querySelectorAll('.logs').forEach((element: HTMLElement): void => {
         element.classList.add('empty');
       });
-    }
-    else if(this.dataService.StudentType.value === "Internat")
-    {
+    } else if (this.dataService.StudentType.value === "Internat") {
       enum typ {sniadanie = 1, obiad = 2, kolacja = 3}
+
       this.dodanie.forEach((element_parent) => {
         element_parent.array.forEach((element) => {
           this.dataService.send(
@@ -317,13 +331,14 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.dataService.changeTypPoslikuSaved(true)
     this.dataService.changeSelectedSaved(true)
   }
-  checkIfEmpty() : void {
-    this.diff_selected_zsti = this.selected.filter((element : string ) : boolean => !this.dbCopyZstiDays.includes(element));
-    let ul_1 : HTMLElement = this.DOMelement?.querySelectorAll('.logs')[0];
-    let ul_2 : HTMLElement = this.DOMelement?.querySelectorAll('.logs')[1];
+
+  checkIfEmpty(): void {
+    this.diff_selected_zsti = this.selected.filter((element: string): boolean => !this.dbCopyZstiDays.includes(element));
+    let ul_1: HTMLElement = this.DOMelement?.querySelectorAll('.logs')[0];
+    let ul_2: HTMLElement = this.DOMelement?.querySelectorAll('.logs')[1];
     this.diff_selected_zsti.length === 0 ? ul_1.classList.add('empty') : ul_1.classList.remove('empty');
     this.diff_undo_selected_zsti = [];
-    this.dbCopyZstiDays.forEach((element : string) : void => {
+    this.dbCopyZstiDays.forEach((element: string): void => {
       if (!this.selected.includes(element)) {
         this.diff_undo_selected_zsti.push(element);
       }
@@ -331,10 +346,11 @@ export class KalendarzComponent implements OnChanges, OnInit {
     console.log("Diff undo: ", this.diff_undo_selected_zsti)
     this.diff_undo_selected_zsti.length === 0 ? ul_2.classList.add('empty') : ul_2.classList.remove('empty');
   }
-  ngOnInit() : void  {
+
+  ngOnInit(): void {
     this.show_calendar()
     this.dataService.AllStudentDeclarations.asObservable().subscribe((change) => this.changeDeclaration(change));
-    this.DOMelement?.querySelectorAll('.logs').forEach((element : HTMLElement) : void => {
+    this.DOMelement?.querySelectorAll('.logs').forEach((element: HTMLElement): void => {
       element.classList.add('empty');
     });
     this.checkIfEmpty();
@@ -345,26 +361,27 @@ export class KalendarzComponent implements OnChanges, OnInit {
       element.array = []
     });
   }
-isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
-    let dayOfTheWeek : number = date.getDay();
-    if(dayOfTheWeek === 0)
+
+  isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
+    let dayOfTheWeek: number = date.getDay();
+    if (dayOfTheWeek === 0)
       dayOfTheWeek = 7
     dayOfTheWeek--
-    if(dayOfTheWeek === 5 || dayOfTheWeek === 6) {
+    if (dayOfTheWeek === 5 || dayOfTheWeek === 6) {
       button.disabled = true;
       return true;
     }
-    if(!this.CurrentStudentDeclaration) {
+    if (!this.CurrentStudentDeclaration) {
       button.disabled = true;
       if (dayOfTheWeek !== 5 && dayOfTheWeek !== 6)
         button.classList.add('disabled-for-person')
       return true;
     }
-    if(typ === 'ZSTI') {
+    if (typ === 'ZSTI') {
       this.CurrentStudentDeclaration = this.CurrentStudentDeclaration as Array<DeklaracjaZSTI>;
-      this.CurrentStudentDeclaration.forEach((d : DeklaracjaZSTI) : boolean => {
+      this.CurrentStudentDeclaration.forEach((d: DeklaracjaZSTI): boolean => {
         if (date >= new Date(d.data_od!) && date <= new Date(d.data_do!)) {
-          if (toBinary(Number(d.dni?.['data']),5)[dayOfTheWeek] === '0') {
+          if (toBinary(Number(d.dni?.['data']), 5)[dayOfTheWeek] === '0') {
             button.disabled = true;
             button.classList.add('disabled-for-person')
             return true;
@@ -372,40 +389,37 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
         }
         return false;
       })
-      // if (toBinary(Number(this.CurrentStudentDeclaration?.dni?.['data']),5)[dayOfTheWeek] === '0') {
-      //   button.disabled = true;
-      //   button.classList.add('disabled-for-person')
-      //   return true;
-      // }
     }
     return false;
   }
-  checkVersion(dayOfTheWeek : number, mealId : number) : boolean {
-    if(!this.CurrentStudentDeclaration) return false;
-    let dni : string[] = ['poniedzialek','wtorek','sroda','czwartek','piatek']
+
+  checkVersion(dayOfTheWeek: number, mealId: number): boolean {
+    if (!this.CurrentStudentDeclaration) return false;
+    let dni: string[] = ['poniedzialek', 'wtorek', 'sroda', 'czwartek', 'piatek']
     this.dni = [];
-    dni.forEach((dzien : string) : void => {
+    dni.forEach((dzien: string): void => {
       // @ts-ignore
-      this.dni.push(toBinary(this.CurrentStudentDeclaration?.[dzien]?.data[0],3))
+      this.dni.push(toBinary(this.CurrentStudentDeclaration?.[dzien]?.data[0], 3))
       //! really fix someday...
     })
-    if(dayOfTheWeek === 0)
+    if (dayOfTheWeek === 0)
       dayOfTheWeek = 7
     dayOfTheWeek--
     return this.dni[dayOfTheWeek][mealId] === '1';
   }
-  checkDayInternat(year : any, month: any, day: any, posilek: any, first_day_week: any, i: any, typy: any): boolean {
+
+  checkDayInternat(year: any, month: any, day: any, posilek: any, first_day_week: any, i: any, typy: any): boolean {
     const date = new Date(year, month - 1, day);
     if (date.getDay() === 0 || date.getDay() === 6) return false;
 
     const dayString = `${year}-${month + 1}-${i - first_day_week + 1}`;
     return this.checkVersion(date.getDay(), typy.indexOf(posilek)) ||
-           this.dodanie.find(meal => meal.id === posilek)?.array.includes(dayString) ||
-           this.typy_posilkow_db.array_operacaja.find(meal => meal.id === posilek)!.array.includes(dayString);
+      this.dodanie.find(meal => meal.id === posilek)?.array.includes(dayString) ||
+      this.typy_posilkow_db.array_operacaja.find(meal => meal.id === posilek)!.array.includes(dayString);
   }
 
 
-  show_calendar() : void {
+  show_calendar(): void {
     let data: Date = this.date;
     const calendar_content: HTMLElement = this.DOMelement?.querySelector('#kalendarz')!;
     calendar_content.textContent = '';
@@ -415,13 +429,13 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
     let first_day_week: number = new Date(year, month, 1).getDay();
 
     this.currentDate = this.months[month] + ' ' + year;
-    let week : HTMLElement = this.renderer.createElement('div');
+    let week: HTMLElement = this.renderer.createElement('div');
     week.classList.add('week');
     const typy: string[] = ['sniadanie', 'obiad', 'kolacja'];
 
-    for (let i : number = -7; i <= (month_days + first_day_week + 6); i++) {
-      const day_number : string = `${year}-${(month + 1).toString().padStart(2, '0')}-${(i - first_day_week + 1).toString().padStart(2, '0')}`;
-      let day : HTMLButtonElement;
+    for (let i: number = -7; i <= (month_days + first_day_week + 6); i++) {
+      const day_number: string = `${year}-${(month + 1).toString().padStart(2, '0')}-${(i - first_day_week + 1).toString().padStart(2, '0')}`;
+      let day: HTMLButtonElement;
       if (i < first_day_week || i > month_days + first_day_week - 1) {
         day = this.renderer.createElement('div');
         day.classList.add('empty');
@@ -431,34 +445,18 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
         day.classList.add('day');
         day.textContent = (i - first_day_week + 1).toString();
         this.isWeekend(new Date(day_number), day, this.typ!);
-        if(this.CurrentStudentDeclaration) {
-          let nearestDeclaration: DeklaracjaZSTI | DeklaracjaInternat | undefined;
-          if(Array.isArray(this.CurrentStudentDeclaration)) {
-            let minDiff : number = Infinity;
-            this.CurrentStudentDeclaration?.forEach((declaration: DeklaracjaZSTI | DeklaracjaInternat) => {
-            const declarationStartDate = new Date(declaration.data_od!);
-            const declarationEndDate = new Date(declaration.data_do!);
-            const startDiff : number = Math.abs(this.date.getTime() - declarationStartDate.getTime());
-            const endDiff : number = Math.abs(this.date.getTime() - declarationEndDate.getTime());
-            const diff : number = Math.min(startDiff, endDiff);
-            if (diff < minDiff) {
-              minDiff = diff;
-              nearestDeclaration = declaration;
-            }
-            });
-          } else {
-            nearestDeclaration = this.CurrentStudentDeclaration as DeklaracjaZSTI | DeklaracjaInternat;
-          }
-          console.log(nearestDeclaration);
-          if ((day_number <= nearestDeclaration?.data_od! || day_number >= nearestDeclaration?.data_do!) || nearestDeclaration === undefined) {
+        if (this.CurrentStudentDeclaration) {
+          let nearestDeclaration : DeklaracjaZSTI | DeklaracjaInternat = this.nearestDeclaration!;
+          // console.log(nearestDeclaration, day_number, day_number <= nearestDeclaration?.data_od!, day_number >= nearestDeclaration?.data_do!, this.isWeekend(new Date(day_number), day, this.typ!));
+          if (((day_number <= nearestDeclaration?.data_od! || day_number >= nearestDeclaration?.data_do!) && !this.isWeekend(new Date(day_number), day, this.typ!)) || nearestDeclaration === undefined) {
             day.disabled = true;
-            day.classList.add('disabled-for-person');
+            day.classList.add('out-declaration');
           }
         }
 
         if (this.typ === 'Internat') {
           const checkboxes: HTMLElement = this.renderer.createElement('div');
-          typy.forEach((typ : string): void => {
+          typy.forEach((typ: string): void => {
             const checkbox: HTMLInputElement = this.renderer.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.value = typ;
@@ -467,12 +465,12 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
 
             if (this.DisabledDays?.includes(day_number) || day.disabled)
               checkbox.disabled = true;
-            this.typy_posilkow_db.array_operacaja[typy.indexOf(typ)].array.forEach((data : string) : void => {
-              if(data === day_number)
+            this.typy_posilkow_db.array_operacaja[typy.indexOf(typ)].array.forEach((data: string): void => {
+              if (data === day_number)
                 checkbox.checked = false;
             });
-            this.dodanie[typy.indexOf(typ)].array.forEach((data : string) : void => {
-              if(data === day_number)
+            this.dodanie[typy.indexOf(typ)].array.forEach((data: string): void => {
+              if (data === day_number)
                 checkbox.checked = false;
             })
             checkboxes.appendChild(checkbox);
@@ -493,23 +491,23 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
         week.classList.add('week');
       }
     }
-    const dni : HTMLElement = this.DOMelement?.querySelector('#dni')!;
+    const dni: HTMLElement = this.DOMelement?.querySelector('#dni')!;
     dni.textContent = '';
-    for (let i : number = 0; i < 7; i++) {
+    for (let i: number = 0; i < 7; i++) {
       const daySpan: HTMLSpanElement = this.renderer.createElement('span');
       daySpan.textContent = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i];
       dni.appendChild(daySpan);
     }
-    this.DOMelement?.querySelectorAll('.week')?.forEach((week : HTMLElement) : void => {
-      if (!Array.from(week.children).some((child: Element) : boolean => (child as HTMLElement).classList.contains('day')))
+    this.DOMelement?.querySelectorAll('.week')?.forEach((week: HTMLElement): void => {
+      if (!Array.from(week.children).some((child: Element): boolean => (child as HTMLElement).classList.contains('day')))
         week.remove();
     });
-    let week_number : number = this.getStartingWeekNumber(year, month + 1);
+    let week_number: number = this.getStartingWeekNumber(year, month + 1);
     const zaznacz: HTMLElement = this.DOMelement?.querySelector('#zaznacz')!;
     zaznacz.textContent = '';
-    for (let i : number = 0; i < this.DOMelement?.getElementsByClassName('week').length!; i++) {
-      let selected_days : number = 0;
-      let days : number = 0;
+    for (let i: number = 0; i < this.DOMelement?.getElementsByClassName('week').length!; i++) {
+      let selected_days: number = 0;
+      let days: number = 0;
       Array.from(this.DOMelement?.getElementsByClassName('week')[i]?.children as HTMLCollectionOf<HTMLElement>).forEach((day: HTMLElement): void => {
         if (!day.classList.contains('empty')) {
           if (day.classList.contains('selected'))
@@ -517,13 +515,13 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
           days++;
         }
       });
-      let zaznacz_ : HTMLElement = this.renderer.createElement('div');
-      let number : number = week_number + i;
+      let zaznacz_: HTMLElement = this.renderer.createElement('div');
+      let number: number = week_number + i;
       if (number > 52) number = 1;
       zaznacz_.textContent = number.toString();
-      let zaznaczAbbr : HTMLElement = this.renderer.createElement('abbr');
-      let zaznaczElement : HTMLInputElement = this.renderer.createElement('input');
-      let zaznaczSpan : HTMLElement = this.renderer.createElement('span');
+      let zaznaczAbbr: HTMLElement = this.renderer.createElement('abbr');
+      let zaznaczElement: HTMLInputElement = this.renderer.createElement('input');
+      let zaznaczSpan: HTMLElement = this.renderer.createElement('span');
       if (this.typ === 'Internat') {
         this.renderer.addClass(zaznaczSpan, 'zaznacz_internat');
         this.renderer.setProperty(zaznaczAbbr, 'title', 'Kliknij lewym przyciskiem myszy aby zmienić posiłek dla całego tygodnia');
@@ -539,19 +537,36 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
       zaznacz.appendChild(zaznaczAbbr);
     }
   }
-  change_month(number : number) : void {
-    if (number === 0) {
-      this.date = new Date();
-    }
-    else {
-      this.date = new Date(this.date.getFullYear(), this.date.getMonth() + number, 1);
-    }
-    this.month_next = this.months[new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() + 1, 1).getFullYear()
-    this.month_before = this.months[new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getMonth()] + " " + new Date(this.date.getFullYear(), this.date.getMonth() - 1, 1).getFullYear()
-    if(this.DOMelement.querySelector('#kalendarz') === undefined) return;
-    this.show_calendar();
+change_month(number : number): void {
+  if (this.DOMelement.querySelector('#kalendarz') === undefined) return;
+  if (number === 0) {
+    this.date = new Date();
+  } else {
+    this.date = new Date(this.date.getFullYear(), this.date.getMonth() + number, 1);
   }
-  select(element : MouseEvent) : void {
+  this.month_next = `${this.months[(this.date.getMonth() + 1) % 12]} ${this.date.getFullYear() + (this.date.getMonth() === 11 ? 1 : 0)}`;
+  this.month_before = `${this.months[(this.date.getMonth() + 11) % 12]} ${this.date.getFullYear() - (this.date.getMonth() === 0 ? 1 : 0)}`;
+
+  let nearestDeclaration: DeklaracjaZSTI | DeklaracjaInternat | undefined;
+  if (!this.CurrentStudentDeclaration) return;
+
+  if (Array.isArray(this.CurrentStudentDeclaration)) {
+    let minDiff : number = Infinity;
+    this.CurrentStudentDeclaration.forEach((declaration : DeklaracjaZSTI | DeklaracjaInternat) : void => {
+      const diff : number = Math.abs(new Date(declaration.data_od!).getTime() - this.date.getTime());
+      if (diff < minDiff) {
+        minDiff = diff;
+        nearestDeclaration = declaration;
+      }
+    });
+  } else {
+    nearestDeclaration = this.CurrentStudentDeclaration;
+  }
+  this.nearestDeclaration = nearestDeclaration;
+
+  this.show_calendar();
+}
+    select(element : MouseEvent) : void {
     let target : HTMLElement = element.target as HTMLElement;
     if(!target.classList.contains('day') && target.tagName !== "INPUT") return;
     let day : string = target.textContent!;
@@ -708,54 +723,54 @@ isWeekend = (date: Date, button: HTMLButtonElement, typ: string): boolean => {
     const grandparent : HTMLElement = target.parentElement!.parentElement!;
     let typ : HTMLElement = grandparent.querySelectorAll('form')[0]!;
     const formularz : HTMLFormElement = this.DOMelement?.querySelector(`form[name="yah"]`);
-const checkbox_function = (value: string, input: HTMLInputElement): void => {
-  let meal = this.dodanie.find(meal => meal.id === input.value)!;
-  if (input.disabled) return;
-  const typy : string[] = ['sniadanie', 'obiad', 'kolacja'];
-  if (meal) {
-    let date: string = `${this.date.getFullYear()}-${(this.date.getMonth() + 1).toString().padStart(2, '0')}-${input.parentElement!.parentElement!.textContent!.padStart(2, '0')}`;
-    switch (value) {
-      case 'być':
-        input.checked = true;
-        meal.array = meal.array.filter(d => d !== date);
-        if (this.typy_posilkow_db.array_operacaja.find(meal => meal.id === input.value)?.array.includes(date) && this.checkVersion(new Date(date).getDay(), typy.indexOf(input.value))) {
+  const checkbox_function = (value: string, input: HTMLInputElement): void => {
+    let meal = this.dodanie.find(meal => meal.id === input.value)!;
+    if (input.disabled) return;
+    const typy : string[] = ['sniadanie', 'obiad', 'kolacja'];
+    if (meal) {
+      let date: string = `${this.date.getFullYear()}-${(this.date.getMonth() + 1).toString().padStart(2, '0')}-${input.parentElement!.parentElement!.textContent!.padStart(2, '0')}`;
+      switch (value) {
+        case 'być':
+          input.checked = true;
+          meal.array = meal.array.filter(d => d !== date);
+          if (this.typy_posilkow_db.array_operacaja.find(meal => meal.id === input.value)?.array.includes(date) && this.checkVersion(new Date(date).getDay(), typy.indexOf(input.value))) {
+            let usuniecieMeal = this.usuniecie.find(meal => meal.id === input.value);
+            if (usuniecieMeal && !usuniecieMeal.array.includes(date)) {
+              usuniecieMeal.array.push(date);
+            }
+          }
+          break;
+        case 'nie_być':
+          input.checked = false;
           let usuniecieMeal = this.usuniecie.find(meal => meal.id === input.value);
-          if (usuniecieMeal && !usuniecieMeal.array.includes(date)) {
-            usuniecieMeal.array.push(date);
+          if (usuniecieMeal) {
+            usuniecieMeal.array = usuniecieMeal.array.filter(d => d !== date);
           }
-        }
-        break;
-      case 'nie_być':
-        input.checked = false;
-        let usuniecieMeal = this.usuniecie.find(meal => meal.id === input.value);
-        if (usuniecieMeal) {
-          usuniecieMeal.array = usuniecieMeal.array.filter(d => d !== date);
-        }
-        if (!this.typy_posilkow_db.array_operacaja.find(meal => meal.id === input.value)?.array.includes(date) && this.checkVersion(new Date(date).getDay(), typy.indexOf(input.value))) {
-          if (!meal.array.includes(date)) {
-            meal.array.push(date);
+          if (!this.typy_posilkow_db.array_operacaja.find(meal => meal.id === input.value)?.array.includes(date) && this.checkVersion(new Date(date).getDay(), typy.indexOf(input.value))) {
+            if (!meal.array.includes(date)) {
+              meal.array.push(date);
+            }
           }
-        }
-        break;
-      default:
-        console.error('Nieznana wartość');
-        break;
+          break;
+        default:
+          console.error('Nieznana wartość');
+          break;
+      }
     }
-  }
-  this.checkTypPosilkow();
-};
-    typ.querySelectorAll('input:checked').forEach((child : Element) : void => {
-      const input: string = (child as HTMLInputElement).value;
-      let week: HTMLElement = this.DOMelement?.getElementsByClassName('week')[this.numer_week]!;
-      week.querySelectorAll('.day:not(.empty) div').forEach((div: Element): void => {
-        const checkboxes: NodeListOf<HTMLInputElement> = div.querySelectorAll('input');
-        let nieobecnosc: string = (formularz.elements.namedItem('na') as HTMLInputElement).value;
-        checkboxes.forEach((checkboxes: HTMLInputElement): void => {
-          if (checkboxes.value === input || input === 'wszystko') {
-            checkbox_function(nieobecnosc, checkboxes);
-          }
-        })
+    this.checkTypPosilkow();
+  };
+      typ.querySelectorAll('input:checked').forEach((child : Element) : void => {
+        const input: string = (child as HTMLInputElement).value;
+        let week: HTMLElement = this.DOMelement?.getElementsByClassName('week')[this.numer_week]!;
+        week.querySelectorAll('.day:not(.empty) div').forEach((div: Element): void => {
+          const checkboxes: NodeListOf<HTMLInputElement> = div.querySelectorAll('input');
+          let nieobecnosc: string = (formularz.elements.namedItem('na') as HTMLInputElement).value;
+          checkboxes.forEach((checkboxes: HTMLInputElement): void => {
+            if (checkboxes.value === input || input === 'wszystko') {
+              checkbox_function(nieobecnosc, checkboxes);
+            }
+          })
+        });
       });
-    });
-  }
+    }
 }
