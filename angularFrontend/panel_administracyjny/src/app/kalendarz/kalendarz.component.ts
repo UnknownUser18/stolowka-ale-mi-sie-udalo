@@ -19,6 +19,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
   date: Date = new Date();
   CurrentStudentDeclaration: Array<DeklaracjaZSTI> | Array<DeklaracjaInternat> | undefined;
   StudentZstiDays: Array<GetZSTIDisabledDays> | undefined;
+  dodaneZsti: string[] = [];
+  usunieteZsti: string[] = [];
   dbCopyZstiDays: any[] = [];
   StudentInternatDays: Array<GetInternatDisabledDays> | undefined;
   diff_selected_zsti: string[] = [];
@@ -71,13 +73,20 @@ export class KalendarzComponent implements OnChanges, OnInit {
       }, 5000);
     });
   }
-  constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
-    this.DOMelement = this.el.nativeElement;
-    console.log("Data service: ", this.dataService.StudentType.value)
+  temp()
+  {
     switch (this.dataService.StudentType.value) {
       case "ZSTI":
         this.dataService.StudentZstiDays.asObservable().subscribe((data: Array<GetZSTIDisabledDays>): void => {
+          this.selected = []
           this.StudentZstiDays = data?.map(item => new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi));
+          this.StudentZstiDays?.forEach((item: GetZSTIDisabledDays) => {
+            item.dzien_wypisania = this.dataService.formatDate(new Date(item.dzien_wypisania))
+            console.log(item)
+            this.selected.push(item.dzien_wypisania)
+          })
+          this.dodaneZsti = [];
+          this.usunieteZsti = [];
         });
         this.dataService.AllStudentDeclarations.asObservable().subscribe((data: Array<DeklaracjaZSTI>): void => {
           console.log("Deklaracja: ", data)
@@ -85,6 +94,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
             return new DeklaracjaZSTI(d.data_od?.split('T')[0], d.data_do?.split('T')[0], d.rok_szkolny_id, d.id_osoby, d.dni);
           })
         });
+        this.show_calendar()
         break;
       case "Internat":
         this.dataService.StudentInternatDays.asObservable().subscribe((data: Array<GetInternatDisabledDays>): void => {
@@ -95,27 +105,37 @@ export class KalendarzComponent implements OnChanges, OnInit {
             return new DeklaracjaInternat(d.data_od?.split('T')[0], d.data_do?.split('T')[0], d.rok_szkolny_id, d.id_osoby, d.wersja);
           })
         });
+        this.show_calendar()
         break;
       default:
         console.error("Nie wybrano typu ucznia");
         break;
     }
+    this.logDaysChanges();
+
+  }
+  constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
     this.DOMelement = this.el.nativeElement;
-    this.dataService.CurrentZstiDays.asObservable().subscribe(() : void => {
-      this.selected = []
-      this.dbCopyZstiDays = []
-      if (!this.dataService.CurrentZstiDays.value || this.dataService.StudentType.value !== "BRAK") {
-        return
-      }
-      console.log("Zarejestrowane dni: ", this.dataService.CurrentZstiDays.value)
-      this.dataService.CurrentZstiDays.value.forEach((element: GetZSTIDisabledDays): void => {
-        let data: Date = new Date(element.dzien_wypisania)
-        let value: string = data.getFullYear() + "-" + (data.getMonth() + 1).toString().padStart(2, '0') + "-" + data.getDate().toString().padStart(2, '0')
-        this.selected.push(value);
-        this.dbCopyZstiDays.push(value)
-      })
-      this.show_calendar()
-    })
+    console.log("Data service: ", this.dataService.StudentType.value)
+    this.temp()
+    this.dataService.CurrentZstiDays.asObservable().subscribe(()=> this.temp())
+    this.DOMelement = this.el.nativeElement;
+    // this.dataService.CurrentZstiDays.asObservable().subscribe(() : void => {
+    //   this.selected = []
+    //   this.dbCopyZstiDays = []
+    //   if (!this.dataService.CurrentZstiDays.value || this.dataService.StudentType.value !== "BRAK") {
+    //     return
+    //   }
+    //   console.log("Zarejestrowane dni: ", this.dataService.CurrentZstiDays.value)
+    //   this.dataService.CurrentZstiDays.value.forEach((element: GetZSTIDisabledDays): void => {
+    //     let data: Date = new Date(element.dzien_wypisania)
+    //     let value: string = data.getFullYear() + "-" + (data.getMonth() + 1).toString().padStart(2, '0') + "-" + data.getDate().toString().padStart(2, '0')
+    //     this.selected.push(value);
+    //     this.dbCopyZstiDays.push(value)
+    //   })
+    //   console.log(`Tescik: ${this.selected} ; ${this.dbCopyZstiDays}`)
+    //   this.show_calendar()
+    // })
     this.dataService.CurrentInternatDays.asObservable().subscribe(() : void => {
       this.dodanie.forEach((element) : void => {
         element.array = []
@@ -153,6 +173,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
         this.DisabledDays.push(value)
       })
     })
+    this.logDaysChanges();
+
   };
 
   checkSelected(): void {
@@ -244,50 +266,47 @@ export class KalendarzComponent implements OnChanges, OnInit {
     //! fix someday...
   }
 
+  simpleSend(method:string, date: string): void{
+    this.dataService.send(
+      JSON.stringify({
+        action: "request",
+        params: {
+          method: method,
+          studentId: this.dataService.CurrentStudentId.value,
+          date: date,
+          schoolYearId: this.dataService.CurrentStudentDeclaration.value.rok_szkolny_id
+        }
+      })
+    )
+  }
+
   sendDays() {
     if (this.dataService.StudentType.value === "ZSTI") {
-      this.selected.forEach((element) => {
-        if (!this.dbCopyZstiDays.includes(element)) {
-          this.dataService.send(
-            JSON.stringify({
-              action: "request",
-              params: {
-                method: "AddZstiDays",
-                studentId: this.dataService.CurrentStudentId.value,
-                date: element,
-                schoolYearId: this.dataService.CurrentStudentDeclaration.value.rok_szkolny_id
-              }
-            })
-          )
-          console.log("Dodaj element: ", element)
+      this.dataService.send(JSON.stringify({
+        action: "request",
+        params: {
+          method: "sendMailDaysZsti",
+          name: this.dataService.CurrentStudent.value.imie,
+          surname: this.dataService.CurrentStudent.value.nazwisko,
+          email: 'xxxxxxszymi@gmail.com',
+          addedDays: this.dodaneZsti,
+          removedDays: this.usunieteZsti
         }
+      }))
+      this.dodaneZsti.forEach((distinctAddedDay:string)=> {
+        this.simpleSend("AddZstiDays", distinctAddedDay);
       })
-      this.dbCopyZstiDays.forEach((element: any) => {
-        if (!this.selected.includes(element)) {
-          this.dataService.send(
-            JSON.stringify({
-              action: "request",
-              params: {
-                method: "DeleteZstiDays",
-                studentId: this.dataService.CurrentStudentId.value,
-                date: element
-              }
-            })
-          )
-          console.log("Usun element: ", element, {
-            action: "request",
-            params: {
-              method: "DeleteZstiDays",
-              studentId: this.dataService.CurrentStudentId.value,
-              date: element
-            }
-          })
-        }
+      console.log(`Adding ZSTI Days: \n ${this.dodaneZsti}`)
+
+      this.usunieteZsti.forEach((distinctRemovedDay:string)=> {
+        this.simpleSend("DeleteZstiDays", distinctRemovedDay);
       })
+      console.log(`Removing ZSTI Days: \n ${this.usunieteZsti}`)
       this.dataService.getStudentZstiDays()
       this.DOMelement?.querySelectorAll('.logs').forEach((element: HTMLElement): void => {
         element.classList.add('empty');
       });
+
     } else if (this.dataService.StudentType.value === "Internat") {
       enum typ {sniadanie = 1, obiad = 2, kolacja = 3}
 
@@ -350,10 +369,10 @@ export class KalendarzComponent implements OnChanges, OnInit {
   ngOnInit(): void {
     this.show_calendar()
     this.dataService.AllStudentDeclarations.asObservable().subscribe((change) => this.changeDeclaration(change));
-    this.DOMelement?.querySelectorAll('.logs').forEach((element: HTMLElement): void => {
+    (Array.from(this.DOMelement?.querySelectorAll('.logs')) as Array<HTMLElement>).forEach((element: HTMLElement): void => {
       element.classList.add('empty');
     });
-    this.checkIfEmpty();
+    // this.checkIfEmpty();
     this.dodanie.forEach((element) => {
       element.array = []
     });
@@ -477,8 +496,11 @@ export class KalendarzComponent implements OnChanges, OnInit {
           });
           day.appendChild(checkboxes);
           day.classList.add('internat');
-        } else if (this.typ === 'ZSTI' && this.selected.includes(day_number))
+        } else if (this.typ === 'ZSTI' && ((this.dodaneZsti.includes(day_number) || this.StudentZstiDays?.find((distinctItem: GetZSTIDisabledDays) => distinctItem.dzien_wypisania == day_number))))
+        {
           day.classList.add('selected');
+        }
+        this.logDaysChanges();
         if (this.DisabledDays?.includes(day_number)) {
           day.classList.add('disabled-day-global');
           day.disabled = true;
@@ -498,9 +520,9 @@ export class KalendarzComponent implements OnChanges, OnInit {
       daySpan.textContent = ['Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'Sob', 'Nie'][i];
       dni.appendChild(daySpan);
     }
-    this.DOMelement?.querySelectorAll('.week')?.forEach((week: HTMLElement): void => {
-      if (!Array.from(week.children).some((child: Element): boolean => (child as HTMLElement).classList.contains('day')))
-        week.remove();
+    (Array.from(this.DOMelement?.querySelectorAll('.week')) as Array<HTMLElement>).forEach((week: HTMLElement) => {
+        if (!Array.from(week.children).some((child: Element): boolean => (child as HTMLElement).classList.contains('day')))
+          week.remove();
     });
     let week_number: number = this.getStartingWeekNumber(year, month + 1);
     const zaznacz: HTMLElement = this.DOMelement?.querySelector('#zaznacz')!;
@@ -533,7 +555,9 @@ export class KalendarzComponent implements OnChanges, OnInit {
       if (selected_days === days && this.typ === 'ZSTI') {
         zaznaczElement.checked = true;
       }
-      zaznaczAbbr.append(zaznacz_, zaznaczElement, zaznaczSpan);
+      this.renderer.appendChild(zaznaczAbbr, zaznacz_);
+      this.renderer.appendChild(zaznaczAbbr, zaznaczElement);
+      this.renderer.appendChild(zaznaczAbbr, zaznaczSpan);
       zaznacz.appendChild(zaznaczAbbr);
     }
   }
@@ -566,6 +590,10 @@ change_month(number : number): void {
 
   this.show_calendar();
 }
+logDaysChanges()
+{
+  console.log(`Tescik: ${this.dodaneZsti} ; ${this.usunieteZsti}`)
+}
     select(element : MouseEvent) : void {
     let target : HTMLElement = element.target as HTMLElement;
     if(!target.classList.contains('day') && target.tagName !== "INPUT") return;
@@ -574,6 +602,7 @@ change_month(number : number): void {
       day = target.parentElement!.parentElement!.textContent!;
     }
     const date: string = `${this.date.getFullYear()}-${(this.date.getMonth() + 1).toString().padStart(2, '0')}-${day.padStart(2, '0')}`;
+    // const date: string = this.dataService.formatDateFromVariables(this.date.getFullYear(), this.date.getMonth(), day);
     if (this.typ === "ZSTI") {
       function isFullWeekSelected(week : HTMLElement) : boolean {
         let selected : number = 0;
@@ -592,17 +621,30 @@ change_month(number : number): void {
         if (isFullWeekSelected(target.parentElement as HTMLElement)) {
           (this.DOMelement?.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`) as HTMLInputElement).checked = false;
         }
-        this.selected.splice(this.selected.indexOf(date), 1);
+        if(this.dodaneZsti.includes(date))
+        {
+          this.dodaneZsti.splice(this.dodaneZsti.indexOf(date), 1);
+        }
+        else if(this.StudentZstiDays?.find((distinctItem:GetZSTIDisabledDays) => distinctItem.dzien_wypisania == date))
+          this.usunieteZsti.push(date);
+        // this.selected.splice(this.selected.indexOf(date), 1);
         target.classList.remove('selected');
       } else {
         target.classList.add('selected');
-        this.selected.push(date);
+        if(this.usunieteZsti.includes(date))
+        {
+          this.usunieteZsti.splice(this.usunieteZsti.indexOf(date), 1);
+        }
+        else if(!this.StudentZstiDays?.find((distinctItem:GetZSTIDisabledDays) => distinctItem.dzien_wypisania == date))
+          this.dodaneZsti.push(date);
+        // this.selected.push(date);
         if (isFullWeekSelected(target.parentElement as HTMLElement)) {
           (this.DOMelement?.querySelector(`#zaznacz > abbr:nth-child(${week_number + 1}) > input`) as HTMLInputElement).checked = true;
         }
       }
+      this.logDaysChanges();
       this.checkSelected()
-      this.checkIfEmpty();
+      // this.checkIfEmpty();
     }
 
     else if (this.typ === "Internat") {
@@ -695,16 +737,22 @@ change_month(number : number): void {
             element.classList.add('selected');
             if (!this.selected.includes(date)) {
               this.selected.push(date);
+              this.usunieteZsti.splice(this.usunieteZsti.indexOf(date) ,1);
+              if(!this.StudentZstiDays?.find((distinctItem:GetZSTIDisabledDays) => distinctItem.dzien_wypisania == date))
+                this.dodaneZsti.push(date);
               this.checkSelected();
             }
           } else {
             element.classList.remove('selected');
+            this.dodaneZsti.splice(this.dodaneZsti.indexOf(date) ,1);
+            if(this.StudentZstiDays?.find((distinctItem:GetZSTIDisabledDays) => distinctItem.dzien_wypisania == date))
+              this.usunieteZsti.push(date);
             this.selected.splice(this.selected.indexOf(date), 1);
             this.checkSelected();
           }
         }
       }
-      this.checkIfEmpty();
+      // this.checkIfEmpty();
     } else if (this.typ === "Internat") {
       const parent : HTMLElement = target.parentElement!;
       const grandparent : HTMLElement = parent.parentElement!;

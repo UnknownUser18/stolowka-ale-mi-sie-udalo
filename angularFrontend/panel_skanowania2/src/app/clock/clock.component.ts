@@ -10,9 +10,8 @@ import {DataBaseService} from '../data-base.service';
 })
 export class ClockComponent {
   currentTime: Date = new Date()
-  dniTygodnia: string[] = ['Ni', 'Pon', 'Wt', 'Śr', 'Czw', 'Pt', 'So'];
+  dniTygodnia: string[] = ['Nd', 'Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'So'];
   constructor(protected dataService: DataBaseService) {
-    this.currentTime = new Date();
     setInterval(() => this.incrementClock(), 1000)
   }
 

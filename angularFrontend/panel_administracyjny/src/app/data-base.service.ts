@@ -4,19 +4,20 @@ import {Injectable} from '@angular/core';
 // @ts-ignore
 import {BehaviorSubject} from 'rxjs';
 
+
 // @ts-ignore
 @Injectable({
   providedIn: 'root'
 })
 export class DataBaseService {
-  socket: WebSocket | undefined;
+  private socket!: WebSocket;
+  CurrentZstiDays = new BehaviorSubject<any>(null);
   DisabledZstiDays = new BehaviorSubject<any>(null);
   DisabledInternatDays = new BehaviorSubject<any>(null);
   StudentDeclarationZsti = new BehaviorSubject<any>(null);
   CurrentStudentDeclaration = new BehaviorSubject<any>(null);
   StudentDeclarationInternat = new BehaviorSubject<any>(null);
   StudentListZsti = new BehaviorSubject<any>(null);
-  CurrentZstiDays = new BehaviorSubject<any>(null);
   StudentListInternat = new BehaviorSubject<any>(null);
   CurrentInternatDays = new BehaviorSubject<any>(null);
   StudentZstiDays = new BehaviorSubject<any>(null);
@@ -43,6 +44,7 @@ export class DataBaseService {
   CurrentStudentCardInternat = new BehaviorSubject<any>(null)
   AllStudentDeclarations = new BehaviorSubject<any>(null);
   ListOfGroups = new BehaviorSubject<any>(null);
+  CurrentStudent = new BehaviorSubject<any>(null)
   nullKarta = {
     id: -1,
     id_ucznia: -1,
@@ -56,27 +58,37 @@ export class DataBaseService {
     this.PersonalDataSaved,
     this.DeclarationDataSaved
   ];
-  initWebSocket()
-  {
-    this.socket = new WebSocket("ws://localhost:8080");
-    this.socket.onopen = () : void => {
-      console.log('WebSocket connection established')
-      this.Initialize()
-    }
-    this.socket.onerror = () : void => {
-      console.error('WebSocket connection error')
-      setTimeout(()=>{
-        this.initWebSocket()
-      },1000)
+  private initWebSocket(): void {
+    try {
+      // Use browser-native WebSocket
+      this.socket = new WebSocket('ws://localhost:8080');
+
+      // Simplified event handlers
+      this.socket.onopen = () => {
+        console.log('WebSocket connection established');
+        this.Initialize();
+      };
+
+      this.socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setTimeout(() => this.initWebSocket(), 1000);
+      };
+
+      // Add message handler if needed
+      this.socket.onmessage = (event) => {
+        // Handle messages here
+      };
+
+    } catch (error) {
+      console.error('WebSocket initialization failed:', error);
     }
   }
   constructor() {
-    setTimeout(() : void =>{
-      this.initWebSocket()
-    },500)
-
+    // Use browser-only initialization
+    if (typeof window !== 'undefined') {
+      setTimeout(() => this.initWebSocket(), 500);
+    }
   }
-
   public changeSelectedSaved(change:boolean) : void {
     this.SelectedSaved.next(change)
   }
@@ -85,6 +97,9 @@ export class DataBaseService {
     this.TypPosilkuSaved.next(change);
   }
 
+  public formatDate(date:Date): string {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${(date.getDate()).toString().padStart(2, '0')}`;
+  }
 
   public changeDeclarationDataSaved(change:boolean) : void {
     this.DeclarationDataSaved.next(change);
@@ -148,6 +163,7 @@ export class DataBaseService {
     console.warn("Change student call")
     // console.log(Id, type)
     if (this.StudentType.value === "ZSTI") {
+      this.CurrentStudent.next(this.StudentListZsti.value.find((item: any)=> item.id == this.CurrentStudentId.value));
       this.getStudentDeclarationZsti()
       this.getStudentZstiDays()
       this.getStudentDisabledZstiDays()
@@ -158,6 +174,7 @@ export class DataBaseService {
       // console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
     }
     else{
+      this.CurrentStudent.next(this.StudentListInternat.value[this.CurrentStudentId.value]);
       // console.log("Checking internat cards:")
       this.getStudentDeclarationInternat()
       // console.log(this.StudentDeclarationInternat.value, "NMIGER")

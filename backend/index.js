@@ -118,7 +118,8 @@ function handleRequest(ws,params) {
         "addScanInternat": () => addScanInternat(params.cardId, params.datetime, params.meal),
         "getScanInternat": () => getScanInternat(ws),
         "getGroups": () => getGroups(ws),
-        "getScanningInfoZsti": () => getScanningInfoZsti(ws)
+        "getScanningInfoZsti": () => getScanningInfoZsti(ws),
+        "sendMailDaysZsti": () => sendMailDaysZsti(params.name, params.surname, params.email, params.addedDays, params.removedDays),
     }
     if(actions[params.method]) {
         actions[params.method]();
@@ -382,3 +383,80 @@ function QueryExecute(ws, query, pass, responseBool, variable) {
     executeQuery(query, result => sendResponse(ws, variable, result));
 }
 
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'szymixxxxxx@gmail.com',
+        pass: 'lmib pvne monl kleg'
+    }
+});
+
+const dniTygodnia = {
+    0: 'Niedziela',
+    1: 'Poniedziałek',
+    2: 'Wtorek',
+    3: 'Środa',
+    4: 'Czwartek',
+    5: 'Piątek',
+    6: 'Sobota'
+}
+
+const miesiace = {
+    0: 'Styczeń',
+    1: 'Luty',
+    2: 'Marzec',
+    3: 'Kwiecień',
+    4: 'Maj',
+    5: 'Czerwiec',
+    6: 'Lipiec',
+    7: 'Sierpień',
+    8: 'Wrzesień',
+    9: 'Październik',
+    10: 'Listopad',
+    11: 'Grudzień'
+}
+
+// sendMailDaysZsti('Szymon', 'Żelazny', 'xxxxxxszymi@gmail.com', [new Date(), new Date(2024, 11, 21)], [new Date(2024, 10, 11)])
+function sendMail(receiver, subject, text)
+{
+    const tempMailOptions = {
+        from: 'szymixxxxxx@gmail.com',
+        to: receiver,
+        subject: subject,
+        html: text
+    }
+    transporter.sendMail(tempMailOptions);
+}
+
+function sendMailDaysZsti(firstName, lastName, email, addedDays, removedDays) {
+    const formatDate = dateStr => {
+        const date = new Date(dateStr);
+        return `${date.getDate()} ${miesiace[date.getMonth()]} ${date.getFullYear()} (${dniTygodnia[date.getDay()]})`;
+    };
+
+    const generateSection = (title, days) => days.length ? `
+        <h3>${title}:</h3>
+        <ul>${days.map(day => `<li>${formatDate(day)}</li>`).join('')}</ul>
+    ` : '';
+
+    const sections = [
+        generateSection('Dodane nieobecności', addedDays),
+        generateSection('Usunięte nieobecności', removedDays)
+    ].filter(Boolean).join('');
+
+    const mailHtml = `
+        <body style="color: black !important;">
+            Szanowny/a ${firstName} ${lastName[0]}.,<br>
+            Informujemy, że w systemie stołówki zostały odnotowane zmiany dotyczące Twojej obecności na obiedzie.<br>
+            <h2>Szczegóły zmian: <br></h2>
+            ${sections}
+            Jeśli te zmiany były zamierzone, nie musisz podejmować żadnych dalszych działań.<br>
+            W przypadku jakichkolwiek nieścisłości lub potrzeby korekty, prosimy o kontakt z administracją stołówki<br>
+            Dziękujemy za korzystanie z naszego systemu i życzymy miłego dnia!<br>
+            Z wyrazami szacunku, <br> <h4><b>Zespół Stołówki</b></h4>
+        </body>
+    `;
+    sendMail(email, 'Potwierdzenie zgłoszenia nieobecności na obiedzie', mailHtml);
+}

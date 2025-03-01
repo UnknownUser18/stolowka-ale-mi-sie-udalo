@@ -147,6 +147,7 @@ export class AppComponent implements OnInit {
 
   constructor(private dataService: DataBaseService, private el: ElementRef, private dialog: MatDialog) {
     this.DOMelement = this.el.nativeElement;
+    // setInterval(() => {console.log("Niggas")}, 1000)
   }
 
   ngOnInit() : void {

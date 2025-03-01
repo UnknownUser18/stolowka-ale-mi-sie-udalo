@@ -41,11 +41,7 @@ export class AutoCompleteComponent implements AfterViewInit  {
   }
 
   searchControl = new FormControl('');
-  users: User[] = [
-    { firstName: 'Jan', lastName: 'Kowalski', cardId: 1234 },
-    { firstName: 'Anna', lastName: 'Nowak', cardId: 5678 },
-    { firstName: 'Piotr', lastName: 'Wiśniewski', cardId: 91011 },
-  ];
+  users: User[] = [];
 
   filteredUsers: Observable<User[]> = this.searchControl.valueChanges.pipe(
     startWith(''),

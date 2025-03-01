@@ -14,9 +14,7 @@ import {AutoCompleteComponent} from '../auto-complete/auto-complete.component';
 })
 export class CardInputComponent{
   @Output() cardChange = new EventEmitter<string>();
-  constructor(private dataService: DataBaseService) {
 
-  }
   handleSubmit(inputEvent: number) : void {
     console.log(`Entered card input: ${inputEvent}`);
     this.cardChange.emit(inputEvent.toString());

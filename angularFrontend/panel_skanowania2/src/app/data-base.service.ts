@@ -34,12 +34,9 @@ export class DataBaseService {
   ScanInternat = new BehaviorSubject<any>(null);
   CurrentStudentScan = new BehaviorSubject<any>(null);
   constructor() {
-    setTimeout((): void => {
+    // setTimeout((): void => {
       this.initWebSocket();
-    }, 50);
-    setInterval(() => {
-      this.Initialize()
-    }, 5000)
+    // }, 50);
   }
   initWebSocket() {
     this.socket = new WebSocket('ws://localhost:8080');
@@ -56,13 +53,18 @@ export class DataBaseService {
   }
 
   getDisabledDays(): void {
-    this.send(
-      JSON.stringify({
-        action: 'request',
-        params: { method: 'getDniNieczynne' },
-      })
-    );
+      this.simpleRequest('getDniNieczynne')
   }
+
+  private simpleRequest(val:string) {
+    this.send(
+     JSON.stringify({
+      action: 'request',
+      params: {method: val},
+    })
+    )
+  }
+
   getPaymentZsti(): void {
     this.send(
       JSON.stringify({
@@ -137,7 +139,15 @@ export class DataBaseService {
   }
 
   send(query: string) {
-    if (this.socket) this.socket.send(query);
+    if (this.socket)
+    {
+      this.socket.send(query)
+      return 0;
+    }
+    else {
+      console.log('WebSocket connection not established');
+      return -1;
+    }
   }
   Initialize() {
     this.socket!.addEventListener('message', (event) => {
