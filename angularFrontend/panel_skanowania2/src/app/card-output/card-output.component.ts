@@ -140,7 +140,7 @@ export class CardOutputComponent {
     this.message = `Uczeń może wejść na stołówkę - ${new Date().getHours()}:${new Date().getMinutes()}`
     this.backgroundColor = '#a8e5a1'
     this.canAccept = true;
-    setTimeout(() => this.handleSubmit(), 100)
+    setTimeout(() => this.handleSubmitZsti(), 100)
     console.log('passed payments')
     console.log(this.message);
   }
@@ -195,14 +195,15 @@ export class CardOutputComponent {
     this.emitReset.emit();
   }
 
-  handleSubmit(){
+  handleSubmitZsti(){
     let tempData = new Date();
+    let dataString = `${tempData.getFullYear()}-${tempData.getMonth() + 1}-${tempData.getDate()} ${tempData.getHours()}:${tempData.getMinutes()}:${tempData.getSeconds()}`
     let sendingData = JSON.stringify({
       action: 'request',
       params: {
         method: 'addScanZsti',
         cardId: this.dataService.CurrentStudent.value.id_karty,
-        datetime: `${tempData.getFullYear()}-${tempData.getMonth() + 1}-${tempData.getDate()} ${tempData.getHours()}:${tempData.getMinutes()}:${tempData.getSeconds()}`,
+        datetime: dataString,
       },
     })
     // let sendUse = JSON.stringify({
@@ -213,6 +214,14 @@ export class CardOutputComponent {
     // })
     console.warn(sendingData);
     this.dataService.send(sendingData);
+    this.dataService.send(JSON.stringify({
+      action: 'request',
+      params: {
+        method: 'changeLastUseOfCardZsti',
+        cardId: this.dataService.CurrentStudent.value.id_karty,
+        datetime: dataString
+      }
+    }))
     this.dataService.getScanZsti()
     // this.handleReset()
   }

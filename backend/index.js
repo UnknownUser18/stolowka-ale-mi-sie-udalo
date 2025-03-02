@@ -120,6 +120,9 @@ function handleRequest(ws,params) {
         "getGroups": () => getGroups(ws),
         "getScanningInfoZsti": () => getScanningInfoZsti(ws),
         "sendMailDaysZsti": () => sendMailDaysZsti(params.name, params.surname, params.email, params.addedDays, params.removedDays),
+        "changeLastUseOfCardZsti": () => changeLastUseOfCardZsti(params.cardId, params.datetime),
+        "changeLastUseOfCardInternat": () => changeLastUseOfCardInternat(params.cardId, params.datetime),
+        "getScanZstiMoreInfo": () => getScanZstiMoreInfo(ws),
     }
     if(actions[params.method]) {
         actions[params.method]();
@@ -141,6 +144,21 @@ function sendResponse(ws, variable, value) {
             }
         }
     ))
+}
+
+function getScanZstiMoreInfo(ws)
+{
+    executeQuery(`Select skany_zsti.id as id, osoby_zsti.id as id_osoby, skany_zsti.czas from skany_zsti JOIN karty_zsti ON karty_zsti.id = skany_zsti.id_karty JOIN osoby_zsti ON osoby_zsti.id = karty_zsti.id_ucznia;`, result => sendResponse(ws, "ScanZstiMoreInfo", result));
+}
+
+function changeLastUseOfCardZsti(id, date)
+{
+    executeQuery(`update karty_zsti Set karty_zsti.ostatnie_uzycie = '${date}' WHERE karty_zsti.id = ${id};`, result => console.log(result));
+}
+
+function changeLastUseOfCardInternat(id, date)
+{
+    executeQuery(`update karty_internat Set karty_internat.ostatnie_uzycie = '${date}' WHERE karty_internat.id = ${id};`, result => console.log(result));
 }
 
 function getScanningInfoZsti(ws)

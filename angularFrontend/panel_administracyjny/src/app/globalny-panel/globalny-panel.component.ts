@@ -396,7 +396,7 @@ export class GlobalnyPanelComponent implements OnInit {
       this.dataService.getStudentList()
     }
     else{
-      this.editedDeclaration.osoby_internat_id = this.dataService.LastStudentInsertId.value.insertId;
+      this.editedDeclaration.osoby_internat_id = this.dataService.LastStudentInsertId.value;
       this.dataService.send(JSON.stringify({
         action: "request",
         params: {

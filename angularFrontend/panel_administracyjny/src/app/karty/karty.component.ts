@@ -2,6 +2,7 @@ import { Component, ElementRef, Input } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DataBaseService } from '../data-base.service';
 import { NgOptimizedImage } from '@angular/common';
+import {Cards} from '../app.component';
 
 @Component({
   selector: 'app-karty',
@@ -20,7 +21,7 @@ export class KartyComponent {
   today:Date = new Date();
   todayString:string;
   isFocused:boolean = false;
-  CurrentKarta: { id: number, id_ucznia:number, key_card:number, data_wydania:string, ostatnie_uzycie:string } =
+  CurrentKarta: Cards =
       {
         id:-1,
         id_ucznia:-1,
@@ -28,7 +29,7 @@ export class KartyComponent {
         data_wydania: '',
         ostatnie_uzycie: ''
       }
-  nullKarta: { id: number, id_ucznia:number, key_card:number, data_wydania:string, ostatnie_uzycie:string } =
+  nullKarta: Cards =
       {
         id:-1,
         id_ucznia:-1,
@@ -39,7 +40,7 @@ export class KartyComponent {
   constructor(private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.CurrentStudentCardZsti.asObservable().subscribe((change:any)=>this.updateCard(change))
     this.dataService.CurrentStudentCardInternat.asObservable().subscribe((change:any)=>this.updateCard(change))
-    this.todayString = `${this.today.getFullYear()}-${this.today.getMonth()+1}-${this.today.getDate()}`;
+    this.todayString = this.dataService.formatDate(this.today);
     this.nullKarta = {
       id: -1,
       id_ucznia: -1,
@@ -81,8 +82,8 @@ export class KartyComponent {
     }
     console.log("not null karta")
     this.DOMelement.querySelector('input[name="key_card"]').value = this.CurrentKarta.key_card;
-    this.DOMelement.querySelector('input[name="data_wydania"]').value = this.CurrentKarta.data_wydania
-    this.DOMelement.querySelector('input[name="ostatnie_uzycie"]').value = this.CurrentKarta.ostatnie_uzycie
+    this.DOMelement.querySelector('input[name="data_wydania"]').value = this.dataService.formatDate(this.CurrentKarta.data_wydania)
+    this.DOMelement.querySelector('input[name="ostatnie_uzycie"]').value = this.dataService.formatDate(this.CurrentKarta.ostatnie_uzycie)
   }
 
   clearData()

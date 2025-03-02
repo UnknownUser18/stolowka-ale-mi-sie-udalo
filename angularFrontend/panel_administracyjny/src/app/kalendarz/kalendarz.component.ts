@@ -2,7 +2,7 @@ import {Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChange
 import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
 import {FormsModule} from "@angular/forms";
 import {DataBaseService} from '../data-base.service';
-import {DeklaracjaZSTI, DeklaracjaInternat, toBinary, GetZSTIDisabledDays, GetInternatDisabledDays} from '../app.component';
+import {DeklaracjaZSTI, DeklaracjaInternat, toBinary, GetZSTIDisabledDays, GetInternatDisabledDays, DisabledDays} from '../app.component';
 
 @Component({
   selector: 'app-kalendarz',
@@ -21,7 +21,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
   StudentZstiDays: Array<GetZSTIDisabledDays> | undefined;
   dodaneZsti: string[] = [];
   usunieteZsti: string[] = [];
-  dbCopyZstiDays: any[] = [];
+  // dbCopyZstiDays: any[] = [];
   StudentInternatDays: Array<GetInternatDisabledDays> | undefined;
   diff_selected_zsti: string[] = [];
   diff_undo_selected_zsti: string[] = [];
@@ -82,14 +82,17 @@ export class KalendarzComponent implements OnChanges, OnInit {
           this.StudentZstiDays = data?.map(item => new GetZSTIDisabledDays(item.dzien_wypisania, item.osoby_zsti_id, item.uwagi));
           this.StudentZstiDays?.forEach((item: GetZSTIDisabledDays) => {
             item.dzien_wypisania = this.dataService.formatDate(new Date(item.dzien_wypisania))
-            console.log(item)
             this.selected.push(item.dzien_wypisania)
           })
-          this.dodaneZsti = [];
-          this.usunieteZsti = [];
         });
-        this.dataService.AllStudentDeclarations.asObservable().subscribe((data: Array<DeklaracjaZSTI>): void => {
+        this.dataService.AllStudentDeclarations.asObservable().subscribe((data: Array<DeklaracjaZSTI> | Array<DeklaracjaInternat>): void => {
           console.log("Deklaracja: ", data)
+          if(!(data.length > 0))
+            return
+          if(data[0] instanceof DeklaracjaZSTI)
+            data = data as Array<DeklaracjaZSTI>
+          else
+            return
           this.CurrentStudentDeclaration = data.map((d: DeklaracjaZSTI): DeklaracjaZSTI => {
             return new DeklaracjaZSTI(d.data_od?.split('T')[0], d.data_do?.split('T')[0], d.rok_szkolny_id, d.id_osoby, d.dni);
           })
@@ -100,7 +103,13 @@ export class KalendarzComponent implements OnChanges, OnInit {
         this.dataService.StudentInternatDays.asObservable().subscribe((data: Array<GetInternatDisabledDays>): void => {
           this.StudentInternatDays = data?.map(item => new GetInternatDisabledDays(item.posilki_id, item.dzien_wypisania, item.osoby_internat_id, item.uwagi));
         });
-        this.dataService.CurrentStudentDeclaration.asObservable().subscribe((data: Array<DeklaracjaInternat>): void => {
+        this.dataService.AllStudentDeclarations.asObservable().subscribe((data: Array<DeklaracjaInternat> | Array<DeklaracjaZSTI>): void => {
+          if(!(data.length > 0))
+            return
+          if(data[0] instanceof DeklaracjaInternat)
+            data = data as Array<DeklaracjaInternat>
+          else
+            return
           this.CurrentStudentDeclaration = data.map((d: DeklaracjaInternat): DeklaracjaInternat => {
             return new DeklaracjaInternat(d.data_od?.split('T')[0], d.data_do?.split('T')[0], d.rok_szkolny_id, d.id_osoby, d.wersja);
           })
@@ -167,7 +176,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
         return
       }
 
-      this.dataService.DisabledDays.value.forEach((element : any) : void => {
+      this.dataService.DisabledDays.value.forEach((element : DisabledDays) : void => {
         let data: Date = new Date(element.dzien)
         let value : string = data.getFullYear() + "-" + (data.getMonth() + 1) + "-" + data.getDate()
         this.DisabledDays.push(value)
@@ -274,7 +283,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
           method: method,
           studentId: this.dataService.CurrentStudentId.value,
           date: date,
-          schoolYearId: this.dataService.CurrentStudentDeclaration.value.rok_szkolny_id
+          schoolYearId: 1
         }
       })
     )
@@ -306,6 +315,8 @@ export class KalendarzComponent implements OnChanges, OnInit {
       this.DOMelement?.querySelectorAll('.logs').forEach((element: HTMLElement): void => {
         element.classList.add('empty');
       });
+      this.dodaneZsti = [];
+      this.usunieteZsti = [];
 
     } else if (this.dataService.StudentType.value === "Internat") {
       enum typ {sniadanie = 1, obiad = 2, kolacja = 3}
@@ -321,7 +332,7 @@ export class KalendarzComponent implements OnChanges, OnInit {
                 date: element,
                 // @ts-ignore
                 mealId: typ[element_parent.id],
-                schoolYearId: this.dataService.CurrentStudentDeclaration.value.rok_szkolny_id
+                schoolYearId: 1
               }
             })
           )
@@ -351,20 +362,20 @@ export class KalendarzComponent implements OnChanges, OnInit {
     this.dataService.changeSelectedSaved(true)
   }
 
-  checkIfEmpty(): void {
-    this.diff_selected_zsti = this.selected.filter((element: string): boolean => !this.dbCopyZstiDays.includes(element));
-    let ul_1: HTMLElement = this.DOMelement?.querySelectorAll('.logs')[0];
-    let ul_2: HTMLElement = this.DOMelement?.querySelectorAll('.logs')[1];
-    this.diff_selected_zsti.length === 0 ? ul_1.classList.add('empty') : ul_1.classList.remove('empty');
-    this.diff_undo_selected_zsti = [];
-    this.dbCopyZstiDays.forEach((element: string): void => {
-      if (!this.selected.includes(element)) {
-        this.diff_undo_selected_zsti.push(element);
-      }
-    });
-    console.log("Diff undo: ", this.diff_undo_selected_zsti)
-    this.diff_undo_selected_zsti.length === 0 ? ul_2.classList.add('empty') : ul_2.classList.remove('empty');
-  }
+  // checkIfEmpty(): void {
+  //   this.diff_selected_zsti = this.selected.filter((element: string): boolean => !this.dbCopyZstiDays.includes(element));
+  //   let ul_1: HTMLElement = this.DOMelement?.querySelectorAll('.logs')[0];
+  //   let ul_2: HTMLElement = this.DOMelement?.querySelectorAll('.logs')[1];
+  //   this.diff_selected_zsti.length === 0 ? ul_1.classList.add('empty') : ul_1.classList.remove('empty');
+  //   this.diff_undo_selected_zsti = [];
+  //   this.dbCopyZstiDays.forEach((element: string): void => {
+  //     if (!this.selected.includes(element)) {
+  //       this.diff_undo_selected_zsti.push(element);
+  //     }
+  //   });
+  //   console.log("Diff undo: ", this.diff_undo_selected_zsti)
+  //   this.diff_undo_selected_zsti.length === 0 ? ul_2.classList.add('empty') : ul_2.classList.remove('empty');
+  // }
 
   ngOnInit(): void {
     this.show_calendar()
@@ -592,7 +603,7 @@ change_month(number : number): void {
 }
 logDaysChanges()
 {
-  console.log(`Tescik: ${this.dodaneZsti} ; ${this.usunieteZsti}`)
+  console.log(`Dodane ; Usunietę ZSTI: ${this.dodaneZsti} ; ${this.usunieteZsti}`)
 }
     select(element : MouseEvent) : void {
     let target : HTMLElement = element.target as HTMLElement;

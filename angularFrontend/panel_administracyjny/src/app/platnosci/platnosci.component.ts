@@ -2,6 +2,7 @@ import {Component, ElementRef, Input, OnChanges} from '@angular/core';
 import {DataBaseService} from '../data-base.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
+import { Payments} from '../app.component';
 
 @Component({
   selector: 'app-platnosci',
@@ -58,19 +59,19 @@ export class PlatnosciComponent implements OnChanges{
     }
   }
 
-  changePayments(changes:any)
+  changePayments(changes:Payments[])
   {
     if(this.DOMelement === undefined) return;
     this.clearData()
     this.selectedPayment = null;
     this.PaymentZsti = []
-    if(changes.value)
-      changes = changes.value
-    changes.forEach((element:any) => {
+    // if(changes.value)
+    //   changes = changes.value
+    changes.forEach((element:Payments) => {
       if(element.id_ucznia === this.dataService.CurrentStudentId.value && element.id_ucznia !== null)
         this.PaymentZsti.push(element);
     })
-    this.PaymentZsti.forEach((element:any) => {
+    this.PaymentZsti.forEach((element:Payments) => {
       let date = new Date(element.data_platnosci)
       element.data_platnosci = this.formatDate(`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`);
     })
@@ -155,6 +156,7 @@ export class PlatnosciComponent implements OnChanges{
 
   dodajPlatnosc(){
     this.DOMelement.querySelector('#dodaj_platnosc').style.display = 'flex';
+    this.DOMelement.querySelector('input[name="payment-date-edit"]').value = this.dataService.formatDate(new Date())
   }
 
   delete()

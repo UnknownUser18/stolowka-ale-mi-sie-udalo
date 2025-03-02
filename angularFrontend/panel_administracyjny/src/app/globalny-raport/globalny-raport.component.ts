@@ -1,7 +1,7 @@
 import { Component, ElementRef, Renderer2 } from '@angular/core';
 import * as XLS from 'xlsx';
 import { DataBaseService } from '../data-base.service';
-import {Osoba, OsobaZSTI, OsobaInternat, Deklaracja, DeklaracjaInternat, DeklaracjaZSTI, GetZSTIDisabledDays, GetInternatDisabledDays} from '../app.component';
+import {Osoba, OsobaZSTI, OsobaInternat, Deklaracja, DeklaracjaInternat, DeklaracjaZSTI, GetZSTIDisabledDays, GetInternatDisabledDays, ScanZstiExtended} from '../app.component';
 
 
 
@@ -35,7 +35,7 @@ export class GlobalnyRaportComponent {
   deklaracjeInternat: Array<DeklaracjaInternat> = [];
   nieobecnosciZsti: Array<GetZSTIDisabledDays> = [];
   nieobecnosciInternat: Array<GetInternatDisabledDays> = [];
-
+  skanyZstiExtended: Array<ScanZstiExtended> = [];
   constructor(protected renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService ) {
     this.DOMelement = this.el.nativeElement;
     this.getDataBaseInfo();
@@ -75,6 +75,9 @@ export class GlobalnyRaportComponent {
     this.dataService.StudentDeclarationInternat.asObservable().subscribe((data: Array<DeklaracjaInternat>): void => {
       this.deklaracjeInternat = data?.map(item => new DeklaracjaInternat(item.data_do, item.data_od, item.id_osoby, item.rok_szkolny_id, item.wersja));
     });
+    this.dataService.ScanZstiMoreInfo.asObservable().subscribe((data: Array<ScanZstiExtended>):void => {
+      this.skanyZstiExtended = data?.map(item => new ScanZstiExtended(item.id, item.id_osoby, item.czas))
+    })
   }
   checkDate(date: string): boolean {
     if (date.length !== 7) return false;
@@ -120,8 +123,8 @@ export class GlobalnyRaportComponent {
     const buttonExcel: HTMLButtonElement = this.renderer.createElement('button');
     buttonExcel.textContent = okres ? `Zapisz raport za okres ${data} do pliku Excel` : `Zapisz raport za ${data} do pliku Excel`;
     buttonExcel.addEventListener('click', (): void => {
-      const table = XLS.utils.table_to_book(document.getElementById('raport_table'), { sheet: okres ? `Raport za okres ${data}` : `Raport za ${data}` });
-      const ws = table.Sheets[okres ? `Raport za okres ${data}` : `Raport za ${data}`];
+      const table = XLS.utils.table_to_book(document.getElementById('raport_table'), { sheet: okres ? `Raport za okres ${data}`.slice(0,30) : `Raport za ${data}`.slice(0,30) });
+      const ws = table.Sheets[okres ? `Raport za okres ${data}`.slice(0,30) : `Raport za ${data}`.slice(0,30)];
       ws['!cols'] = [{ wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }];
       const range = XLS.utils.decode_range(<string>ws['!ref']);
       for (let row = range.s.r; row <= range.e.r; row++) {
@@ -134,7 +137,7 @@ export class GlobalnyRaportComponent {
           ws[cellAddress].s.alignment.vertical = 'center';
         }
       }
-      XLS.writeFile(table, okres ? `raport_${name}_okres_${data}.xlsx` : `raport_${name}_${data}.xlsx`);
+      XLS.writeFile(table, okres ? `raport_${name}_okres_${data}.xlsx`.slice(0,26).concat('.xlsx') : `raport_${name}_${data}.xlsx`.slice(0,26).concat('.xlsx'));
     });
     this.DOMelement.querySelector('#content').appendChild(buttonExcel);
   }
@@ -149,6 +152,7 @@ export class GlobalnyRaportComponent {
     form.method = 'POST';
     content.textContent = '';
     switch (id) {
+      case 3:
       case 1:
         let h2 : HTMLHeadingElement = this.renderer.createElement('h2');
         h2.innerHTML = 'Wybierz okres';
@@ -200,6 +204,7 @@ export class GlobalnyRaportComponent {
         break;
       case 2:
         break;
+
     }
     content.appendChild(form);
     let button : HTMLButtonElement = this.renderer.createElement('button');
@@ -214,6 +219,9 @@ export class GlobalnyRaportComponent {
         case 2:
           this.wersje_posilkow(event);
           break;
+        case 3:
+          this.obecnosc(event);
+          break;
       }
     });
     form.appendChild(button);
@@ -221,6 +229,99 @@ export class GlobalnyRaportComponent {
     raport.setAttribute('id', 'raport');
     raport.textContent = '';
     content.appendChild(raport);
+  }
+  daysBetween(start:Date, end:Date) {
+    return Math.floor(Math.abs((+start) - (+end))/8.64e7 + 1);
+  }
+
+  getChessBoardZsti(start: Date | string, end: Date | string, id:number, daty: Date[]): string[]
+  {
+    let result : string[] = [];
+    daty.forEach((date : Date) => {
+      let tempData = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+      let userScans = this.skanyZstiExtended.filter((scan: ScanZstiExtended) => scan.id_osoby == id)
+      // console.log(data,userScans.find((scan: ScanZstiExtended) => scan.czas == data), daty )
+      if(userScans.find((scan: ScanZstiExtended) => scan.czas == tempData))
+        result.push('X')
+      else{
+        let userNieobecnosci = this.nieobecnosciZsti.filter((day: GetZSTIDisabledDays) => day.osoby_zsti_id == id)
+        userNieobecnosci.map((item: GetZSTIDisabledDays)=> {
+          let tempDate = new Date(item.dzien_wypisania!);
+          item.dzien_wypisania = `${tempDate.getFullYear()}-${tempDate.getMonth() + 1}-${tempDate.getDate()}`
+        })
+        if(userNieobecnosci.find((day: GetZSTIDisabledDays) => day.dzien_wypisania == tempData))
+          result.push('N')
+        else
+          result.push(' ')
+      }
+
+    })
+    return result;
+  }
+
+  obecnosc(event: Event) : void {
+    event.preventDefault()
+
+    let date : string = this.DOMelement.querySelector('input[name="month"]').value;
+    let data_od : string = this.DOMelement.querySelector('input[name="data-od"]').value;
+    let data_do : string = this.DOMelement.querySelector('input[name="data-do"]').value
+    let typ : string = this.DOMelement.querySelector('select[name="typ"]').value;
+    let raport : HTMLElement = this.DOMelement.querySelector('#raport');
+    if(!this.validate_dates(date, data_od, data_do, raport)) return;
+
+    let table : HTMLTableElement = this.create_table();
+
+    let tr_header : HTMLTableRowElement = this.renderer.createElement('tr');
+    let th : HTMLTableCellElement = this.renderer.createElement('th');
+    let daySpan = this.daysBetween(new Date(data_od), new Date(data_do));
+
+    let columns : string[] = ['Lp.','Imię i Nazwisko']
+    const dates: Date[] = []
+    for(let i:number = 0; i < daySpan; i++)
+    {
+      let tempDate = new Date(data_od);
+      tempDate.setHours(24 * i);
+      dates.push(tempDate)
+    }
+    dates.forEach((date: Date) => {
+      if(date.getDay() != 0 && date.getDay() != 6)
+        columns.push(`${date.getDate()}/${date.getMonth() + 1}`)
+    })
+    if(columns.length == 3)
+      return;
+
+    th.colSpan = columns.length;
+    if(data_od !== '' || data_do !== '') th.textContent = `Lista obecności korzystających ze stołówki ZSTI za okres od ${data_od} do ${data_do}`;
+    else th.textContent = `Lista korzystających ze stołówki ZSTI za ${this.miesiace[parseInt(date.split('-')[1]) - 1]} ${date.split('-')[0]}`;
+    tr_header.appendChild(th);
+    table.appendChild(tr_header);
+
+    this.create_data_row(columns, table, true);
+    let index = 1;
+    this.skanyZstiExtended.forEach((item: ScanZstiExtended)=> {console.log(item.czas)})
+    switch (typ)
+    {
+      case "ZSTI":
+        this.uczniowieZsti.forEach((osoba: OsobaZSTI)=> {
+          let data : string[] = [
+            `${index}.`,
+            `${osoba.imie} ${osoba.nazwisko} (${osoba.klasa})`,
+          ];
+          this.getChessBoardZsti(data_od, data_do, osoba.id!, dates).forEach((item: string) => {
+            data.push(item)
+          })
+          this.create_data_row(data, table, false);
+          index++;
+        })
+
+
+        break;
+    }
+
+    if(data_od !== '' || data_do !== '') this.generateToExcel('obec', `${data_od} — ${data_do}`, true);
+    else this.generateToExcel('obec', date, false);
+    this.getDataBaseInfo();
+    raport.appendChild(table);
   }
 
   korekty(event : Event) : void | string {

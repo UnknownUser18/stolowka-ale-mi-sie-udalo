@@ -3,7 +3,18 @@
 import {Injectable} from '@angular/core';
 // @ts-ignore
 import {BehaviorSubject} from 'rxjs';
-
+import {
+  DeklaracjaInternat,
+  DeklaracjaZSTI,
+  GetZSTIDisabledDays,
+  GetInternatDisabledDays,
+  OsobaZSTI,
+  OsobaInternat,
+  DisabledDays,
+  Payments,
+  Cards,
+  ScanZstiExtended
+} from './app.component'
 
 // @ts-ignore
 @Injectable({
@@ -11,40 +22,41 @@ import {BehaviorSubject} from 'rxjs';
 })
 export class DataBaseService {
   private socket!: WebSocket;
-  CurrentZstiDays = new BehaviorSubject<any>(null);
-  DisabledZstiDays = new BehaviorSubject<any>(null);
-  DisabledInternatDays = new BehaviorSubject<any>(null);
-  StudentDeclarationZsti = new BehaviorSubject<any>(null);
-  CurrentStudentDeclaration = new BehaviorSubject<any>(null);
-  StudentDeclarationInternat = new BehaviorSubject<any>(null);
-  StudentListZsti = new BehaviorSubject<any>(null);
-  StudentListInternat = new BehaviorSubject<any>(null);
-  CurrentInternatDays = new BehaviorSubject<any>(null);
-  StudentZstiDays = new BehaviorSubject<any>(null);
-  StudentInternatDays = new BehaviorSubject<any>(null);
+  CurrentZstiDays = new BehaviorSubject<Array<GetZSTIDisabledDays>>([]);
+  DisabledZstiDays = new BehaviorSubject<Array<GetZSTIDisabledDays>>([]);
+  StudentZstiDays = new BehaviorSubject<Array<GetZSTIDisabledDays>>([]);
+  StudentDisabledZstiDays = new BehaviorSubject<Array<GetZSTIDisabledDays>>([]);
+  CurrentDisabledZstiDays = new BehaviorSubject<Array<GetZSTIDisabledDays>>([]);
+  DisabledInternatDays = new BehaviorSubject<Array<GetInternatDisabledDays>>([]);
+  CurrentInternatDays = new BehaviorSubject<Array<GetInternatDisabledDays>>([]);
+  StudentInternatDays = new BehaviorSubject<Array<GetInternatDisabledDays>>([]);
+  CurrentDisabledInternatDays = new BehaviorSubject<Array<GetInternatDisabledDays>>([]);
+  StudentDisabledInternatDays = new BehaviorSubject<Array<GetInternatDisabledDays>>([]);
+  StudentDeclarationZsti = new BehaviorSubject<Array<DeklaracjaZSTI>>([]);
+  CurrentStudentDeclaration = new BehaviorSubject<DeklaracjaZSTI | DeklaracjaInternat | undefined>(new DeklaracjaZSTI());
+  StudentDeclarationInternat = new BehaviorSubject<Array<DeklaracjaInternat>>([]);
+  AllStudentDeclarations = new BehaviorSubject<Array<DeklaracjaZSTI> | Array<DeklaracjaInternat>>([]);
+  StudentListZsti = new BehaviorSubject<Array<OsobaZSTI>>([]);
+  StudentListInternat = new BehaviorSubject<Array<OsobaInternat>>([]);
   CurrentStudentId = new BehaviorSubject<number>(-1)
   StudentType = new BehaviorSubject<string>("BRAK")
-  lastValue:any = null;
-  CurrentDisabledInternatDays = new BehaviorSubject<any>(null);
-  StudentDisabledZstiDays = new BehaviorSubject<any>(null);
-  StudentDisabledInternatDays = new BehaviorSubject<any>(null);
-  CurrentDisabledZstiDays = new BehaviorSubject<any>(null);
-  DisabledDays = new BehaviorSubject<any>(null);
+  DisabledDays = new BehaviorSubject<Array<DisabledDays>>([]);
   TypPosilkuSaved = new BehaviorSubject<boolean>(true)
   SelectedSaved = new BehaviorSubject<boolean>(true)
   PersonalDataSaved = new BehaviorSubject<boolean>(true)
   DeclarationDataSaved = new BehaviorSubject<boolean>(true)
   SchoolYears = new BehaviorSubject<any>(null)
-  LastStudentInsertId = new BehaviorSubject<any>(null)
-  PaymentZsti = new BehaviorSubject<any>(null)
-  PaymentInternat = new BehaviorSubject<any>(null);
-  CardsZsti = new BehaviorSubject<any>(null)
+  LastStudentInsertId = new BehaviorSubject<number>(0)
+  PaymentZsti = new BehaviorSubject<Array<Payments>>([])
+  PaymentInternat = new BehaviorSubject<Array<Payments>>([]);
+  CardsZsti = new BehaviorSubject<Array<Cards>>([])
+  CardsInternat = new BehaviorSubject<Array<Cards>>([]);
+  ScanZstiMoreInfo = new BehaviorSubject<Array<ScanZstiExtended>>([])
   CurrentStudentCardZsti = new BehaviorSubject<any>(null)
-  CardsInternat = new BehaviorSubject<any>(null);
   CurrentStudentCardInternat = new BehaviorSubject<any>(null)
-  AllStudentDeclarations = new BehaviorSubject<any>(null);
   ListOfGroups = new BehaviorSubject<any>(null);
   CurrentStudent = new BehaviorSubject<any>(null)
+  lastValue:any = null;
   nullKarta = {
     id: -1,
     id_ucznia: -1,
@@ -74,11 +86,6 @@ export class DataBaseService {
         setTimeout(() => this.initWebSocket(), 1000);
       };
 
-      // Add message handler if needed
-      this.socket.onmessage = (event) => {
-        // Handle messages here
-      };
-
     } catch (error) {
       console.error('WebSocket initialization failed:', error);
     }
@@ -97,7 +104,8 @@ export class DataBaseService {
     this.TypPosilkuSaved.next(change);
   }
 
-  public formatDate(date:Date): string {
+  public formatDate(date:Date | string): string {
+    date = new Date(date);
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${(date.getDate()).toString().padStart(2, '0')}`;
   }
 
@@ -157,13 +165,17 @@ export class DataBaseService {
   getGroups() : void {
     this.send(JSON.stringify({action: "request", params: {method: "getGroups"}}));
   }
+
+  getScanZstiMoreInfo() : void {
+    this.send(JSON.stringify({action: "request", params: {method: "getScanZstiMoreInfo"}}));
+  }
   changeStudent(Id:number, type:string):void {
     this.CurrentStudentId.next(Id)
     this.StudentType.next(type)
     console.warn("Change student call")
     // console.log(Id, type)
     if (this.StudentType.value === "ZSTI") {
-      this.CurrentStudent.next(this.StudentListZsti.value.find((item: any)=> item.id == this.CurrentStudentId.value));
+      this.CurrentStudent.next(this.StudentListZsti.value.find((item: OsobaZSTI)=> item.id == this.CurrentStudentId.value));
       this.getStudentDeclarationZsti()
       this.getStudentZstiDays()
       this.getStudentDisabledZstiDays()
@@ -174,7 +186,7 @@ export class DataBaseService {
       // console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
     }
     else{
-      this.CurrentStudent.next(this.StudentListInternat.value[this.CurrentStudentId.value]);
+      this.CurrentStudent.next(this.StudentListInternat.value.find((item: OsobaInternat)=> item.id == this.CurrentStudentId.value));
       // console.log("Checking internat cards:")
       this.getStudentDeclarationInternat()
       // console.log(this.StudentDeclarationInternat.value, "NMIGER")
@@ -213,103 +225,111 @@ adjustDateTime(dateString: string): string {
         this.lastValue = JSON.parse(event.data);
         switch (this.lastValue.params.variable) {
           case 'StudentDeclarationZsti':
-            this.lastValue.params.value.forEach((element:any) => {
-              element.data_od = this.adjustDateTime(element.data_od);
-              element.data_do = this.adjustDateTime(element.data_do);
+            this.lastValue.params.value.forEach((element:DeklaracjaZSTI) => {
+              element.data_od = this.adjustDateTime(element.data_od!);
+              element.data_do = this.adjustDateTime(element.data_do!);
             });
-            this.StudentDeclarationZsti.next(this.lastValue.params.value );
+            this.StudentDeclarationZsti.next(this.lastValue.params.value as Array<DeklaracjaZSTI>);
             // console.log(this.CurrentStudentId.value);
-            this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:any) => element.id_osoby == this.CurrentStudentId.value));
-            this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.filter((element:any) => element.id_osoby == this.CurrentStudentId.value))
+            this.CurrentStudentDeclaration.next(this.StudentDeclarationZsti.value.find((element:DeklaracjaZSTI) => element.id_osoby == this.CurrentStudentId.value));
+            this.AllStudentDeclarations.next(this.StudentDeclarationZsti.value.filter((element:DeklaracjaZSTI) => element.id_osoby == this.CurrentStudentId.value))
             console.log("StudentDeclarationZsti: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value, this.AllStudentDeclarations.value);
             break;
           case 'StudentDeclarationInternat':
-            this.lastValue.params.value.forEach((element:any) => {
-              element.data_od = this.adjustDateTime(element.data_od);
-              element.data_do = this.adjustDateTime(element.data_do);
+            this.lastValue.params.value.forEach((element:DeklaracjaInternat) => {
+              element.data_od = this.adjustDateTime(element.data_od!);
+              element.data_do = this.adjustDateTime(element.data_do!);
             });
-            this.StudentDeclarationInternat.next(this.lastValue.params.value );
+            this.StudentDeclarationInternat.next(this.lastValue.params.value as Array<DeklaracjaInternat>);
             this.CurrentStudentDeclaration.next(this.StudentDeclarationInternat.value.find((element:any)=> element.osoby_internat_id == this.CurrentStudentId.value))
-            this.AllStudentDeclarations.next(this.StudentDeclarationInternat.value.find((element:any) => element.osoby_internat_id == this.CurrentStudentId.value))
+            this.AllStudentDeclarations.next(this.StudentDeclarationInternat.value.filter((element:any) => element.osoby_internat_id == this.CurrentStudentId.value))
             // console.log("StudentDeclarationInternat: ", this.lastValue.params.value, this.CurrentStudentDeclaration.value);
             break;
           case 'StudentListZsti':
-            this.StudentListZsti.next(this.lastValue.params.value);
+            this.StudentListZsti.next(this.lastValue.params.value as Array<OsobaZSTI>);
             // console.log("StudentListZsti: ", this.lastValue.params.value);
             break;
           case 'StudentListInternat':
-            this.StudentListInternat.next(this.lastValue.params.value);
+            this.StudentListInternat.next(this.lastValue.params.value as Array<OsobaInternat>);
             // console.log("StudentListInternat: ", this.lastValue.params.value);
             break;
           case 'StudentZstiDays':
-            this.StudentZstiDays.next(this.lastValue.params.value);
-            this.lastValue.params.value.forEach((element:any)=> {
+            this.StudentZstiDays.next(this.lastValue.params.value as Array<GetZSTIDisabledDays>);
+            this.lastValue.params.value.forEach((element:GetZSTIDisabledDays)=> {
               if(element.osoby_zsti_id === this.CurrentStudentId.value)
                 tempArray.push(element)
             })
-            this.CurrentZstiDays.next(tempArray);
+            this.CurrentZstiDays.next(tempArray as Array<GetZSTIDisabledDays>);
             // console.log("StudentZstiDays: ", this.lastValue.params.value);
             break;
           case 'StudentDisabledZstiDays':
-            this.StudentDisabledZstiDays.next(this.lastValue.params.value);
-            this.lastValue.params.value.forEach((element:any)=> {
+            this.StudentDisabledZstiDays.next(this.lastValue.params.value as Array<GetZSTIDisabledDays>);
+            this.lastValue.params.value.forEach((element:GetZSTIDisabledDays)=> {
               if(element.osoby_zsti_id === this.CurrentStudentId.value)
                 tempArray.push(element)
             })
-            this.CurrentDisabledZstiDays.next(tempArray);
+            this.CurrentDisabledZstiDays.next(tempArray as Array<GetZSTIDisabledDays>);
             // console.log("StudentDisabledZstiDays: ", this.lastValue.params.value);
             break;
             case 'DisabledZstiDays':
-            this.DisabledZstiDays.next(this.lastValue.params.value);
+            this.DisabledZstiDays.next(this.lastValue.params.value as Array<GetZSTIDisabledDays>);
             // console.log("DisabledZstiDays: ", this.lastValue.params.value);
             break;
           case 'StudentInternatDays':
-            this.StudentInternatDays.next(this.lastValue.params.value);
-            this.StudentInternatDays.value.forEach((element:any)=> {
+            this.StudentInternatDays.next(this.lastValue.params.value as Array<GetInternatDisabledDays>);
+            this.StudentInternatDays.value.forEach((element:GetInternatDisabledDays)=> {
               if(element.osoby_internat_id === this.CurrentStudentId.value)
                 tempArray.push(element)
             })
-            this.CurrentInternatDays.next(tempArray);
+            this.CurrentInternatDays.next(tempArray as Array<GetInternatDisabledDays>);
             // console.log("StudentInternatDays: ", this.lastValue.params.value);
             break;
           case 'StudentDisabledInternatDays':
-            this.StudentDisabledInternatDays.next(this.lastValue.params.value);
-            this.StudentDisabledInternatDays.value.forEach((element:any)=> {
+            this.StudentDisabledInternatDays.next(this.lastValue.params.value as Array<GetInternatDisabledDays>);
+            this.StudentDisabledInternatDays.value.forEach((element:GetInternatDisabledDays)=> {
               if(element.osoby_internat_id === this.CurrentStudentId.value)
                 tempArray.push(element)
             })
-            this.CurrentDisabledInternatDays.next(tempArray);
+            this.CurrentDisabledInternatDays.next(tempArray as Array<GetInternatDisabledDays>);
             break;
             case 'DisabledInternatDays':
-              this.DisabledInternatDays.next(this.lastValue.params.value);
+              this.DisabledInternatDays.next(this.lastValue.params.value as Array<GetInternatDisabledDays>);
               break;
           case 'DisabledDays':
-            this.DisabledDays.next(this.lastValue.params.value);
+            this.DisabledDays.next(this.lastValue.params.value as Array<DisabledDays>);
             break;
           case 'SchoolYears':
             this.SchoolYears.next(this.lastValue.params.value);
             break;
           case 'LastStudentInsertId':
-            this.LastStudentInsertId.next(this.lastValue.params.value)
+            this.LastStudentInsertId.next(parseInt(this.lastValue.params.value.insertId))
             break;
           case 'PaymentZsti':
-            this.PaymentZsti.next(this.lastValue.params.value);
+            this.PaymentZsti.next(this.lastValue.params.value as Array<Payments>);
             break;
           case 'PaymentInternat':
-            this.PaymentInternat.next(this.lastValue.params.value);
+            this.PaymentInternat.next(this.lastValue.params.value as Array<Payments>);
             break;
           case 'CardsZsti':
-            this.CardsZsti.next(this.lastValue.params.value);
-            this.CurrentStudentCardZsti.next(this.CardsZsti.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
+            this.CardsZsti.next(this.lastValue.params.value as Array<Cards>);
+            this.CurrentStudentCardZsti.next(this.CardsZsti.value.find((element:Cards)=>element.id_ucznia == this.CurrentStudentId.value))
             // console.log("ZMIANA KARTY: ", this.CardsZsti.value, this.CurrentStudentCardZsti.value)
             break;
           case 'CardsInternat':
-            this.CardsInternat.next(this.lastValue.params.value);
-            this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:any)=>element.id_ucznia == this.CurrentStudentId.value))
+            this.CardsInternat.next(this.lastValue.params.value as Array<Cards>);
+            this.CurrentStudentCardInternat.next(this.CardsInternat.value.find((element:Cards)=>element.id_ucznia == this.CurrentStudentId.value))
             // console.log("ZMIANA KARTY: ", this.CardsInternat.value, this.CurrentStudentCardInternat.value)
             break;
           case 'ListOfGroups':
             this.ListOfGroups.next(this.lastValue.params.value);
+            break;
+          case 'ScanZstiMoreInfo':
+            (this.lastValue.params.value as Array<ScanZstiExtended>).forEach((item: ScanZstiExtended)=> {
+              let tempDate = new Date(item.czas!);
+              item.czas = `${tempDate.getFullYear()}-${tempDate.getMonth() + 1}-${tempDate.getDate()}`
+              tempArray.push(item as ScanZstiExtended)
+            })
+            this.ScanZstiMoreInfo.next(tempArray as Array<ScanZstiExtended>);
             break;
         }
       })
@@ -325,6 +345,7 @@ adjustDateTime(dateString: string): string {
     this.getStudentDeclarationZsti();
     this.getStudentDeclarationInternat();
     this.getGroups()
+    this.getScanZstiMoreInfo();
   }
 
 }

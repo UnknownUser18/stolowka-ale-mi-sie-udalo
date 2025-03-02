@@ -130,6 +130,47 @@ export class DeklaracjaInternat extends Deklaracja {
     return this;
   }
 }
+export interface DisabledDays{
+  id:number,
+  dzien: string
+}
+
+export interface Payments{
+  id: number,
+  id_ucznia: number,
+  platnosc: number,
+  data_platnosci: string,
+  miesiac: number,
+  opis: string,
+  rok: number
+}
+
+export interface Cards{
+  id: number,
+  id_ucznia: number,
+  key_card:number,
+  data_wydania: string,
+  ostatnie_uzycie:string
+}
+
+export class ScanZstiExtended{
+  id: number | undefined;
+  id_osoby: number | undefined;
+  czas: string | undefined;
+  constructor(id?: number, id_ucznia?: number, czas?: string) {
+    this.id = id;
+    this.id_osoby = id_ucznia;
+    this.czas = czas;
+  }
+  assignValues(other: ScanZstiExtended):this
+  {
+    this.id = other.id;
+    this.id_osoby = other.id_osoby;
+    this.czas = other.czas;
+    return this;
+  }
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

@@ -58,12 +58,12 @@ export class EdycjaComponent implements OnChanges {
   updateStudent(change: any): void {
     if (this.dataService.StudentType.value === 'Internat') {
       this.student = new OsobaInternat()
-      const studentData : OsobaInternat = this.dataService.StudentListInternat.value.find((element: any): boolean => element.id === change.value);
+      const studentData : OsobaInternat = this.dataService.StudentListInternat.value.find((element: OsobaInternat): boolean => element.id === change.value) ?? new OsobaInternat();
       this.student.assignValues(studentData)
 
     } else if (this.dataService.StudentType.value === 'ZSTI') {
       this.student = new OsobaZSTI();
-      const studentData : OsobaZSTI = this.dataService.StudentListZsti.value.find((element: any): boolean => element.id === change.value) ?? new OsobaZSTI();
+      const studentData : OsobaZSTI = this.dataService.StudentListZsti.value.find((element: OsobaZSTI): boolean => element.id === change.value) ?? new OsobaZSTI();
       this.student.assignValues(studentData)
 
     }
@@ -99,12 +99,13 @@ export class EdycjaComponent implements OnChanges {
     }
     if (this.dataService.StudentType.value === 'ZSTI') {
       this.declaration = new DeklaracjaZSTI()
+      this.declaration?.assignValues(this.dataService.CurrentStudentDeclaration.value as DeklaracjaZSTI)
     } else if (this.dataService.StudentType.value === 'Internat') {
       this.declaration = new DeklaracjaInternat()
+      this.declaration?.assignValues(this.dataService.CurrentStudentDeclaration.value as DeklaracjaInternat)
     }
     this.dataService.changeDeclarationDataSaved(true)
     if (this.declaration && this.DOMelement) {
-      this.declaration?.assignValues(this.dataService.CurrentStudentDeclaration.value)
       if (this.declaration instanceof DeklaracjaZSTI) {
         if (this.declaration.dni) {
           let dni_binary: string = toBinary(this.declaration.dni['data'][0], 5)
