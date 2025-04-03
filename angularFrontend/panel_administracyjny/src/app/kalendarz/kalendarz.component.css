@@ -31,19 +31,19 @@
 #sending button {
     height: fit-content;
 }
-#sending  ul {
+#sending ul {
     display: flex;
 }
-#sending  ul > li {
+#sending ul > li {
     list-style-type: none;
     margin: 0 10px;
 }
-#sending > div > h2 {
+#sending div > h2 {
     text-align: center;
-    font-size: 1.7em;
+    font-size: 1.5em;
     margin: 0.4em 0;
 }
-#sending > div > ul > li {
+#sending div > ul > li {
     background-color: var(--background-color);
     padding: 5px 10px;
     border-radius: 7px;
@@ -69,9 +69,11 @@
     border-radius: 12px;
 }
 .day:disabled {
-    background-color: var(--disabled);
     color: var(--disabled-text-color);
     cursor: default;
+}
+.day:not(.disabled-for-person):disabled {
+    background-color: var(--disabled);
 }
 .day:disabled input {
     cursor: default;
@@ -102,8 +104,8 @@
     cursor: default;
     justify-content: space-evenly;
     flex-direction: column;
-    height: 80px;
-    width: 80px;
+    height: 75px;
+    width: 75px;
 }
 input:disabled {
     cursor: default !important;
@@ -119,12 +121,17 @@ input:disabled {
     background-color: var(--disabled);
     color: var(--disabled-text-color);
 }
+.out-declaration {
+    background-color: var(--out-declaration) !important;
+    color: var(--text-color);
+}
 .disabled-for-person {
     background-color: var(--disabled-working-day) !important;
     color: var(--disabled-text-color) !important;
 }
 .day.disabled-day-global {
-    background-color: var(--disabled-global-day);
+    background-color: var(--disabled-global-day) !important;
+    color: var(--text-color);
 }
 #date {
     width: 100%;
@@ -332,6 +339,58 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='yah'] > la
     width: 20px;
     height: 20px;
 }
+.logs > li {
+    border: 0 !important;
+    width: 140px !important;
+    margin: 2px 5px !important;
+    text-align: center;
+    padding: 0 !important;
+    height: fit-content !important;
+}
+.logs {
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    max-height: 50%;
+    overflow: scroll;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    padding: 5px 10px;
+    margin: 5px;
+    font-size: 1.5em;
+}
+.logs.empty {
+    background-color: transparent;
+    border: 0;
+}
+#zsti_diff {
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+}
+#zsti_diff h4 {
+    text-align: center;
+    font-size: 1.5em;
+    margin: 0;
+}
+#zsti_diff > div {
+    max-width: 60%;
+    max-height: 30vh;
+}
+#internat_diff ul {
+    padding: 0;
+}
+#internat_diff {
+    position: absolute;
+    top: 25%;
+    border-radius: 7px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--box-shadow);
+    right: 0;
+    width: 22%;
+    height: 50%;
+    background-color: var(--primary-color);
+}
 #zmiana label:hover {
     text-decoration: underline;
 }
@@ -365,57 +424,6 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='yah'] > la
     cursor: pointer;
 }
 #sending button:hover {
-    background-color: var(--accent-color);
-    color: var(--primary-color);
-}
-#stop_background {
-    display: none;
-    width: 100%;
-    height: 100%;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 3;
-}
-#stop_background > section {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: var(--box-shadow);
-    width: 30vw;
-    height: 20vh;
-    border-radius: 20px;
-    background-color: var(--primary-color);
-    border: 3px solid var(--border-color);
-    padding: 0 25px;
-}
-#stop_background h2 {
-    text-align: center;
-    font-size: 2em;
-}
-#stop_background > section > div {
-    margin-bottom: 5%;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-}
-#stop_background > section button {
-    width: fit-content;
-    padding: 5px 10px;
-    margin: 0 auto;
-    font-size: 1.2em;
-    font-family: inherit;
-    font-weight: 500;
-    border: 0;
-    border-radius: 7px;
-    background-color: var(--background-color);
-    transition: 150ms ease-in-out all;
-    cursor: pointer;
-}
-#stop_background > section  button:hover {
     background-color: var(--accent-color);
     color: var(--primary-color);
 }
@@ -474,5 +482,47 @@ form[name='zmiana_posilku'] > label > input[type='radio'], form[name='yah'] > la
     #zmiana button {
         font-size: 1.2em;
         padding: 5px 10px;
+    }
+}
+@media (min-width: 768px) and (max-width: 1280px) {
+    .day {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2em;
+    }
+    .day.empty {
+        width: 30px;
+        height: 30px;
+    }
+    .day.internat {
+        height: 70px;
+        width: 70px;
+    }
+    .day > div > input {
+        width: 15px;
+        height: 15px;
+    }
+    .week {
+        margin: 20px 0;
+    }
+    #dni {
+        font-size: 1.2em;
+        margin-left: 5em;
+    }
+    #zaznacz input {
+        width: 45px;
+        height: 45px;
+    }
+    #zaznacz span {
+        background-size: 40px;
+        width: 40px;
+        height: 40px;
+    }
+    #zaznacz > abbr > .zaznacz_internat {
+        background-size: 25px !important;
+    }
+    #zmiana {
+        width: 30vw;
+        font-size: 0.8em;
     }
 }

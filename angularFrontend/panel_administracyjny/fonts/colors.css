@@ -10,17 +10,32 @@
     font-style: normal;
     font-weight: normal;
 }
+/*:root {*/
+/*    --gradient: #b5bdcc;*/
+/*    --disabled-global-day: #7e7eab;*/
+/*    --disabled-working-day: #A9A9BE;*/
+/*    --disabled: #c0bfca;*/
+/*    --disabled-text-color: #2d2d2d;*/
+/*    --background-color: #fffdfb;*/
+/*    --primary-color: #cfd5e3;*/
+/*    --secondary-color: #a1aab9;*/
+/*    --third-color: #848da7;*/
+/*    --accent-color: #666a8f;*/
+/*    --border-color: #525876;*/
+/*    --text-color: #212121;*/
+/*}*/
 :root {
+    --background-color: #F1F0E8;
+    --primary-color: #B3C8CF;
+    --secondary-color: #89A8B2;
+    --third-color: #5F7F8A;
+    --accent-color: #3B5A65;
+    --border-color: #2A3F4A;
+    --text-color: #212121;
     --gradient: #b5bdcc;
     --disabled-global-day: #7e7eab;
     --disabled-working-day: #A9A9BE;
-    --disabled: #c0bfca;
+    --out-declaration: #a2a2e7;
+    --disabled: #6ca8b7;
     --disabled-text-color: #2d2d2d;
-    --background-color: #fffdfb;
-    --primary-color: #cfd5e3;
-    --secondary-color: #a1aab9;
-    --third-color: #848da7;
-    --accent-color: #666a8f;
-    --border-color: #525876;
-    --text-color: #212121;
 }

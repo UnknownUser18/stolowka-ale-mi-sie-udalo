@@ -1,27 +1,27 @@
-const mysql = require("mysql");
-const ws = require("ws");
+const mysql = require('mysql');
+const ws = require('ws');
 
 const wss = new ws.WebSocketServer({
-    port: 8080,
-    perMessageDeflate: {
-        zlibDeflateOptions: {
-            // See zlib defaults.
-            chunkSize: 1024,
-            memLevel: 7,
-            level: 3
-        },
-        zlibInflateOptions: {
-            chunkSize: 10 * 1024
-        },
-        // Other options settable:
-        clientNoContextTakeover: true, // Defaults to negotiated value.
-        serverNoContextTakeover: true, // Defaults to negotiated value.
-        serverMaxWindowBits: 10, // Defaults to negotiated value.
-        // Below options specified as default values.
-        concurrencyLimit: 10, // Limits zlib concurrency for perf.
-        threshold: 1024 // Size (in bytes) below which messages
-        // should not be compressed if context takeover is disabled.
-    }
+  port: 8080,
+  perMessageDeflate: {
+    zlibDeflateOptions: {
+      // See zlib defaults.
+      chunkSize: 1024,
+      level: 3,
+      memLevel: 7
+    },
+    zlibInflateOptions: {
+      chunkSize: 10240
+    },
+    // Other options settable:
+    clientNoContextTakeover: true, // Defaults to negotiated value.
+    serverNoContextTakeover: true, // Defaults to negotiated value.
+    serverMaxWindowBits: 10, // Defaults to negotiated value.
+    // Below options specified as default values.
+    concurrencyLimit: 10, // Limits zlib concurrency for perf.
+    threshold: 1024 // Size (in bytes) below which messages
+    // should not be compressed if context takeover is disabled.
+  }
 });
 console.log("Waiting for connection...");
 wss.on('connection', function connection(ws) {
@@ -30,178 +30,13 @@ wss.on('connection', function connection(ws) {
     ws.on('error', console.error);
 
     ws.on('message', function message(data) {
-        if(typeof data != 'object')
-            return -1;
+        if(typeof data != 'object') return;
         let object = JSON.parse(data)
-        console.log(data)
-        if(object.action !== "request")
-            return -1;
-        let parameters = object.params;
-        switch (parameters.method) {
-            case "CardScan":
-                CardScan(parameters.id_ucznia, parameters.timestamp);
-                break;
-            case "AnyQuery":
-                QueryExecute(parameters.query, parameters.password, parameters.query, parameters.password, parameters.responseBool, parameters.variable);
-                break;
-            case "StudentList":
-                StudentList(ws ,parameters.condition);
-                break;
-            case "CalendarStudent":
-                CalendarStudent(ws,  parameters.id_ucznia, parameters.relationBool, parameters.isAll);
-                break;
-            case "StudentMeal":
-                StudentMeal(ws, parameters.id_ucznia);
-                break;
-            case "CalendarAdd":
-                CalendarAdd(ws, parameters.id_ucznia, parameters.data, parameters.mealId)
-                break;
-            case "CalendarDelete":
-                CalendarDelete(ws, parameters.studentId, parameters.data, parameters.mealId)
-                break;
-            case "UpdateStudent":
-                UpdateStudent(ws, parameters.studentId, parameters.name, parameters.surname, parameters.mealId);
-                break;
-            case "DeleteStudent":
-                DeleteStudent(ws, parameters.studentId)
-                break;
-            case "getStudentDeclarationInternat":
-                getStudentDeclarationInternat(ws)
-                break;
-            case "getStudentDeclarationZsti":
-                getStudentDeclarationZsti(ws)
-                break;
-            case "changeStudentDeclarationInternat":
-                changeStudentDeclarationInternat(parameters.studentId, parameters.schoolYearId, parameters.wersja, parameters.beginDate, parameters.endDate);
-                break;
-            case "changeStudentDeclarationZsti":
-                changeStudentDeclarationZsti(parameters.studentId, parameters.schoolYearId, parameters.days, parameters.beginDate, parameters.endDate);
-                break;
-            case "changeStudentInternat":
-                changeStudentInternat(parameters.studentId, parameters.name, parameters.surname, parameters.attends);
-                break;
-            case "changeStudentZsti":
-                changeStudentZsti(parameters.studentId, parameters.type, parameters.name, parameters.surname, parameters.class, parameters.attends);
-                break;
-            case "getStudentListZsti":
-                getStudentListZsti(ws)
-                break;
-            case "getStudentListInternat":
-                getStudentListInternat(ws)
-                break;
-            case "getStudentZstiDays":
-                getStudentZstiDays(ws, parameters.studentId)
-                break;
-            case "getStudentDisabledZstiDays":
-                getStudentDisabledZstiDays(ws, parameters.studentId)
-                break;
-            case "getStudentInternatDays":
-                getStudentInternatDays(ws, parameters.studentId)
-                break;
-            case "getStudentDisabledInternatDays":
-                getStudentDisabledInternatDays(ws, parameters.studentId)
-                break;
-            case "AddZstiDays":
-                AddZstiDays(parameters.studentId, parameters.date, parameters.schoolYearId)
-                break;
-            case "AddDisabledZstiDays":
-                AddDisabledZstiDays(parameters.studentId, parameters.date, parameters.schoolYearId)
-                break;
-            case "AddInternatDays":
-                AddInternatDays(parameters.studentId, parameters.date, parameters.mealId, parameters.schoolYearId);
-                break;
-            case "AddDisabledInternatDays":
-                AddDisabledInternatDays(parameters.studentId, parameters.date, parameters.mealId, parameters.schoolYearId);
-                break;
-            case "DeleteZstiDays":
-                DeleteZstiDays(parameters.studentId, parameters.date);
-                break;
-            case "DeleteDisabledZstiDays":
-                DeleteDisabledZstiDays(parameters.studentId, parameters.date);
-                break;
-            case "DeleteInternatDays":
-                DeleteInternatDays(parameters.studentId, parameters.date, parameters.mealId);
-                break;
-            case "DeleteDisabledInternatDays":
-                DeleteDisabledInternatDays(parameters.studentId, parameters.date, parameters.mealId);
-                break;
-            case "getDniNieczynne":
-                getDniNieczynne(ws);
-                break;
-            case "DeleteDniNieczynne":
-                DeleteDniNieczynne(parameters.date)
-                break;
-            case "AddDniNieczynne":
-                AddDniNieczynne(parameters.date)
-                break;
-            case 'getSchoolYears':
-                getSchoolYears(ws)
-                break;
-            case 'addSchoolYear':
-                addSchoolYear(parameters.year)
-                break;
-            case 'DeleteStudentZsti':
-                DeleteStudentZsti(parameters.studentId)
-                break;
-            case 'addZstiDeclaration':
-                addZstiDeclaration(parameters.studentId, parameters.schoolYearId, parameters.beginDate, parameters.endDate, parameters.days);
-                break;
-            case 'addInternatDeclaration':
-                addInternatDeclaration(parameters.studentId, parameters.schoolYearId, parameters.beginDate, parameters.endDate, parameters.wersja)
-                break;
-            case 'addZstiStudent':
-                addZstiStudent(ws, parameters.name, parameters.surname, parameters.class, parameters.attends, parameters.type);
-                break;
-            case 'addInternatStudent':
-                addInternatStudent(ws, parameters.name, parameters.surname, parameters.attends)
-                break;
-            case 'getPaymentZsti':
-                getPaymentZsti(ws);
-                break;
-            case 'addPaymentZsti':
-                addPaymentZsti(parameters.studentId, parameters.cost, parameters.date, parameters.month, parameters.description);
-                break;
-            case 'DeletePaymentZsti':
-                DeletePaymentZsti(parameters.id);
-                break;
-            case 'getPaymentInternat':
-                getPaymentInternat(ws);
-                break;
-            case 'addPaymentInternat':
-                addPaymentInternat(parameters.studentId, parameters.cost, parameters.date, parameters.month, parameters.description);
-                break;
-            case 'DeletePaymentInternat':
-                DeletePaymentInternat(parameters.id);
-                break;
-            case 'getKartyZsti':
-                getKartyZsti(ws);
-                break;
-            case 'DeleteKartyZsti':
-                DeleteKartyZsti(parameters.id);
-                break;
-            case 'addKartyZsti':
-                addKartyZsti(parameters.studentId, parameters.keyCard, parameters.beginDate, parameters.lastUse);
-                break;
-            case 'getKartyInternat':
-                getKartyInternat(ws);
-                break;
-            case 'DeleteKartyInternat':
-                DeleteKartyInternat(parameters.id);
-                break;
-            case 'addKartyInternat':
-                addKartyInternat(parameters.studentId, parameters.keyCard, parameters.beginDate, parameters.lastUse);
-                break;
-            case 'getStudentFromCardZsti':
-                getStudentFromCardZsti(ws, parameters.keyCard);
-                break;
-            case 'getStudentFromCardInternat':
-                getStudentFromCardInternat(ws, parameters.keyCard);
-                break;
-        }
+        if(object.action !== "request") return;
+        handleRequest(ws, object.params);
     });
 });
 
-//todo: ENV variables
 const serverPassword = process.argv.slice(2,6)[0]
 const dbPassword = process.env.dbPassword
 const dbHost = process.env.dbHost
@@ -214,751 +49,432 @@ const dbConfig = {
     database: "stolowka"
 }
 let database = mysql.createConnection(dbConfig);
-function handleDisconnect()
-{
-    database = mysql.createConnection(dbConfig);
+handleDisconnect();
 
+function handleDisconnect() {
     database.on('error', function (err) {
         console.error('Db error: ', err);
-        if(err.code === "PROTOCOL_CONNECTION_LOST")
-        {
+        if (err.code === "PROTOCOL_CONNECTION_LOST") {
+            database = mysql.createConnection(dbConfig);
             handleDisconnect();
-        }
-        else{
+        } else {
             throw err;
         }
     });
 }
 
-database.on('error', function (err) {
-    console.error('Db error: ', err);
-    if(err.code === "PROTOCOL_CONNECTION_LOST")
-    {
-        handleDisconnect();
+function handleRequest(ws,params) {
+    const actions = {
+        "CardScan": () => CardScan(params.id_ucznia, params.timestamp),
+        "AnyQuery": () => QueryExecute(ws, params.query, params.password, params.responseBool, params.variable),
+        "StudentList": () => StudentList(ws, params.condition),
+        "CalendarStudent": () => CalendarStudent(ws, params.id_ucznia, params.relationBool, params.isAll),
+        "StudentMeal": () => StudentMeal(ws, params.id_ucznia),
+        "getStudentDeclarationInternat": () => getStudentDeclarationInternat(ws),
+        "getStudentDeclarationZsti": () => getStudentDeclarationZsti(ws),
+        "changeStudentDeclarationInternat": () => changeStudentDeclarationInternat(params.studentId, params.schoolYearId, params.wersja, params.beginDate, params.endDate),
+        "changeStudentDeclarationZsti": () => changeStudentDeclarationZsti(params.studentId, params.schoolYearId, params.days, params.beginDate, params.endDate),
+        "changeStudentInternat": () => changeStudentInternat(params.studentId, params.name, params.surname, params.attends, params.group),
+        "changeStudentZsti": () => changeStudentZsti(params.studentId, params.type, params.name, params.surname, params.class, params.attends),
+        "getStudentListZsti": () => getStudentListZsti(ws),
+        "getStudentListInternat": () => getStudentListInternat(ws),
+        "DeleteDeclarationZSTI": () => DeleteDeclarationZSTI(params.studentId, params.schoolYearId, params.beginDate, params.endDate),
+        "DeleteDeclarationInternat": () => DeleteDeclarationInternat(params.studentId, params.schoolYearId, params.beginDate, params.endDate),
+        "getStudentZstiDays": () => getStudentZstiDays(ws, params.studentId),
+        "getStudentDisabledZstiDays": () => getStudentDisabledZstiDays(ws, params.studentId),
+        "getDisabledZstiDays": () => getDisabledZstiDays(ws),
+        "getDisabledInternatDays": () => getDisabledInternatDays(ws),
+        "getStudentInternatDays": () => getStudentInternatDays(ws, params.studentId),
+        "AddZstiDays": () => AddZstiDays(params.studentId, params.date, params.schoolYearId),
+        "AddInternatDays": () => AddInternatDays(params.studentId, params.date, params.mealId, params.schoolYearId),
+        "DeleteZstiDays": () => DeleteZstiDays(params.studentId, params.date),
+        "DeleteInternatDays": () => DeleteInternatDays(params.studentId, params.date, params.mealId),
+        "getDniNieczynne": () => getDniNieczynne(ws),
+        "DeleteDniNieczynne": () => DeleteDniNieczynne(params.date),
+        "AddDniNieczynne": () => AddDniNieczynne(params.date),
+        "getSchoolYears": () => getSchoolYears(ws),
+        "addSchoolYear": () => addSchoolYear(params.year),
+        "DeleteStudentZsti": () => DeleteStudentZsti(params.studentId),
+        "addZstiDeclaration": () => addZstiDeclaration(params.studentId, params.schoolYearId, params.beginDate, params.endDate, params.days),
+        "addInternatDeclaration": () => addInternatDeclaration(params.studentId, params.schoolYearId, params.beginDate, params.endDate, params.wersja),
+        "addZstiStudent": () => addZstiStudent(ws, params.name, params.surname, params.class, params.attends, params.type),
+        "addInternatStudent": () => addInternatStudent(ws, params.name, params.surname, params.attends),
+        "getPaymentZsti": () => getPaymentZsti(ws),
+        "addPaymentZsti": () => addPaymentZsti(params.studentId, params.cost, params.date, params.month, params.description),
+        "DeletePaymentZsti": () => DeletePaymentZsti(params.id),
+        "getPaymentInternat": () => getPaymentInternat(ws),
+        "addPaymentInternat": () => addPaymentInternat(params.studentId, params.cost, params.date, params.month, params.description),
+        "DeletePaymentInternat": () => DeletePaymentInternat(params.id),
+        "getKartyZsti": () => getKartyZsti(ws),
+        "DeleteKartyZsti": () => DeleteKartyZsti(params.id),
+        "addKartyZsti": () => addKartyZsti(params.studentId, params.keyCard, params.beginDate, params.lastUse),
+        "getKartyInternat": () => getKartyInternat(ws),
+        "DeleteKartyInternat": () => DeleteKartyInternat(params.id),
+        "addKartyInternat": () => addKartyInternat(params.studentId, params.keyCard, params.beginDate, params.lastUse),
+        "getStudentFromCardZsti": () => getStudentFromCardZsti(ws, params.keyCard),
+        "getStudentFromCardInternat": () => getStudentFromCardInternat(ws, params.keyCard),
+        "addScanZsti": () => addScanZsti(params.cardId, params.datetime),
+        "getScanZsti": () => getScanZsti(ws),
+        "addScanInternat": () => addScanInternat(params.cardId, params.datetime, params.meal),
+        "getScanInternat": () => getScanInternat(ws),
+        "getGroups": () => getGroups(ws),
+        "getScanningInfoZsti": () => getScanningInfoZsti(ws),
+        "sendMailDaysZsti": () => sendMailDaysZsti(params.name, params.surname, params.email, params.addedDays, params.removedDays),
+        "changeLastUseOfCardZsti": () => changeLastUseOfCardZsti(params.cardId, params.datetime),
+        "changeLastUseOfCardInternat": () => changeLastUseOfCardInternat(params.cardId, params.datetime),
+        "getScanZstiMoreInfo": () => getScanZstiMoreInfo(ws),
     }
-    else{
-        handleDisconnect()
-        throw err;
+    if(actions[params.method]) {
+        actions[params.method]();
     }
-});
-
-function getStudentFromCardZsti(websocketClient, keyCard)
-{
-    let query = `SELECT * FROM karty_zsti WHERE key_card = ${keyCard}`
+}
+function executeQuery(query, callback) {
     return database.query(query, (err, result) => {
-        if(err)throw err;
-        console.log(result);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: 'StudentCardZsti',
-                    value: result
-                }
+        if(err) throw err;
+        callback(result);
+    });
+}
+function sendResponse(ws, variable, value) {
+    ws.send(JSON.stringify(
+        {
+            action: "response",
+            params: {
+                variable: variable,
+                value: value
             }
-        ))
-    })
+        }
+    ))
 }
 
-function getStudentFromCardInternat(websocketClient, keyCard)
+function getScanZstiMoreInfo(ws)
 {
-    let query = `SELECT * FROM karty_internat WHERE key_card = ${keyCard}`
-    return database.query(query, (err, result) => {
-        if(err)throw err;
-        console.log(result);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: 'StudentCardInternat',
-                    value: result
-                }
-            }
-        ))
-    })
+    executeQuery(`Select skany_zsti.id as id, osoby_zsti.id as id_osoby, skany_zsti.czas from skany_zsti JOIN karty_zsti ON karty_zsti.id = skany_zsti.id_karty JOIN osoby_zsti ON osoby_zsti.id = karty_zsti.id_ucznia;`, result => sendResponse(ws, "ScanZstiMoreInfo", result));
+}
+
+function changeLastUseOfCardZsti(id, date)
+{
+    executeQuery(`update karty_zsti Set karty_zsti.ostatnie_uzycie = '${date}' WHERE karty_zsti.id = ${id};`, result => console.log(result));
+}
+
+function changeLastUseOfCardInternat(id, date)
+{
+    executeQuery(`update karty_internat Set karty_internat.ostatnie_uzycie = '${date}' WHERE karty_internat.id = ${id};`, result => console.log(result));
+}
+
+function getScanningInfoZsti(ws)
+{
+    executeQuery(`select osoby_zsti.id, typ_osoby_id, imie, nazwisko, klasa, uczeszcza, miasto, key_card, data_wydania, ostatnie_uzycie, karty_zsti.id as id_karty from osoby_zsti LEFT JOIN karty_zsti ON karty_zsti.id_ucznia = osoby_zsti.id;`, result => sendResponse(ws, "ScanningInfoZsti", result))
+}
+
+function getGroups(ws)
+{
+    executeQuery(`select * from slownik_grupy;`, result => sendResponse(ws, "ListOfGroups", result));
+}
+
+function getScanInternat(ws) {
+    executeQuery(`SELECT * FROM skany_internat;`, result => sendResponse(ws, 'ScanInternat', result));
+}
+
+function addScanInternat(cardId, datetime, meal) {
+    executeQuery(`INSERT INTO skany_internat (id_karty, czas, posilek) values(${cardId}, '${datetime}', ${meal})`, result => console.log(result));
 }
 
 
-function addKartyInternat(studentId, keyCard, beginDate, lastUse)
-{
-    let query = `INSERT INTO karty_internat (id_ucznia, key_card, data_wydania) VALUES(${studentId}, ${keyCard}, '${beginDate}')`;
-    if(lastUse)
+function getScanZsti(ws) {
+    executeQuery(`SELECT * FROM skany_zsti;`, result => sendResponse(ws, 'ScanZsti', result));
+}
+
+function addScanZsti(cardId, datetime) {
+    executeQuery(`INSERT INTO skany_zsti (id_karty, czas) values(${cardId}, '${datetime}')`, result => console.log(result));
+}
+
+function getStudentFromCardZsti(ws, keyCard) {
+    executeQuery(`select karty_zsti.id, karty_zsti.id_ucznia, karty_zsti.key_card, karty_zsti.data_wydania, karty_zsti.ostatnie_uzycie, osoby_zsti.imie, osoby_zsti.nazwisko, osoby_zsti.uczeszcza from karty_zsti join osoby_zsti on karty_zsti.id_ucznia = osoby_zsti.id WHERE karty_zsti.key_card = ${keyCard};`, result => sendResponse(ws, 'StudentCardZsti', result));
+}
+
+function getStudentFromCardInternat(ws, keyCard) {
+    executeQuery(`select karty_internat.id, karty_internat.id_ucznia, karty_internat.key_card, karty_internat.data_wydania, karty_internat.ostatnie_uzycie, osoby_internat.imie, osoby_internat.nazwisko, osoby_internat.uczeszcza, osoby_internat.grupa from karty_internat join osoby_internat on karty_internat.id_ucznia = osoby_internat.id WHERE karty_internat.key_card = ${keyCard};`, result => sendResponse(ws, 'StudentCardInternat', result));
+}
+
+function DeleteDeclarationZSTI(studentId, schoolYearId, beginDate, endDate) {
+    executeQuery(`DELETE FROM deklaracja_zywieniowa_zsti WHERE id_osoby = ${studentId} && rok_szkolny_id = ${schoolYearId} && data_od = '${beginDate}' && data_do = '${endDate}';`, result => console.log(result));
+}
+function DeleteDeclarationInternat(studentId, schoolYearId, beginDate, endDate) {
+    executeQuery(`DELETE FROM deklaracja_zywieniowa_internat WHERE osoby_internat_id = ${studentId} && rok_szkolny_id = ${schoolYearId} && data_od = '${beginDate}' && data_do = '${endDate}';`, result => console.log(result));
+}
+function addKartyInternat(studentId, keyCard, beginDate, lastUse) {
+    let query;
+    if(lastUse) {
         query = `INSERT INTO karty_internat (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES(${studentId}, ${keyCard}, '${beginDate}', '${lastUse}')`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-    })
+    }
+    else {
+        query = `INSERT INTO karty_internat (id_ucznia, key_card, data_wydania) VALUES(${studentId}, ${keyCard}, '${beginDate}')`;
+    }
+    executeQuery(query, result => console.log(result));
 }
 
 
-function DeleteKartyInternat(id)
-{
-    let query = `DELETE FROM karty_internat WHERE id = ${id};`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-    })
+function DeleteKartyInternat(id) {
+    executeQuery(`DELETE FROM karty_internat WHERE id = ${id};`, result => console.log(result));
 }
 
-function getKartyInternat(websocketClient)
-{
-    let query = `SELECT * FROM karty_internat;`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(err);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: 'CardsInternat',
-                    value: result
-                }
-            }
-        ))
-    })
+function getKartyInternat(ws) {
+    executeQuery(`SELECT * FROM karty_internat;`, result => sendResponse(ws, 'CardsInternat', result));
 }
 
-function addKartyZsti(studentId, keyCard, beginDate, lastUse)
-{
-    let query = `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania) VALUES(${studentId}, ${keyCard}, '${beginDate}')`;
-    if(lastUse)
+function addKartyZsti(studentId, keyCard, beginDate, lastUse) {
+    let query;
+    if(lastUse) {
         query = `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES(${studentId}, ${keyCard}, '${beginDate}', '${lastUse}')`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-    })
+    }
+    else {
+        query = `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania) VALUES(${studentId}, ${keyCard}, '${beginDate}')`;
+    }
+    executeQuery(query, result => console.log(result));
 }
 
 
-function DeleteKartyZsti(id)
-{
-    let query = `DELETE FROM karty_zsti WHERE id = ${id};`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-    })
+function DeleteKartyZsti(id) {
+    executeQuery(`DELETE FROM karty_zsti WHERE id = ${id};`, result => console.log(result));
 }
 
-function getKartyZsti(websocketClient)
-{
-    let query = `SELECT * FROM karty_zsti;`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(err);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: 'CardsZsti',
-                    value: result
-                }
-            }
-        ))
-    })
+function getKartyZsti(ws) {
+    executeQuery(`SELECT * FROM karty_zsti;`, result => sendResponse(ws, 'CardsZsti', result));
 }
 
-function getPaymentInternat(websocketClient)
-{
-    let query = `SELECT * FROM platnosci_internat;`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: 'PaymentInternat',
-                    value: result
-                }
-            }
-        ));
-    })
+function getPaymentInternat(ws) {
+    executeQuery(`SELECT * FROM platnosci_internat;`, result => sendResponse(ws, 'PaymentInternat', result));
 }
 
-function addPaymentInternat(id, cost, date, month, description)
-{
-    let query = `INSERT INTO platnosci_internat (id_ucznia, platnosc, data_platnosci, miesiac, opis) values(${id}, ${cost}, '${date}', ${month}, '${description}')`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result)
-    })
+function addPaymentInternat(id, cost, date, month, description) {
+    executeQuery(`INSERT INTO platnosci_internat (id_ucznia, platnosc, data_platnosci, miesiac, opis) values(${id}, ${cost}, '${date}', ${month}, '${description}')`, result => console.log(result));
 }
 
-function DeletePaymentInternat(id)
-{
-    let query = `DELETE FROM platnosci_internat WHERE id = ${id};`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result)
-    })
+function DeletePaymentInternat(id) {
+    executeQuery(`DELETE FROM platnosci_internat WHERE id = ${id};`, result => console.log(result));
 }
 
-function getPaymentZsti(websocketClient)
-{
-    let query = `SELECT * FROM platnosci_zsti;`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: 'PaymentZsti',
-                    value: result
-                }
-            }
-        ));
-    })
+function getPaymentZsti(ws) {
+    executeQuery(`SELECT * FROM platnosci_zsti;`, result => sendResponse(ws, 'PaymentZsti', result));
 }
 
-function addPaymentZsti(id, cost, date, month, description)
-{
-    let query = `INSERT INTO platnosci_zsti (id_ucznia, platnosc, data_platnosci, miesiac, opis) values(${id}, ${cost}, '${date}', ${month}, '${description}')`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result)
-    })
+function addPaymentZsti(id, cost, date, month, description) {
+    executeQuery(`INSERT INTO platnosci_zsti (id_ucznia, platnosc, data_platnosci, miesiac, opis, rok) values(${id}, ${cost}, '${date}', ${month}, '${description}', 2025)`, result => console.log(result));
 }
 
-function DeletePaymentZsti(id)
-{
-    let query = `DELETE FROM platnosci_zsti WHERE id = ${id};`;
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result)
-    })
+function DeletePaymentZsti(id) {
+    executeQuery(`DELETE FROM platnosci_zsti WHERE id = ${id};`, result => console.log(result));
 }
 
-function addZstiStudent(websocketClient, name, surname, classa, attends, type)
-{
+function addZstiStudent(ws, name, surname, classa, attends, type) {
     let query = `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id) VALUES('${name}', '${surname}', '${classa}', ${attends}, ${type})`
-    console.log(query)
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result.insertId)
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "LastStudentInsertId",
-                        value: result
-                    }
-                }))
-    })
+    executeQuery(query, result => sendResponse(ws, 'LastStudentInsertId', result));
 }
 
-function addInternatStudent(websocketClient, name, surname, attends)
-{
-    let query = `INSERT INTO osoby_internat (imie, nazwisko, uczeszcza) VALUES('${name}', '${surname}', ${attends})`
-    console.log(query)
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        console.log(result)
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "LastStudentInsertId",
-                        value: result
-                    }
-                }))
-    })
+function addInternatStudent(ws, name, surname, attends, grupa) {
+    executeQuery(`INSERT INTO osoby_internat (imie, nazwisko, uczeszcza,grupa) VALUES('${name}', '${surname}', ${attends} , '${grupa}')`, result => sendResponse(ws, 'LastStudentInsertId', result));
 }
 
-function addZstiDeclaration(studentId, schoolYearId, beginDate, endDate, days)
-{
+function addZstiDeclaration(studentId, schoolYearId, beginDate, endDate, days) {
     let query = `INSERT INTO deklaracja_zywieniowa_zsti (id_osoby, rok_szkolny_id, data_od, data_do, dni) VALUES(${studentId}, ${schoolYearId}, '${beginDate}', '${endDate}', ${days});`
-    return database.query(query, (err, result)=>{
-        if(err) throw err;
-        console.log(result)
-    })
+    executeQuery(query, result => console.log(result));
 }
 
-function addInternatDeclaration(studentId, schoolYearId, beginDate, endDate, wersja)
-{
+function addInternatDeclaration(studentId, schoolYearId, beginDate, endDate, wersja) {
     let query = `INSERT INTO deklaracja_zywieniowa_internat (osoby_internat_id, rok_szkolny_id, data_od, data_do, wersja) VALUES(${studentId}, ${schoolYearId}, '${beginDate}', '${endDate}', ${wersja});`
-    return database.query(query, (err, result)=>{
-        if(err) throw err;
-        console.log(result)
-    })
+    executeQuery(query, result => console.log(result));
 }
 
-function DeleteStudentZsti(studentId)
-{
+function DeleteStudentZsti(studentId) {
     let query = `DELETE FROM `
 }
 
-function addSchoolYear(year)
-{
-    let query = `INSERT INTO rok_szkolny VALUES(null, '${year}');`
-    return database.query(query, (err,result)=>{
-        if(err) throw err;
-        console.log(result);
-    })
+function addSchoolYear(year) {
+    executeQuery(`INSERT INTO rok_szkolny VALUES(null, '${year}');`, result => console.log(result));
 }
 
-function getSchoolYears(websocketClient)
-{
-    let query = "SELECT * FROM rok_szkolny;"
-    return database.query(query, (err, result) => {
-        if(err) throw err;
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "SchoolYears",
-                        value: result
-                    }
-                }))
-    })
+function getSchoolYears(ws) {
+    executeQuery(`SELECT * FROM rok_szkolny;`, result => sendResponse(ws, 'SchoolYears', result));
 }
 
-function changeStudentZsti(studentId, type, name, surname, klasa, attends)
-{
-    let query = "UPDATE osoby_zsti SET typ_osoby_id = " + type + ", imie = '" + name + "', nazwisko = '" + surname + "', klasa = '" + klasa + "', uczeszcza = " + attends + " WHERE id = " + studentId + ";"
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-    })
+function changeStudentZsti(studentId, type, name, surname, klasa, attends) {
+    console.error(type, name, surname, klasa, attends)
+    let query = `UPDATE osoby_zsti SET typ_osoby_id = ${type}, imie = '${name}', nazwisko = '${surname}', klasa = '${klasa}', uczeszcza = ${attends} WHERE id = ${studentId};`
+    executeQuery(query, result => console.log(result));
 }
 
-function changeStudentInternat(studentId, name, surname, attends)
-{
-    let query = "UPDATE osoby_internat SET imie = '" + name + "', nazwisko = '" + surname + "', uczeszcza = " + attends + " WHERE id = " + studentId + ";"
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-    })
+function changeStudentInternat(studentId, name, surname, attends, group) {
+    let query = `UPDATE osoby_internat SET imie = '${name}', nazwisko = '${surname}', uczeszcza = ${attends}`
+    if(group !== undefined) query += `, grupa = ${group}`
+    query += ` WHERE id = ${studentId};`
+    executeQuery(query, result => console.log(result));
 }
 
-function AddDniNieczynne(day)
-{
-    let query = "INSERT INTO dni_nieczynne_stolowki VALUES(null, '" + day + "')";
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-    })
+function AddDniNieczynne(day) {
+    executeQuery(`INSERT INTO dni_nieczynne_stolowki VALUES(null, '${day}');`, result => console.log(result));
 }
 
-function DeleteDniNieczynne(day)
-{
-    let query = "DELETE FROM dni_nieczynne_stolowki WHERE dzien = '" + day + "';";
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-    })
+function DeleteDniNieczynne(day) {
+    executeQuery(`DELETE FROM dni_nieczynne_stolowki WHERE dzien = '${day}';`, result => console.log(result));
 }
 
-function getDniNieczynne(websocketClient)
-{
-    let query = "SELECT * FROM dni_nieczynne_stolowki"
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "DisabledDays",
-                        value: result
-                    }
-                }))
-    })
+function getDniNieczynne(ws) {
+    executeQuery(`SELECT * FROM dni_nieczynne_stolowki;`, result => sendResponse(ws, 'DisabledDays', result));
 }
 
-function getStudentDeclarationInternat(websocketClient)
-{
-    let query = "SELECT * FROM deklaracja_zywieniowa_internat  JOIN slownik_wersje ON wersja = slownik_wersje.id";
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-        console.log(result);
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "StudentDeclarationInternat",
-                        value: result
-                    }
-                }))
-    })
+function getStudentDeclarationInternat(ws) {
+    executeQuery(`SELECT * FROM deklaracja_zywieniowa_internat  JOIN slownik_wersje ON wersja = slownik_wersje.id`, result => sendResponse(ws, 'StudentDeclarationInternat', result));
 }
 
-function getStudentDeclarationZsti(websocketClient)
-{
-    let query = "SELECT * FROM deklaracja_zywieniowa_zsti";
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-        console.log(result);
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "StudentDeclarationZsti",
-                        value: result
-                    }
-                }))
-    })
+function getStudentDeclarationZsti(ws) {
+    executeQuery(`SELECT * FROM deklaracja_zywieniowa_zsti`, result => sendResponse(ws, 'StudentDeclarationZsti', result));
 }
 
 function changeStudentDeclarationInternat(StudentId, schoolYearId, wersja, beginDate, endDate) {
     let query = `UPDATE deklaracja_zywieniowa_internat SET rok_szkolny_id = ${schoolYearId}, data_od = '${beginDate}', data_do = '${endDate}', wersja = ${wersja} WHERE osoby_internat_id = ${StudentId};`
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-    })
+    executeQuery(query, result => console.log(result));
 }
 
 function changeStudentDeclarationZsti(StudentId, schoolYearId, days, beginDate, endDate) {
-    let query = `UPDATE deklaracja_zywieniowa_zsti SET rok_szkolny_id = ${schoolYearId}, data_od = '${beginDate}', data_do = '${endDate}', dni = ${days} WHERE id_osoby = ${StudentId}`
-    return database.query(query, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-    })
+    let query = `UPDATE deklaracja_zywieniowa_zsti SET rok_szkolny_id = ${schoolYearId}, data_od = '${beginDate}', data_do = '${endDate}', dni = 0b${days} WHERE id_osoby = ${StudentId}`
+    executeQuery(query, result => console.log(result));
 }
 
-function getStudentListZsti(websocketClient)
-{
-    let query = "SELECT * FROM osoby_zsti";
-    database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "StudentListZsti",
-                        value: result
-                    }
-                }))
-    });
+function getStudentListZsti(ws) {
+    executeQuery(`SELECT * FROM osoby_zsti ORDER BY nazwisko, imie`, result => sendResponse(ws, 'StudentListZsti', result));
 }
 
-function getStudentListInternat(websocketClient)
-{
-    let query = "SELECT * FROM osoby_internat";
-    database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "StudentListInternat",
-                        value: result
-                    }
-                }))
-    });
+function getStudentListInternat(ws) {
+    executeQuery(`SELECT * FROM osoby_internat LEFT JOIN slownik_grupy ON osoby_internat.grupa = slownik_grupy.idGrupy ORDER BY nazwisko, imie`, result => sendResponse(ws, 'StudentListInternat', result));
 }
 
-function getStudentZstiDays(websocketClient, StudentId)
-{
-    let query = "SELECT * FROM nieobecnosci_zsti WHERE osoby_zsti_id = " + StudentId + ";";
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: "StudentZstiDays",
-                    value: result
-                }
-            }
-        ))
-    })
+function getStudentZstiDays(ws, StudentId) {
+    executeQuery(`SELECT * FROM nieobecnosci_zsti WHERE osoby_zsti_id = ${StudentId};`, result => sendResponse(ws, 'StudentZstiDays', result));
 }
 
-function getStudentInternatDays(websocketClient, StudentId)
-{
-    let query = "SELECT * FROM nieobecnosci_internat  WHERE osoby_internat_id = " + StudentId + ";";
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: "StudentInternatDays",
-                    value: result
-                }
-            }
-        ))
-    })
+function getStudentInternatDays(ws, StudentId) {
+    executeQuery(`SELECT * FROM nieobecnosci_internat WHERE osoby_internat_id = ${StudentId};`, result => sendResponse(ws, 'StudentInternatDays', result));
 }
 
-function AddZstiDays(StudentId, Date, schoolYearId)
-{
+function AddZstiDays(StudentId, Date, schoolYearId) {
     let query = "INSERT INTO nieobecnosci_zsti (dzien_wypisania, osoby_zsti_id, rok_szkolny_id) VALUES('" + Date + "', " + StudentId
     if(schoolYearId)
         query += ", " + schoolYearId + ");"
     else
         query += ", null);"
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
+    executeQuery(query, result => console.log(result));
 }
 
-function AddInternatDays(StudentId, Date, mealId, schoolYearId)
-{
+function AddInternatDays(StudentId, Date, mealId, schoolYearId) {
     let query = "INSERT INTO nieobecnosci_internat (dzien_wypisania, osoby_internat_id, posilki_id, rok_szkolny_id) VALUES('" + Date + "', " + StudentId + ", " + mealId
     if(schoolYearId)
         query += ", " + schoolYearId + ");"
     else
         query += ", null);"
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
+    executeQuery(query, result => console.log(result));
 }
 
-function DeleteZstiDays(StudentId, Date)
+function DeleteZstiDays(StudentId, Date) {
+    executeQuery(`DELETE FROM nieobecnosci_zsti WHERE osoby_zsti_id = ${StudentId} && dzien_wypisania = '${Date}';`, result => console.log(result));
+}
+
+function DeleteInternatDays(StudentId, Date, mealId) {
+    executeQuery(`DELETE FROM nieobecnosci_internat WHERE osoby_internat_id = ${StudentId} && dzien_wypisania = '${Date}' && posilki_id = ${mealId};`, result => console.log(result));
+}
+
+function getStudentDisabledZstiDays(ws, StudentId) {
+    executeQuery(`SELECT * FROM nieobecnosci_zsti WHERE osoby_zsti_id = ${StudentId};`, result => sendResponse(ws, 'StudentDisabledZstiDays', result));
+}
+function getDisabledZstiDays(ws) {
+    executeQuery(`SELECT * FROM nieobecnosci_zsti;`, result => sendResponse(ws, 'DisabledZstiDays', result));
+}
+function getDisabledInternatDays(ws) {
+    executeQuery(`SELECT * FROM nieobecnosci_internat;`, result => sendResponse(ws, 'DisabledInternatDays', result));
+}
+
+function CardScan(cardId, timestamp) {
+    executeQuery(`INSERT INTO skan (id_karty, time) VALUES(${cardId}, '${timestamp}')`, result => console.log(result));
+}
+
+function QueryExecute(ws, query, pass, responseBool, variable) {
+    if(serverPassword !== pass) return -1
+    executeQuery(query, result => sendResponse(ws, variable, result));
+}
+
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'szymixxxxxx@gmail.com',
+        pass: 'lmib pvne monl kleg'
+    }
+});
+
+const dniTygodnia = {
+    0: 'Niedziela',
+    1: 'Poniedziałek',
+    2: 'Wtorek',
+    3: 'Środa',
+    4: 'Czwartek',
+    5: 'Piątek',
+    6: 'Sobota'
+}
+
+const miesiace = {
+    0: 'Styczeń',
+    1: 'Luty',
+    2: 'Marzec',
+    3: 'Kwiecień',
+    4: 'Maj',
+    5: 'Czerwiec',
+    6: 'Lipiec',
+    7: 'Sierpień',
+    8: 'Wrzesień',
+    9: 'Październik',
+    10: 'Listopad',
+    11: 'Grudzień'
+}
+
+// sendMailDaysZsti('Szymon', 'Żelazny', 'xxxxxxszymi@gmail.com', [new Date(), new Date(2024, 11, 21)], [new Date(2024, 10, 11)])
+function sendMail(receiver, subject, text)
 {
-    let query = "DELETE FROM nieobecnosci_zsti WHERE osoby_zsti_id = " + StudentId + " && dzien_wypisania = '" + Date + "';";
-    console.log(query, "NIGER NIGER NIGER")
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
+    const tempMailOptions = {
+        from: 'szymixxxxxx@gmail.com',
+        to: receiver,
+        subject: subject,
+        html: text
+    }
+    transporter.sendMail(tempMailOptions);
 }
 
-function DeleteInternatDays(StudentId, Date, mealId)
-{
-    let query = "DELETE FROM nieobecnosci_internat WHERE osoby_internat_id = " + StudentId + " && dzien_wypisania = '" + Date + "' && posilki_id = " + mealId + ";";
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
-}
+function sendMailDaysZsti(firstName, lastName, email, addedDays, removedDays) {
+    const formatDate = dateStr => {
+        const date = new Date(dateStr);
+        return `${date.getDate()} ${miesiace[date.getMonth()]} ${date.getFullYear()} (${dniTygodnia[date.getDay()]})`;
+    };
 
-function getStudentDisabledZstiDays(websocketClient, StudentId)
-{
-    let query = "SELECT * FROM obencosci_zsti WHERE osoby_zsti_id = " + StudentId + ";";
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: "StudentDisabledZstiDays",
-                    value: result
-                }
-            }
-        ))
-    })
-}
+    const generateSection = (title, days) => days.length ? `
+        <h3>${title}:</h3>
+        <ul>${days.map(day => `<li>${formatDate(day)}</li>`).join('')}</ul>
+    ` : '';
 
-function getStudentDisabledInternatDays(websocketClient, StudentId)
-{
-    let query = "SELECT * FROM obencosci_internat WHERE osoby_internat_id = " + StudentId + ";";
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: "StudentDisabledInternatDays",
-                    value: result
-                }
-            }
-        ))
-    })
-}
+    const sections = [
+        generateSection('Dodane nieobecności', addedDays),
+        generateSection('Usunięte nieobecności', removedDays)
+    ].filter(Boolean).join('');
 
-function AddDisabledZstiDays(StudentId, Date, schoolYearId)
-{
-    let query = "INSERT INTO obencosci_zsti (dzien_wypisania, osoby_zsti_id, rok_szkolny_id) VALUES('" + Date + "', " + StudentId
-    if(schoolYearId)
-        query += ", " + schoolYearId + ");"
-    else
-        query += ", null);"
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
-}
-
-function AddDisabledInternatDays(StudentId, Date, schoolYearId, mealId)
-{
-    let query = "INSERT INTO obencosci_internat (dzien_wypisania, osoby_zsti_id, posilki_id,rok_szkolny_id) VALUES('" + Date + "', " + StudentId + ", " + mealId
-    if(schoolYearId)
-        query += ", " + schoolYearId + ");"
-    else
-        query += ", null);"
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
-}
-
-function DeleteDisabledZstiDays(StudentId, Date)
-{
-    let query = "DELETE FROM obencosci_zsti WHERE osoby_zsti_id = " + StudentId + " && dzien_wypisania = '" + Date + "';";
-    console.log(query, "NIGER NIGER NIGER")
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
-}
-
-function DeleteDisabledInternatDays(StudentId, Date, mealId)
-{
-    let query = "DELETE FROM obencosci_internat WHERE osoby_zsti_id = " + StudentId + " && dzien_wypisania = '" + Date + "' && posilki_id = " + mealId + ";";
-    return database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-function CardScan(cardId, timestamp)
-{
-    let query = "INSERT INTO skan (id_karty, time) VALUES(" + cardId + ",'" + timestamp +"')"
-    return database.query(query, function (err, res) {
-        console.log("Error of " + query + " - :" +err);
-        console.log(res);
-        return res;
-    })
-}
-
-function QueryExecute(websocketClient, query, pass, responseBool, variable) {
-    if(serverPassword !== pass)
-        return -1
-    database.query(query, function (err, result)  {
-        console.log("Error of " + query + " - :" +err);
-        console.log("Result of " + query + " - :" +result);
-        if(!responseBool)
-            return result;
-        websocketClient.send(JSON.stringify(
-            {
-                action: "response",
-                params: {
-                    variable: variable,
-                    value: result
-                }
-            }))
-    })
-}
-
-function StudentList(websocketClient, condition)
-{
-    let query = "SELECT * FROM uczniowie";
-    if(condition!=="")
-        query += " WHERE " + condition;
-    query += ";"
-    database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(
-            JSON.stringify(
-            {
-            action: "response",
-            params: {
-                variable: "StudentList",
-                value: result
-            }
-        }))
-    });
-}
-
-function CalendarStudent(websocketClient, studentId, relationBool, isAll)
-{
-    let query = "SELECT * FROM kalendarz";
-    if(relationBool)
-        query += " JOIN uczniowie ON kalendarz.id_uczniowie = uczniowie.id"
-    if(!isAll)
-        query += " WHERE id_uczniowie = " + studentId
-    query += ";";
-    database.query(query, function (err, result) {
-        if (err) throw err;
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "CalendarStudent",
-                        value: result
-                    }
-                }
-            )
-        )
-    })
-}
-
-function StudentMeal(websocketClient, studentId)
-{
-    let query = "SELECT id_posilki FROM uczniowie WHERE id = " + studentId + ";";
-    database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-        websocketClient.send(
-            JSON.stringify(
-                {
-                    action: "response",
-                    params: {
-                        variable: "StudentMeal",
-                        value: result
-                    }
-                }
-            )
-        )
-    })
-}
-
-function CalendarAdd(websocketClient, studentId, date, mealId)
-{
-    let query = "INSERT INTO kalendarz Values("+studentId+", '"+date+"', " + mealId + ");";
-    database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
-}
-
-function CalendarDelete(websocketClient, studentId, date, mealId)
-{
-    let query = "DELETE FROM kalendarz WHERE id_uczniowie = "+studentId+" AND dzien_wypisania = '"+date+"' AND typ_posilku = "+mealId+";";
-    console.log(query);
-    database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
-}
-function UpdateStudent(websocketClient, studentId, name, surname, mealId)
-{
-    let query = "UPDATE uczniowie SET imie = '" + name + "', nazwisko = '" + surname + "', id_posilki = " + mealId + " WHERE id = " + studentId + ";";
-    database.query(query, function (err, result) {
-        if (err) throw err;
-        console.log(result);
-    })
-}
-function DeleteStudent(websocketClient, studentId)
-{
-    let query = "DELETE FROM uczniowie WHERE id = " + studentId +";";
-    database.query(query, function (err, result){
-        if(err) throw err;
-        console.log(result)
-    })
+    const mailHtml = `
+        <body style="color: black !important;">
+            Szanowny/a ${firstName} ${lastName[0]}.,<br>
+            Informujemy, że w systemie stołówki zostały odnotowane zmiany dotyczące Twojej obecności na obiedzie.<br>
+            <h2>Szczegóły zmian: <br></h2>
+            ${sections}
+            Jeśli te zmiany były zamierzone, nie musisz podejmować żadnych dalszych działań.<br>
+            W przypadku jakichkolwiek nieścisłości lub potrzeby korekty, prosimy o kontakt z administracją stołówki<br>
+            Dziękujemy za korzystanie z naszego systemu i życzymy miłego dnia!<br>
+            Z wyrazami szacunku, <br> <h4><b>Zespół Stołówki</b></h4>
+        </body>
+    `;
+    sendMail(email, 'Potwierdzenie zgłoszenia nieobecności na obiedzie', mailHtml);
 }

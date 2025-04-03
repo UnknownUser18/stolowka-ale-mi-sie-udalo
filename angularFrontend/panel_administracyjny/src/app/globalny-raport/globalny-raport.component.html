@@ -1,21 +1,17 @@
 <section id="select">
   <h2>Globalny Raport</h2>
-  <button (click)="show()">Wygeneruj</button>
+  <button (click)="this.renderer.setStyle(this.DOMelement.querySelector('main'), 'display', 'flex');">Wygeneruj</button>
 </section>
 <main>
   <section>
-    <h1>Raport z miesiąca {{ miesiac }}</h1>
-    <img ngSrc="../../assets/x.svg" alt="Zamknij" (click)="close()" height="48" width="48">
-    <form name="miesiac" (submit)="generuj($event)" method="post">
-      <div>
-        <label>Miesiąc: <input type="month" name="month" [value]="date.getFullYear()+'-'+(date.getMonth()+1)" placeholder="YYYY-MM"></label>
-        <label><select required name="typ">
-          <option value="ZSTI">ZSTI</option>
-          <option value="Internat">Internat</option>
-        </select></label>
-        <button type="submit">Generuj</button>
-      </div>
-      <div id="raport"></div>
-    </form>
+    <nav>
+      <h2 (click)="this.renderer.setStyle(this.DOMelement.querySelector('main'), 'display', 'none');">Powrót</h2>
+      <ol (click)="show_raport($event)">
+        <li data-id="1">Korekty</li>
+        <li data-id="2">Wersje Posiłków</li>
+        <li data-id="3">Obecność Uczniów</li>
+      </ol>
+    </nav>
+    <div id="content"></div>
   </section>
 </main>

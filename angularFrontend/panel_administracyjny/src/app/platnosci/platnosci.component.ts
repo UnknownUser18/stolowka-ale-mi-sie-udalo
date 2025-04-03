@@ -1,7 +1,8 @@
-import {Component, ElementRef, Input, OnChanges, Renderer2} from '@angular/core';
+import {Component, ElementRef, Input, OnChanges} from '@angular/core';
 import {DataBaseService} from '../data-base.service';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
+import { Payments} from '../app.component';
 
 @Component({
   selector: 'app-platnosci',
@@ -17,15 +18,17 @@ import {NgForOf, NgOptimizedImage} from '@angular/common';
 })
 export class PlatnosciComponent implements OnChanges{
   @Input() typ: string | undefined;
+  DOMelement : any | undefined;
   Months: string[] = ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień']
   PaymentZsti:any = null;
   PaymentInternat:any = null;
   CurrentPayment: {id:number, id_ucznia:number, platnosc:number, data_platnosci:string, miesiac:number, opis:string} = {id: -1, id_ucznia:-1, data_platnosci:'', platnosc:-1, miesiac:-1, opis:''};
-  constructor(private renderer: Renderer2, private el: ElementRef, private dataService: DataBaseService) {
+  constructor(private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.PaymentZsti.asObservable().subscribe(change => this.changePayments(change));
     this.dataService.CurrentStudentId.asObservable().subscribe(()=> this.typeChangePayment())
     this.dataService.PaymentInternat.asObservable().subscribe(change=> this.changePayments(change))
     this.dataService.StudentType.asObservable().subscribe(()=> this.typeChangePayment())
+    this.DOMelement = this.el.nativeElement;
   }
 
   monthToString(month:number, isNormal:boolean)
@@ -56,25 +59,25 @@ export class PlatnosciComponent implements OnChanges{
     }
   }
 
-  changePayments(changes:any)
+  changePayments(changes:Payments[])
   {
+    if(this.DOMelement === undefined) return;
     this.clearData()
     this.selectedPayment = null;
     this.PaymentZsti = []
-    if(changes.value)
-      changes = changes.value
-    changes.forEach((element:any) => {
-      console.log(element)
+    // if(changes.value)
+    //   changes = changes.value
+    changes.forEach((element:Payments) => {
       if(element.id_ucznia === this.dataService.CurrentStudentId.value && element.id_ucznia !== null)
         this.PaymentZsti.push(element);
     })
-    this.PaymentZsti.forEach((element:any) => {
+    this.PaymentZsti.forEach((element:Payments) => {
       let date = new Date(element.data_platnosci)
-      element.data_platnosci = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+      element.data_platnosci = this.formatDate(`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`);
     })
     this.PaymentZsti.sort((a:any, b:any) => {
-      let dateA:Date = new Date(a.data_platnosci);
-      let dateB:Date = new Date(b.data_platnosci);
+      let dateA:Date = new Date(this.formatDate(a.data_platnosci));
+      let dateB:Date = new Date(this.formatDate(b.data_platnosci));
 
       // @ts-ignore
       return dateA - dateB;
@@ -91,10 +94,10 @@ export class PlatnosciComponent implements OnChanges{
       method = 'addPaymentInternat';
     let editPayment = JSON.parse(JSON.stringify(this.CurrentPayment));
     editPayment.id_ucznia = this.dataService.CurrentStudentId.value;
-    editPayment.data_platnosci = this.el.nativeElement.querySelector('input[name="payment-date-edit"]').value;
-    editPayment.platnosc = this.el.nativeElement.querySelector('input[name="payment-amount-edit"]').value;
-    editPayment.miesiac = this.el.nativeElement.querySelector('select[name="payment-month-edit"]').value ;
-    editPayment.opis = this.el.nativeElement.querySelector('input[name="payment-description-edit"]').value;
+    editPayment.data_platnosci = this.DOMelement.querySelector('input[name="payment-date-edit"]').value;
+    editPayment.platnosc = this.DOMelement.querySelector('input[name="payment-amount-edit"]').value;
+    editPayment.miesiac = this.DOMelement.querySelector('select[name="payment-month-edit"]').value ;
+    editPayment.opis = this.DOMelement.querySelector('input[name="payment-description-edit"]').value;
     if(editPayment.data_platnosci !== '' && editPayment.platnosc !== null && editPayment.miesiac !== 0)
     {
       this.dataService.send(JSON.stringify({
@@ -135,30 +138,25 @@ export class PlatnosciComponent implements OnChanges{
     else
       this.CurrentPayment = this.PaymentZsti[((event.target as HTMLElement).querySelector('input[name="Payment"]') as HTMLInputElement).value]
     console.log(this.CurrentPayment)
-    this.el.nativeElement.querySelector('input[name="payment-amount"]').value = this.CurrentPayment.platnosc
-    this.el.nativeElement.querySelector('input[name="payment-date"]').value = this.formatDate(this.CurrentPayment.data_platnosci)
-    this.el.nativeElement.querySelector('select[name="payment-month"]').value = this.CurrentPayment.miesiac - 1
-    this.el.nativeElement.querySelector('input[name="payment-description"]').value = this.CurrentPayment.opis;
+    this.DOMelement.querySelector('input[name="payment-amount"]').value = this.CurrentPayment.platnosc
+    this.DOMelement.querySelector('input[name="payment-date"]').value = this.formatDate(this.CurrentPayment.data_platnosci)
+    this.DOMelement.querySelector('select[name="payment-month"]').value = this.CurrentPayment.miesiac - 1
+    this.DOMelement.querySelector('input[name="payment-description"]').value = this.CurrentPayment.opis;
   }
 
   selectedPayment: number | null = -1;
-
-  selectPayment(index: number): void {
-    this.selectedPayment = index;
-  }
-
-
   ngOnChanges(){
    this.showPayment()
   }
 
   closePlatnosc()
   {
-    this.el.nativeElement.querySelector('#dodaj_platnosc').style.display = 'none';
+    this.DOMelement.querySelector('#dodaj_platnosc').style.display = 'none';
   }
 
   dodajPlatnosc(){
-    this.el.nativeElement.querySelector('#dodaj_platnosc').style.display = 'flex';
+    this.DOMelement.querySelector('#dodaj_platnosc').style.display = 'flex';
+    this.DOMelement.querySelector('input[name="payment-date-edit"]').value = this.dataService.formatDate(new Date())
   }
 
   delete()
@@ -184,13 +182,13 @@ export class PlatnosciComponent implements OnChanges{
 
   clearData()
   {
-    this.el.nativeElement.querySelector('input[name="payment-amount"]').value = ''
-    this.el.nativeElement.querySelector('input[name="payment-date"]').value = ''
-    this.el.nativeElement.querySelector('select[name="payment-month"]').value = 0
-    this.el.nativeElement.querySelector('input[name="payment-description"]').value = ''
+    this.DOMelement.querySelector('input[name="payment-amount"]').value = ''
+    this.DOMelement.querySelector('input[name="payment-date"]').value = ''
+    this.DOMelement.querySelector('select[name="payment-month"]').value = 0
+    this.DOMelement.querySelector('input[name="payment-description"]').value = ''
   }
   showPayment()
   {
-    console.log(this.PaymentZsti)
+    // console.log(this.PaymentZsti)
   }
 }

@@ -1,8 +1,8 @@
-import {Component, ElementRef, Input} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {DataBaseService} from '../data-base.service';
-import {NgForOf, NgIf, NgOptimizedImage} from '@angular/common';
-import {CardDisplayComponent} from '../card-display/card-display.component';
+import { Component, ElementRef, Input } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DataBaseService } from '../data-base.service';
+import { NgOptimizedImage } from '@angular/common';
+import {Cards} from '../app.component';
 
 @Component({
   selector: 'app-karty',
@@ -10,20 +10,18 @@ import {CardDisplayComponent} from '../card-display/card-display.component';
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    NgForOf,
     NgOptimizedImage,
-    CardDisplayComponent,
-    NgIf
   ],
   templateUrl: './karty.component.html',
   styleUrl: './karty.component.css'
 })
 export class KartyComponent {
+  DOMelement : any | undefined;
   @Input() typ: string | undefined;
   today:Date = new Date();
   todayString:string;
   isFocused:boolean = false;
-  CurrentKarta: { id: number, id_ucznia:number, key_card:number, data_wydania:string, ostatnie_uzycie:string } =
+  CurrentKarta: Cards =
       {
         id:-1,
         id_ucznia:-1,
@@ -31,7 +29,7 @@ export class KartyComponent {
         data_wydania: '',
         ostatnie_uzycie: ''
       }
-  nullKarta: { id: number, id_ucznia:number, key_card:number, data_wydania:string, ostatnie_uzycie:string } =
+  nullKarta: Cards =
       {
         id:-1,
         id_ucznia:-1,
@@ -42,7 +40,7 @@ export class KartyComponent {
   constructor(private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.CurrentStudentCardZsti.asObservable().subscribe((change:any)=>this.updateCard(change))
     this.dataService.CurrentStudentCardInternat.asObservable().subscribe((change:any)=>this.updateCard(change))
-    this.todayString = `${this.today.getFullYear()}-${this.today.getMonth()+1}-${this.today.getDate()}`;
+    this.todayString = this.dataService.formatDate(this.today);
     this.nullKarta = {
       id: -1,
       id_ucznia: -1,
@@ -50,14 +48,15 @@ export class KartyComponent {
       data_wydania: '',
       ostatnie_uzycie: ''
     }
+    this.DOMelement = this.el.nativeElement;
   }
 
   updateCard(change:any)
   {
-    console.log("Karta pierwsza zmiana" + this.CurrentKarta, change)
+    // console.log("Karta pierwsza zmiana" + this.CurrentKarta, change)
+    if(change === null) return console.warn("Null karta!")
     if(typeof change != 'object' || change.id === -1)
     {
-      console.log("Null karta!")
       this.CurrentKarta = this.nullKarta;
       this.clearData();
       return
@@ -76,37 +75,23 @@ export class KartyComponent {
   {
     if(this.CurrentKarta === this.nullKarta)
     {
-      this.el.nativeElement.querySelector('input[name="key_card"]').value = '';
-      this.el.nativeElement.querySelector('input[name="data_wydania"]').value = ''
-      this.el.nativeElement.querySelector('input[name="ostatnie_uzycie"]').value = ''
+      this.DOMelement.querySelector('input[name="key_card"]').value = '';
+      this.DOMelement.querySelector('input[name="data_wydania"]').value = ''
+      this.DOMelement.querySelector('input[name="ostatnie_uzycie"]').value = ''
       return
     }
     console.log("not null karta")
-    this.el.nativeElement.querySelector('input[name="key_card"]').value = this.CurrentKarta.key_card;
-    this.el.nativeElement.querySelector('input[name="data_wydania"]').value = this.CurrentKarta.data_wydania
-    this.el.nativeElement.querySelector('input[name="ostatnie_uzycie"]').value = this.CurrentKarta.ostatnie_uzycie
+    this.DOMelement.querySelector('input[name="key_card"]').value = this.CurrentKarta.key_card;
+    this.DOMelement.querySelector('input[name="data_wydania"]').value = this.dataService.formatDate(this.CurrentKarta.data_wydania)
+    this.DOMelement.querySelector('input[name="ostatnie_uzycie"]').value = this.dataService.formatDate(this.CurrentKarta.ostatnie_uzycie)
   }
 
   clearData()
   {
-    this.el.nativeElement.querySelector('input[name="key_card"]').value = '';
-    this.el.nativeElement.querySelector('input[name="data_wydania"]').value = '';
-    this.el.nativeElement.querySelector('input[name="ostatnie_uzycie"]').value = '';
+    this.DOMelement.querySelector('input[name="key_card"]').value = '';
+    this.DOMelement.querySelector('input[name="data_wydania"]').value = '';
+    this.DOMelement.querySelector('input[name="ostatnie_uzycie"]').value = '';
   }
-
-  generateRandomKeyCard(event: Event | null):any
-  {
-    let max = 0x10000;
-    let min = 0x400;
-    let value = Math.floor(Math.random() * (max - min) + max);
-    if(this.dataService.CardsZsti.value.find((element:any) => element.key_card == value))
-      return this.generateRandomKeyCard(null);
-    if(this.dataService.CardsInternat.value.find((element:any) => element.key_card == value))
-      return this.generateRandomKeyCard(null);
-    this.el.nativeElement.querySelector('input[name="card-amount-edit"]').value = value;
-    return true;
-  }
-
   deleteCard()
   {
     let method = "DeleteKartyZsti"
@@ -143,8 +128,8 @@ export class KartyComponent {
        method = 'addKartyZsti'
     let tempCard = JSON.parse(JSON.stringify(this.nullKarta));
     tempCard.id_ucznia = this.dataService.CurrentStudentId.value;
-    tempCard.key_card = parseInt(this.el.nativeElement.querySelector('input[name="card-amount-edit"]').value);
-    tempCard.data_wydania = this.el.nativeElement.querySelector('input[name="card-date-release"]').value;
+    tempCard.key_card = parseInt(this.DOMelement.querySelector('input[name="card-amount-edit"]').value);
+    tempCard.data_wydania = this.DOMelement.querySelector('input[name="card-date-release"]').value;
     if(this.dataService.CardsZsti.value.find((element:any) => element.key_card == tempCard.key_card) || this.dataService.CardsInternat.value.find((element:any) => element.key_card == tempCard.key_card))
     {
       alert("JUZ ISTNIEJE!")
@@ -176,8 +161,8 @@ export class KartyComponent {
     console.log("jak wyglada karta: ", this.CurrentKarta)
     if(this.CurrentKarta === this.nullKarta)
     {
-      this.el.nativeElement.querySelector('#dodaj_karte').style.display = 'flex';
-      this.el.nativeElement.querySelector('input[name="card-amount-edit"]').focus()
+      this.DOMelement.querySelector('#dodaj_karte').style.display = 'flex';
+      this.DOMelement.querySelector('input[name="card-amount-edit"]').focus()
       return
     }
     alert("Ta osoba posiada już kartę!")
@@ -186,9 +171,9 @@ export class KartyComponent {
 
   closeCard()
   {
-    this.el.nativeElement.querySelector('#dodaj_karte').style.display = 'none';
+    this.DOMelement.querySelector('#dodaj_karte').style.display = 'none';
     this.isFocused = false;
-    this.el.nativeElement.querySelector('input[name="card-amount-edit"]').unfocus()
+    this.DOMelement.querySelector('input[name="card-amount-edit"]').unfocus()
   }
 
 }

@@ -1,0 +1,19 @@
+<article class="scanner-container">
+  <header class="header">
+    <h1>Skanuj Kartę</h1>
+    <p>Wprowadź dane z karty, aby kontynuować</p>
+  </header>
+  <!--  <form class="scanner-form" (submit)="handleSubmit($event)">-->
+  <!--    <input-->
+  <!--      type="text"-->
+  <!--      name="cardInput"-->
+  <!--      placeholder="Skanuj lub wprowadź dane karty..."-->
+  <!--      class="card-input"-->
+  <!--      [(ngModel)]="textInput"-->
+  <!--      (blur)="onBlur()"-->
+  <!--      #cardInput-->
+  <!--    />-->
+  <!--    <button type="submit" class="submit-btn">Prześlij</button>-->
+  <!--  </form>-->
+  <app-auto-complete (cardSelected)="handleSubmit($event)"></app-auto-complete>
+</article>

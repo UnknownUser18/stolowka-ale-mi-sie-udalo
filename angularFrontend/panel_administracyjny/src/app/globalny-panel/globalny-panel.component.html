@@ -26,8 +26,6 @@
           <legend>Dodaj dzień</legend>
           <label>Dzień: <input type="number" [min]="minDay" [max]="days_in_month" [value]="day" name="dzien"></label>
           <label>Miesiąc: <select [value]="month" name="miesiac"  (change)="check()">
-<!--            [disabled]="element.disabled" - Wyłączyłem bo czasami nie działa :/-->
-<!--            k 👌-->
               <option *ngFor="let element of miesiace; let i = index"  [value]="i" >{{element.month}}</option>
             </select>
           </label>
@@ -61,6 +59,7 @@
             <option value="2">Nauczyciel</option>
           </select></label>
           <label class="zsti">Klasa: <input type="text" name="klasa"></label>
+          <label class="internat">Grupa: <input type="text" name="grupa"></label>
         </fieldset>
         <fieldset id="deklaracja">
           <legend>Deklaracja Żywieniowa</legend>
@@ -68,11 +67,11 @@
           <label>Data do: <input type="date" name="data_do"></label>
           <span class="zsti">Dni żywienia:
             <div>
-              <label><input type="checkbox" name="poniedzialek"> Poniedziałek</label>
-              <label><input type="checkbox" name="wtorek"> Wtorek</label>
-              <label><input type="checkbox" name="sroda"> Środa</label>
-              <label><input type="checkbox" name="czwartek"> Czwartek</label>
-              <label><input type="checkbox" name="piatek"> Piątek</label>
+              <label><input type="checkbox" name="poniedzialek" checked> Poniedziałek</label>
+              <label><input type="checkbox" name="wtorek" checked> Wtorek</label>
+              <label><input type="checkbox" name="sroda" checked> Środa</label>
+              <label><input type="checkbox" name="czwartek" checked> Czwartek</label>
+              <label><input type="checkbox" name="piatek" checked> Piątek</label>
             </div>
           </span>
           <label class="internat">Wersja posiłku <select name="wersja">

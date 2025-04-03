@@ -14,22 +14,27 @@ import {GlobalnyRaportComponent} from '../globalny-raport/globalny-raport.compon
   templateUrl: './globalny-panel.component.html',
   styleUrls: ['./globalny-panel.component.css']
 })
-export class GlobalnyPanelComponent implements OnInit{
+export class GlobalnyPanelComponent implements OnInit {
+  DOMelement : any | undefined;
   constructor(private el: ElementRef, private dataService: DataBaseService) {
     this.dataService.DisabledDays.asObservable().subscribe((change:any)=>this.updateDays(change));
     this.dataService.getDisabledDays()
-    this.dataService.LastStudentInsertId.asObservable().subscribe((change:any)=>this.sendDeclaration(change));
+    this.dataService.StudentListZsti.asObservable().subscribe((data: any): void => {
+      this.uczniowieZsti = data;
+    });
+    // this.dataService.LastStudentInsertId.asObservable().subscribe((change:any)=>this.sendDeclaration(change));
+    this.DOMelement = this.el.nativeElement;
   }
 
-  student: { imie: string, nazwisko:string, typ_osoby_id:number, klasa:string, uczeszcza:boolean} = {imie:'', nazwisko:'', typ_osoby_id: 0, klasa:'', uczeszcza:false}
+  // student: { imie: string, nazwisko:string, typ_osoby_id:number, klasa:string, uczeszcza:boolean} = {imie:'', nazwisko:'', typ_osoby_id: 0, klasa:'', uczeszcza:false}
   editedStudent: { imie: string, nazwisko:string, typ_osoby_id?:number, klasa?:string, uczeszcza:boolean} = {imie:'', nazwisko:'', typ_osoby_id: 0, klasa:'', uczeszcza:false}
 
-  nullDeclaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string ,osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
-  declaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string ,osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
+  // nullDeclaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string ,osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
+  // declaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string ,osoby_internat_id?:number, id_osoby?:number, dniString: string, dni?:any, wersja:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
   editedDeclaration: {data_od:string, data_do:string, rok_szkolny_id:number, rok_szkolny?:string, osoby_internat_id?:number, id_osoby?:number, dniString?: string, dni?:any, wersja?:number, poniedzialek?:any, wtorek?:any, sroda?:any, czwartek?:any, piatek?:any} = {data_od:'', data_do:'', rok_szkolny_id:-1, osoby_internat_id: -1, id_osoby: -1, dni: -1, wersja: -1, dniString: ''};
 
   insertedDeclaration:boolean = true;
-
+  uczniowieZsti : any = [];
   day: number = new Date().getDate();
   month: number = new Date().getMonth();
   year: number = new Date().getFullYear();
@@ -110,8 +115,13 @@ export class GlobalnyPanelComponent implements OnInit{
         month,
         disabled: !disabledMonths.has(index + 1)
       }));
-      if(this.day - 7 < 1) {
-        this.miesiace[this.month-1] = { month: this.miesiace[this.month-1].month, disabled: false };
+      if(this.day - 7 < 1 ) {
+        if(this.month === 0) {
+          this.miesiace[11] = { month: this.miesiace[11].month, disabled: false };
+        }
+        else {
+          this.miesiace[this.month-1] = { month: this.miesiace[this.month-1].month, disabled: false };
+        }
         this.minDay = new Date(this.year, this.month + 1, 0).getDate() - 7;
       }
       else {
@@ -121,6 +131,9 @@ export class GlobalnyPanelComponent implements OnInit{
   }
 
   daysFromNow(dateString: string): string {
+    // console.log(dateString) za duzo spamu
+    if(dateString)
+      dateString = this.formatDate(dateString);
     const inputDate = new Date(dateString);
     const today = new Date();
 
@@ -139,16 +152,24 @@ export class GlobalnyPanelComponent implements OnInit{
     return 'undefined'
   }
 
+  formatDate(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-');
+    const formattedMonth = month.padStart(2, '0');
+    const formattedDay = day.padStart(2, '0');
+
+    return `${year}-${formattedMonth}-${formattedDay}`;
+  }
+
   dodaj() {
     console.log('dodaj');
-    let day = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]');
+    let day = this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]');
     if(day.value > new Date(this.year, this.month + 1, 0).getDate() || day.value < 1) {
       alert('Niepoprawny dzień!');
       return;
     }
-    let month = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]');
-    let year = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="rok"]');
-    let string = `${year.value}-${month.value}-${day.value}`;
+    let month = this.DOMelement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]');
+    let year = this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="rok"]');
+    let string = this.formatDate(`${year.value}-${month.value}-${day.value}`);
     let date = new Date(string)
     date.setMonth(date.getMonth() + 1)
     console.log(`${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`);
@@ -164,29 +185,29 @@ export class GlobalnyPanelComponent implements OnInit{
   }
 
   check() {
-    let year = parseInt(this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="rok"]').value);
-    let month = parseInt(this.el.nativeElement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]').value);
+    let year = parseInt(this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="rok"]').value);
+    let month = parseInt(this.DOMelement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]').value);
 
     if (year > this.year && year != this.yearBefore) {
       this.miesiace = this.miesiace.map(month => {
         return { month: month.month, disabled: false };
       });
-      this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').value = 1;
+      this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').value = 1;
     } else if (year != this.yearBefore) {
       this.miesiace = this.miesiace.map((month, index) => {
         return {month: month.month, disabled: index < this.month};
       });
       setTimeout(() => {
-        this.el.nativeElement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]').value = this.month.toString();
+        this.DOMelement.querySelector('form[name="dni_nieczynne"] select[name="miesiac"]').value = this.month.toString();
         if(this.day - 7 < 1) {
           this.miesiace[month-1] = { month: this.miesiace[month-1].month, disabled: false };
-          this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = new Date(year, this.month + 1, 0).getDate() - 7;
+          this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = new Date(year, this.month + 1, 0).getDate() - 7;
         }
         else {
-          this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = this.day - 7;
-          this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').value = this.day;
+          this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = this.day - 7;
+          this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').value = this.day;
         }
-        this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').max = new Date(year, this.month + 1, 0).getDate();
+        this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').max = new Date(year, this.month + 1, 0).getDate();
       }, 10);
 
     }
@@ -194,21 +215,21 @@ export class GlobalnyPanelComponent implements OnInit{
     if (year === this.year && month === this.month) {
       if(this.day - 7 < 1) {
         this.miesiace[month-1] = { month: this.miesiace[month-1].month, disabled: false };
-        this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = new Date(year, month + 1, 0).getDate() - 7;
+        this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = new Date(year, month + 1, 0).getDate() - 7;
       }
       else {
-        this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = this.day - 7;
+        this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = this.day - 7;
       }
-      this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').max = new Date(year, month + 1, 0).getDate();
+      this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').max = new Date(year, month + 1, 0).getDate();
     } else {
-      this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = 1;
-      this.el.nativeElement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').max = new Date(year, month + 1, 0).getDate();
+      this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').min = 1;
+      this.DOMelement.querySelector('form[name="dni_nieczynne"] input[name="dzien"]').max = new Date(year, month + 1, 0).getDate();
     }
   }
 
   usun() {
     console.log('usun');
-    let element = this.el.nativeElement.querySelector('form[name="dni_nieczynne"] select[multiple]').value
+    let element = this.DOMelement.querySelector('form[name="dni_nieczynne"] select[multiple]').value
     if(element === '') {
       alert('Nie wybrano żadnego dnia do usunięcia!')
     }
@@ -225,27 +246,30 @@ export class GlobalnyPanelComponent implements OnInit{
   }
 
   show() {
-    this.el.nativeElement.querySelector('#dni_nieczynne').style.display = 'flex';
+    this.DOMelement.querySelector('#dni_nieczynne').style.display = 'flex';
   }
   close() {
-    this.el.nativeElement.querySelector('#dni_nieczynne').style.display = 'none';
+    this.DOMelement.querySelector('#dni_nieczynne').style.display = 'none';
   }
 
   dodaj_os() {
-    this.el.nativeElement.querySelector('#dodaj_osobe').style.display = 'flex';
+    this.DOMelement.querySelector('#dodaj_osobe').style.display = 'flex';
   }
   close_os() {
-    this.el.nativeElement.querySelector('#dodaj_osobe').style.display = 'none';
+    this.DOMelement.querySelector('#dodaj_osobe').style.display = 'none';
+  }
+  getDatabaseInfo() {
+    this.dataService.getStudentList();
+    this.uczniowieZsti = this.dataService.StudentListZsti.value;
   }
   dodaj_osobe() {
-    let thisElement = this.el.nativeElement;
+    let thisElement = this.DOMelement;
     this.editedStudent = {
       imie: thisElement.querySelector('input[name="imie"]').value,
       nazwisko:thisElement.querySelector('input[name="nazwisko"]').value,
       uczeszcza: true
     }
-    if(thisElement.querySelector('select[name="typ"]').value === 'ZSTI')
-    {
+    if(thisElement.querySelector('select[name="typ"]').value === 'ZSTI') {
       this.editedStudent.typ_osoby_id = thisElement.querySelector('select[name="typ_zsti"]').value
       this.editedStudent.klasa = thisElement.querySelector('input[name="klasa"]').value
       this.dataService.send(JSON.stringify({
@@ -260,7 +284,7 @@ export class GlobalnyPanelComponent implements OnInit{
         }
       }))
     }
-    else{
+    else {
       this.dataService.send(JSON.stringify({
         action: "request",
         params: {
@@ -273,48 +297,50 @@ export class GlobalnyPanelComponent implements OnInit{
     }
     this.insertedDeclaration = false;
     console.log('dodaj_osobe');
+    this.afterSendDeclaration()
+    this.close_os()
   }
-  sendDeclaration(change:any)
-  {
-    let thisElement = this.el.nativeElement;
-    this.editedDeclaration = {
-      rok_szkolny_id: 0,
-      data_od: thisElement.querySelector('input[name="data_od"]').value,
-      data_do: thisElement.querySelector('input[name="data_do"]').value
-    }
-    this.editedDeclaration.rok_szkolny = thisElement.querySelector('input[name="rok_szkolny"]').value
-    let rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny == this.editedDeclaration.rok_szkolny)
-    if(!rokSzkolny)
-    {
-      this.dataService.send(JSON.stringify(
-        {
-          action: "request",
-          params: {
-            method: "addSchoolYear",
-            year: this.editedDeclaration.rok_szkolny
-          }
-        }))
-      console.log(JSON.stringify(
-        {
-          action: "request",
-          params: {
-            method: "addSchoolYear",
-            year: this.editedDeclaration.rok_szkolny
-          }
-        }))
-      this.dataService.getSchoolYears()
-    }
-    let IntervalSchoolYear = setInterval(()=>{
-      rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny === this.editedDeclaration.rok_szkolny)
-      if(rokSzkolny.id)
-      {
-        clearInterval(IntervalSchoolYear)
-        this.editedDeclaration.rok_szkolny_id = rokSzkolny.id
-        this.afterSendDeclaration()
-      }
-    }, 500)
-
-  }
+  //! is it really needed?
+  // sendDeclaration(change : any)
+  // {
+  //   this.editedDeclaration = {
+  //     rok_szkolny_id: 0,
+  //     data_od: this.DOMelement.querySelector('input[name="data_od"]').value,
+  //     data_do: this.DOMelement.querySelector('input[name="data_do"]').value
+  //   }
+  //   this.editedDeclaration.rok_szkolny = this.DOMelement.querySelector('input[name="rok_szkolny"]').value
+  //   let rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny == this.editedDeclaration.rok_szkolny)
+  //   if(!rokSzkolny)
+  //   {
+  //     this.dataService.send(JSON.stringify(
+  //       {
+  //         action: "request",
+  //         params: {
+  //           method: "addSchoolYear",
+  //           year: this.editedDeclaration.rok_szkolny
+  //         }
+  //       }))
+  //     console.log(JSON.stringify(
+  //       {
+  //         action: "request",
+  //         params: {
+  //           method: "addSchoolYear",
+  //           year: this.editedDeclaration.rok_szkolny
+  //         }
+  //       }))
+  //     this.dataService.getSchoolYears()
+  //   }
+  //   let IntervalSchoolYear = setInterval(()=>{
+  //     rokSzkolny = this.dataService.SchoolYears.value.find((element:any) => element.rok_szkolny === this.editedDeclaration.rok_szkolny)
+  //     if(rokSzkolny.id)
+  //     {
+  //       clearInterval(IntervalSchoolYear)
+  //       this.editedDeclaration.rok_szkolny_id = rokSzkolny.id
+  //       this.afterSendDeclaration()
+  //     }
+  //   }, 500)
+  //
+  // }
 
   toBinary(num : number, len : number)
   {
@@ -328,16 +354,25 @@ export class GlobalnyPanelComponent implements OnInit{
 
   afterSendDeclaration()
   {
-    let thisElement = this.el.nativeElement;
+    console.log('WOjtek')
+    let thisElement = this.DOMelement;
     if(thisElement.querySelector('select[name="typ"]').value === 'ZSTI')
     {
-      this.editedDeclaration.id_osoby = this.dataService.LastStudentInsertId.value.insertId;
+      this.editedDeclaration = {
+        rok_szkolny_id: 1,
+        data_od : this.DOMelement.querySelector('input[name="data_od"]').value,
+        data_do : this.DOMelement.querySelector('input[name="data_do"]').value,
+      }
+      console.log(this.uczniowieZsti)
+      this.getDatabaseInfo();
+      this.editedDeclaration.id_osoby = this.uczniowieZsti.find((element:any) => element.imie === this.editedStudent.imie && element.nazwisko === this.editedStudent.nazwisko).id_osoby
+      console.log(this.editedDeclaration.id_osoby)
       let dni = [
-        this.el.nativeElement.querySelector('input[name="poniedzialek"]'),
-        this.el.nativeElement.querySelector('input[name="wtorek"]'),
-        this.el.nativeElement.querySelector('input[name="sroda"]'),
-        this.el.nativeElement.querySelector('input[name="czwartek"]'),
-        this.el.nativeElement.querySelector('input[name="piatek"]')
+        this.DOMelement.querySelector('input[name="poniedzialek"]'),
+        this.DOMelement.querySelector('input[name="wtorek"]'),
+        this.DOMelement.querySelector('input[name="sroda"]'),
+        this.DOMelement.querySelector('input[name="czwartek"]'),
+        this.DOMelement.querySelector('input[name="piatek"]')
       ]
       let value = ''
       dni.forEach((element:any)=>{
@@ -349,7 +384,8 @@ export class GlobalnyPanelComponent implements OnInit{
         action: "request",
         params: {
           method: "addZstiDeclaration",
-          studentId: this.editedDeclaration.id_osoby,
+          // @ts-ignore
+          studentId: (this.editedDeclaration.id_osoby + 1),
           schoolYearId: this.editedDeclaration.rok_szkolny_id,
           beginDate: this.editedDeclaration.data_od,
           endDate: this.editedDeclaration.data_do,
@@ -357,9 +393,10 @@ export class GlobalnyPanelComponent implements OnInit{
         }
       }))
       this.dataService.getStudentDeclarationZsti()
+      this.dataService.getStudentList()
     }
     else{
-      this.editedDeclaration.osoby_internat_id = this.dataService.LastStudentInsertId.value.insertId;
+      this.editedDeclaration.osoby_internat_id = this.dataService.LastStudentInsertId.value;
       this.dataService.send(JSON.stringify({
         action: "request",
         params: {
@@ -373,45 +410,42 @@ export class GlobalnyPanelComponent implements OnInit{
       }))
       this.dataService.getStudentDeclarationInternat()
     }
-    console.log(this.dataService.LastStudentInsertId.value.insertId)
-    this.dataService.getStudentList()
+    this.getDatabaseInfo();
   }
 
   change_form() {
-    console.log('change_form');
-    const typ = this.el.nativeElement.querySelector('form[name="dodaj"] select[name="typ"]').value;
+    const typ = this.DOMelement.querySelector('form[name="dodaj"] select[name="typ"]').value;
     switch(typ) {
       case 'wybierz':
-        this.el.nativeElement.querySelectorAll('form[name="dodaj"] fieldset').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('form[name="dodaj"] fieldset').forEach((element : HTMLElement) => {
           element.style.display = 'none';
         })
-        this.el.nativeElement.querySelector('form[name="dodaj"]').style.width = '20%';
-        this.el.nativeElement.querySelector('form[name="dodaj"] > :nth-last-child(2)').style.display = 'none';
-
+        this.DOMelement.querySelector('form[name="dodaj"]').style.width = '20%';
+        this.DOMelement.querySelector('form[name="dodaj"] > :nth-last-child(2)').style.display = 'none';
         break;
       case 'ZSTI':
-        this.el.nativeElement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
           element.style.display = 'flex';
         })
-        this.el.nativeElement.querySelectorAll('form[name="dodaj"] fieldset').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('form[name="dodaj"] fieldset').forEach((element : HTMLElement) => {
           element.style.display = 'block';
         })
-        this.el.nativeElement.querySelector('form[name="dodaj"] > :nth-last-child(2)').style.display = 'flex';
-        this.el.nativeElement.querySelector('form[name="dodaj"]').style.width = 'fit-content';
-        this.el.nativeElement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelector('form[name="dodaj"] > :nth-last-child(2)').style.display = 'flex';
+        this.DOMelement.querySelector('form[name="dodaj"]').style.width = 'fit-content';
+        this.DOMelement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
           element.style.display = 'none';
         })
         break;
       case 'Internat':
-        this.el.nativeElement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('.zsti').forEach((element : HTMLElement) => {
           element.style.display = 'none';
         })
-        this.el.nativeElement.querySelectorAll('form[name="dodaj"] fieldset').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelectorAll('form[name="dodaj"] fieldset').forEach((element : HTMLElement) => {
           element.style.display = 'block';
         })
-        this.el.nativeElement.querySelector('form[name="dodaj"] > :nth-last-child(2)').style.display = 'flex';
-        this.el.nativeElement.querySelector('form[name="dodaj"]').style.width = 'fit-content';
-        this.el.nativeElement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
+        this.DOMelement.querySelector('form[name="dodaj"] > :nth-last-child(2)').style.display = 'flex';
+        this.DOMelement.querySelector('form[name="dodaj"]').style.width = 'fit-content';
+        this.DOMelement.querySelectorAll('.internat').forEach((element : HTMLElement) => {
           element.style.display = 'flex';
         })
         break;
@@ -419,14 +453,14 @@ export class GlobalnyPanelComponent implements OnInit{
         console.error('Nieznany typ');
         break;
     }
-    const typ_zsti = this.el.nativeElement.querySelector('form[name="dodaj"] select[name="typ_zsti"]').value;
+    const typ_zsti = this.DOMelement.querySelector('form[name="dodaj"] select[name="typ_zsti"]').value;
     if(typ === 'ZSTI') {
       switch (typ_zsti) {
         case 'uczeń':
-          this.el.nativeElement.querySelector('form[name="dodaj"] input[name="klasa"]').parentElement.style.display = 'flex';
+          this.DOMelement.querySelector('form[name="dodaj"] input[name="klasa"]').parentElement.style.display = 'flex';
           break;
         case 'nauczyciel':
-          this.el.nativeElement.querySelector('form[name="dodaj"] input[name="klasa"]').parentElement.style.display = 'none';
+          this.DOMelement.querySelector('form[name="dodaj"] input[name="klasa"]').parentElement.style.display = 'none';
           break;
         default:
           console.error('Nieznany typ');

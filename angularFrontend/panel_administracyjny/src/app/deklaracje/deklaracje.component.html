@@ -1,0 +1,61 @@
+<form name="deklaracje">
+  <fieldset>
+    <div>
+      <legend>Zarządzanie istniejącymi Deklaracjami</legend>
+      <label>Data rozpoczęcia:
+        <input type="date" name="declaration-begin-date" required value="">
+      </label>
+      <label>Data zakończenia:
+        <input type="date" name="declaration-end-date" required value="">
+      </label>
+      <button (click)="deleteDeclaration()">Usuń deklarację</button>
+    </div>
+    <div class="deklaracja">
+      <h2>Lista Deklaracji</h2>
+      <label *ngFor="let element of ZSTIDeclarations; let i = index" class="deklaracje">
+        <input type="radio" [value]="i" (click)="updateDeclaration($event)" name="deklaracja">
+        <span>{{ element.data_od }} {{ element.data_do }}</span>
+      </label>
+      <button (click)="dodajDeklaracje()">Dodaj nową deklarację</button>
+      </div>
+  </fieldset>
+</form>
+
+<section id="dodaj_deklaracje">
+  <form name="dodaj">
+    <h2>Dodawanie Deklaracji</h2>
+    <img ngSrc="../../assets/x.svg" alt="Zamknij" (click)="closeDeklaracje()" height="48" width="48">
+    <fieldset id="deklaracja">
+      <legend>Informacje o Deklaracji</legend>
+      <div>
+        <label>Data rozpoczęcia:
+          <input type="date" name="begin-date-edit" required [value]="today">
+        </label>
+        <label>Data zakończenia:
+          <input type="date" name="end-date-edit" required [value]="next_month">
+        </label>
+      </div>
+        <div class="zsti">
+          <span>Dni tygodnia:</span>
+          <label><input type="checkbox" name="days" value="1" checked>Poniedziałek</label>
+          <label><input type="checkbox" name="days" value="1" checked>Wtorek</label>
+          <label><input type="checkbox" name="days" value="1" checked>Środa</label>
+          <label><input type="checkbox" name="days" value="1" checked>Czwartek</label>
+          <label><input type="checkbox" name="days" value="1" checked >Piątek</label>
+        </div>
+        <label class="internat">Wersja posiłku:
+          <select name="meal-version" required>
+            <option value="I">I</option>
+            <option value="II">II</option>
+            <option value="III">III</option>
+            <option value="IV">IV</option>
+            <option value="V">V</option>
+            <option value="VI">VI</option>
+            <option value="VII">VII</option>
+            <option value="VIII">Obiad</option>
+          </select>
+        </label>
+      <button type="button" (click)="sendDeclaration()"><span>Zapisz</span></button>
+    </fieldset>
+  </form>
+</section>
