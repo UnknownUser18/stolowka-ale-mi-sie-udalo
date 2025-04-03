@@ -4,15 +4,14 @@ import {DataBaseService} from '../data-base.service';
 import {GlobalnyRaportComponent} from '../globalny-raport/globalny-raport.component';
 
 @Component({
-  selector: 'app-globalny-panel',
-  standalone: true,
-  imports: [
-    NgForOf,
-    NgOptimizedImage,
-    GlobalnyRaportComponent
-  ],
-  templateUrl: './globalny-panel.component.html',
-  styleUrls: ['./globalny-panel.component.css']
+    selector: 'app-globalny-panel',
+    imports: [
+        NgForOf,
+        NgOptimizedImage,
+        GlobalnyRaportComponent
+    ],
+    templateUrl: './globalny-panel.component.html',
+    styleUrls: ['./globalny-panel.component.css']
 })
 export class GlobalnyPanelComponent implements OnInit {
   DOMelement : any | undefined;

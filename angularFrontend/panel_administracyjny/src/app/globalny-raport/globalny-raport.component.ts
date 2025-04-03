@@ -6,11 +6,10 @@ import {Osoba, OsobaZSTI, OsobaInternat, Deklaracja, DeklaracjaInternat, Deklara
 
 
 @Component({
-  selector: 'app-globalny-raport',
-  standalone: true,
-  imports: [],
-  templateUrl: './globalny-raport.component.html',
-  styleUrl: './globalny-raport.component.css'
+    selector: 'app-globalny-raport',
+    imports: [],
+    templateUrl: './globalny-raport.component.html',
+    styleUrl: './globalny-raport.component.css'
 })
 export class GlobalnyRaportComponent {
   DOMelement : any | undefined;

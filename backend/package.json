@@ -11,9 +11,9 @@
   "dependencies": {
     "aws-sdk": "^2.1691.0",
     "child_process": "^1.0.2",
-    "express": "^2.5.11",
+    "express": "^5.1.0",
     "mysql": "^2.18.1",
-    "mysqldump": "^3.2.0",
+    "mysqldump": "^1.4.2",
     "nodemailer": "^6.10.0",
     "ws": "^8.18.0"
   },

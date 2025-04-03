@@ -6,11 +6,10 @@ import {KartyComponent} from '../karty/karty.component';
 import {DeklaracjeComponent} from '../deklaracje/deklaracje.component';
 
 @Component({
-  selector: 'app-panel',
-  standalone: true,
-  imports: [KalendarzComponent, EdycjaComponent, PlatnosciComponent, KartyComponent, DeklaracjeComponent],
-  templateUrl: './panel.component.html',
-  styleUrls: ['./panel.component.css']
+    selector: 'app-panel',
+    imports: [KalendarzComponent, EdycjaComponent, PlatnosciComponent, KartyComponent, DeklaracjeComponent],
+    templateUrl: './panel.component.html',
+    styleUrls: ['./panel.component.css']
 })
 export class PanelComponent implements OnInit, OnChanges {
   DOMelement: HTMLElement | null;

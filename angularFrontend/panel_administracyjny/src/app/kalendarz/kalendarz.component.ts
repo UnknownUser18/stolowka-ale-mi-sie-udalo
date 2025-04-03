@@ -5,11 +5,10 @@ import {DataBaseService} from '../data-base.service';
 import {DeklaracjaZSTI, DeklaracjaInternat, toBinary, GetZSTIDisabledDays, GetInternatDisabledDays, DisabledDays} from '../app.component';
 
 @Component({
-  selector: 'app-kalendarz',
-  standalone: true,
-  imports: [NgOptimizedImage, FormsModule, NgForOf, NgIf],
-  templateUrl: './kalendarz.component.html',
-  styleUrl: './kalendarz.component.css'
+    selector: 'app-kalendarz',
+    imports: [NgOptimizedImage, FormsModule, NgForOf, NgIf],
+    templateUrl: './kalendarz.component.html',
+    styleUrl: './kalendarz.component.css'
 })
 export class KalendarzComponent implements OnChanges, OnInit {
   DOMelement: any | undefined;

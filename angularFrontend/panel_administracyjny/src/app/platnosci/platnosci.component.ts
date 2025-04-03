@@ -5,16 +5,15 @@ import {NgForOf, NgOptimizedImage} from '@angular/common';
 import { Payments} from '../app.component';
 
 @Component({
-  selector: 'app-platnosci',
-  standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    NgForOf,
-    NgOptimizedImage
-  ],
-  templateUrl: './platnosci.component.html',
-  styleUrl: './platnosci.component.css'
+    selector: 'app-platnosci',
+    imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        NgForOf,
+        NgOptimizedImage
+    ],
+    templateUrl: './platnosci.component.html',
+    styleUrl: './platnosci.component.css'
 })
 export class PlatnosciComponent implements OnChanges{
   @Input() typ: string | undefined;

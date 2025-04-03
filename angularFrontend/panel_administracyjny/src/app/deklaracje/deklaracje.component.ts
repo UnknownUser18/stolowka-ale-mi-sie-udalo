@@ -4,16 +4,15 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgForOf, NgOptimizedImage} from '@angular/common';
 import {DeklaracjaZSTI, DeklaracjaInternat} from '../app.component'
 @Component({
-  selector: 'app-deklaracje',
-  standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    NgForOf,
-    NgOptimizedImage,
-  ],
-  templateUrl: './deklaracje.component.html',
-  styleUrl: './deklaracje.component.css'
+    selector: 'app-deklaracje',
+    imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        NgForOf,
+        NgOptimizedImage,
+    ],
+    templateUrl: './deklaracje.component.html',
+    styleUrl: './deklaracje.component.css'
 })
 export class DeklaracjeComponent implements OnChanges {
   @Input() typ: string | undefined;

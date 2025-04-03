@@ -3,14 +3,13 @@ import {NgOptimizedImage} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
 @Component({
-  selector: 'app-ustawienia',
-  standalone: true,
-  imports: [
-    NgOptimizedImage,
-    FormsModule
-  ],
-  templateUrl: './ustawienia.component.html',
-  styleUrl: './ustawienia.component.css'
+    selector: 'app-ustawienia',
+    imports: [
+        NgOptimizedImage,
+        FormsModule
+    ],
+    templateUrl: './ustawienia.component.html',
+    styleUrl: './ustawienia.component.css'
 })
 export class UstawieniaComponent {
   DOMelement: any | undefined;

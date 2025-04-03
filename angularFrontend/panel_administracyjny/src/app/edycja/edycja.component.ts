@@ -5,14 +5,13 @@ import {NgForOf} from '@angular/common';
 import {OsobaInternat, OsobaZSTI, DeklaracjaZSTI, DeklaracjaInternat, toBinary} from '../app.component';
 
 @Component({
-  selector: 'app-edycja',
-  standalone: true,
-  imports: [
-    FormsModule,
-    NgForOf
-  ],
-  templateUrl: './edycja.component.html',
-  styleUrl: './edycja.component.css'
+    selector: 'app-edycja',
+    imports: [
+        FormsModule,
+        NgForOf
+    ],
+    templateUrl: './edycja.component.html',
+    styleUrl: './edycja.component.css'
 })
 export class EdycjaComponent implements OnChanges {
   @Input() typ: string | undefined;

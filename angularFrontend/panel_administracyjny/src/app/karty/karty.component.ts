@@ -5,15 +5,14 @@ import { NgOptimizedImage } from '@angular/common';
 import {Cards} from '../app.component';
 
 @Component({
-  selector: 'app-karty',
-  standalone: true,
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    NgOptimizedImage,
-  ],
-  templateUrl: './karty.component.html',
-  styleUrl: './karty.component.css'
+    selector: 'app-karty',
+    imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        NgOptimizedImage,
+    ],
+    templateUrl: './karty.component.html',
+    styleUrl: './karty.component.css'
 })
 export class KartyComponent {
   DOMelement : any | undefined;
