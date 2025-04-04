@@ -1,0 +1,44 @@
+<article *ngIf="daneUcznia.znaleziony" [ngStyle]="{'background-color': backgroundColor}">
+  <h1>{{ daneUcznia.name }} {{ daneUcznia.surname }}</h1>
+  <h2>{{ message }}</h2>
+  <div class="button-group">
+<!--    <button class="btn accept" *ngIf="canAccept" (click)="handleSubmit()">Potwierdź</button>-->
+<!--    <button class="btn decline" (click)="handleReset()">Odrzuć</button>-->
+    <button class="btn return" (click)="handleReset()">Wróć</button>
+<!--    <form class="scanner-form" (submit)="handleFormSubmit()">-->
+<!--      <input-->
+<!--        type="text"-->
+<!--        name="cardInput"-->
+<!--        placeholder="Skanuj lub wprowadź dane karty..."-->
+<!--        class="card-input"-->
+<!--        [(ngModel)]="cardTextInput"-->
+<!--        (blur)="onBlur()"-->
+<!--        #cardInput-->
+<!--      />-->
+<!--      <button type="submit" class="submit-btn">Prześlij</button>-->
+<!--    </form>-->
+
+  </div>
+  <app-auto-complete (cardSelected)="handleFormSubmit($event)"></app-auto-complete>
+</article>
+<article *ngIf="!daneUcznia.znaleziony">
+  <h1>Nie Znaleziono Ucznia</h1>
+<!--  <h2>{{ message }}</h2>-->
+<!--  <form class="scanner-form" (submit)="handleFormSubmit()">-->
+<!--    <input-->
+<!--      type="text"-->
+<!--      name="cardInput"-->
+<!--      placeholder="Skanuj lub wprowadź dane karty..."-->
+<!--      class="card-input"-->
+<!--      [(ngModel)]="cardTextInput"-->
+<!--      (blur)="onBlur()"-->
+<!--      #cardInput2-->
+<!--    />-->
+<!--    &lt;!&ndash;      <button type="submit" class="submit-btn">Prześlij</button>&ndash;&gt;-->
+<!--  </form>-->
+  <app-auto-complete (cardSelected)="handleFormSubmit($event)"></app-auto-complete>
+
+  <div class="button-group">
+    <button class="btn return" (click)="handleReset()">Wróć</button>
+  </div>
+</article>
