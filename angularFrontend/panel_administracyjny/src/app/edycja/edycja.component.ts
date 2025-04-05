@@ -11,7 +11,7 @@ import {OsobaInternat, OsobaZSTI, DeklaracjaZSTI, DeklaracjaInternat, toBinary} 
         NgForOf
     ],
     templateUrl: './edycja.component.html',
-    styleUrl: './edycja.component.css'
+    styleUrl: './edycja.component.scss'
 })
 export class EdycjaComponent implements OnChanges {
   @Input() typ: string | undefined;

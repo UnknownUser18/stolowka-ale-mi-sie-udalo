@@ -8,7 +8,7 @@ import {DeklaracjaZSTI, DeklaracjaInternat, toBinary, GetZSTIDisabledDays, GetIn
     selector: 'app-kalendarz',
     imports: [NgOptimizedImage, FormsModule, NgForOf, NgIf],
     templateUrl: './kalendarz.component.html',
-    styleUrl: './kalendarz.component.css'
+    styleUrl: './kalendarz.component.scss'
 })
 export class KalendarzComponent implements OnChanges, OnInit {
   DOMelement: any | undefined;

@@ -9,7 +9,7 @@ import {Osoba, OsobaZSTI, OsobaInternat, Deklaracja, DeklaracjaInternat, Deklara
     selector: 'app-globalny-raport',
     imports: [],
     templateUrl: './globalny-raport.component.html',
-    styleUrl: './globalny-raport.component.css'
+    styleUrl: './globalny-raport.component.scss'
 })
 export class GlobalnyRaportComponent {
   DOMelement : any | undefined;

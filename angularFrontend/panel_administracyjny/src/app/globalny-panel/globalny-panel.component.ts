@@ -11,7 +11,7 @@ import {GlobalnyRaportComponent} from '../globalny-raport/globalny-raport.compon
         GlobalnyRaportComponent
     ],
     templateUrl: './globalny-panel.component.html',
-    styleUrls: ['./globalny-panel.component.css']
+    styleUrls: ['./globalny-panel.component.scss']
 })
 export class GlobalnyPanelComponent implements OnInit {
   DOMelement : any | undefined;

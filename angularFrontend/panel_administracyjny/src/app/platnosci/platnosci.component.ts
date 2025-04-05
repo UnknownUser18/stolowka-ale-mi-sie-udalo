@@ -13,7 +13,7 @@ import { Payments} from '../app.component';
         NgOptimizedImage
     ],
     templateUrl: './platnosci.component.html',
-    styleUrl: './platnosci.component.css'
+    styleUrl: './platnosci.component.scss'
 })
 export class PlatnosciComponent implements OnChanges{
   @Input() typ: string | undefined;

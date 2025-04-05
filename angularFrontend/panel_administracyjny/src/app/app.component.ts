@@ -175,7 +175,7 @@ export class ScanZstiExtended{
     selector: 'app-root',
     templateUrl: './app.component.html',
     imports: [PanelComponent, NgOptimizedImage, NgForOf, GlobalnyPanelComponent, NgIf, UstawieniaComponent],
-    styleUrls: ['./app.component.css']
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
   DOMelement: any | undefined;

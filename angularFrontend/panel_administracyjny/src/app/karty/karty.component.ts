@@ -12,7 +12,7 @@ import {Cards} from '../app.component';
         NgOptimizedImage,
     ],
     templateUrl: './karty.component.html',
-    styleUrl: './karty.component.css'
+    styleUrl: './karty.component.scss'
 })
 export class KartyComponent {
   DOMelement : any | undefined;

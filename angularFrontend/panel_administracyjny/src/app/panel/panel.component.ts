@@ -9,7 +9,7 @@ import {DeklaracjeComponent} from '../deklaracje/deklaracje.component';
     selector: 'app-panel',
     imports: [KalendarzComponent, EdycjaComponent, PlatnosciComponent, KartyComponent, DeklaracjeComponent],
     templateUrl: './panel.component.html',
-    styleUrls: ['./panel.component.css']
+    styleUrls: ['./panel.component.scss']
 })
 export class PanelComponent implements OnInit, OnChanges {
   DOMelement: HTMLElement | null;

@@ -12,7 +12,7 @@ import {DeklaracjaZSTI, DeklaracjaInternat} from '../app.component'
         NgOptimizedImage,
     ],
     templateUrl: './deklaracje.component.html',
-    styleUrl: './deklaracje.component.css'
+    styleUrl: './deklaracje.component.scss'
 })
 export class DeklaracjeComponent implements OnChanges {
   @Input() typ: string | undefined;

@@ -9,7 +9,7 @@ import {FormsModule} from '@angular/forms';
         FormsModule
     ],
     templateUrl: './ustawienia.component.html',
-    styleUrl: './ustawienia.component.css'
+    styleUrl: './ustawienia.component.scss'
 })
 export class UstawieniaComponent {
   DOMelement: any | undefined;
