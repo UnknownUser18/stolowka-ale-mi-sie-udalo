@@ -1,6 +1,5 @@
 ﻿import 'dotenv/config';
 import { z } from 'zod';
-import { WebSocket } from 'ws';
 
 export type ActionType = 'request' | 'response';
 
@@ -14,6 +13,7 @@ export interface ServerData {
 export interface RequestPayload {
     method: string;
     params: {[key: string]: any};
+    responseVar?: string;
 }
 
 export interface ResponsePayload {
@@ -21,9 +21,20 @@ export interface ResponsePayload {
     value: any;
 }
 
-export interface ActionHandler {
-    (ws: WebSocket, params: Params): Promise<void>;
-}
+export type QueryCategory = {
+    type: z.ZodSchema<any>;
+    get: string;
+    add?: string;
+    update?: string;
+    delete?: string;
+    [key: string]: string | z.ZodSchema | undefined;
+};
+
+export type QueriesStructure = {
+    [sector: string]: {
+        [category: string]: QueryCategory;
+    };
+};
 
 export const envSchema = z.object({
     DB_HOST: z.string(),
@@ -44,10 +55,23 @@ export interface Declaration {
     dni: string;
 }
 
+export const Declaration = z.object({
+    id: z.number(),
+    id_osoby: z.number(),
+    data_od: z.date(),
+    data_do: z.date(),
+    dni: z.string()
+});
+
 export interface CanceledDay {
     id: number;
     dzien: string;
 }
+
+export const CanceledDay = z.object({
+    id: z.number(),
+    dzien: z.date()
+});
 
 export interface Card {
     id: number;
@@ -57,12 +81,25 @@ export interface Card {
     ostatnie_uzycie: string;
 }
 
+export const Card = z.object({
+    id: z.number(),
+    id_ucznia: z.number(),
+    key_card: z.number(),
+    data_wydania: z.date(),
+    ostatnie_uzycie: z.date()
+});
+
 export interface AbsenceDay {
     id: number;
     dzien_wypisania: string;
     osoby_zsti_id: number;
-    uwagi: string;
 }
+
+export const AbsenceDay = z.object({
+    id: z.number(),
+    dzien_wypisania: z.date(),
+    osoby_zsti_id: z.number()
+});
 
 export interface Person {
     id: number;
@@ -74,6 +111,16 @@ export interface Person {
     miasto: boolean;
 }
 
+export const Person = z.object({
+    id: z.number(),
+    typ_osoby_id: z.number(),
+    imie: z.string(),
+    nazwisko: z.string(),
+    klasa: z.string(),
+    uczeszcza: z.number(),
+    miasto: z.number(),
+});
+
 export interface Payment {
     id: number;
     id_ucznia: number;
@@ -84,8 +131,24 @@ export interface Payment {
     rok: number;
 }
 
+export const Payment = z.object({
+    id: z.number(),
+    id_ucznia: z.number(),
+    platnosc: z.number(),
+    data_platnosci: z.date(),
+    miesiac: z.number(),
+    opis: z.string(),
+    rok: z.number()
+});
+
 export interface Scan {
     id: number;
     id_karty: number;
     czas: string;
 }
+
+export const Scan = z.object({
+    id: z.number(),
+    id_karty: z.number(),
+    czas: z.date()
+});
