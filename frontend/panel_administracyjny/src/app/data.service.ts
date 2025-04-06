@@ -104,6 +104,16 @@ export class DataService {
     this.initAllGetData()
   }
 
+  /**
+   * @method initializeWebSocket
+   *
+   * @description Startuje komunikację z serwerem oraz zarządza błędami inicjalizacji
+   *
+   * @returns {void}
+   *
+   * @example
+   * this.initializeWebSocket();
+   * */
   initializeWebSocket() {
     this.ws = new WebSocket('ws://localhost:8080');
 
@@ -128,17 +138,55 @@ export class DataService {
     };
   }
 
+  /**
+   * @method handleResponse
+   *
+   * @description Zarządza przychodzącymi danymi z serwera
+   *
+   * @property {VariableName} variable - Nazwa zmiennej, do której ma być przypisana wartość
+   * @property {any} value - Wartość zwrócona przez serwer
+   *
+   * @example
+   * // Te wartości to przykładowe odebrane od serwera
+   * this.handleResponse('studentList', {imie: 'Michał', nazwisko: 'wiaterek', wiek: 15});
+   * */
   handleResponse(variable: VariableName, value: any) {
     console.log(variable, value)
     this.cachedData.set(variable, value);
     this.dataChange.next(variable);
   }
 
+  /**
+   * @method get
+   *
+   * @description Zwraca wartość zapisaną w cachedData pod daną nazwą, z konkretnym typem
+   * @property {T} variable - Nazwa zmiennej, której wartość chcemy dostać
+   *
+   * @returns {VariableTypeMap[T] | undefined} - Wartość podanej zmiennej z typem tej zmiennej lub undefined, jeżeli nie było żadnych danych w tej zmiennej
+   *
+   * @example
+   * // Get zwraca wartość o typie Student[], w tym przypadku
+   * this.get('studentList');
+   * */
   get<T extends VariableName>(variable: T): VariableTypeMap[T] | undefined {
     return this.cachedData.get(variable) as VariableTypeMap[T];
   }
 
-  request(method: string, params: Params = {}, responseVar?: VariableName) {
+  /**
+   * @method request
+   *
+   * @description Wysyła zapytanie do serwera
+   *
+   * @property {string} method - Metoda, jaką chcemy wykonać
+   * @property {Params} params={} - Parametry do wykonania metody
+   * @property {VariableName} [responseVar] - Potencjalna nazwa zmiennej, do której potem chcemy przypisać dane zwrócone przez serwer
+   *
+   * @returns {void}
+   *
+   * @example
+   * this.request('zsti.student.get', {}, 'studentList');
+   * */
+  request(method: string, params: Params = {}, responseVar?: VariableName): void {
     if(this.ws.readyState !== WebSocket.OPEN) return;
     const [sector, dataPool, operation] = method.split('.');
     this.ws.send(JSON.stringify({
@@ -156,6 +204,9 @@ export class DataService {
     }
   }
 
+  /**
+   * Wysyła zapytania o każdy typ danych z bazy
+   * */
   async initAllGetData() {
     this.request('zsti.student.get', {}, 'studentList')
     this.request('zsti.declaration.get', {}, 'declarationList')
