@@ -6,6 +6,15 @@ import {Person, envSchema, AbsenceDay, CanceledDay, Card, Scan, Payment, Declara
 import {PoolOptions} from "mysql2/promise";
 // import { createTransport, Transporter } from 'nodemailer';
 
+/** Inicjalizacja loggera
+ *  Logi są złożone z:
+ *  - Czasu stworzenia loga;
+ *  - Dane;
+ *  Logi są przekazywane do:
+ *  - Konsoli;
+ *  - Pliku serwer-*dzisiejsza data*.log
+ *
+ * */
 export const logger = winston.createLogger({
     level: 'info',
     format: winston.format.combine(
@@ -30,6 +39,9 @@ export const logger = winston.createLogger({
     ]
 });
 
+/** Inicjalizacja serwera WebSocketServer
+ * Port: 8080
+ * */
 export const wss: WebSocketServer = new WebSocketServer({
     port: 8080,
     perMessageDeflate: {
@@ -47,8 +59,18 @@ export const wss: WebSocketServer = new WebSocketServer({
     },
 });
 
+/**
+ * Dopasowanie pliku .env do typu envSchema
+ * */
 export const env = envSchema.parse(process.env);
 
+/** Konfiguracja połączenia z bazą danych
+ * Przekazanie wszystkich wartości z pliku .env
+ * Dodatkowo:
+ * - Kwerendy można wykonywać z placeholderami;
+ * - Maksymalna ilość prób połączenia: 100;
+ * - Maksymalna liczba żądań połączenia, które komunikacja z bazą danych umieści w kolejce przed zwróceniem błędu: 100;
+ * */
 export const dbConfig: PoolOptions = {
     host: env.DB_HOST,
     port: env.DB_PORT,
@@ -60,12 +82,20 @@ export const dbConfig: PoolOptions = {
     connectionLimit: 100,
     queueLimit: 100
 }
-
+/**
+ * Inicjalizacja serwisu obsługującego maile
+ * */
 // export const transporter: Transporter = createTransport({
 //     service: 'gmail',
 //     auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
 // });
 
+/**
+ * Statyczne kwerendy podzielone:
+ * - sektory;
+ * - tabele lub typy danych, na których się pracuje;
+ * - operacje na danych;
+ * */
 export const Queries: QueriesStructure = {
     "zsti": {
         "student": {
@@ -98,8 +128,8 @@ export const Queries: QueriesStructure = {
         "absence": {
             "type": AbsenceDay.array(),
             "get": `SELECT * FROM nieobecnosci_zsti`,
-            "add": `INSERT INTO nieobecnosci_zsti (rok_szkolny_id, dzien_wypisania, osoby_zsti_id, uwagi) VALUES (:rok_szkolny_id, :dzien_wypisania, :osoby_zsti_id, :uwagi)`,
-            "update": `UPDATE nieobecnosci_zsti SET rok_szkolny_id = :rok_szkolny_id, dzien_wypisania = :dzien_wypisania, osoby_zsti_id = :osoby_zsti_id, uwagi = :uwagi WHERE id = :id`,
+            "add": `INSERT INTO nieobecnosci_zsti (rok_szkolny_id, dzien_wypisania, osoby_zsti_id) VALUES (:rok_szkolny_id, :dzien_wypisania, :osoby_zsti_id)`,
+            "update": `UPDATE nieobecnosci_zsti SET rok_szkolny_id = :rok_szkolny_id, dzien_wypisania = :dzien_wypisania, osoby_zsti_id = :osoby_zsti_id WHERE id = :id`,
             "delete": `DELETE FROM nieobecnosci_zsti WHERE id = :id`
         },
         "payment": {

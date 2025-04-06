@@ -41,7 +41,7 @@ async function sendResponse(ws: WebSocket, variable: string, value: any): Promis
         logger.info(`Sending response completed successfully: `, {variable, value});
     }
     catch(error){
-        await sendError(ws, 0x103, `Sending response error`, {variable, value, error});
+        await sendError(ws, 300, `Sending response error`, {variable, value, error});
         logger.error(`Sending response error: `, {variable, value, error});
         throw error;
     }
@@ -66,12 +66,15 @@ async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<void
         const query: string = method[operation] as string;
 
         const rawResult = await executeQuery(query, params.params);
-        const result = method.type.parse(rawResult);
 
-        if(params.responseVar) await sendResponse(ws, params.responseVar, result);
+        if(params.responseVar)
+        {
+            const result = method.type.parse(rawResult);
+            await sendResponse(ws, params.responseVar, result);
+        }
     } catch (error) {
-        await sendError(ws, 0x102, `Failed to initialize handler`, query);
-        logger.error(`Failed to initialize handler: ${query}`);
+        await sendError(ws, 300, `Failed to handle method`, query);
+        logger.error(`Failed to handle method: ${query}`);
         throw error;
     }
 }
@@ -81,7 +84,7 @@ wss.on('connection', async (ws: WebSocket) => {
     await sendResponse(ws, 'message', `Successfully connected to the server!`);
 
     ws.on('error', async (error) => {
-        await sendError(ws, 0x1, `WebSocket spotted an error`, error);
+        await sendError(ws, 1, `WebSocket spotted an error`, error);
         logger.error(`WebSocket spotted an error: `, {error});
     });
 
@@ -92,7 +95,7 @@ wss.on('connection', async (ws: WebSocket) => {
                 await handleMethod(ws, message.params as RequestPayload)
             }
         } catch(error) {
-            await sendError(ws, 0x100, `Message formatting error`, error);
+            await sendError(ws, 200, `Message formatting error`, error);
             logger.error(`Message formatting error: `, {error})
         }
     })
