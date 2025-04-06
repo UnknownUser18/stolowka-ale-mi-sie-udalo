@@ -70,7 +70,13 @@ export interface ResponsePayload {
 }
 
 type VariableTypeMap = {
-  studentList: Student[]
+  studentList: Student[],
+  declarationList: Declaration[],
+  canceledDayList: CanceledDay[],
+  cardList: Card[],
+  absenceDayList: AbsenceDay[],
+  paymentList: Payment[],
+  scanList: Scan[]
 };
 
 type VariableName = keyof VariableTypeMap;
@@ -95,6 +101,7 @@ export class DataService {
 
   constructor() {
     this.initializeWebSocket();
+    this.initAllGetData()
   }
 
   initializeWebSocket() {
@@ -148,4 +155,15 @@ export class DataService {
       this.request(getMethod, {}, 'studentList');
     }
   }
+
+  async initAllGetData() {
+    this.request('zsti.student.get', {}, 'studentList')
+    this.request('zsti.declaration.get', {}, 'declarationList')
+    this.request('zsti.canceledDay.get', {}, 'canceledDayList')
+    this.request('zsti.card.get', {}, 'cardList')
+    this.request('zsti.absence.get', {}, 'absenceDayList')
+    this.request('zsti.payment.get', {}, 'paymentList')
+    this.request('zsti.scan.get', {}, 'scanList')
+  }
+
 }
