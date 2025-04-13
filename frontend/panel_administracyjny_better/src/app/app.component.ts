@@ -1,13 +1,22 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { NavComponent } from './nav/nav.component';
+import { NgOptimizedImage } from '@angular/common';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { GlobalInfoService } from './global-info.service';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+    selector: 'app-root',
+  imports: [NavComponent, NgOptimizedImage, RouterLink, RouterOutlet],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'panel_administracyjny_better';
+  private title : string = 'panel_administracyjny_better';
+  constructor(private router : Router, private titleService : GlobalInfoService) {}
+
+  navigateMainPage() : void {
+    this.router.navigate(['']).then(() : void => {
+      this.titleService.setTitle('Strona Główna');
+    });
+  }
 }
