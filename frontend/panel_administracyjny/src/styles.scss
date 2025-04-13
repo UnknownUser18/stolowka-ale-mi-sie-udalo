@@ -1,18 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
-@import "../../panel_administracyjny/fonts/colors.css";
 :root {
-    --box-shadow: 11px 10px 18px -3px rgba(0, 0, 0, 0.5);
+  --color-1: #00111c;
+  --color-2: #001523;
+  --color-3: #001A2C;
+  --color-4: #002137;
+  --color-5: #00253E;
+  --color-6: #002945;
+  --color-7: #002E4E;
+  --color-8: #003356;
+  --color-9: #003A61;
+  --color-10: #00406C;
+  --color-11: #5E7889;
+  --color-12: #A4C1D5;
+  --color-13: #EFEFEF;
 }
-html {
-    height: 100%;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-
-/* we don't fw with mobile ok? */
+input, select, option {
+  font-family: inherit;
+  color: inherit;
+  background-color: inherit;
+  border: none;
+  outline: none;
+}
