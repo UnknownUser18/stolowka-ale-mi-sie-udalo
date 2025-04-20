@@ -12,7 +12,7 @@ import { GlobalInfoService } from './global-info.service';
 })
 export class AppComponent {
   private title : string = 'panel_administracyjny_better';
-  constructor(private router : Router, private titleService : GlobalInfoService) {}
+  constructor(protected router : Router, private titleService : GlobalInfoService) {}
 
   navigateMainPage() : void {
     this.router.navigate(['']).then(() : void => {
