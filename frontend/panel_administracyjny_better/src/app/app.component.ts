@@ -11,7 +11,6 @@ import { GlobalInfoService } from './global-info.service';
     styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  private title : string = 'panel_administracyjny_better';
   constructor(protected router : Router, private titleService : GlobalInfoService) {}
 
   navigateMainPage() : void {

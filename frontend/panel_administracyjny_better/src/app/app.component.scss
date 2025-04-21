@@ -3,7 +3,7 @@ nav {
   background-color: var(--color-3);
   grid-row: 1 / span 2;
 }
-li {
+.main-page li {
   margin: 15px auto;
   width: 90%;
   border-radius: 10px;
@@ -52,4 +52,29 @@ i.fa-regular, i.fa-solid {
   font-size: 1.2em;
   margin-right: 10px;
   color: var(--color-12);
+}
+.table {
+  width: 90%;
+  margin: 0 auto;
+  border-radius: 10px;
+  background-color: var(--color-4);
+  h1 {
+    padding: 5px 10px;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    transition: background-color 120ms ease-in;
+    will-change: background-color;
+    background-color: var(--color-5);
+    color: var(--color-13);
+    font-weight: 500;
+    i {
+      color: var(--color-12);
+    }
+    &:hover {
+      background-color: var(--color-6);
+    }
+  }
+  li {
+    margin-left: 16px;
+  }
 }
