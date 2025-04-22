@@ -1,0 +1,40 @@
+<header>
+  <label>
+    <input type="text" placeholder="Wyszukaj osobę z ZSTI..." [(ngModel)]="searchTerm" (blur)="filterPersons($event)" (keydown)="filterPersons($event)">
+    <i class="fa-solid fa-filter"></i>
+    <i class="fa-solid fa-magnifying-glass" (click)="filterPersons($event)"></i>
+  </label>
+  <span>Znaleziono {{ persons_zsti?.length ?? 0 }} wyników.</span>
+</header>
+<table>
+  <thead>
+    <tr>
+      <th>Numer</th>
+      <th>Imię i nazwisko</th>
+      <th>Klasa</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @defer (when persons_zsti) {
+      @for (person of persons_zsti; track person.id) {
+        <tr>
+          <td>{{ getPersonIndex(person.id)+1 }}</td>
+          <td>{{ person.imie }} {{ person.nazwisko }}</td>
+          <td>{{ person.klasa === '' ? 'Nauczyciel' : person.klasa }}</td>
+          <td>
+            <button (click)="selectPerson(person.id)">Wybierz</button>
+          </td>
+        </tr>
+      }
+    } @placeholder (minimum 1000ms) {
+      @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+        <tr class="placeholder">
+          @for (j of [1,2,3,4]; track j) {
+            <td></td>
+          }
+        </tr>
+      }
+    }
+  </tbody>
+</table>

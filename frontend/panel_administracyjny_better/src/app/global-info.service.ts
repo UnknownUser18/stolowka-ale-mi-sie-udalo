@@ -5,9 +5,9 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class GlobalInfoService {
+  constructor() { }
   public title : BehaviorSubject<string> = new BehaviorSubject<string>('Strona główna');
   public setTitle(title: string) : void {
     this.title.next(title);
   }
-  constructor() { }
 }

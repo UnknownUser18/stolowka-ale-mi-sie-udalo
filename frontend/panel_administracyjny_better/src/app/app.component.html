@@ -1,10 +1,16 @@
 <nav>
-  <img ngSrc="assets/hella_chopped.jpg" alt="Logo" class="logo" height="4000" width="3000" (click)="navigateMainPage()">
+  @defer {
+    <img ngSrc="assets/hella_chopped.jpg" alt="Logo" class="logo" height="4000" width="3000" (click)="navigateMainPage()">
+  } @placeholder (minimum 1000ms) {
+    <span class="round placeholder" (click)="navigateMainPage()"></span>
+  } @error {
+    <span class="round placeholder" (click)="navigateMainPage()"></span>
+  }
   @if (!router.url.match('/')) {
     <i class="fa-solid fa-arrow-right-from-bracket"></i>
   }
-  @switch (router.url) {
-    @case ('/') {
+  <div class="scrollable">
+    @if (router.url === '/') {
       <ul class="main-page">
         <li routerLink="osoby"><i class="fa-regular fa-user"></i>Osoby</li>
         <li routerLink="raporty"><i class="fa-solid fa-table-columns"></i>Raporty</li>
@@ -13,18 +19,47 @@
         <li><i class="fa-solid fa-lock"></i>Administracja osób</li>
         <li><i class="fa-solid fa-gear"></i>Ustawienia</li>
       </ul>
-    }
-    @case ('/osoby') {
+    } @else if (router.url.includes('/osoby')) {
+      <i class="fa-solid fa-right-to-bracket exit" (click)="navigateMainPage()"></i>
       <div class="table">
-        <h1><i class="fa-solid fa-graduation-cap"></i>ZSTI</h1>
+        <h1 routerLink="osoby/zsti"><i class="fa-solid fa-graduation-cap"></i>ZSTI</h1>
         <ol>
-          <li>Julka C. <i>(2P)</i></li>
+          @defer (when persons_zsti) {
+            @for (person of persons_zsti; track person.id) {
+              <li>{{ person.imie }} {{ person.nazwisko[0] }}. <i>({{ person.klasa === '' ? 'n.' : person.klasa }})</i></li>
+            } @empty {
+              <li><h3>Brak osób w bazie danych.</h3></li>
+            }
+          } @placeholder (minimum 500ms) {
+            @for (i of [0, 1, 2, 3, 4] ; track i) {
+              <li class="placeholder"></li>
+            }
+          } @error {
+            <li><h3>Wystąpił błąd podczas ładowania danych.</h3></li>
+          }
+        </ol>
+      </div>
+      <div class="table">
+        <h1><i class="fa-solid fa-building"></i>Internat</h1>
+        <ol>
+          <li>Julka W. <i>(LO1)</i></li>
+          <li>Dawid C. <i>(LO3)</i></li>
+          <li>Jan B. <i>(Koszykarze)</i></li>
+          <li>Pyndzel <i>(w.)</i></li>
+          <!-- czy wychowawca to też jakaś grupa? -->
         </ol>
       </div>
     }
-  }
+  </div>
 </nav>
 <app-nav></app-nav>
 <main>
-  <router-outlet></router-outlet>
+  @if (router.url === '/osoby') {
+    <div class="osoby">
+      <h1>Osoby</h1>
+      <p>Wybierz osobę.</p>
+    </div>
+  } @else {
+    <router-outlet></router-outlet>
+  }
 </main>

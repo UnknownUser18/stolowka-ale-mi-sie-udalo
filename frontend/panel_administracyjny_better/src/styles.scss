@@ -22,7 +22,13 @@
   box-sizing: border-box;
   will-change: transition;
 }
-input, select, option {
+::selection {
+  background-color: var(--color-11);
+}
+.placeholder {
+  animation: light 1.5s ease-in-out infinite alternate;
+}
+input, select, option, button{
   font-family: inherit;
   color: inherit;
   background-color: inherit;
@@ -39,4 +45,22 @@ app-root {
   display: grid;
   grid-template-columns: 0.2fr 1fr;
   grid-template-rows: 0.08fr 1fr;
+}
+app-zsti {
+  grid-template-rows: auto 1fr;
+  flex-direction: column;
+  background-color: var(--color-3);
+  border-radius: 50px;
+  width: 90%;
+  height: 90%;
+  max-height: 80vh;
+  margin: auto;
+}
+@keyframes light {
+  0% {
+    background-color: var(--color-11);
+  }
+  100% {
+    background-color: var(--color-12);
+  }
 }
