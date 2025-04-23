@@ -1,0 +1,21 @@
+span {
+  font-weight: 500;
+  font-size: 1.5em;
+  transition: color 120ms ease-in-out;
+  cursor: pointer;
+  user-select: none;
+  &:first-child {
+    place-self: center start;
+  }
+  &:nth-child(2) {
+    place-self: center;
+    cursor: default;
+    color: var(--color-13);
+  }
+  &:last-child {
+    place-self: center end;
+  }
+  &:hover:not(:nth-child(2)) {
+    color: var(--color-13);
+  }
+}

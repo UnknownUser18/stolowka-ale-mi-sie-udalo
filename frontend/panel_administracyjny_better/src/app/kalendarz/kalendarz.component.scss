@@ -1,0 +1,48 @@
+app-date-changer {
+  display: grid;
+  background-color: var(--color-6);
+  padding: 5px 1%;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  border-radius: 20px;
+}
+section {
+  display: grid;
+  grid-template-columns: 0.2fr 1fr;
+  grid-template-rows: 1fr 0.5fr;
+  border-radius: 25px;
+  background-color: var(--color-3);
+}
+main {
+  display: grid;
+  grid-template-rows: 0.5fr repeat(auto-fit, 1fr);
+  gap: 10px;
+  padding: 5px;
+  & > * {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    place-items: center;
+  }
+  .weekdays {
+    font-size: 1.5em;
+    font-weight: 500;
+  }
+  .day {
+    font-size: 1.5em;
+    transition: background-color 120ms ease-in-out, color 120ms ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 10px;
+    width: 70px;
+    height: 70px;
+    font-family: 'Roboto', 'Inter', sans-serif;
+    font-weight: 500;
+    background-color: var(--color-6);
+    &:hover {
+      color: var(--color-13);
+      background-color: var(--color-7);
+    }
+  }
+}

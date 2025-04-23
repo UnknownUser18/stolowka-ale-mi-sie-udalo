@@ -18,6 +18,10 @@ input {
   &:placeholder-shown {
     color: var(--color-11);
   }
+  &:disabled {
+    cursor: not-allowed;
+    background-color: var(--color-1) !important;
+  }
 }
 header label {
   display: flex;
@@ -122,8 +126,13 @@ button {
   }
 }
 section {
+  transition: backdrop-filter 750ms ease-in-out;
   background-color: rgba(var(--color-1), 0.5);
-  backdrop-filter: blur(10px);
+  backdrop-filter: none;
+  &.done {
+    backdrop-filter: blur(10px);
+  }
+  overflow: hidden;
   position: absolute;
   top: 0;
   left: 0;
@@ -153,11 +162,17 @@ section {
     margin-bottom: 20px;
   }
   div {
+    transition: margin-top 750ms ease-in-out;
+    box-shadow: var(--box-shadow);
     width: 50%;
     position: relative;
     padding: 15px 30px;
     border-radius: 25px;
     background-color: var(--color-3);
+    margin-top: 100%;
+    &.done {
+      margin-top: 0;
+    }
   }
   form {
     display: grid;
@@ -199,10 +214,15 @@ section {
       margin-bottom: 15px;
     }
     input {
+      transition: outline-color 120ms ease-in-out;
+      outline: 2px solid transparent;
       border-radius: 20px;
       padding: 10px 15px;
       background-color: var(--color-2);
       font-size: 1.3em;
+      &:focus {
+        outline-color: var(--color-10);
+      }
     }
     select {
       border-radius: 20px;
@@ -210,9 +230,9 @@ section {
       background-color: var(--color-2);
       font-size: 1.3em;
       option {
+        font-size: 0.9em;
         background-color: var(--color-2);
         color: var(--color-13);
-        font-size: 1.3em;
       }
     }
   }

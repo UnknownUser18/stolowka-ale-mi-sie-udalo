@@ -12,13 +12,16 @@ import { DataService, Student } from './data.service';
     styleUrl: './app.component.scss'
 })
 export class AppComponent implements AfterViewInit, OnDestroy {
-  constructor(protected router : Router, private titleService : GlobalInfoService, private database : DataService) {}
+  constructor(protected router : Router, protected globalInfoService : GlobalInfoService, private database : DataService) {}
   private routerSubscription!: Subscription;
   protected persons_zsti : Student[] | undefined
   protected navigateMainPage() : void {
     this.router.navigate(['']).then(() : void => {
-      this.titleService.setTitle('Strona Główna');
+      this.globalInfoService.setTitle('Strona Główna');
     });
+  }
+  protected getPersonById(id: number): Student | undefined {
+    return this.persons_zsti?.find((person: Student) : boolean => person.id === id);
   }
   public ngAfterViewInit(): void {
     this.routerSubscription = this.router.events.subscribe(event => {
@@ -26,7 +29,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         const currentUrl : string = event.urlAfterRedirects;
         switch (currentUrl) {
           case '/osoby':
-            this.titleService.setTitle('Osoby');
+            this.globalInfoService.setTitle('Osoby');
             this.database.request('zsti.student.get',{},'studentList')
             setTimeout(() : void => {
               this.persons_zsti = this.database.get('studentList');
@@ -36,10 +39,15 @@ export class AppComponent implements AfterViewInit, OnDestroy {
       }
     });
   }
-
   public ngOnDestroy(): void {
     if (this.routerSubscription) {
       this.routerSubscription.unsubscribe();
     }
+  }
+
+  protected selectPerson(id : number) : void {
+    this.router.navigate(['osoba/zsti', id, 'kalendarz']).then((): void => {
+      this.globalInfoService.setActiveUser(id);
+    });
   }
 }

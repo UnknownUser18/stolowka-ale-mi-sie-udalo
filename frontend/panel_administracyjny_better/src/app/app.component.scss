@@ -20,7 +20,7 @@ nav {
     margin: 15% auto;
     width: 90%;
     border-radius: 10px;
-    padding: 5px;
+    padding: 10px 15px;
     font-weight: 500;
     font-size: 1.5em;
     transition: background-color 120ms ease-in;
@@ -65,13 +65,6 @@ nav {
   border-radius: 50%;
   background-color: var(--color-12);
   margin: 10px 0 0 10px;
-}
-.table li.placeholder {
-  cursor: default;
-  height: 50px;
-  &::before {
-    content: '';
-  }
 }
 .scrollable {
   overflow-y: auto;
@@ -141,11 +134,21 @@ ol i[class^="fa-"], ul i[class^="fa-"] {
     margin: 5px 0 5px 10px;
     font-size: 1.8em;
     color: var(--color-13);
+    &.placeholder {
+      cursor: default;
+      height: 50px;
+      &::before {
+        content: '';
+      }
+    }
+    &.selected {
+      background-color: var(--color-9);
+    }
     &::before {
       font-weight: 200;
       content: counter(list) '. ';
     }
-    &:hover {
+    &:hover:not(.selected) {
       background-color: var(--color-7);
     }
     i {

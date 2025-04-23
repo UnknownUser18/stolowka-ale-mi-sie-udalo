@@ -15,6 +15,7 @@
   --color-11: #5E7889;
   --color-12: #A4C1D5;
   --color-13: #EFEFEF;
+  --box-shadow: 15px 9px 48px 6px rgba(0,0,0,0.44);
 }
 * {
   padding: 0;
@@ -55,6 +56,14 @@ app-zsti {
   height: 90%;
   max-height: 80vh;
   margin: auto;
+}
+app-kalendarz {
+  row-gap: 25px;
+  margin: auto;
+  width: 95%;
+  height: 95%;
+  display: grid;
+  grid-template-rows: 0.08fr 1fr;
 }
 @keyframes light {
   0% {
