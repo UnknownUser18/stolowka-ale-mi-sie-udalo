@@ -26,7 +26,7 @@
         <ol>
           @defer (when persons_zsti) {
             @for (person of persons_zsti; track person.id) {
-              <li>{{ person.imie }} {{ person.nazwisko[0] }}. <i>({{ person.klasa === '' ? 'n.' : person.klasa }})</i></li>
+              <li>{{ person.imie }} {{ person.nazwisko[0] }}. <i>({{ person.klasa === '' && person.typ_osoby_id === 2 ? 'n.' : person.klasa }})</i></li>
             } @empty {
               <li><h3>Brak osób w bazie danych.</h3></li>
             }

@@ -1,10 +1,10 @@
 <header>
   <label>
     <input type="text" placeholder="Wyszukaj osobę z ZSTI..." [(ngModel)]="searchTerm" (blur)="filterPersons($event)" (keydown)="filterPersons($event)">
-    <i class="fa-solid fa-filter"></i>
+    <i class="fa-solid fa-filter" (click)="openFilterMenu()"></i>
     <i class="fa-solid fa-magnifying-glass" (click)="filterPersons($event)"></i>
   </label>
-  <span>Znaleziono {{ persons_zsti?.length ?? 0 }} wyników.</span>
+  <span>Znaleziono {{ result?.length ?? '...'}} {{ (this.result?.length ?? 0) === 1 ? "wynik" : ((this.result?.length ?? 0) >= 2 && (this.result?.length ?? 0) <= 4 ? "wyniki" : "wyników") }}.</span>
 </header>
 <table>
   <thead>
@@ -16,8 +16,8 @@
     </tr>
   </thead>
   <tbody>
-    @defer (when persons_zsti) {
-      @for (person of persons_zsti; track person.id) {
+    @defer (when result) {
+      @for (person of result; track person.id) {
         <tr>
           <td>{{ getPersonIndex(person.id)+1 }}</td>
           <td>{{ person.imie }} {{ person.nazwisko }}</td>
@@ -38,3 +38,53 @@
     }
   </tbody>
 </table>
+@if (showFilter) {
+  <section>
+    <div>
+      <h3>Filtry dla osób ZSTI</h3>
+      <i class="fa-solid fa-xmark close" (click)="showFilter = false"></i>
+      <form>
+        <fieldset>
+          <legend><i class="fa-solid fa-user"></i>Dane osobowe</legend>
+          <label>
+            <span>Imię :</span>
+            <input type="text" placeholder="Imię" [(ngModel)]="filter.imie" name="imie">
+          </label>
+          <label>
+            <span>Nazwisko :</span>
+            <input type="text" placeholder="Nazwisko" [(ngModel)]="filter.nazwisko" name="nazwisko">
+          </label>
+          <label>
+            <span>Opłacany przez miasto :</span>
+            <select [(ngModel)]="filter.miasto" name="miasto">
+              <option value="true">Tak</option>
+              <option value="false">Nie</option>
+            </select>
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend><i class="fa-solid fa-graduation-cap"></i>Dane szkolne</legend>
+          <label>
+            <span>Klasa :</span>
+            <input type="text" placeholder="Klasa" [(ngModel)]="filter.klasa" name="klasa">
+          </label>
+          <label>
+            <span>Typ osoby :</span>
+            <select [(ngModel)]="filter.typ_osoby" name="typ_osoby">
+              <option value="1">Uczeń</option>
+              <option value="2">Nauczyciel</option>
+            </select>
+          </label>
+          <label>
+            <span>Uczęszcza :</span>
+            <select [(ngModel)]="filter.uczeszcza" name="uczeszcza">
+              <option value="true">Tak</option>
+              <option value="false">Nie</option>
+            </select>
+          </label>
+        </fieldset>
+        <button (click)="applyFilter()">Zastosuj</button>
+      </form>
+    </div>
+  </section>
+}
