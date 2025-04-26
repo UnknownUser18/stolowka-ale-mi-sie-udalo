@@ -119,13 +119,13 @@ export class DataService {
 
     this.ws.onopen = () => console.log('WebSocket connected');
 
-    this.ws.onmessage = (event) => {
+    this.ws.addEventListener('message', (event) => {
       const response: ServerData = JSON.parse(event.data);
       if (response.action === 'response') {
         const { variable, value } = response.params as ResponsePayload;
         this.handleResponse(variable, value);
       }
-    };
+    });
 
     this.ws.onclose = () => {
       console.log('WebSocket closed, reconnecting...');
@@ -186,9 +186,8 @@ export class DataService {
    * @example
    * this.request('zsti.student.get', {}, 'studentList');
    * */
-  request(method: string, params: Params = {}, responseVar?: VariableName): void {
-    if(this.ws.readyState !== WebSocket.OPEN) return;
-    const [sector, dataPool, operation] = method.split('.');
+  request(method: string, params: Params = {}, responseVar?: VariableName): Promise<Array<any>> {
+    if(this.ws.readyState !== WebSocket.OPEN) throw new Error('WebSocket is not ready');
     this.ws.send(JSON.stringify({
       action: 'request',
       params: {
@@ -197,11 +196,20 @@ export class DataService {
         responseVar
       } as RequestPayload
     }))
-    if(operation !== 'get')
-    {
-      const getMethod = sector + '.' + dataPool + '.get'
-      this.request(getMethod, {}, 'studentList');
-    }
+
+    return new Promise((resolve, reject): void => {
+      this.ws.addEventListener('message', event => {
+        if(!event.data) {
+          reject(new Error("Error in event.data", event.data));
+          return;
+        }
+        const {variable, value} = event.data.params as ResponsePayload;
+        if(variable === responseVar) {
+          console.log("Websocket message received: ", value);
+          resolve(JSON.parse(variable));
+        }
+      })
+    })
   }
 
   /**
