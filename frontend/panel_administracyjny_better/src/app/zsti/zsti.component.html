@@ -1,6 +1,6 @@
 <header>
   <label>
-    <input type="text" placeholder="Wyszukaj osobę z ZSTI..." [(ngModel)]="searchTerm" (blur)="filterPersons($event)" (keydown)="filterPersons($event)">
+    <input type="text" name="szukanie osoby" placeholder="Wyszukaj osobę z ZSTI..." [(ngModel)]="searchTerm" (blur)="filterPersons($event)" (keydown)="filterPersons($event)">
     <i class="fa-solid fa-filter" (click)="openFilterMenu()"></i>
     <i class="fa-solid fa-magnifying-glass" (click)="filterPersons($event)"></i>
   </label>
@@ -19,7 +19,7 @@
     @defer (when result) {
       @for (person of result; track person.id) {
         <tr>
-          <td>{{ getPersonIndex(person.id)+1 }}</td>
+          <td>{{ getPersonIndex(person.id) }}</td>
           <td>{{ person.imie }} {{ person.nazwisko }}</td>
           <td>{{ person.klasa === '' ? 'Nauczyciel' : person.klasa }}</td>
           <td>
@@ -42,7 +42,7 @@
   <section>
     <div>
       <h3>Filtry dla osób ZSTI</h3>
-      <i class="fa-solid fa-xmark close" (click)="showFilter = false"></i>
+      <i class="fa-solid fa-xmark close" (click)="closeFilterMenu()"></i>
       <form>
         <fieldset>
           <legend><i class="fa-solid fa-user"></i>Dane osobowe</legend>
@@ -57,6 +57,7 @@
           <label>
             <span>Opłacany przez miasto :</span>
             <select [(ngModel)]="filter.miasto" name="miasto">
+              <option value="wszyscy">Wszyscy</option>
               <option value="true">Tak</option>
               <option value="false">Nie</option>
             </select>
@@ -66,18 +67,20 @@
           <legend><i class="fa-solid fa-graduation-cap"></i>Dane szkolne</legend>
           <label>
             <span>Klasa :</span>
-            <input type="text" placeholder="Klasa" [(ngModel)]="filter.klasa" name="klasa">
+            <input type="text" [placeholder]="filter.typ_osoby === '3' ? 'Wybrano nauczyciela...' : 'Klasa'" [(ngModel)]="filter.klasa" name="klasa" [disabled]="filter.typ_osoby === '3'">
           </label>
           <label>
             <span>Typ osoby :</span>
-            <select [(ngModel)]="filter.typ_osoby" name="typ_osoby">
-              <option value="1">Uczeń</option>
-              <option value="2">Nauczyciel</option>
+            <select [(ngModel)]="filter.typ_osoby" name="typ_osoby" (change)="cdr.detectChanges()">
+              <option value="1">Wszyscy</option>
+              <option value="2">Uczeń</option>
+              <option value="3">Nauczyciel</option>
             </select>
           </label>
           <label>
             <span>Uczęszcza :</span>
             <select [(ngModel)]="filter.uczeszcza" name="uczeszcza">
+              <option value="wszyscy">Wszyscy</option>
               <option value="true">Tak</option>
               <option value="false">Nie</option>
             </select>

@@ -101,6 +101,7 @@ export const Queries: QueriesStructure = {
         "student": {
             "type": Person.array(),
             "get": `SELECT * FROM osoby_zsti ORDER BY nazwisko, imie;`,
+            "getById": `SELECT * FROM osoby_zsti WHERE id = :id`,
             "add": `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id) values(:imie, :nazwisko, :klasa, :uczeszcza, :typ_osoby_id);`,
             "update": `UPDATE osoby_zsti SET imie = :imie, nazwisko = :nazwisko, klasa = :klasa, uczeszcza = :uczeszcza, typ_osoby_id = :typ_osoby_id WHERE id = :id;`,
             "delete": `DELETE FROM osoby_zsti WHERE id = :id`

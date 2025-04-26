@@ -71,6 +71,7 @@ export interface ResponsePayload {
 
 type VariableTypeMap = {
   studentList: Student[],
+  student: Student[], // mysql throws are returned as arrays
   declarationList: Declaration[],
   canceledDayList: CanceledDay[],
   cardList: Card[],
