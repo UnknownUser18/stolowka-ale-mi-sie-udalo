@@ -48,7 +48,7 @@ export class ZstiComponent {
     }
   }
   protected getPersonIndex(id : number) : number {
-    return this.result?.findIndex((item : Student) : boolean => item.id === id)! + 1 ?? -1;
+    return this.result?.findIndex((item : Student) : boolean => item.id === id)! + 1;
   }
   protected filterPersons(event : Event) : void {
     if(event instanceof KeyboardEvent && event.key !== 'Enter') return;

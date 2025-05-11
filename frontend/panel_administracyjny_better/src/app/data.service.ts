@@ -73,6 +73,7 @@ type VariableTypeMap = {
   studentList: Student[],
   student: Student[], // mysql throws are returned as arrays
   declarationList: Declaration[],
+  declaration: Declaration[],
   canceledDayList: CanceledDay[],
   cardList: Card[],
   absenceDayList: AbsenceDay[],
@@ -102,7 +103,6 @@ export class DataService {
 
   constructor() {
     this.initializeWebSocket();
-    this.initAllGetData()
   }
 
   /**
@@ -152,7 +152,7 @@ export class DataService {
    * this.handleResponse('studentList', {imie: 'Michał', nazwisko: 'wiaterek', wiek: 15});
    * */
   handleResponse(variable: VariableName, value: any) {
-    console.log(variable, value)
+    console.table(value)
     this.cachedData.set(variable, value);
     this.dataChange.next(variable);
   }
@@ -204,26 +204,15 @@ export class DataService {
           reject(new Error("Error in event.data", event.data));
           return;
         }
-        const {variable, value} = event.data.params as ResponsePayload;
-        if(variable === responseVar) {
-          console.log("Websocket message received: ", value);
-          resolve(JSON.parse(variable));
+        let data : ServerData = JSON.parse(event.data);
+        if(!data.params) {
+          reject(new Error("Error in event.data.params", data.params));
+          return;
+        }
+        if(data.params.variable === responseVar) {
+          resolve(data.params.value);
         }
       })
     })
   }
-
-  /**
-   * Wysyła zapytania o każdy typ danych z bazy
-   * */
-  async initAllGetData() {
-    this.request('zsti.student.get', {}, 'studentList')
-    this.request('zsti.declaration.get', {}, 'declarationList')
-    this.request('zsti.canceledDay.get', {}, 'canceledDayList')
-    this.request('zsti.card.get', {}, 'cardList')
-    this.request('zsti.absence.get', {}, 'absenceDayList')
-    this.request('zsti.payment.get', {}, 'paymentList')
-    this.request('zsti.scan.get', {}, 'scanList')
-  }
-
 }

@@ -1,5 +1,5 @@
 <app-date-changer></app-date-changer>
-<section>
+<section #section>
   <div class="select-buttons">
     co nie?
   </div>
@@ -12,6 +12,8 @@
   </main>
   <button>Prześlij</button>
   <div class="diff">
-    chłopie
+    @for (day of globalInfo.selectedDays.added; track day) {
+      <span class="added">{{ day }}</span>
+    }
   </div>
 </section>

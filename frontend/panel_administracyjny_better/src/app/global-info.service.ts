@@ -9,7 +9,13 @@ export class GlobalInfoService {
   public title : BehaviorSubject<string> = new BehaviorSubject<string>('Strona Główna');
   public activeUser : BehaviorSubject<number> = new BehaviorSubject<number>(0);
   public activeTab : BehaviorSubject<string | undefined> = new BehaviorSubject<string | undefined>(undefined);
-  public activeMonth : BehaviorSubject<Date> = new BehaviorSubject<Date>(new Date());
+  public activeMonth : BehaviorSubject<Date | undefined> = new BehaviorSubject<Date | undefined>(undefined);
+  public previousMonth : Date | undefined;
+  public previousUser : number | undefined;
+  public selectedDays = {
+    added: [] as Date[],
+    removed: [] as Date[]
+  }
   public setTitle(title : string) : void {
     this.title.next(title);
   }
@@ -20,6 +26,10 @@ export class GlobalInfoService {
     this.activeTab.next(type);
   }
   public setActiveMonth(date : Date) : void {
+    this.previousMonth = this.activeMonth.getValue();
     this.activeMonth.next(date);
+  }
+  public setPreviousUser(id : number) : void {
+    this.previousUser = id;
   }
 }
