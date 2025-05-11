@@ -27,11 +27,9 @@ export class ZstiComponent {
   }
   constructor(private globalInfoService: GlobalInfoService, private database: DataService, protected cdr: ChangeDetectorRef, private el: ElementRef, private router : Router) {
     this.globalInfoService.setTitle('ZSTI - Osoby');
-    this.database.request('zsti.student.get', {}, 'studentList');
-    setTimeout(() : void => {
-      this.persons_zsti = this.database.get('studentList');
-      this.result = this.persons_zsti!;
-    }, 1000); // please make this function async 😭😭😭😭😭
+    this.database.request('zsti.student.get', {}, 'studentList').then((payload) => {
+      this.persons_zsti = payload;
+    });
   }
   private applyAnimation(type : string) : void {
     const filterBackground : HTMLElement = this.el.nativeElement.querySelector('section');
@@ -96,7 +94,7 @@ export class ZstiComponent {
     }, 800);
   }
   protected selectPerson(id : number) : void {
-    this.router.navigate(['osoba/zsti', id, 'kalendarz']).then((r : boolean) : void => {
+    this.router.navigate(['osoba/zsti', id, 'kalendarz']).then(() : void => {
       this.globalInfoService.setActiveUser(id);
     });
   }

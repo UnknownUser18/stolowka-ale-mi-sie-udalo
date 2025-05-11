@@ -1,18 +1,18 @@
 <nav #nav>
   @defer {
-    <img ngSrc="assets/hella_chopped.jpg" alt="Logo" class="logo" height="4000" width="3000" (click)="navigateMainPage()">
+    <img ngSrc="assets/hella_chopped.jpg" alt="Logo" class="logo" height="4000" width="3000" (click)="navigate('', 'all')">
   } @placeholder (minimum 1000ms) {
-    <span class="round placeholder" (click)="navigateMainPage()"></span>
+    <span class="round placeholder" (click)="navigate('', 'all')"></span>
   } @error {
-    <span class="round placeholder" (click)="navigateMainPage()"></span>
+    <span class="round placeholder" (click)="navigate('', 'all')"></span>
   }
   @if (!router.url.match('/')) {
     <i class="fa-solid fa-arrow-right-from-bracket"></i>
   }
-  <div class="scrollable">
+  <div class="scrollable" #scrollable>
     @if (router.url === '/') {
-      <ul class="main-page">
-        <li (click)="navigateOsoby()"><i class="fa-regular fa-user"></i>Osoby</li>
+      <ul class="main-page all">
+        <li (click)="navigate('osoby','main-page')"><i class="fa-regular fa-user"></i>Osoby</li>
         <li routerLink="raporty"><i class="fa-solid fa-table-columns"></i>Raporty</li>
         <li routerLink="cennik"><i class="fa-solid fa-money-bills"></i>Cennik</li>
         <li><i class="fa-regular fa-calendar"></i>Dni nieczynne</li>
@@ -20,8 +20,8 @@
         <li><i class="fa-solid fa-gear"></i>Ustawienia</li>
       </ul>
     } @else if (router.url.includes('/osoby') || router.url.includes('/osoba')) {
-      <div class="osoby">
-        <i class="fa-solid fa-right-to-bracket exit" (click)="navigateMainPage()"></i>
+      <div class="osoby all">
+        <i class="fa-solid fa-right-to-bracket exit" (click)="navigate('','osoby')"></i>
         <div class="table">
           <h1 routerLink="osoby/zsti"><i class="fa-solid fa-graduation-cap"></i>ZSTI</h1>
           <ol>
