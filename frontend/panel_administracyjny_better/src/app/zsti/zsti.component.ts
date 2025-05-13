@@ -1,8 +1,9 @@
-import { Component, ChangeDetectorRef, ElementRef } from '@angular/core';
+import {Component, ChangeDetectorRef, ElementRef, ViewChild, NgZone} from '@angular/core';
 import { DataService, Student } from '../data.service';
 import { Router } from '@angular/router';
 import { GlobalInfoService } from '../global-info.service';
 import { FormsModule } from '@angular/forms';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-zsti',
@@ -13,6 +14,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './zsti.component.scss'
 })
 export class ZstiComponent {
+  @ViewChild('section_filter') sectionFilter : ElementRef | undefined;
   protected searchTerm : string | undefined;
   protected persons_zsti : Student[] | undefined;
   protected result : Student[] | undefined;
@@ -25,26 +27,41 @@ export class ZstiComponent {
     typ_osoby : '1',
     uczeszcza : 'wszyscy',
   }
-  constructor(private globalInfoService: GlobalInfoService, private database: DataService, protected cdr: ChangeDetectorRef, private el: ElementRef, private router : Router) {
+  constructor(
+    private globalInfoService: GlobalInfoService,
+    private database: DataService,
+    protected cdr: ChangeDetectorRef,
+    private router : Router,
+    private zone : NgZone) {
     this.globalInfoService.setTitle('ZSTI - Osoby');
     this.database.request('zsti.student.get', {}, 'studentList').then((payload) => {
-      this.persons_zsti = payload;
+      this.result = this.persons_zsti = payload;
     });
   }
-  private applyAnimation(type : string) : void {
-    const filterBackground : HTMLElement = this.el.nativeElement.querySelector('section');
-    const filterMain : HTMLElement = this.el.nativeElement.querySelector('section > div');
-    switch (type) {
-      case 'open':
-        filterBackground.classList.add('done');
-        filterMain.classList.add('done');
-        break;
-      case 'close':
-        filterBackground.classList.remove('done');
-        filterMain.classList.remove('done');
-        break;
-    }
+  private applyAnimation(open: boolean): Promise<boolean> {
+    return new Promise((resolve): void => {
+      this.zone.onStable.pipe(take(1)).subscribe((): void => {
+        requestAnimationFrame((): void => {
+          const filterBackground: HTMLElement = this.sectionFilter!.nativeElement as HTMLElement;
+          const filterMain: HTMLElement = filterBackground.querySelector('section > div')!;
+
+          filterBackground.classList.toggle('done', open);
+          filterMain.classList.toggle('done', open);
+
+          const onTransitionEnd = (e: TransitionEvent): void => {
+            if (e.target === filterMain) { // Check if the event target is the filterMain element
+              filterMain.removeEventListener('transitionend', onTransitionEnd);
+              resolve(true);
+            }
+          };
+
+          filterMain.addEventListener('transitionend', onTransitionEnd);
+        });
+      });
+    });
   }
+
+
   protected getPersonIndex(id : number) : number {
     return this.result?.findIndex((item : Student) : boolean => item.id === id)! + 1;
   }
@@ -58,40 +75,40 @@ export class ZstiComponent {
   }
   protected openFilterMenu() : void {
     this.showFilter = true;
-    setTimeout(() : void => {
-      this.applyAnimation('open');
-    }, 10)
-    const searchTerm : string = this.searchTerm ?? '';
-    if (searchTerm.includes(' ') && searchTerm.length > 0) {
-      this.filter.imie = searchTerm.charAt(0).toUpperCase() + searchTerm.split(' ')[0].slice(1);
-      this.filter.nazwisko = searchTerm.split(' ')[1].charAt(0).toUpperCase() + searchTerm.split(' ')[1].slice(1);
-    } else {
-      this.filter.imie = searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1);
-    }
+    this.applyAnimation(true).then(() : void => {
+      const searchTerm : string = this.searchTerm ?? '';
+      if (searchTerm.includes(' ') && searchTerm.length > 0) {
+        this.filter.imie = searchTerm.charAt(0).toUpperCase() + searchTerm.split(' ')[0].slice(1);
+        this.filter.nazwisko = searchTerm.split(' ')[1].charAt(0).toUpperCase() + searchTerm.split(' ')[1].slice(1);
+      } else {
+        this.filter.imie = searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1);
+      }
+    });
   }
   protected applyFilter() : void {
-    this.applyAnimation('close');
-    setTimeout(() : void => {
-      this.showFilter = false;
-    }, 800);
-    this.result = this.persons_zsti!.filter((person : Student) : boolean => {
-      const { imie, nazwisko, klasa, miasto, typ_osoby_id, uczeszcza } = person;
-      return (
-        imie.toLowerCase().includes(this.filter.imie.toLowerCase()) &&
-        nazwisko.toLowerCase().includes(this.filter.nazwisko.toLowerCase()) &&
-        klasa.toLowerCase().includes(this.filter.klasa.toLowerCase()) &&
-        (this.filter.miasto === 'wszyscy' ? true : this.filter.miasto === 'true' ? miasto : !miasto) &&
-        (this.filter.typ_osoby === '1' ? true : this.filter.typ_osoby === '2' ? typ_osoby_id === 1 : typ_osoby_id === 2) &&
-        (this.filter.uczeszcza === 'wszyscy' ? true : this.filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
-      );
+    this.applyAnimation(false).then((r : boolean) : void => {
+      if(r) this.showFilter = false;
+    }).finally(() : void => {
+      if(this.filter.typ_osoby === '3') this.filter.klasa = '';
+      this.result = this.persons_zsti!.filter((person : Student) : boolean => {
+        const { imie, nazwisko, klasa, miasto, typ_osoby_id, uczeszcza } = person;
+        return (
+          imie.toLowerCase().includes(this.filter.imie.toLowerCase()) &&
+          nazwisko.toLowerCase().includes(this.filter.nazwisko.toLowerCase()) &&
+          klasa.toLowerCase().includes(this.filter.klasa.toLowerCase()) &&
+          (this.filter.miasto === 'wszyscy' ? true : this.filter.miasto === 'true' ? miasto : !miasto) &&
+          (this.filter.typ_osoby === '1' ? true : this.filter.typ_osoby === '2' ? typ_osoby_id === 1 : typ_osoby_id === 2) &&
+          (this.filter.uczeszcza === 'wszyscy' ? true : this.filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
+        );
+      });
+      this.searchTerm = (this.filter.imie + ' ' + this.filter.nazwisko).trim();
     });
-    this.searchTerm = (this.filter.imie + ' ' + this.filter.nazwisko).trim();
   }
   protected closeFilterMenu() : void {
-    this.applyAnimation('close');
-    setTimeout(() : void => {
-      this.showFilter = false;
-    }, 800);
+    this.applyAnimation(false).then((r : boolean) : void => {
+      console.log("Closed");
+      if(r) this.showFilter = false;
+    });
   }
   protected selectPerson(id : number) : void {
     this.router.navigate(['osoba/zsti', id, 'kalendarz']).then(() : void => {

@@ -97,6 +97,14 @@ export const dbConfig: PoolOptions = {
  * - operacje na danych;
  * */
 export const Queries: QueriesStructure = {
+    "global": {
+        "canceledDay": {
+            "type": CanceledDay.array(),
+            "get": `SELECT * FROM dni_nieczynne_stolowki`,
+            "add": `INSERT INTO dni_nieczynne_stolowki (dzien) VALUES(:dzien)`,
+            "delete": `DELETE FROM dni_nieczynne_stolowki WHERE id = :id`
+        }
+    },
     "zsti": {
         "student": {
             "type": Person.array(),

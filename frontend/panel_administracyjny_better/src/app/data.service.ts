@@ -78,7 +78,8 @@ type VariableTypeMap = {
   cardList: Card[],
   absenceDayList: AbsenceDay[],
   paymentList: Payment[],
-  scanList: Scan[]
+  scanList: Scan[],
+  canceledDay: CanceledDay[],
 };
 
 type VariableName = keyof VariableTypeMap;

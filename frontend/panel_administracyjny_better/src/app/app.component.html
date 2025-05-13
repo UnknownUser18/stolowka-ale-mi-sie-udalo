@@ -1,6 +1,6 @@
 <nav #nav>
   @defer {
-    <img ngSrc="assets/hella_chopped.jpg" alt="Logo" class="logo" height="4000" width="3000" (click)="navigate('', 'all')">
+    <img ngSrc="assets/hella_chopped.jpg" alt="Logo" class="logo" height="4000" width="3000" (click)="navigate('', 'all', false)">
   } @placeholder (minimum 1000ms) {
     <span class="round placeholder" (click)="navigate('', 'all')"></span>
   } @error {
@@ -11,7 +11,7 @@
   }
   <div class="scrollable" #scrollable>
     @if (router.url === '/') {
-      <ul class="main-page all">
+      <ul class="main-page all ignore">
         <li (click)="navigate('osoby','main-page')"><i class="fa-regular fa-user"></i>Osoby</li>
         <li routerLink="raporty"><i class="fa-solid fa-table-columns"></i>Raporty</li>
         <li routerLink="cennik"><i class="fa-solid fa-money-bills"></i>Cennik</li>

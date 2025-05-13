@@ -39,7 +39,11 @@ export class AppComponent implements AfterViewInit {
       this.globalInfoService.setActiveUser(id);
     });
   }
-  protected navigate(path : string, class_name : classNames) : void {
+  protected navigate(path : string, class_name : classNames, ignore : boolean = true) : void {
+    if (!ignore) {
+      this.router.navigate([path]).then();
+      return;
+    }
     this.animateElement(class_name, true).then((): void => {
       this.router.navigate([path]).then();
     });
@@ -61,9 +65,8 @@ export class AppComponent implements AfterViewInit {
   private startPageLogic() : void {
     switch (this.router.url) {
       case '/':
-        this.animateElement('main-page', false).then((): void => {
-          this.globalInfoService.setTitle('Strona Główna');
-        });
+        this.globalInfoService.setTitle('Strona Główna');
+        this.animateElement('main-page').then((): void => {});
         break;
       case '/osoby':
         this.globalInfoService.setTitle('Osoby');
@@ -74,7 +77,7 @@ export class AppComponent implements AfterViewInit {
         });
         break;
     }
-    if(this.router.url.match('/osoba')) {
+    if(this.router.url.startsWith('/osoba')) {
       this.animateElement('osoby').then((): void => {
         this.database.request('zsti.student.get', {}, 'studentList').then((payload): void => {
           this.persons_zsti = payload;

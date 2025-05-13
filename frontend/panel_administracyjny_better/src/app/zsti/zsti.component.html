@@ -39,7 +39,7 @@
   </tbody>
 </table>
 @if (showFilter) {
-  <section>
+  <section #section_filter>
     <div>
       <h3>Filtry dla osób ZSTI</h3>
       <i class="fa-solid fa-xmark close" (click)="closeFilterMenu()"></i>
@@ -67,7 +67,7 @@
           <legend><i class="fa-solid fa-graduation-cap"></i>Dane szkolne</legend>
           <label>
             <span>Klasa :</span>
-            <input type="text" [placeholder]="filter.typ_osoby === '3' ? 'Wybrano nauczyciela...' : 'Klasa'" [(ngModel)]="filter.klasa" name="klasa" [disabled]="filter.typ_osoby === '3'">
+            <input type="text" [placeholder]="filter.typ_osoby === '3' ? 'Wybrano nauczyciela...' : 'Klasa'" [value]="filter.typ_osoby === '3' ? '' : filter.klasa" [(ngModel)]="filter.klasa" name="klasa" [disabled]="filter.typ_osoby === '3'">
           </label>
           <label>
             <span>Typ osoby :</span>
