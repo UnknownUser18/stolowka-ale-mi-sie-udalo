@@ -138,9 +138,10 @@ export const Queries: QueriesStructure = {
         "absence": {
             "type": AbsenceDay.array(),
             "get": `SELECT * FROM nieobecnosci_zsti`,
+            "getById": `SELECT * FROM nieobecnosci_zsti WHERE osoby_zsti_id = :id`,
             "add": `INSERT INTO nieobecnosci_zsti (rok_szkolny_id, dzien_wypisania, osoby_zsti_id) VALUES (:rok_szkolny_id, :dzien_wypisania, :osoby_zsti_id)`,
             "update": `UPDATE nieobecnosci_zsti SET rok_szkolny_id = :rok_szkolny_id, dzien_wypisania = :dzien_wypisania, osoby_zsti_id = :osoby_zsti_id WHERE id = :id`,
-            "delete": `DELETE FROM nieobecnosci_zsti WHERE id = :id`
+            "delete": `DELETE FROM nieobecnosci_zsti WHERE dzien_wypisania = :dzien_wypisania AND osoby_zsti_id = :osoby_zsti_id`
         },
         "payment": {
             "type": Payment.array(),

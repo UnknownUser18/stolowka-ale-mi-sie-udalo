@@ -71,7 +71,7 @@ export interface ResponsePayload {
 
 type VariableTypeMap = {
   studentList: Student[],
-  student: Student[], // mysql throws are returned as arrays
+  student: Student[],
   declarationList: Declaration[],
   declaration: Declaration[],
   canceledDayList: CanceledDay[],
@@ -79,10 +79,10 @@ type VariableTypeMap = {
   absenceDayList: AbsenceDay[],
   paymentList: Payment[],
   scanList: Scan[],
-  canceledDay: CanceledDay[],
+  closedDays: CanceledDay[],
 };
 
-type VariableName = keyof VariableTypeMap;
+export type VariableName = keyof VariableTypeMap;
 
 export interface ServerData<T extends VariableName = VariableName> {
   action: ActionType;

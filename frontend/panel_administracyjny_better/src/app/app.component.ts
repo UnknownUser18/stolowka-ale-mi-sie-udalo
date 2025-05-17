@@ -48,19 +48,6 @@ export class AppComponent implements AfterViewInit {
       this.router.navigate([path]).then();
     });
   }
-  public ngAfterViewInit(): void {
-    const mainPage : HTMLElement = this.scrollable.nativeElement.querySelector('.main-page')!;
-    mainPage.classList.add('done');
-    this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe(() => {
-        this.zone.onStable.pipe(take(1)).subscribe(() => {
-          requestAnimationFrame(() => {
-            this.startPageLogic();
-          });
-        });
-      });
-  }
 
   private startPageLogic() : void {
     switch (this.router.url) {
@@ -86,4 +73,17 @@ export class AppComponent implements AfterViewInit {
     }
   }
 
+  public ngAfterViewInit(): void {
+    const mainPage : HTMLElement = this.scrollable.nativeElement.querySelector('.main-page')!;
+    mainPage.classList.add('done');
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        this.zone.onStable.pipe(take(1)).subscribe(() => {
+          requestAnimationFrame(() => {
+            this.startPageLogic();
+          });
+        });
+      });
+  }
 }

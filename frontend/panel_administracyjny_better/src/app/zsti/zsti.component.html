@@ -17,9 +17,9 @@
   </thead>
   <tbody>
     @defer (when result) {
-      @for (person of result; track person.id) {
+      @for (person of result; track person.id; let index = $index) {
         <tr>
-          <td>{{ getPersonIndex(person.id) }}</td>
+          <td>{{ index+1 }}</td>
           <td>{{ person.imie }} {{ person.nazwisko }}</td>
           <td>{{ person.klasa === '' ? 'Nauczyciel' : person.klasa }}</td>
           <td>

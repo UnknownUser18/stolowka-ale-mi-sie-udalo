@@ -61,10 +61,6 @@ export class ZstiComponent {
     });
   }
 
-
-  protected getPersonIndex(id : number) : number {
-    return this.result?.findIndex((item : Student) : boolean => item.id === id)! + 1;
-  }
   protected filterPersons(event : Event) : void {
     if(event instanceof KeyboardEvent && event.key !== 'Enter') return;
     if (this.searchTerm === undefined) return;
@@ -106,7 +102,6 @@ export class ZstiComponent {
   }
   protected closeFilterMenu() : void {
     this.applyAnimation(false).then((r : boolean) : void => {
-      console.log("Closed");
       if(r) this.showFilter = false;
     });
   }

@@ -1,10 +1,14 @@
-import { AfterViewInit, Component, ElementRef, Renderer2, ViewChild } from '@angular/core';
-import { DateChangerComponent } from './date-changer/date-changer.component';
-import { GlobalInfoService } from '../global-info.service';
-import { DataService, Declaration, Student, CanceledDay } from '../data.service';
-import { filter, take } from 'rxjs';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, Renderer2, ViewChild} from '@angular/core';
+import {DateChangerComponent} from './date-changer/date-changer.component';
+import {GlobalInfoService, TabType} from '../global-info.service';
+import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName} from '../data.service';
+import {filter, find, take} from 'rxjs';
 
-
+enum AbsenceWindowStatus  {
+  CLOSED,
+  DODANE,
+  USUNIETE
+}
 @Component({
   selector: 'app-kalendarz',
   imports: [
@@ -14,33 +18,78 @@ import { filter, take } from 'rxjs';
   styleUrl: './kalendarz.component.scss'
 })
 export class KalendarzComponent implements AfterViewInit {
-  protected user : Student | undefined;
+  private absenceDays : AbsenceDay[] = [];
   private declarations : Declaration[] | undefined;
-  private canceledDays : CanceledDay[] = [];
+  private closedDays : CanceledDay[] = [];
+
+  protected user : Student | undefined;
+  protected openStatus: AbsenceWindowStatus = AbsenceWindowStatus.CLOSED;
+  protected readonly AbsenceWindowStatus = AbsenceWindowStatus;
+  protected readonly Math = Math;
+
   @ViewChild('section') section!: ElementRef;
-  constructor(protected globalInfo : GlobalInfoService, private database : DataService, private renderer : Renderer2) {}
-  private addDay(day : Date) : void {
+  @ViewChild('absencesMenu') absencesMenu!: ElementRef;
+
+  constructor(
+    protected globalInfo : GlobalInfoService,
+    private database : DataService,
+    private renderer : Renderer2,
+    private zone : NgZone,
+    private cdr : ChangeDetectorRef
+  ) {}
+
+  private addDay(day : Date, absence : boolean) : void {
     if(!day) return;
-    const dayIndex : number = this.globalInfo.selectedDays.added.findIndex((d : Date) : boolean => {
-      return d.getTime() === day.getTime();
-    });
-    if(dayIndex === -1) {
-      this.globalInfo.selectedDays.added.push(day);
+    if (!absence) {
+      const dayIndex = this.globalInfo.selectedDays.added.findIndex(d => d.getTime() === day.getTime());
+      dayIndex === -1
+        ? this.globalInfo.selectedDays.added.push(day)
+        : this.globalInfo.selectedDays.added.splice(dayIndex, 1);
     } else {
-      this.globalInfo.selectedDays.added.splice(dayIndex, 1);
+      const dayIndex = this.globalInfo.selectedDays.removed.findIndex(d => d.getTime() === day.getTime());
+      dayIndex === -1
+        ? this.globalInfo.selectedDays.removed.push(day)
+        : this.globalInfo.selectedDays.removed.splice(dayIndex, 1);
     }
   }
+
+  /** @method initComponent
+   * @description Inicjalizuje komponent, pobierając dane z bazy danych.
+   * @param method{string} - Nazwa metody do wywołania w bazie danych.
+   * @param responseVar{VariableName} - Nazwa zmiennej, do której przypisane będą dane z bazy danych.
+   * @param variable{string} - Nazwa zmiennej, do której przypisane będą dane z bazy danych.
+   * @param params{boolean} - Czy metoda wymaga parametrów?
+   * @returns {Promise<boolean>} - Promise, która rozwiązuje się po zakończeniu inicjalizacji komponentu.
+   * @throws {Error} - Jeśli nie można znaleźć zmiennej.
+   * @memberof KalendarzComponent
+   */
+  private async initComponent(method : string, responseVar : VariableName, variable : string, params : boolean = false) : Promise<boolean> {
+    if(!this.user) return false;
+    try {
+      if(params) {
+        (this as any)[variable] = await this.database.request(method, { id: this.user.id }, responseVar);
+      } else {
+        (this as any)[variable] = await this.database.request(method, {}, responseVar);
+      }
+    } catch (error) {
+      throw new Error(`Nie można znaleźć ${variable}`);
+    }
+    return (this as any)[variable] !== undefined;
+  }
+
   /** @method initializeCalendar
-   * @description Inicjalizuje cały kalendarz, włącznie z logiką deklaracji i zaznaczania.
+   * @description Inicjalizuje cały kalendarz, włącznie z logiką deklaracji, dni nieczynnych, nieobecności oraz zaznaczania.
    * @returns {void}
    * @memberof KalendarzComponent
-   * @throws {Error} - Jeśli nie można zainicjalizować kalendarza, deklaracji (każde sprawdza osobno).
+   * @throws {Error} - Jeśli nie można zainicjalizować kalendarza, deklaracji itp. (każde sprawdza osobno).
    */
   private async initializeCalendar(): Promise<void> {
     try {
       if(!await this.initCalendar()) return;
-      if(!await this.initDeclarations()) return;
-      if(!await this.initNieczynneDni()) return;
+      // Inicjacja po kolei deklaracji, dni nieczynnych i dni nieobecności
+      if(!await this.initComponent('zsti.declaration.getById', 'declaration', 'declarations', true)) return;
+      if(!await this.initComponent('global.canceledDay.get', 'closedDays', 'closedDays')) return;
+      if(!await this.initComponent('zsti.absence.getById', 'absenceDayList', 'absenceDays', true)) return;
       let declarations: Declaration[] = this.declarations!;
       let days: NodeListOf<HTMLButtonElement> = this.section.nativeElement.querySelectorAll('.day')!;
       days.forEach((d: HTMLButtonElement): void => {
@@ -48,19 +97,18 @@ export class KalendarzComponent implements AfterViewInit {
         const day: Date = new Date(date);
         if (day.getDay() === 0 || day.getDay() === 6) {
           d.disabled = true;
+          d.classList.add('weekend');
           return;
         }
-        const day_string = `${day.getFullYear()}-${(day.getMonth() + 1).toString().padStart(2, '0')}-${(day.getDate()).toString().padStart(2, '0')}`;
-        const declaration: Declaration | undefined = declarations.find((declaration: Declaration): boolean => {
-          return declaration.data_od <= day_string && declaration.data_do >= day_string;
-        });
-        function getTime(date : Date) {
-          return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${(date.getDate()).toString().padStart(2, '0')}`;
+        const absenceDay = this.absenceDays.find(a => this.formatDate(new Date(a.dzien_wypisania)) === this.formatDate(day));
+        if(absenceDay) {
+          d.classList.add('absence');
+          if(!this.globalInfo.selectedDays.removed.find(d => this.formatDate(d) === this.formatDate(day))) d.classList.add('selected');
+        } else if(this.globalInfo.selectedDays.added.find(d => this.formatDate(d) === this.formatDate(day))) {
+          d.classList.add('selected');
         }
-        const canceledDay: CanceledDay | undefined = this.canceledDays.find((canceledDay: CanceledDay): boolean => {
-          return getTime(new Date(canceledDay.dzien)) === getTime(day);
-        });
-        console.log(canceledDay);
+        const declaration = declarations.find(d => d.data_od <= this.formatDate(day) && d.data_do >= this.formatDate(day));
+        const canceledDay = this.closedDays.find(c => this.formatDate(new Date(c.dzien)) === this.formatDate(day));
         if (!(declaration && !d.disabled && declaration?.dni.split('')[day.getDay() - 1] === '1')) {
           d.classList.add('no-declaration');
         } else if(canceledDay) {
@@ -68,16 +116,18 @@ export class KalendarzComponent implements AfterViewInit {
           d.disabled = true;
         } else {
           d.addEventListener('click', (): void => {
-            this.addDay(day);
+            this.addDay(day, d.classList.contains('absence'));
             d.classList.toggle('selected');
+            this.checkZaznaczanie(Array.from(d.parentElement!.parentElement!.children).indexOf(d.parentElement!)-1);
           });
         }
-        this.initZaznaczanie().then();
       });
+      this.initZaznaczanie().then();
     } catch (err) {
       console.error(err);
     }
   }
+
   /** @method initCalendar
     * @description Inicjalizuje kalendarz, tworząc widok miesięczny bez uwzględnienia deklaracji użytkownika.
     * @returns {Promise<boolean>} - Promise, która rozwiązuje się po zakończeniu inicjalizacji kalendarza, pozwalając na dołączenie dodatkowej logiki (np. deklaracji).
@@ -121,7 +171,7 @@ export class KalendarzComponent implements AfterViewInit {
       let day : HTMLButtonElement = this.renderer.createElement('button');
       this.renderer.addClass(day, 'day');
       this.renderer.setProperty(day, 'innerText', `${i + 1}`);
-      this.renderer.setAttribute(day, 'date', `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2,'0')}-${(i + 1).toString().padStart(2,'0')}`);
+      this.renderer.setAttribute(day, 'date', this.formatDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)));
 
       let weekIndex: number = Math.floor((i + firstDay) / 7);
       let week: HTMLElement = main.querySelectorAll('.week')[weekIndex] as HTMLElement;
@@ -130,95 +180,206 @@ export class KalendarzComponent implements AfterViewInit {
     return true;
   }
 
-  /** @method initDeclarations
-   * @description Inicjalizuje deklaracje użytkownika, jeśli są dostępne.
-   * @returns {Promise<boolean>} - Promise, która rozwiązuje się po zakończeniu inicjalizacji deklaracji.
-   * @memberof KalendarzComponent
-   */
-  private async initDeclarations(): Promise<boolean> {
-    if (!this.user) return false;
-    if (!this.declarations) {
-      try {
-        this.declarations = await this.database.request('zsti.declaration.getById', { id: this.user.id }, 'declaration');
-      } catch (error) {
-        throw new Error('Nie można znaleźć deklaracji');
-      }
-    }
-    return this.declarations !== undefined;
-  }
   /** @method initZaznaczanie
    * @description Inicjalizuje sekcję zaznaczania dni w kalendarzu.
    * @returns {Promise<boolean>} - Promise, która rozwiązuje się po zakończeniu inicjalizacji sekcji zaznaczania.
    * @throws {Error} - Jeśli nie można znaleźć sekcji zaznaczania.
    * @memberof KalendarzComponent
    */
-  private async initZaznaczanie() : Promise<boolean> {
-    let select_section : HTMLElement = this.section.nativeElement.querySelector('.select-buttons')!;
-    if(!select_section) throw new Error('Nie można znaleźć sekcji zaznaczania');
-    if(select_section.childNodes.length > 0) {
-      for(const child of Array.from(select_section.childNodes)) {
-        this.renderer.removeChild(select_section, child);
-      }
+  private async initZaznaczanie(): Promise<boolean> {
+    const selectSection = this.section.nativeElement.querySelector('.select-buttons')!;
+    if (!selectSection) throw new Error('Nie można znaleźć sekcji zaznaczania');
+    while (selectSection.firstChild) {
+      this.renderer.removeChild(selectSection, selectSection.firstChild);
     }
-    let weeks : NodeListOf<HTMLButtonElement> = this.section.nativeElement.querySelectorAll('.week');
-    for(let i : number = 0; i < weeks.length ; i++) {
-      let button : HTMLButtonElement = this.renderer.createElement('button');
-      let i_element : HTMLElement = this.renderer.createElement('i');
-      i_element.classList.add('fa-solid', 'fa-xmark');
-      button.addEventListener('click', () : void => {
-        i_element.classList.toggle('fa-xmark');
-        i_element.classList.toggle('fa-check');
-        for (const day of Array.from(weeks[i].querySelectorAll('.day')) as HTMLButtonElement[]) {
-          if (day.classList.contains('no-declaration') || day.disabled) continue;
-          if (i_element.classList.contains('fa-check')) {
+    const weeks = this.section.nativeElement.querySelectorAll('.week');
+    weeks.forEach((week : HTMLElement) => {
+      const button = this.renderer.createElement('button');
+      const icon = this.renderer.createElement('i');
+      icon.classList.add('fa-solid');
+      const days = Array.from(week.querySelectorAll('.day')) as HTMLButtonElement[];
+      const activeDays = days.filter(d => !d.classList.contains('no-declaration') && !d.disabled);
+      const selectableDays = days.filter(d => !d.classList.contains('weekend') && !d.classList.contains('no-declaration'));
+      if (activeDays.length === 0) {
+        button.disabled = true;
+        icon.classList.add('fa-minus');
+      } else {
+        const allSelected = selectableDays.every(d => d.classList.contains('selected'));
+        icon.classList.add(allSelected ? 'fa-check' : 'fa-xmark');
+      }
+      button.appendChild(icon);
+      selectSection.appendChild(button);
+      button.addEventListener('click', () => {
+        icon.classList.toggle('fa-xmark');
+        icon.classList.toggle('fa-check');
+        const isSelecting = icon.classList.contains('fa-check');
+
+        for (const day of activeDays) {
+          const dayDate = new Date(day.getAttribute('date')!);
+          const isAbsence = day.classList.contains('absence');
+          const isSelected = day.classList.contains('selected');
+          const isAdded = this.globalInfo.selectedDays.added.some(d => d.getTime() === dayDate.getTime());
+          const isRemoved = this.globalInfo.selectedDays.removed.some(d => d.getTime() === dayDate.getTime());
+          if (isSelecting) {
             day.classList.add('selected');
-            const dayDate = new Date(day.getAttribute('date')!);
-            if (!this.globalInfo.selectedDays.added.some(selectedDay => selectedDay.getTime() === dayDate.getTime())) {
+            if (isAbsence && !isSelected) {
+              this.globalInfo.selectedDays.removed = isRemoved
+                ? this.globalInfo.selectedDays.removed.filter(d => d.getTime() !== dayDate.getTime())
+                : [...this.globalInfo.selectedDays.removed, dayDate];
+            } else if (!isAbsence && !isAdded) {
               this.globalInfo.selectedDays.added.push(dayDate);
             }
           } else {
             day.classList.remove('selected');
-            const dayDate = new Date(day.getAttribute('date')!);
-            this.globalInfo.selectedDays.added = this.globalInfo.selectedDays.added.filter(selectedDay => selectedDay.getTime() !== dayDate.getTime());
+            if (isAbsence && !isRemoved) {
+              this.globalInfo.selectedDays.removed.push(dayDate);
+            } else {
+              this.globalInfo.selectedDays.added = this.globalInfo.selectedDays.added.filter(d => d.getTime() !== dayDate.getTime());
+            }
           }
         }
       });
-      button.appendChild(i_element);
-      select_section.appendChild(button);
-    }
+    });
     return true;
   }
 
-  /**
-   * @method initNieczynneDni
-   * @description Inicjalizuje dni nieczynne, które są pobierane z bazy danych.
-   * @returns {Promise<boolean>} - Promise, która rozwiązuje się po zakończeniu inicjalizacji dni nieczynnych.
-   * @throws {Error} - Jeśli nie można znaleźć dni nieczynnych.
+  /** @method checkZaznaczanie
+   * @description Sprawdza zaznaczenie dni w kalendarzu.
+   * @param {number} week_number - Numer tygodnia do sprawdzenia.
+   * @returns {void}
    * @memberof KalendarzComponent
    */
-  private async initNieczynneDni() : Promise<boolean> {
-    try {
-      this.canceledDays = await this.database.request('global.canceledDay.get', {}, 'canceledDay');
-    } catch (error) {
-      throw new Error('Nie można znaleźć dni nieczynnych');
+  private checkZaznaczanie(week_number : number) : void {
+    const week = this.section.nativeElement.querySelectorAll('.week')[week_number] as HTMLElement;
+    const days = Array.from(week.querySelectorAll('.day')) as HTMLButtonElement[];
+    const selectElement = this.section.nativeElement.querySelector('.select-buttons')!.children[week_number].firstChild as HTMLElement;
+    const selectedAll : boolean = days.filter(d => !d.classList.contains('weekend') && !d.classList.contains('no-declaration') && !d.disabled)
+      .every(d => d.classList.contains('selected'));
+    selectElement.classList.remove('fa-check', 'fa-xmark');
+    selectElement.classList.add(selectedAll ? 'fa-check' : 'fa-xmark');
+  }
+
+  /** @method sendAbsence
+   * @description Wysyła zgłoszenie nieobecności do serwera.
+   * @throws {Error} - Jeśli nie można znaleźć użytkownika.
+   * @returns {void}
+   * @memberof KalendarzComponent
+   */
+  protected sendAbsence() : void {
+    if (!this.user) throw new Error('Nie można znaleźć użytkownika');
+    this.globalInfo.selectedDays.added.forEach(d => {
+      this.database.request('zsti.absence.add', { rok_szkolny_id: 1, dzien_wypisania: this.formatDate(d), osoby_zsti_id: this.user!.id }).then();
+    });
+    this.globalInfo.selectedDays.removed.forEach((d) => {
+      this.database.request('zsti.absence.delete', { dzien_wypisania: this.formatDate(d), osoby_zsti_id: this.user!.id }).then();
+    });
+    this.initializeCalendar().then(() => {
+      this.globalInfo.selectedDays = { added: [], removed: [] };
+    });
+  }
+
+  /** @method applyAnimation
+   * @description Zastosowuje animację do okna nieobecności.
+   * @param {AbsenceWindowStatus} openStatus - Status okna nieobecności.
+   * @returns {Promise<boolean>} - Promise, która rozwiązuje się po zakończeniu animacji.
+   * @memberof KalendarzComponent
+   */
+  protected applyAnimation(openStatus: AbsenceWindowStatus): Promise<boolean> {
+    if(openStatus !== AbsenceWindowStatus.CLOSED)
+      this.openStatus = openStatus;
+    return new Promise((resolve): void => {
+      this.zone.onStable.pipe(take(1)).subscribe((): void => {
+        requestAnimationFrame((): void => {
+          const absenceBackground: HTMLElement = this.absencesMenu!.nativeElement as HTMLElement;
+          const absenceMain: HTMLElement = absenceBackground.querySelector('section > div')!;
+
+          absenceBackground.classList.toggle('done', openStatus !== AbsenceWindowStatus.CLOSED);
+          absenceMain.classList.toggle('done', openStatus !== AbsenceWindowStatus.CLOSED);
+
+          const onTransitionEnd = (e: TransitionEvent): void => {
+            if (e.target === absenceMain) {
+              absenceMain.removeEventListener('transitionend', onTransitionEnd);
+              if(openStatus === AbsenceWindowStatus.CLOSED) {
+                this.openStatus = openStatus;
+                this.cdr.detectChanges();
+              }
+              resolve(true);
+            }
+          };
+          absenceMain.addEventListener('transitionend', onTransitionEnd);
+        });
+      });
+    });
+  }
+
+  /** @method formatDate
+   * @description Formatuje datę do formatu YYYY-MM-DD.
+   * @param date{Date} - Data do sformatowania.
+   * @param fancy{boolean} - Formatowanie daty w formacie DD miesiąc YYYY.
+   * @returns {string} - Sformatowana data w formacie YYYY-MM-DD.
+   * @memberof KalendarzComponent
+   */
+  protected formatDate(date : Date, fancy : boolean = false) : string {
+    if(fancy) {
+      return date.toLocaleDateString('pl-PL', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
     }
-    return this.canceledDays !== undefined;
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${(date.getDate()).toString().padStart(2, '0')}`;
+  }
+
+  /** @method removeAbsence
+   * @description Usuwa nieobecność z listy dni.
+   * @param date - Data do usunięcia.
+   * @returns {void}
+   * @memberof KalendarzComponent
+   */
+  protected removeAbsence(date : Date) : void {
+    switch (this.openStatus) {
+      case AbsenceWindowStatus.DODANE:
+        this.globalInfo.selectedDays.added = this.globalInfo.selectedDays.added.filter(d => d.getTime() !== date.getTime());
+        break;
+      case AbsenceWindowStatus.USUNIETE:
+        this.globalInfo.selectedDays.removed = this.globalInfo.selectedDays.removed.filter(d => d.getTime() !== date.getTime());
+        break;
+      default:
+        throw new Error("Nieznany status okna");
+    }
+  }
+
+  /** @method closeAbsenceWindow
+   * @description Zamyka okno nieobecności.
+   * @returns {void}
+   * @memberof KalendarzComponent
+   */
+  protected closeAbsenceWindow() : void {
+    this.applyAnimation(AbsenceWindowStatus.CLOSED).then(() => {
+      this.initializeCalendar().then();
+    });
   }
 
   public ngAfterViewInit(): void {
     this.globalInfo.activeUser.pipe(
-      filter(id => id !== undefined && id !== 0), take(1)).subscribe((id: number): void => {
-      this.database.request('zsti.student.getById', { id: id }, 'student').then((payload) => {
-        this.user = payload[0];
-        if (!this.user) throw new Error('User not found');
-        this.globalInfo.setTitle(`${this.user.imie} ${this.user.nazwisko[0]}. - Kalendarz`);
-
-        this.globalInfo.activeMonth.pipe(filter(date => date !== undefined)).subscribe((): void => {
-          this.initializeCalendar().then();
+      find(id => id !== undefined && id !== 0)).subscribe((id: number | undefined): void => {
+        if(!id) return;
+        this.database.request('zsti.student.getById', { id: id }, 'student').then((payload) => {
+          this.user = payload[0];
+          this.declarations = undefined;
+          this.closedDays = [];
+          this.absenceDays = [];
+          if (!this.user) throw new Error('User not found');
+          this.globalInfo.setTitle(`${this.user.imie} ${this.user.nazwisko[0]}. - Kalendarz`);
+          this.globalInfo.setActiveUser(this.user.id);
+          this.globalInfo.setActiveTab('KALENDARZ');
+          this.globalInfo.activeMonth.pipe(filter(date => date !== undefined)).subscribe((): void => {
+            this.initializeCalendar().then();
+          });
+        }).catch((err) => {
+          console.error('Error fetching user: ', err);
         });
-      }).catch((err) => {
-        console.error('Error fetching user: ', err);
-      });
     });
   }
+
 }
