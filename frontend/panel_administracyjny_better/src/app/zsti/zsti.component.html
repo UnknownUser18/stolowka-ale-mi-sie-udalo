@@ -23,7 +23,7 @@
           <td>{{ person.imie }} {{ person.nazwisko }}</td>
           <td>{{ person.klasa === '' ? 'Nauczyciel' : person.klasa }}</td>
           <td>
-            <button (click)="selectPerson(person.id)">Wybierz</button>
+            <button (click)="selectPerson(person)">Wybierz</button>
           </td>
         </tr>
       }
@@ -67,22 +67,22 @@
           <legend><i class="fa-solid fa-graduation-cap"></i>Dane szkolne</legend>
           <label>
             <span>Klasa :</span>
-            <input type="text" [placeholder]="filter.typ_osoby === '3' ? 'Wybrano nauczyciela...' : 'Klasa'" [value]="filter.typ_osoby === '3' ? '' : filter.klasa" [(ngModel)]="filter.klasa" name="klasa" [disabled]="filter.typ_osoby === '3'">
+            <input type="text" [placeholder]="filter.typ_osoby === TypOsoby.NAUCZYCIEL ? 'Wybrano nauczyciela...' : 'Klasa'" [value]="filter.typ_osoby === TypOsoby.NAUCZYCIEL ? '' : filter.klasa" [(ngModel)]="filter.klasa" name="klasa" [disabled]="filter.typ_osoby === TypOsoby.NAUCZYCIEL">
           </label>
           <label>
             <span>Typ osoby :</span>
             <select [(ngModel)]="filter.typ_osoby" name="typ_osoby" (change)="cdr.detectChanges()">
-              <option value="1">Wszyscy</option>
-              <option value="2">Uczeń</option>
-              <option value="3">Nauczyciel</option>
+              <option [value]="3">Wszyscy</option>
+              <option [value]="TypOsoby.UCZEN">Uczeń</option>
+              <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
             </select>
           </label>
           <label>
             <span>Uczęszcza :</span>
             <select [(ngModel)]="filter.uczeszcza" name="uczeszcza">
-              <option value="wszyscy">Wszyscy</option>
-              <option value="true">Tak</option>
-              <option value="false">Nie</option>
+              <option [value]="'wszyscy'">Wszyscy</option>
+              <option [value]="true">Tak</option>
+              <option [value]="false">Nie</option>
             </select>
           </label>
         </fieldset>

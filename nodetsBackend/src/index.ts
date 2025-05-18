@@ -10,7 +10,6 @@ import {
     QueriesStructure
 } from "./types";
 import { logger, wss, dbConfig, Queries } from './config'
-import { query } from "winston";
 logger.info(``);
 logger.info(`Successfully started the server!`);
 logger.info(``);
@@ -60,17 +59,22 @@ function standardizeData(action: ActionType, params: ResponsePayload): string
 
 async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<void>
 {
+    let query: string | undefined = undefined;
     try{
         const [sector, category, operation] = params.method.split('.');
         const method = (Queries as QueriesStructure)[sector][category];
-        const query: string = method[operation] as string;
+        query = method[operation] as string;
 
         const rawResult = await executeQuery(query, params.params);
 
         if(params.responseVar)
         {
-            const result = method.type.parse(rawResult);
-            await sendResponse(ws, params.responseVar, result);
+            if (operation === 'update' || operation === 'delete') {
+                await sendResponse(ws, params.responseVar, [{ success: rawResult.affectedRows > 0 }]);
+            } else {
+                const result = method.type.parse(rawResult);
+                await sendResponse(ws, params.responseVar, result);
+            }
         }
     } catch (error) {
         await sendError(ws, 300, `Failed to handle method`, query);

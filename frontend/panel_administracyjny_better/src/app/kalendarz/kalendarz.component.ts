@@ -1,8 +1,8 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, Renderer2, ViewChild} from '@angular/core';
-import {DateChangerComponent} from './date-changer/date-changer.component';
-import {GlobalInfoService, TabType} from '../global-info.service';
-import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName} from '../data.service';
-import {filter, find, take} from 'rxjs';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, Renderer2, ViewChild } from '@angular/core';
+import { DateChangerComponent } from './date-changer/date-changer.component';
+import { GlobalInfoService } from '../global-info.service';
+import { AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName } from '../data.service';
+import { Subject, take } from 'rxjs';
 
 enum AbsenceWindowStatus  {
   CLOSED,
@@ -17,10 +17,11 @@ enum AbsenceWindowStatus  {
   templateUrl: './kalendarz.component.html',
   styleUrl: './kalendarz.component.scss'
 })
-export class KalendarzComponent implements AfterViewInit {
+export class KalendarzComponent implements AfterViewInit, OnDestroy {
   private absenceDays : AbsenceDay[] = [];
   private declarations : Declaration[] | undefined;
   private closedDays : CanceledDay[] = [];
+  private destroy$ = new Subject<void>();
 
   protected user : Student | undefined;
   protected openStatus: AbsenceWindowStatus = AbsenceWindowStatus.CLOSED;
@@ -35,9 +36,16 @@ export class KalendarzComponent implements AfterViewInit {
     private database : DataService,
     private renderer : Renderer2,
     private zone : NgZone,
-    private cdr : ChangeDetectorRef
+    private cdr : ChangeDetectorRef,
   ) {}
 
+  /** @method addDay
+   * @description Dodaje dzień do listy dni zaznaczonych.
+   * @param day - Data do dodania.
+   * @param absence - Czy dzień jest nieobecnością?
+   * @returns {void}
+   * @memberof KalendarzComponent
+   */
   private addDay(day : Date, absence : boolean) : void {
     if(!day) return;
     if (!absence) {
@@ -361,25 +369,21 @@ export class KalendarzComponent implements AfterViewInit {
   }
 
   public ngAfterViewInit(): void {
-    this.globalInfo.activeUser.pipe(
-      find(id => id !== undefined && id !== 0)).subscribe((id: number | undefined): void => {
-        if(!id) return;
-        this.database.request('zsti.student.getById', { id: id }, 'student').then((payload) => {
-          this.user = payload[0];
-          this.declarations = undefined;
-          this.closedDays = [];
-          this.absenceDays = [];
-          if (!this.user) throw new Error('User not found');
-          this.globalInfo.setTitle(`${this.user.imie} ${this.user.nazwisko[0]}. - Kalendarz`);
-          this.globalInfo.setActiveUser(this.user.id);
-          this.globalInfo.setActiveTab('KALENDARZ');
-          this.globalInfo.activeMonth.pipe(filter(date => date !== undefined)).subscribe((): void => {
-            this.initializeCalendar().then();
-          });
-        }).catch((err) => {
-          console.error('Error fetching user: ', err);
-        });
+    this.globalInfo.activeUser.subscribe((user : Student | undefined) => {
+      if (!user) return;
+      this.user = user;
+      this.globalInfo.setTitle(`${user.imie} ${user.nazwisko} - Kalendarz`);
+      this.globalInfo.setActiveTab('KALENDARZ');
+      this.globalInfo.setActiveMonth(new Date());
     });
+    this.globalInfo.activeMonth.subscribe((date : Date | undefined) => {
+      if (!date) return;
+      this.initializeCalendar().catch(err => console.error('Init error:', err));
+    })
   }
 
+  public ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

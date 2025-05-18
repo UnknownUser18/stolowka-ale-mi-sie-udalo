@@ -1,11 +1,11 @@
 app-nav {
   grid-column: 2 / span 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   width: 100%;
-  padding: 10px 0;
+  padding: 10px 0 0 0;
   background-color: var(--color-2);
+  place-items: center;
 }
 nav {
   display: flex;

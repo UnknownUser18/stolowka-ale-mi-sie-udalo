@@ -27,15 +27,24 @@ export interface AbsenceDay {
   dzien_wypisania: string;
   osoby_zsti_id: number;
 }
+export enum TypOsoby {
+  UCZEN = 1,
+  NAUCZYCIEL = 2,
+}
 
 export interface Student {
   id: number;
-  typ_osoby_id: number;
+  typ_osoby_id: TypOsoby;
   imie: string;
   nazwisko: string;
   klasa: string;
   uczeszcza: boolean;
   miasto: boolean;
+  imie_opiekuna: string,
+  nazwisko_opiekuna: string;
+  nr_kierunkowy: string;
+  telefon: string;
+  email: string;
 }
 
 export interface Payment {
@@ -80,6 +89,7 @@ type VariableTypeMap = {
   paymentList: Payment[],
   scanList: Scan[],
   closedDays: CanceledDay[],
+  dump: any[], // used for updaing, deleting etc.
 };
 
 export type VariableName = keyof VariableTypeMap;

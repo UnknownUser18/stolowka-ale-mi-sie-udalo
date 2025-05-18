@@ -141,7 +141,7 @@ export interface QueriesStructure {
         [category: string]: QueryCategory;
     };
 }
-
+export const SuccessResponse = z.object({ success: z.boolean() });
 
 export const envSchema = z.object({
     DB_HOST: z.string(),
@@ -215,6 +215,11 @@ export interface Person {
     klasa: string;
     uczeszcza: boolean;
     miasto: boolean;
+    imie_opiekuna: string;
+    nazwisko_opiekuna: string;
+    nr_kierunkowy: string;
+    telefon: string;
+    email: string;
 }
 
 export const Person = z.object({
@@ -225,6 +230,11 @@ export const Person = z.object({
     klasa: z.string(),
     uczeszcza: z.number(),
     miasto: z.number(),
+    imie_opiekuna: z.string(),
+    nazwisko_opiekuna: z.string(),
+    nr_kierunkowy: z.string(),
+    telefon: z.string(),
+    email: z.string()
 });
 
 export interface Payment {

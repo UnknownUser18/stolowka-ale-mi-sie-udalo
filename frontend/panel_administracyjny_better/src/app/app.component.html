@@ -26,11 +26,12 @@
           <h1 routerLink="osoby/zsti"><i class="fa-solid fa-graduation-cap"></i>ZSTI</h1>
           <ol>
             @if (router.url.includes('/osoba') && persons_zsti) {
-              <li class="selected">{{ getPersonById(globalInfoService.activeUser.value)?.imie }} {{ getPersonById(globalInfoService.activeUser.value)?.nazwisko![0] }}. <i>({{ getPersonById(globalInfoService.activeUser.value)?.typ_osoby_id === 2 ? 'n.' : getPersonById(globalInfoService.activeUser.value)?.klasa }})</i></li>
+              <li class="selected">{{ globalInfoService.activeUser.value?.imie }} {{ globalInfoService.activeUser.value?.nazwisko![0] }}. <i>({{globalInfoService.activeUser.value?.typ_osoby_id! === TypOsoby.NAUCZYCIEL ? 'n.' : globalInfoService.activeUser.value?.klasa }})</i></li>
             }
             @defer (when persons_zsti) {
               @for (person of persons_zsti; track person.id) {
-                <li (click)="selectPerson(person.id)">{{ person.imie }} {{ person.nazwisko[0] }}. <i>({{ person.klasa === '' && person.typ_osoby_id === 2 ? 'n.' : person.klasa }})</i></li>
+                <li (click)="selectPerson(person)">{{ person.imie }} {{ person.nazwisko[0] }}.
+                  <i>({{ person.typ_osoby_id === TypOsoby.NAUCZYCIEL ? 'n.' : person.klasa }})</i></li>
               } @empty {
                 <li><h3>Brak osób w bazie danych.</h3></li>
               }

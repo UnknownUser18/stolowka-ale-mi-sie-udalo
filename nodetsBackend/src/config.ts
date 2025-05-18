@@ -2,7 +2,7 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 import {WebSocketServer} from "ws";
-import {Person, envSchema, AbsenceDay, CanceledDay, Card, Scan, Payment, Declaration, QueriesStructure} from "./types";
+import {Person, envSchema, AbsenceDay, CanceledDay, Card, Scan, Payment, Declaration, QueriesStructure, SuccessResponse} from "./types";
 import {PoolOptions} from "mysql2/promise";
 // import { createTransport, Transporter } from 'nodemailer';
 
@@ -98,6 +98,10 @@ export const dbConfig: PoolOptions = {
  * */
 export const Queries: QueriesStructure = {
     "global": {
+        "success": {
+            "type": SuccessResponse.array(),
+            "get": `SELECT @ROW_COUNT() as affectedRows`, // kept only for compatibility
+        },
         "canceledDay": {
             "type": CanceledDay.array(),
             "get": `SELECT * FROM dni_nieczynne_stolowki`,
@@ -110,8 +114,8 @@ export const Queries: QueriesStructure = {
             "type": Person.array(),
             "get": `SELECT * FROM osoby_zsti ORDER BY nazwisko, imie;`,
             "getById": `SELECT * FROM osoby_zsti WHERE id = :id`,
-            "add": `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id) values(:imie, :nazwisko, :klasa, :uczeszcza, :typ_osoby_id);`,
-            "update": `UPDATE osoby_zsti SET imie = :imie, nazwisko = :nazwisko, klasa = :klasa, uczeszcza = :uczeszcza, typ_osoby_id = :typ_osoby_id WHERE id = :id;`,
+            "add": `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id, imie_opiekuna, nazwisko_opiekuna, telefon, email) values(:imie, :nazwisko, :klasa, :uczeszcza, :typ_osoby_id, :imie_opiekuna, :nazwisko_opiekuna, :telefon, :email);`,
+            "update": `UPDATE osoby_zsti SET imie = :imie, nazwisko = :nazwisko, klasa = :klasa, uczeszcza = :uczeszcza, typ_osoby_id = :typ_osoby_id, imie_opiekuna = :imie_opiekuna, nazwisko_opiekuna = :nazwisko_opiekuna, telefon = :telefon, email = :email, nr_kierunkowy = :nr_kierunkowy, miasto = :miasto WHERE id = :id;`,
             "delete": `DELETE FROM osoby_zsti WHERE id = :id`
         },
         "declaration": {

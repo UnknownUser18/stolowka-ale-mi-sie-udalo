@@ -1,5 +1,5 @@
-import {Component, ChangeDetectorRef, ElementRef, ViewChild, NgZone} from '@angular/core';
-import { DataService, Student } from '../data.service';
+import { Component, ChangeDetectorRef, ElementRef, ViewChild, NgZone } from '@angular/core';
+import { DataService, Student, TypOsoby  } from '../data.service';
 import { Router } from '@angular/router';
 import { GlobalInfoService } from '../global-info.service';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +24,7 @@ export class ZstiComponent {
     nazwisko : '',
     klasa : '',
     miasto : 'wszyscy',
-    typ_osoby : '1',
+    typ_osoby : 3,
     uczeszcza : 'wszyscy',
   }
   constructor(
@@ -60,14 +60,36 @@ export class ZstiComponent {
       });
     });
   }
+  private applyFilterLogic(use_filter : boolean = false) : void {
+    if(this.filter.typ_osoby === TypOsoby.NAUCZYCIEL) this.filter.klasa = '';
+    this.result = this.persons_zsti!.filter((person : Student) : boolean => {
+      const { imie, nazwisko, klasa, miasto, typ_osoby_id, uczeszcza } = person;
+      if(use_filter) {
+        const searchTerm : string = this.searchTerm?.toLowerCase()!;
+        return (
+          imie.toLowerCase().includes(searchTerm) &&
+          nazwisko.toLowerCase().includes(searchTerm) &&
+          klasa.toLowerCase().includes(this.filter.klasa.toLowerCase()) &&
+          (this.filter.miasto === 'wszyscy' ? true : this.filter.miasto === 'true' ? miasto : !miasto) &&
+          (this.filter.typ_osoby === 3 || Number(this.filter.typ_osoby) === typ_osoby_id as TypOsoby) &&
+          (this.filter.uczeszcza === 'wszyscy' ? true : this.filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
+        );
+      }
+      return (
+        imie.toLowerCase().includes(this.filter.imie.toLowerCase()) &&
+        nazwisko.toLowerCase().includes(this.filter.nazwisko.toLowerCase()) &&
+        klasa.toLowerCase().includes(this.filter.klasa.toLowerCase()) &&
+        (this.filter.miasto === 'wszyscy' ? true : this.filter.miasto === 'true' ? miasto : !miasto) &&
+        (this.filter.typ_osoby === 3 || Number(this.filter.typ_osoby) === typ_osoby_id as TypOsoby) &&
+        (this.filter.uczeszcza === 'wszyscy' ? true : this.filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
+      );
+    });
+  }
 
   protected filterPersons(event : Event) : void {
     if(event instanceof KeyboardEvent && event.key !== 'Enter') return;
     if (this.searchTerm === undefined) return;
-    const searchTerm : string = this.searchTerm.toLowerCase();
-    this.result = this.persons_zsti!.filter((person : Student) : boolean => {
-      return person.imie.toLowerCase().includes(searchTerm) || person.nazwisko.toLowerCase().includes(searchTerm);
-    });
+    this.applyFilterLogic(true);
   }
   protected openFilterMenu() : void {
     this.showFilter = true;
@@ -85,18 +107,7 @@ export class ZstiComponent {
     this.applyAnimation(false).then((r : boolean) : void => {
       if(r) this.showFilter = false;
     }).finally(() : void => {
-      if(this.filter.typ_osoby === '3') this.filter.klasa = '';
-      this.result = this.persons_zsti!.filter((person : Student) : boolean => {
-        const { imie, nazwisko, klasa, miasto, typ_osoby_id, uczeszcza } = person;
-        return (
-          imie.toLowerCase().includes(this.filter.imie.toLowerCase()) &&
-          nazwisko.toLowerCase().includes(this.filter.nazwisko.toLowerCase()) &&
-          klasa.toLowerCase().includes(this.filter.klasa.toLowerCase()) &&
-          (this.filter.miasto === 'wszyscy' ? true : this.filter.miasto === 'true' ? miasto : !miasto) &&
-          (this.filter.typ_osoby === '1' ? true : this.filter.typ_osoby === '2' ? typ_osoby_id === 1 : typ_osoby_id === 2) &&
-          (this.filter.uczeszcza === 'wszyscy' ? true : this.filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
-        );
-      });
+      this.applyFilterLogic();
       this.searchTerm = (this.filter.imie + ' ' + this.filter.nazwisko).trim();
     });
   }
@@ -105,9 +116,11 @@ export class ZstiComponent {
       if(r) this.showFilter = false;
     });
   }
-  protected selectPerson(id : number) : void {
-    this.router.navigate(['osoba/zsti', id, 'kalendarz']).then(() : void => {
-      this.globalInfoService.setActiveUser(id);
+  protected selectPerson(user : Student) : void {
+    this.router.navigate(['osoba/zsti', user.id, 'kalendarz']).then(() : void => {
+      this.globalInfoService.setActiveUser(user);
     });
   }
+
+  protected readonly TypOsoby = TypOsoby;
 }
