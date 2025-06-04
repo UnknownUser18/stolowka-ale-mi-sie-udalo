@@ -1,8 +1,8 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, Renderer2, ViewChild } from '@angular/core';
-import { DateChangerComponent } from './date-changer/date-changer.component';
-import { GlobalInfoService } from '../global-info.service';
-import { AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName } from '../data.service';
-import { Subject, take } from 'rxjs';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, Renderer2, ViewChild} from '@angular/core';
+import {DateChangerComponent} from './date-changer/date-changer.component';
+import {GlobalInfoService} from '../global-info.service';
+import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName, WebSocketStatus} from '../data.service';
+import {Subject, take} from 'rxjs';
 
 enum AbsenceWindowStatus  {
   CLOSED,
@@ -369,17 +369,20 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit(): void {
-    this.globalInfo.activeUser.subscribe((user : Student | undefined) => {
-      if (!user) return;
-      this.user = user;
-      this.globalInfo.setTitle(`${user.imie} ${user.nazwisko} - Kalendarz`);
-      this.globalInfo.setActiveTab('KALENDARZ');
-      this.globalInfo.setActiveMonth(new Date());
+    this.globalInfo.webSocketStatus.subscribe(status => {
+      if (status !== WebSocketStatus.OPEN) return;
+      this.globalInfo.activeUser.subscribe((user : Student | undefined) => {
+        if (!user) return;
+        this.user = user;
+        this.globalInfo.setTitle(`${user.imie} ${user.nazwisko} - Kalendarz`);
+        this.globalInfo.setActiveTab('KALENDARZ');
+        this.globalInfo.setActiveMonth(new Date());
+      });
+      this.globalInfo.activeMonth.subscribe((date : Date | undefined) => {
+        if (!date) return;
+        this.initializeCalendar().catch(err => console.error('Init error:', err));
+      })
     });
-    this.globalInfo.activeMonth.subscribe((date : Date | undefined) => {
-      if (!date) return;
-      this.initializeCalendar().catch(err => console.error('Init error:', err));
-    })
   }
 
   public ngOnDestroy(): void {

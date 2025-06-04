@@ -1,10 +1,11 @@
-import { Component, AfterViewInit, ElementRef, ViewChild, NgZone } from '@angular/core';
-import { NavComponent } from './nav/nav.component';
-import { NgOptimizedImage } from '@angular/common';
-import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
-import { GlobalInfoService } from './global-info.service';
-import { filter, take } from 'rxjs';
-import {DataService, Student, TypOsoby} from './data.service';
+import {AfterViewInit, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
+import {NavComponent} from './nav/nav.component';
+import {NgOptimizedImage} from '@angular/common';
+import {NavigationEnd, Router, RouterLink, RouterOutlet} from '@angular/router';
+import {GlobalInfoService} from './global-info.service';
+import {filter, take} from 'rxjs';
+import {DataService, Student, TypOsoby, WebSocketStatus} from './data.service';
+
 export type classNames = 'main-page' | 'osoby' | 'all';
 
 @Component({
@@ -20,7 +21,30 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('nav') nav!: ElementRef;
   @ViewChild('scrollable') scrollable!: ElementRef;
 
-  constructor(protected router : Router, protected globalInfoService : GlobalInfoService, private database : DataService, private zone : NgZone) {}
+  constructor(
+    protected router : Router,
+    protected globalInfoService : GlobalInfoService,
+    private database : DataService,
+    private zone : NgZone) {
+    this.database.initializeWebSocket().then(status => {
+      this.globalInfoService.setWebSocketStatus(status);
+    });
+    this.globalInfoService.webSocketStatus.subscribe(status => {
+      if (status !== WebSocketStatus.OPEN) return;
+      const lastUser = localStorage.getItem('activeUser');
+      if (!lastUser) return;
+      const url = this.router.url;
+
+      if (url.includes('null')) {
+        const newUrl = url.replace('null', lastUser);
+        this.database.request('zsti.student.getById', {id: parseInt(lastUser)}, 'studentList').then((payload): void => {
+          if (!payload || payload.length === 0) return;
+          this.globalInfoService.setActiveUser(payload[0]);
+          this.router.navigateByUrl(newUrl).then();
+        });
+      }
+    })
+  }
   protected navigate(path : string, class_name : classNames, ignore : boolean = true) : void {
     if (!ignore) {
       this.router.navigate([path]).then();
@@ -30,6 +54,7 @@ export class AppComponent implements AfterViewInit {
       this.router.navigate([path]).then();
     });
   }
+
   private async animateElement(class_name: classNames, remove: boolean = false): Promise<boolean> {
     return new Promise((resolve, reject): void => {
       const element: HTMLElement = this.nav.nativeElement.querySelector(`.${class_name}`)!;
@@ -43,6 +68,7 @@ export class AppComponent implements AfterViewInit {
       });
     });
   };
+
   protected selectPerson(student : Student) : void {
     this.router.navigate(['osoba/zsti', student.id, 'kalendarz']).then((): void => {
       this.globalInfoService.setActiveUser(student);

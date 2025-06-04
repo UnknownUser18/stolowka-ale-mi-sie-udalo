@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Subject, timer } from 'rxjs';
 
+export enum WebSocketStatus {
+  CLOSED,
+  OPEN,
+  ERROR,
+}
+
 export interface Declaration {
   id: number;
   id_osoby: number;
@@ -112,9 +118,8 @@ export class DataService {
   public cachedData: Map<VariableName, any> = new Map<VariableName, any>();
   public dataChange: Subject<VariableName> = new Subject<VariableName>()
 
-  constructor() {
-    this.initializeWebSocket();
-  }
+
+  constructor() {}
 
   /**
    * @method initializeWebSocket
@@ -124,30 +129,36 @@ export class DataService {
    * @returns {void}
    *
    * @example
-   * this.initializeWebSocket();
+   * this.initializeWebSocket().then();
    * */
-  initializeWebSocket() {
+  async initializeWebSocket(): Promise<WebSocketStatus> {
     this.ws = new WebSocket('ws://localhost:8080');
-
-    this.ws.onopen = () => console.log('WebSocket connected');
-
-    this.ws.addEventListener('message', (event) => {
-      const response: ServerData = JSON.parse(event.data);
-      if (response.action === 'response') {
-        const { variable, value } = response.params as ResponsePayload;
-        this.handleResponse(variable, value);
+    return new Promise((resolve, reject) => {
+      this.ws.onopen = () => {
+        console.log('WebSocket connected');
+        resolve(WebSocketStatus.OPEN);
       }
+
+      this.ws.addEventListener('message', (event) => {
+        const response: ServerData = JSON.parse(event.data);
+        if (response.action === 'response') {
+          const { variable, value } = response.params as ResponsePayload;
+          this.handleResponse(variable, value);
+        }
+      });
+
+      this.ws.onclose = () => {
+        console.log('WebSocket closed, reconnecting...');
+        timer(this.RECONNECT_INTERVAL).subscribe(() => this.initializeWebSocket());
+        resolve(WebSocketStatus.CLOSED);
+      };
+
+      this.ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        this.ws.close();
+        reject(WebSocketStatus.ERROR);
+      };
     });
-
-    this.ws.onclose = () => {
-      console.log('WebSocket closed, reconnecting...');
-      timer(this.RECONNECT_INTERVAL).subscribe(() => this.initializeWebSocket());
-    };
-
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      this.ws.close();
-    };
   }
 
   /**

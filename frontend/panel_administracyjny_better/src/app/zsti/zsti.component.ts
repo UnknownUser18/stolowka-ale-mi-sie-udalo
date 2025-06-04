@@ -1,9 +1,9 @@
-import { Component, ChangeDetectorRef, ElementRef, ViewChild, NgZone } from '@angular/core';
-import { DataService, Student, TypOsoby  } from '../data.service';
-import { Router } from '@angular/router';
-import { GlobalInfoService } from '../global-info.service';
-import { FormsModule } from '@angular/forms';
-import { take } from 'rxjs';
+import {ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
+import {DataService, Student, TypOsoby, WebSocketStatus} from '../data.service';
+import {Router} from '@angular/router';
+import {GlobalInfoService} from '../global-info.service';
+import {FormsModule} from '@angular/forms';
+import {take} from 'rxjs';
 
 @Component({
   selector: 'app-zsti',
@@ -34,9 +34,13 @@ export class ZstiComponent {
     private router : Router,
     private zone : NgZone) {
     this.globalInfoService.setTitle('ZSTI - Osoby');
-    this.database.request('zsti.student.get', {}, 'studentList').then((payload) => {
-      this.result = this.persons_zsti = payload;
-    });
+    this.globalInfoService.webSocketStatus.subscribe(status => {
+      console.log(status)
+      if (status !== WebSocketStatus.OPEN) return;
+      this.database.request('zsti.student.get', {}, 'studentList').then((payload) => {
+        this.result = this.persons_zsti = payload;
+      });
+    })
   }
   private applyAnimation(open: boolean): Promise<boolean> {
     return new Promise((resolve): void => {

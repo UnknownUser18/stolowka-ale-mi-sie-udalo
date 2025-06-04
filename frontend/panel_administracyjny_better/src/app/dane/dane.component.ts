@@ -1,7 +1,7 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
-import {DataService, Declaration, Student, TypOsoby} from '../data.service';
-import { GlobalInfoService } from '../global-info.service';
-import { Subject } from 'rxjs';
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy} from '@angular/core';
+import {DataService, Declaration, Student, TypOsoby, WebSocketStatus} from '../data.service';
+import {GlobalInfoService} from '../global-info.service';
+import {Subject} from 'rxjs';
 import {FormsModule} from '@angular/forms';
 
 @Component({
@@ -61,22 +61,25 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
 
 
   public ngAfterViewInit(): void {
-    this.globalInfo.activeUser.subscribe((user : Student | undefined) => {
-      if (!user) return;
-      this.user = user;
-      this.globalInfo.setTitle(`${user.imie} ${user.nazwisko} - Dane`);
-      this.globalInfo.setActiveTab('DANE');
-      this.forms = {
-        imie_nazwisko: user.imie + ' ' + user.nazwisko,
-        klasa: user.klasa,
-        miasto: user.miasto,
-        typ_osoby: user.typ_osoby_id,
-        imie_nazwisko_opiekuna: user.imie_opiekuna + ' ' + user.nazwisko_opiekuna,
-        telefon: `+${user.nr_kierunkowy} ${user.telefon}`,
-        email: user.email,
-        uczeszcza: user.uczeszcza
-      };
-      this.cdr.detectChanges();
+    this.globalInfo.webSocketStatus.subscribe((status) => {
+      if (status !== WebSocketStatus.OPEN) return;
+      this.globalInfo.activeUser.subscribe((user : Student | undefined) => {
+        if (!user) return;
+        this.user = user;
+        this.globalInfo.setTitle(`${user.imie} ${user.nazwisko} - Dane`);
+        this.globalInfo.setActiveTab('DANE');
+        this.forms = {
+          imie_nazwisko: user.imie + ' ' + user.nazwisko,
+          klasa: user.klasa,
+          miasto: user.miasto,
+          typ_osoby: user.typ_osoby_id,
+          imie_nazwisko_opiekuna: user.imie_opiekuna + ' ' + user.nazwisko_opiekuna,
+          telefon: `+${user.nr_kierunkowy} ${user.telefon}`,
+          email: user.email,
+          uczeszcza: user.uczeszcza
+        };
+        this.cdr.detectChanges();
+      });
     });
   }
 
