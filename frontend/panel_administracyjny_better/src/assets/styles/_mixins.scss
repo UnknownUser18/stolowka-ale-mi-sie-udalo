@@ -1,0 +1,102 @@
+@use 'variables' as v;
+@use 'functions' as f;
+
+@mixin flex-center($direction: row, $justify: center, $align: center) {
+  display: flex;
+  justify-content: $justify;
+  align-items: $align;
+  @if $direction == column {
+    flex-direction: column;
+  }
+}
+
+@mixin font($size: 1em, $weight: 400, $color: inherit) {
+  color: $color;
+  font-size: $size;
+  @if $weight != 400 {
+    font-weight: $weight;
+  }
+}
+
+@mixin font-500($color: inherit) {
+  @include font(1.5em, 500, $color);
+}
+
+@mixin overlay {
+  @include flex-center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+@mixin button($padding, $color: inherit, $bg-color, $h-color: inherit, $h-bg-color) {
+  @include font(1em, 500, $color);
+  transition: f.transition(color, v.$medium), f.transition(background-color, v.$medium);
+  padding: $padding $padding * 2;
+  border-radius: 15px;
+  background-color: $bg-color;
+  &:hover {
+    @if $h-color != inherit {
+      color: $h-color;
+    } @else {
+      color: $color;
+    }
+    background-color: $h-bg-color;
+  }
+}
+
+@mixin window {
+  @include overlay;
+  transition: f.transition(backdrop-filter, v.$xlong);
+  background-color: rgba(var(--color-1), 0.5);
+  backdrop-filter: none;
+  overflow: hidden;
+  &.done {
+    backdrop-filter: blur(10px);
+  }
+  .close {
+    transition: f.transition(color);
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 3em;
+    color: var(--color-12);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-13);
+    }
+  }
+  div {
+    transition: f.transition(margin-top, v.$xlong);
+    box-shadow: var(--box-shadow);
+    width: 50%;
+    position: relative;
+    padding: 15px 30px;
+    border-radius: 25px;
+    background-color: var(--color-3);
+    margin-top: 100%;
+
+    &.done {
+      margin-top: 0;
+    }
+  }
+}
+
+@mixin table {
+  tbody, thead, tr {
+    width: 100%;
+    display: contents;
+  }
+  td, th {
+    @include flex-center;
+    border-right: 2px solid var(--color-10);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+}

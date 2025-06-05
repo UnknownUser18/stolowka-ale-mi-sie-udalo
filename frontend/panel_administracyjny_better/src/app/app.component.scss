@@ -1,3 +1,4 @@
+@use 'index' as i;
 app-nav {
   grid-column: 2 / span 1;
   display: grid;
@@ -14,19 +15,17 @@ nav {
   background-color: var(--color-3);
   grid-row: 1 / span 2;
 }
-nav .osoby {
-  transition: transform 0.5s cubic-bezier(.29,0,0,.94);
-  transform: translateX(30vw);
+nav .osoby, .main-page {
+  transition: transform 0.5s i.$cubic-bezier;
   &.done {
     transform: translateX(0);
   }
 }
+nav .osoby {
+  transform: translateX(30vw);
+}
 .main-page {
-  transition: transform 0.5s cubic-bezier(.29,0,0,.94);
   transform: translateX(-30vw);
-  &.done {
-    transform: translateX(0);
-  }
   margin-top: 5%;
   li {
     margin: 15% auto;
@@ -38,7 +37,6 @@ nav .osoby {
     transition: background-color 120ms ease-in;
     cursor: pointer;
     color: var(--color-13);
-    list-style: none;
     display: flex;
     align-items: center;
     &:hover {
@@ -47,15 +45,16 @@ nav .osoby {
   }
 }
 .osoby {
-  h1 {
+  h1, p {
     text-align: center;
+  }
+  h1 {
     font-size: 3em;
     color: var(--color-13);
     font-weight: 600;
     margin-bottom: 5px;
   }
   p {
-    text-align: center;
     font-size: 1.5em;
     font-family: 'Roboto', sans-serif;
     font-weight: 200;
@@ -64,19 +63,14 @@ nav .osoby {
 .logo {
   display: inline-block;
   cursor: pointer;
-  margin: 10px 0 0 10px;
+  border-radius: 50%;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  margin: 10px 0 0 10px;
 }
 .round {
-  cursor: pointer;
-  display: inline-block;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  @extend .logo;
   background-color: var(--color-12);
-  margin: 10px 0 0 10px;
 }
 .scrollable {
   overflow-x: hidden;
@@ -85,10 +79,7 @@ nav .osoby {
   padding: 5px 10px;
 }
 main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include i.flex-center(column)
 }
 ol i[class^="fa-"], ul i[class^="fa-"] {
   font-size: 1.2em;
@@ -96,7 +87,7 @@ ol i[class^="fa-"], ul i[class^="fa-"] {
   color: var(--color-12);
 }
 .exit {
-  transition: color 120ms ease-in;
+  transition: i.transition(color);
   margin: 5% 0 5% 10px;
   font-size: 3em;
   cursor: pointer;
@@ -111,6 +102,7 @@ ol i[class^="fa-"], ul i[class^="fa-"] {
   border-radius: 10px;
   background-color: var(--color-4);
   h1 {
+    transition: i.transition(background-color);
     display: inline-grid;
     font-size: 2em;
     width: 100%;
@@ -119,7 +111,6 @@ ol i[class^="fa-"], ul i[class^="fa-"] {
     padding: 5px 10px;
     border-radius: 10px 10px 0 0;
     cursor: pointer;
-    transition: background-color 120ms ease-in;
     background-color: var(--color-5);
     color: var(--color-13);
     font-weight: 500;
@@ -132,18 +123,17 @@ ol i[class^="fa-"], ul i[class^="fa-"] {
     }
   }
   ol {
-    list-style: none;
     counter-reset: list;
   }
   li {
-    transition: background-color 120ms ease-in;
+    transition: i.transition(background-color);
     width: calc(100% - 20px);
     padding: 10px;
     border-radius: 10px;
     counter-increment: list;
     position: relative;
     cursor: pointer;
-    font-family: 'Roboto', 'Inter', sans-serif;
+    font-family: inherit;
     margin: 5px 0 5px 10px;
     font-size: 1.8em;
     color: var(--color-13);

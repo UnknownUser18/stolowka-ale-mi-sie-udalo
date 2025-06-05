@@ -1,77 +1,90 @@
 @use 'assets/font/inter.css';
+@use 'assets/styles/index' as i;
 @import '@fortawesome/fontawesome-free/css/all.css';
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-:root {
-  --color-1: #00111C;
-  --color-2: #001523;
-  --color-3: #001A2C;
-  --color-4: #002137;
-  --color-5: #00253E;
-  --color-6: #002945;
-  --color-7: #002E4E;
-  --color-8: #003356;
-  --color-9: #003A61;
-  --color-10: #00406C;
-  --color-11: #5E7889;
-  --color-12: #A4C1D5;
-  --color-13: #EFEFEF;
-  --box-shadow: 15px 9px 48px 6px rgba(0,0,0,0.44);
+
+@mixin positional($width, $height, $b-radius: 25px) {
+  width: $width;
+  height: $height;
+  @if $b-radius != null {
+    border-radius: $b-radius;
+  }
+  margin: auto;
 }
+
 * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  will-change: transition;
 }
+
 ::selection {
   background-color: var(--color-11);
 }
+
 .placeholder {
   animation: light 1.5s ease-in-out infinite alternate;
 }
-input, select, option, button{
+
+input, select, option, button {
   font-family: inherit;
   color: inherit;
   background-color: inherit;
   border: none;
   outline: none;
 }
+
+button {
+  cursor: pointer;
+}
+
 body {
   font-family: 'Inter', 'Roboto', sans-serif;
   background-color: var(--color-1);
   color: var(--color-12);
 }
+
 app-root {
   height: 100vh;
   display: grid;
   grid-template-columns: 0.2fr 1fr;
   grid-template-rows: 0.08fr 1fr;
 }
+
+ol, ul, menu {
+  list-style: none;
+}
+
 app-zsti {
+  @include positional(90%, 90%, 50px);
   grid-template-rows: auto 1fr;
   flex-direction: column;
   background-color: var(--color-3);
-  border-radius: 50px;
-  width: 90%;
-  height: 90%;
   max-height: 80vh;
   margin: auto;
 }
+
 app-dane {
+  @include positional(80%, 80%);
   background-color: var(--color-3);
-  border-radius: 25px;
-  width: 80%;
-  height: 80%;
-  margin: auto;
 }
+
 app-kalendarz {
+  @include positional(95%, 95%, null);
   row-gap: 25px;
-  margin: auto;
-  width: 95%;
-  height: 95%;
   display: grid;
   grid-template-rows: 0.08fr 1fr;
 }
+
+app-deklaracje {
+  @include positional(80%, 80%);
+  background-color: var(--color-3);
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 30px 40px;
+}
+
 @keyframes light {
   0% {
     background-color: var(--color-11);

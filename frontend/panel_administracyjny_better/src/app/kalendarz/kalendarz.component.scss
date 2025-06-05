@@ -1,3 +1,5 @@
+@use 'index' as i;
+
 app-date-changer {
   display: grid;
   background-color: var(--color-6);
@@ -8,6 +10,7 @@ app-date-changer {
   min-height: 60px;
   height: 100%;
 }
+
 section:first-of-type {
   display: grid;
   grid-template-columns: 0.2fr 1fr;
@@ -15,118 +18,122 @@ section:first-of-type {
   border-radius: 25px;
   background-color: var(--color-3);
   padding: 10px;
+
   & > div:nth-of-type(2) {
     display: grid;
     place-items: end center;
+
     button {
-      transition: background-color 120ms ease-in-out;
-      font-size: 1.5em;
-      font-weight: 500;
-      cursor: pointer;
-      background-color: var(--color-6);
-      color: var(--color-13);
-      padding: 10px 25px;
-      border-radius: 10px;
-      &:hover {
-        background-color: var(--color-9);
-      }
+      @include i.button($padding: 10px, $bg-color: var(--color-6), $h-bg-color: var(--color-9));
+      @include i.font-500(var(--color-13));
     }
   }
 }
+
 .select-buttons {
   display: grid;
   margin-top: 45px;
   grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
   place-items: center;
+
   button {
-    &:not(:disabled) {
-      cursor: pointer;
-    }
-    cursor: not-allowed;
-    transition: background-color 120ms ease-in-out, color 120ms ease-in-out;
-    background-color: var(--color-8);
     width: 70px;
     height: 70px;
     border-radius: 10px;
+
+    &:not(:disabled) {
+      transition: i.transition(background-color), i.transition(color);
+      cursor: pointer;
+      background-color: var(--color-8);
+
+      &:hover {
+        background-color: var(--color-9);
+      }
+    }
+
     &:disabled {
       background-color: var(--color-5);
+      cursor: not-allowed;
       color: var(--color-11);
     }
-    &:hover:not(:disabled) {
-      background-color: var(--color-9);
-    }
+
     i {
       font-size: 35px;
     }
   }
 }
+
 main {
   display: grid;
   grid-template-rows: 0.5fr repeat(auto-fit, 1fr);
   row-gap: 5px;
   padding: 5px;
+
   & > * {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     place-items: center;
   }
+
   .weekdays {
     font-size: 1.5em;
     font-weight: 500;
     height: 45px;
   }
+
   .day {
-    font-size: 1.5em;
-    transition: background-color 120ms ease-in-out, color 120ms ease-in-out;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    @include i.font-500;
+    @include i.flex-center;
+    transition: i.transition(background-color), i.transition(color);
     border-radius: 10px;
     width: 70px;
     height: 70px;
-    font-family: 'Roboto', 'Inter', sans-serif;
-    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
     background-color: var(--color-6);
+
     &:hover {
       color: var(--color-13);
       background-color: var(--color-7);
     }
-    &:disabled {
-      cursor: not-allowed;
-      background-color: var(--color-2);
+
+    &:disabled, &.no-declaration, &.canceled {
       color: var(--color-11);
+      cursor: not-allowed;
+
+      &:not(.no-declaration) {
+        background-color: var(--color-2);
+      }
     }
+
     &:not(.no-declaration, :disabled) {
       cursor: pointer;
     }
+
     &.selected {
       background-color: var(--color-10);
       color: var(--color-13);
     }
+
     &.no-declaration {
-      cursor: not-allowed;
       background-color: var(--color-4);
-      color: var(--color-11);
-    }
-    &.canceled {
-      background-color: var(--color-2);
-      color: var(--color-11);
     }
   }
 }
+
 .diff {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+
   h3 {
-    font-size: 1.5em;
-    font-weight: 500;
-    color: var(--color-13);
+    @include i.font-500(var(--color-13));
   }
+
   div {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
+
   table {
     border-radius: 5px;
     height: 200px;
@@ -135,36 +142,43 @@ main {
     display: grid;
     grid-template-rows: repeat(auto-fit, minmax(40px, 50px));
     background-color: var(--color-5);
+
     &:has(> .empty) {
       place-items: center;
       grid-template-rows: 1fr;
     }
+
     tr {
+      @include i.font-500(var(--color-13));
       display: grid;
       width: 100%;
       height: 50px;
       padding: 10px;
-      font-size: 1.5em;
-      font-weight: 500;
-      color: var(--color-13);
+
       &.empty {
         color: var(--color-12);
       }
+
       &:last-of-type:not(.empty) {
         grid-template-columns: repeat(2, 1fr);
       }
+
       &:nth-child(even) {
         background-color: var(--color-7);
       }
+
       &:not(.empty) > td:first-child {
         margin-left: 70px;
       }
+
       &.empty {
         place-items: center;
       }
+
       td:nth-child(2) {
         place-self: center end;
       }
+
       i {
         color: var(--color-13);
         cursor: pointer;
@@ -172,108 +186,46 @@ main {
     }
   }
 }
+
 .absenceWindow {
-  transition: backdrop-filter 750ms ease-in-out;
-  background-color: rgba(var(--color-1), 0.5);
-  backdrop-filter: none;
-  &.done {
-    backdrop-filter: blur(10px);
-  }
-  overflow: hidden;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1;
-  .close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 3em;
-    color: var(--color-12);
-    cursor: pointer;
-    transition: color 120ms ease-in-out;
-    &:hover {
-      color: var(--color-13);
-    }
-  }
+  @include i.window;
+
   h3 {
+    @include i.font(2em, 500, var(--color-13));
     text-align: center;
-    color: var(--color-13);
-    font-size: 2em;
-    font-weight: 500;
     margin-bottom: 20px;
   }
-  div {
-    transition: margin-top 750ms ease-in-out;
-    box-shadow: var(--box-shadow);
-    width: 50%;
+
+  table {
+    @include i.table;
     position: relative;
-    padding: 15px 30px;
-    border-radius: 25px;
-    background-color: var(--color-3);
-    margin-top: 100%;
-    &.done {
-      margin-top: 0;
+    overflow-y: auto;
+    display: grid;
+    background-color: var(--color-4);
+    grid-template-columns: repeat(3, 1fr);
+    
+    tr {
+      &:first-child th {
+        @include i.font-500(var(--color-13));
+        position: sticky;
+        top: 0;
+        padding: 10px 5px;
+        background-color: var(--color-2);
+      }
+
+      &.empty td {
+        grid-column: 1 / -1;
+      }
     }
-    table {
-      position: relative;
-      overflow-y: auto;
-      display: grid;
-      background-color: var(--color-4);
-      grid-template-columns: repeat(3, 1fr);
-      thead, tbody, tr {
-        display: contents;
-        width: 100%;
-      }
-      th, td {
-        font-size: 1.5em;
-      }
-      tr {
-        &:first-child th {
-          position: sticky;
-          top: 0;
-          color: var(--color-13);
-          font-weight: 500;
-          padding: 10px 5px;
-          background-color: var(--color-2);
-          border-right: 2px solid var(--color-10);
-          &:last-child {
-            border-right: none;
-          }
-        }
-        &.empty td {
-          grid-column: 1 / -1;
-        }
-      }
-      td {
-        font-family: 'Roboto', 'Inter', sans-serif;
-        color: var(--color-13);
-        border-right: 2px solid var(--color-10);
-        padding: 15px 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        &:last-child {
-          border-right: none;
-        }
-      }
-      button {
-        transition: background-color 120ms ease-in-out;
-        font-size: 1em;
-        cursor: pointer;
-        background-color: var(--color-3);
-        color: var(--color-13);
-        padding: 5px 25px;
-        border-radius: 10px;
-        &:hover {
-          background-color: var(--color-6);
-        }
-      }
+
+    td {
+      @include i.font(1.5em, 400, var(--color-13));
+      font-family: 'Roboto', sans-serif;
+      padding: 15px 0;
+    }
+
+    button {
+      @include i.button($padding: 10px, $color: var(--color-13), $bg-color: var(--color-6), $h-bg-color: var(--color-9));
     }
   }
 }
