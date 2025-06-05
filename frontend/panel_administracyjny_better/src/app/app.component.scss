@@ -1,3 +1,5 @@
+@use 'index' as i;
+
 app-nav {
   grid-column: 2 / span 1;
   display: grid;
@@ -7,6 +9,7 @@ app-nav {
   background-color: var(--color-2);
   place-items: center;
 }
+
 nav {
   display: flex;
   flex-direction: column;
@@ -14,165 +17,173 @@ nav {
   background-color: var(--color-3);
   grid-row: 1 / span 2;
 }
-nav .osoby {
-  transition: transform 0.5s cubic-bezier(.29,0,0,.94);
-  transform: translateX(30vw);
+
+nav .osoby, .main-page {
+  transition: transform 0.5s i.$cubic-bezier;
+
   &.done {
     transform: translateX(0);
   }
 }
+
+nav .osoby {
+  transform: translateX(30vw);
+}
+
 .main-page {
-  transition: transform 0.5s cubic-bezier(.29,0,0,.94);
   transform: translateX(-30vw);
-  &.done {
-    transform: translateX(0);
-  }
   margin-top: 5%;
+
   li {
+    @include i.font-500(var(--color-13));
+    transition: i.transition(background-color);
     margin: 15% auto;
     width: 90%;
     border-radius: 10px;
     padding: 10px 15px;
-    font-weight: 500;
-    font-size: 1.5em;
-    transition: background-color 120ms ease-in;
     cursor: pointer;
-    color: var(--color-13);
-    list-style: none;
     display: flex;
     align-items: center;
+
     &:hover {
       background-color: var(--color-5);
     }
   }
 }
+
 .osoby {
-  h1 {
+  h1, p {
     text-align: center;
-    font-size: 3em;
-    color: var(--color-13);
-    font-weight: 600;
+  }
+
+  h1 {
+    @include i.font(3em, 600, var(--color-13));
     margin-bottom: 5px;
   }
+
   p {
-    text-align: center;
-    font-size: 1.5em;
+    @include i.font(1.5em, 200);
     font-family: 'Roboto', sans-serif;
-    font-weight: 200;
   }
 }
+
 .logo {
   display: inline-block;
   cursor: pointer;
-  margin: 10px 0 0 10px;
+  border-radius: 50%;
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  margin: 10px 0 0 10px;
 }
+
 .round {
-  cursor: pointer;
-  display: inline-block;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  @extend .logo;
   background-color: var(--color-12);
-  margin: 10px 0 0 10px;
 }
+
 .scrollable {
   overflow-x: hidden;
   overflow-y: auto;
   height: calc(100vh - 10%);
   padding: 5px 10px;
 }
+
 main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include i.flex-center(column)
 }
+
 ol i[class^="fa-"], ul i[class^="fa-"] {
   font-size: 1.2em;
   margin-right: 10px;
   color: var(--color-12);
 }
+
 .exit {
-  transition: color 120ms ease-in;
+  transition: i.transition(color);
   margin: 5% 0 5% 10px;
   font-size: 3em;
   cursor: pointer;
+
   &:hover {
     color: var(--color-13);
   }
 }
+
 .table {
   padding-bottom: 2%;
   width: 95%;
   margin: 10% auto;
   border-radius: 10px;
   background-color: var(--color-4);
+
   h1 {
+    @include i.font(2em, 500, var(--color-13));
+    transition: i.transition(background-color);
     display: inline-grid;
-    font-size: 2em;
     width: 100%;
     grid-template-columns: auto 1fr;
     place-items: center;
     padding: 5px 10px;
     border-radius: 10px 10px 0 0;
     cursor: pointer;
-    transition: background-color 120ms ease-in;
     background-color: var(--color-5);
-    color: var(--color-13);
-    font-weight: 500;
     margin-bottom: 2%;
+
     i {
       color: var(--color-12);
     }
+
     &:hover {
       background-color: var(--color-6);
     }
   }
+
   ol {
-    list-style: none;
     counter-reset: list;
   }
+
   li {
-    transition: background-color 120ms ease-in;
+    @include i.font(1.8em, 400, var(--color-13));
+    transition: i.transition(background-color);
     width: calc(100% - 20px);
     padding: 10px;
     border-radius: 10px;
     counter-increment: list;
     position: relative;
     cursor: pointer;
-    font-family: 'Roboto', 'Inter', sans-serif;
+    font-family: 'Roboto', sans-serif;
     margin: 5px 0 5px 10px;
-    font-size: 1.8em;
-    color: var(--color-13);
+
     &.placeholder {
       cursor: default;
       height: 50px;
+
       &::before {
         content: '';
       }
     }
+
     &.selected {
       background-color: var(--color-9);
     }
+
     &::before {
       font-weight: 200;
       content: counter(list) '. ';
     }
+
     &:hover:not(.selected) {
       background-color: var(--color-7);
     }
+
     i {
-      font-size: 0.7em;
+      @include i.font(0.7em, 300);
       margin-right: 16px;
-      font-weight: 300;
     }
   }
+
   h3 {
+    @include i.font(0.6em, 300);
     display: inline-block;
-    font-size: 0.6em;
-    font-weight: 300;
   }
 }

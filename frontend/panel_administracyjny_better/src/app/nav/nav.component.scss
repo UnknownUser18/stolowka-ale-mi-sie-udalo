@@ -1,40 +1,40 @@
+@use 'index' as i;
+
 h2 {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
+  @include i.flex-center;
+  @include i.font(1.6em, 500, var(--color-12));
   background-color: var(--color-3);
   padding: 5px 20px;
   border-radius: 20px;
-  color: var(--color-12);
-  font-weight: 500;
-  font-size: 1.6em;
+
   &.center {
     grid-column: 2 / span 1;
   }
 }
+
 menu {
   place-self: end center;
-  list-style: none;
   background-color: var(--color-3);
   border-radius: 10px 10px 0 0;
   display: flex;
   justify-content: space-around;
   padding: 5px 10px;
   gap: 30px;
+
   li {
+    @include i.font-500(var(--color-12));
+    transition: i.transition(background-color), i.transition(color);
     min-width: 50px;
     user-select: none;
-    font-weight: 500;
     cursor: pointer;
-    font-size: 1.5em;
-    transition: background-color 120ms ease-in, color 120ms ease-in;
     background-color: transparent;
-    color: var(--color-12);
     border-radius: 5px;
     padding: 5px;
+
     &:hover {
       background-color: var(--color-4);
     }
+
     &.active {
       color: var(--color-13);
       background-color: var(--color-6);
