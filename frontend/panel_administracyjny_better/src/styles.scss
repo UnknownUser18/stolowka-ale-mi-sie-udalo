@@ -80,12 +80,18 @@ app-kalendarz {
 }
 
 app-deklaracje {
-  @include positional(80%, 80%);
+  @include positional(80%, 90%);
   background-color: var(--color-3);
-  display: flex;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: 1fr 0.5fr;
+  grid-template-rows: auto 0.1fr;
+  column-gap: 20px;
+  row-gap: 10px;
   justify-content: space-between;
   padding: 30px 40px;
+  & > button {
+    place-self: center start;
+  }
 }
 
 .notification {

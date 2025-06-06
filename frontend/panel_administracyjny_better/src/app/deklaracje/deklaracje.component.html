@@ -1,0 +1,121 @@
+<section>
+  <h2>Lista dostępnych deklaracji: <i tabindex="0" role="button" class="fa-solid fa-filter" (click)="openWindow('filter')"></i> @if (checkForFilter()) {
+    <span>Filtry w użyciu <abbr title="Zresetuj filtry" role="button" tabindex="0" (click)="resetFilter()"><i class="fa-solid fa-xmark"></i></abbr></span>
+  }</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>Numer</th>
+      <th>Data rozpoczęcia</th>
+      <th>Data zakończenia</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (declaration of result; track declaration.id; let i = $index) {
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ formatDate(declaration.data_od) }}</td>
+          <td>{{ formatDate(declaration.data_do) }}</td>
+          <td>
+            <button (click)="selectDeclaration(declaration)">Wybierz</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="empty">Brak dostępnych deklaracji...</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>
+<form [formGroup]="deklaracjaForm">
+  @defer (when (deklaracjaForm.get('data_od')?.value && deklaracjaForm.get('data_do')?.value)) {
+    <label>
+      <span>Data Rozpoczęcia : </span>
+      <input type="date" formControlName="data_od">
+    </label>
+    <label>
+      <span>Data Zakończenia : </span>
+      <input type="date" formControlName="data_do">
+    </label>
+    <h3>Wybrane dni : </h3>
+    @for (dzien of dniNazwy; track dzien.key) {
+      <label class="checkbox-label">
+        <span>{{ dzien.label }}</span>
+        <input type="checkbox" [formControl]="getDzienKey(dzien.key, 'deklaracjaForm')">
+        <div></div>
+      </label>
+    }
+    <button type="submit" (click)="updateDeclaration()">Prześlij dane
+    </button>
+    <button type="button" (click)="openWindow('delete')">Usuń deklaracje</button>
+  }
+</form>
+<button (click)="openWindow('add')">Dodaj deklarację</button>
+@if (showWindow !== '') {
+  <section #filter [class]="{'filter': showWindow === 'filter','delete': showWindow === 'delete','add': showWindow === 'add'}" class="window">
+    <div>
+      <i class="fa-solid fa-xmark close" (click)="closeWindow()"></i>
+      @if (showWindow === 'filter') {
+        <h3>Filtruj deklaracje</h3>
+        <form [formGroup]="filterForm">
+          <fieldset>
+            <legend><i class="fa-solid fa-calendar"></i> Pomiędzy dniami:</legend>
+            <label>
+              <span>Data rozpoczęcia:</span>
+              <input type="date" formControlName="data_od">
+            </label>
+            <label>
+              <span>Data zakończenia:</span>
+              <input type="date" formControlName="data_do">
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend><i class="fa-solid fa-calendar-day"></i> Wybierz dni:</legend>
+            @for (dzien of dniNazwy; track dzien.key) {
+              <label class="checkbox-label">
+                <span>{{ dzien.label }}</span>
+                <input type="checkbox" [formControl]="getDzienKey(dzien.key, 'filterForm')">
+                <div></div>
+              </label>
+            }
+          </fieldset>
+          <button type="button" (click)="applyFilter()">Zastosuj</button>
+        </form>
+      } @else if (showWindow === 'delete') {
+        <h3>Ostrzeżenie</h3>
+        <p>Czy na pewno chcesz usunąć deklarację z dnia <b>{{ formatDate(deklaracjaForm.get('data_od')?.value!) }}</b> do dnia <b>{{ formatDate(deklaracjaForm.get('data_do')?.value!) }}</b>?</p>
+        <p>Dla osoby <b>{{ globalInfo.activeUser.value?.imie }}</b> <b>{{ globalInfo.activeUser.value?.nazwisko }}</b>?</p>
+        <button type="button" (click)="deleteDeclaration()">Usuń</button>
+        <button type="button" (click)="closeWindow()">Anuluj</button>
+      } @else if (showWindow === 'add') {
+        <h3>Dodaj Deklarację</h3>
+        <form [formGroup]="addForm">
+          <fieldset>
+            <legend><i class="fa-solid fa-calendar"></i> Daty:</legend>
+            <label>
+              <span>Data rozpoczęcia:</span>
+              <input type="date" formControlName="data_od">
+            </label>
+            <label>
+              <span>Data zakończenia:</span>
+              <input type="date" formControlName="data_do">
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend><i class="fa-solid fa-calendar-day"></i> Dni:</legend>
+            @for (dzien of dniNazwy; track dzien.key) {
+              <label class="checkbox-label">
+                <span>{{ dzien.label }}</span>
+                <input type="checkbox" [formControl]="getDzienKey(dzien.key, 'addForm')">
+                <div></div>
+              </label>
+            }
+          </fieldset>
+          <button type="button" (click)="addDeclaration()">Dodaj</button>
+        </form>
+      }
+    </div>
+  </section>
+}

@@ -69,7 +69,7 @@ async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<void
 
         if(params.responseVar)
         {
-            if (operation === 'update' || operation === 'delete') {
+            if (operation === 'update' || operation === 'delete' || operation === 'add') {
                 await sendResponse(ws, params.responseVar, [{ success: rawResult.affectedRows > 0 }]);
             } else {
                 const result = method.type.parse(rawResult);
