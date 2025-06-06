@@ -10,6 +10,30 @@
   }
 }
 
+@mixin hover-logic($type, $color: inherit, $h-color) {
+  transition: f.transition($type);
+  @if $type == color {
+    color: $color;
+    &:hover {
+      color: $h-color;
+    }
+  } @else {
+    background-color: $color;
+    &:hover {
+      background-color: $h_color;
+    }
+  }
+}
+
+@mixin background-hover($bg-color: inherit, $h-bg-color) {
+  @include hover-logic(background-color, $bg-color, $h-bg-color);
+}
+
+@mixin clickable-hover($color : inherit, $h-color) {
+  @include hover-logic(color, $color, $h_color);
+  cursor: pointer;
+}
+
 @mixin font($size: 1em, $weight: 400, $color: inherit) {
   color: $color;
   font-size: $size;
@@ -58,21 +82,15 @@
     backdrop-filter: blur(10px);
   }
   .close {
-    transition: f.transition(color);
+    @include clickable-hover(var(--color-12), var(--color-13));
     position: absolute;
     top: 10px;
     right: 10px;
     font-size: 3em;
-    color: var(--color-12);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--color-13);
-    }
   }
   div {
     transition: f.transition(margin-top, v.$xlong);
-    box-shadow: var(--box-shadow);
+    box-shadow: v.$box-shadow;
     width: 50%;
     position: relative;
     padding: 15px 30px;

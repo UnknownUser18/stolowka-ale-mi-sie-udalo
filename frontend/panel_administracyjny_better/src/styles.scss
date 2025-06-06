@@ -23,7 +23,7 @@
 }
 
 .placeholder {
-  animation: light 1.5s ease-in-out infinite alternate;
+  animation: light 1.5s i.$cubic-bezier infinite alternate;
 }
 
 input, select, option, button {
@@ -42,6 +42,7 @@ body {
   font-family: 'Inter', 'Roboto', sans-serif;
   background-color: var(--color-1);
   color: var(--color-12);
+  overflow-x: hidden;
 }
 
 app-root {
@@ -83,6 +84,48 @@ app-deklaracje {
   gap: 20px;
   justify-content: space-between;
   padding: 30px 40px;
+}
+
+.notification {
+  @include i.flex-center(column, start, start);
+  transition: i.transition(right, i.$xlong);
+  position: absolute;
+  bottom: 10%;
+  right: -25%;
+  width: 300px;
+  height: 100px;
+  border-left: 5px solid transparent;
+  background-color: var(--color-3);
+  border-radius: 5px;
+  padding: 10px;
+
+  &.done {
+    right: 0;
+  }
+
+  &.error {
+    border-color: #f38ba8;
+  }
+
+  &.warning {
+    border-color: #f9e2af;
+  }
+
+  &.info {
+    border-color: #89b4fa;
+  }
+
+  &.success {
+    border-color: #a6e3a1;
+  }
+
+  h2 {
+    @include i.font-500(var(--color-13));
+  }
+
+  p {
+    font-size: 1em;
+  }
 }
 
 @keyframes light {

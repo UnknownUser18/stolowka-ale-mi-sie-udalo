@@ -1,41 +1,41 @@
-<form>
+<form [formGroup]="forms">
   <label for="imie_nazwisko">
     <span>Imię i nazwisko:</span>
-    <input type="text" [(ngModel)]="forms.imie_nazwisko" placeholder="Imię i nazwisko..." name="imie_nazwisko" id="imie_nazwisko">
+    <input type="text" formControlName="imie_nazwisko" placeholder="Imię i nazwisko..." name="imie_nazwisko" id="imie_nazwisko">
   </label>
   <label for="imie_nazwisko_opiekuna">
     <span>Imię i nazwisko opiekuna:</span>
-    <input type="text" [(ngModel)]="forms.imie_nazwisko_opiekuna" placeholder="Imię i nazwisko opiekuna..." name="imie_nazwisko_opiekuna" id="imie_nazwisko_opiekuna">
+    <input type="text" formControlName="imie_nazwisko_opiekuna" [placeholder]="Number(forms.get('typ_osoby')?.value) === TypOsoby.NAUCZYCIEL ? 'Nauczyciel...' : 'Imie i nazwisko opiekuna...'" name="imie_nazwisko_opiekuna" id="imie_nazwisko_opiekuna">
   </label>
   <label for="klasa">
     <span>Klasa:</span>
-    <input type="text" [(ngModel)]="forms.klasa" [disabled]="Number(forms.typ_osoby) === TypOsoby.NAUCZYCIEL" [value]="Number(forms.typ_osoby) !== TypOsoby.NAUCZYCIEL ? forms.klasa : ''" [placeholder]="Number(forms.typ_osoby) === TypOsoby.NAUCZYCIEL ? 'Nauczyciel...' : 'Klasa...'" name="klasa" id="klasa">
+    <input type="text" formControlName="klasa" [placeholder]="Number(forms.get('typ_osoby')?.value) === TypOsoby.NAUCZYCIEL ? 'Nauczyciel...' : 'Klasa...'" name="klasa" id="klasa">
   </label>
   <label for="telefon">
     <span>Telefon:</span>
-    <input type="text" [(ngModel)]="forms.telefon" placeholder="Telefon..." name="telefon" id="telefon">
+    <input type="text" formControlName="telefon" placeholder="Telefon..." name="telefon" id="telefon">
   </label>
   <label for="miasto">
     <span>Opłacany przez miasto:</span>
-    <select name="miasto" id="miasto" [(ngModel)]="forms.miasto">
+    <select name="miasto" id="miasto" formControlName="miasto">
       <option [value]="0">Nie</option>
       <option [value]="1">Tak</option>
     </select>
   </label>
   <label for="email">
     <span>Email:</span>
-    <input type="email" [(ngModel)]="forms.email" placeholder="Email..." name="email" id="email">
+    <input type="email" formControlName="email" placeholder="Email..." name="email" id="email">
   </label>
   <label for="typ_osoby">
     <span>Typ osoby:</span>
-    <select name="typ_osoby" id="typ_osoby" [(ngModel)]="forms.typ_osoby">
+    <select name="typ_osoby" id="typ_osoby" formControlName="typ_osoby" (change)="onTypOsobyChange()">
       <option [value]="TypOsoby.UCZEN">Uczeń</option>
       <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
     </select>
   </label>
   <label for="uczeszcza">
     <span>Uczęszcza:</span>
-    <select name="uczeszcza" id="uczeszcza" [(ngModel)]="forms.uczeszcza">
+    <select name="uczeszcza" id="uczeszcza" formControlName="uczeszcza">
       <option [value]="1">Tak</option>
       <option [value]="0">Nie</option>
     </select>

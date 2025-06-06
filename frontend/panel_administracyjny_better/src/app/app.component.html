@@ -23,7 +23,7 @@
       <div class="osoby all">
         <i class="fa-solid fa-right-to-bracket exit" (click)="navigate('','osoby')"></i>
         <div class="table">
-          <h1 routerLink="osoby/zsti"><i class="fa-solid fa-graduation-cap"></i>ZSTI</h1>
+          <h1 tabindex="0" routerLink="osoby/zsti"><i class="fa-solid fa-graduation-cap"></i>ZSTI</h1>
           <ol>
             @if (router.url.includes('/osoba') && persons_zsti) {
               <li class="selected">{{ infoService.activeUser.value?.imie }} {{ infoService.activeUser.value?.nazwisko![0] }}. <i>({{infoService.activeUser.value?.typ_osoby_id! === TypOsoby.NAUCZYCIEL ? 'n.' : infoService.activeUser.value?.klasa }})</i></li>

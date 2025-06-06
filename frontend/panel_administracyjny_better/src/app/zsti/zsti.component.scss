@@ -15,8 +15,8 @@ header {
     align-items: center;
     gap: 20px;
     abbr {
-      cursor: pointer;
       @include i.flex-center;
+      cursor: pointer;
       width: 20px;
       height: 20px;
       &:hover i {
@@ -60,14 +60,9 @@ header label {
   }
 
   i {
-    transition: i.transition(color);
-    cursor: pointer;
+    @include i.clickable-hover($h-color: var(--color-13));
     font-size: 1.5em;
     margin: 0 10px;
-
-    &:hover {
-      color: var(--color-13);
-    }
   }
 
   &:focus-within {

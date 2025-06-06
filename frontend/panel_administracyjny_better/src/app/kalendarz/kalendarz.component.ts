@@ -1,15 +1,16 @@
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, Renderer2, ViewChild} from '@angular/core';
 import {DateChangerComponent} from './date-changer/date-changer.component';
-import {GlobalInfoService} from '../global-info.service';
+import {GlobalInfoService, NotificationType} from '../global-info.service';
 import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName, WebSocketStatus} from '../data.service';
-import {Subject, take} from 'rxjs';
+import {Subject} from 'rxjs';
 import {TransitionService} from '../transition.service';
 
-enum AbsenceWindowStatus  {
+enum AbsenceWindowStatus {
   CLOSED,
   DODANE,
   USUNIETE
 }
+
 @Component({
   selector: 'app-kalendarz',
   imports: [
@@ -19,12 +20,12 @@ enum AbsenceWindowStatus  {
   styleUrl: './kalendarz.component.scss'
 })
 export class KalendarzComponent implements AfterViewInit, OnDestroy {
-  private absenceDays : AbsenceDay[] = [];
-  private declarations : Declaration[] | undefined;
-  private closedDays : CanceledDay[] = [];
+  private absenceDays: AbsenceDay[] = [];
+  private declarations: Declaration[] | undefined;
+  private closedDays: CanceledDay[] = [];
   private destroy$ = new Subject<void>();
 
-  protected user : Student | undefined;
+  protected user: Student | undefined;
   protected openStatus: AbsenceWindowStatus = AbsenceWindowStatus.CLOSED;
   protected readonly AbsenceWindowStatus = AbsenceWindowStatus;
   protected readonly Math = Math;
@@ -33,13 +34,14 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   @ViewChild('absencesMenu') absencesMenu!: ElementRef;
 
   constructor(
-    private database : DataService,
-    private renderer : Renderer2,
-    private zone : NgZone,
-    private cdr : ChangeDetectorRef,
-    private transtion : TransitionService,
-    protected infoService : GlobalInfoService
-  ) {}
+    private database: DataService,
+    private renderer: Renderer2,
+    private zone: NgZone,
+    private cdr: ChangeDetectorRef,
+    private transtion: TransitionService,
+    protected infoService: GlobalInfoService
+  ) {
+  }
 
   /** @method addDay
    * @description Dodaje dzień do listy dni zaznaczonych.
@@ -48,8 +50,8 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    * @returns {void}
    * @memberof KalendarzComponent
    */
-  private addDay(day : Date, absence : boolean) : void {
-    if(!day) return;
+  private addDay(day: Date, absence: boolean): void {
+    if (!day) return;
     if (!absence) {
       const dayIndex = this.infoService.selectedDays.added.findIndex(d => d.getTime() === day.getTime());
       dayIndex === -1
@@ -73,11 +75,11 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    * @throws {Error} - Jeśli nie można znaleźć zmiennej.
    * @memberof KalendarzComponent
    */
-  private async initComponent(method : string, responseVar : VariableName, variable : string, params : boolean = false) : Promise<boolean> {
-    if(!this.user) return false;
+  private async initComponent(method: string, responseVar: VariableName, variable: string, params: boolean = false): Promise<boolean> {
+    if (!this.user) return false;
     try {
-      if(params) {
-        (this as any)[variable] = await this.database.request(method, { id: this.user.id }, responseVar);
+      if (params) {
+        (this as any)[variable] = await this.database.request(method, {id: this.user.id}, responseVar);
       } else {
         (this as any)[variable] = await this.database.request(method, {}, responseVar);
       }
@@ -95,11 +97,11 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    */
   private async initializeCalendar(): Promise<void> {
     try {
-      if(!await this.initCalendar()) return;
+      if (!await this.initCalendar()) return;
       // Inicjacja po kolei deklaracji, dni nieczynnych i dni nieobecności
-      if(!await this.initComponent('zsti.declaration.getById', 'declaration', 'declarations', true)) return;
-      if(!await this.initComponent('global.canceledDay.get', 'closedDays', 'closedDays')) return;
-      if(!await this.initComponent('zsti.absence.getById', 'absenceDayList', 'absenceDays', true)) return;
+      if (!await this.initComponent('zsti.declaration.getById', 'declaration', 'declarations', true)) return;
+      if (!await this.initComponent('global.canceledDay.get', 'closedDays', 'closedDays')) return;
+      if (!await this.initComponent('zsti.absence.getById', 'absenceDayList', 'absenceDays', true)) return;
       let declarations: Declaration[] = this.declarations!;
       let days: NodeListOf<HTMLButtonElement> = this.section.nativeElement.querySelectorAll('.day')!;
       days.forEach((d: HTMLButtonElement): void => {
@@ -111,24 +113,24 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
           return;
         }
         const absenceDay = this.absenceDays.find(a => this.formatDate(new Date(a.dzien_wypisania)) === this.formatDate(day));
-        if(absenceDay) {
+        if (absenceDay) {
           d.classList.add('absence');
-          if(!this.infoService.selectedDays.removed.find(d => this.formatDate(d) === this.formatDate(day))) d.classList.add('selected');
-        } else if(this.infoService.selectedDays.added.find(d => this.formatDate(d) === this.formatDate(day))) {
+          if (!this.infoService.selectedDays.removed.find(d => this.formatDate(d) === this.formatDate(day))) d.classList.add('selected');
+        } else if (this.infoService.selectedDays.added.find(d => this.formatDate(d) === this.formatDate(day))) {
           d.classList.add('selected');
         }
         const declaration = declarations.find(d => d.data_od <= this.formatDate(day) && d.data_do >= this.formatDate(day));
         const canceledDay = this.closedDays.find(c => this.formatDate(new Date(c.dzien)) === this.formatDate(day));
         if (!(declaration && !d.disabled && declaration?.dni.split('')[day.getDay() - 1] === '1')) {
           d.classList.add('no-declaration');
-        } else if(canceledDay) {
+        } else if (canceledDay) {
           d.classList.add('canceled');
           d.disabled = true;
         } else {
           d.addEventListener('click', (): void => {
             this.addDay(day, d.classList.contains('absence'));
             d.classList.toggle('selected');
-            this.checkZaznaczanie(Array.from(d.parentElement!.parentElement!.children).indexOf(d.parentElement!)-1);
+            this.checkZaznaczanie(Array.from(d.parentElement!.parentElement!.children).indexOf(d.parentElement!) - 1);
           });
         }
       });
@@ -139,13 +141,13 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   }
 
   /** @method initCalendar
-    * @description Inicjalizuje kalendarz, tworząc widok miesięczny bez uwzględnienia deklaracji użytkownika.
-    * @returns {Promise<boolean>} - Promise, która rozwiązuje się po zakończeniu inicjalizacji kalendarza, pozwalając na dołączenie dodatkowej logiki (np. deklaracji).
-    * @throws {Error} - Jeśli nie można znaleźć elementu do kalendarza.
-    * @memberof KalendarzComponent
-  **/
+   * @description Inicjalizuje kalendarz, tworząc widok miesięczny bez uwzględnienia deklaracji użytkownika.
+   * @returns {Promise<boolean>} - Promise, która rozwiązuje się po zakończeniu inicjalizacji kalendarza, pozwalając na dołączenie dodatkowej logiki (np. deklaracji).
+   * @throws {Error} - Jeśli nie można znaleźć elementu do kalendarza.
+   * @memberof KalendarzComponent
+   **/
   private async initCalendar(): Promise<boolean> {
-    const main : HTMLElement = this.section.nativeElement.querySelector('main');
+    const main: HTMLElement = this.section.nativeElement.querySelector('main');
     if (!main) throw new Error('Nie można znaleźć elementu do kalendarza');
     if (main.childNodes.length > 1) {
       for (const child of Array.from(main.childNodes).slice(1)) {
@@ -169,16 +171,16 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
     }
 
     // Tworzenie dni
-    for (let i : number = 0; i < daysInMonth; i++) {
+    for (let i: number = 0; i < daysInMonth; i++) {
       if (i === 0) {
         let firstWeek: HTMLElement = main.querySelector('.week') as HTMLElement;
-        for (let j : number = 0; j < firstDay; j++) {
+        for (let j: number = 0; j < firstDay; j++) {
           let emptyDay: HTMLElement = this.renderer.createElement('div');
           this.renderer.addClass(emptyDay, 'empty-day');
           this.renderer.appendChild(firstWeek, emptyDay);
         }
       }
-      let day : HTMLButtonElement = this.renderer.createElement('button');
+      let day: HTMLButtonElement = this.renderer.createElement('button');
       this.renderer.addClass(day, 'day');
       this.renderer.setProperty(day, 'innerText', `${i + 1}`);
       this.renderer.setAttribute(day, 'date', this.formatDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), i + 1)));
@@ -203,7 +205,7 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
       this.renderer.removeChild(selectSection, selectSection.firstChild);
     }
     const weeks = this.section.nativeElement.querySelectorAll('.week');
-    weeks.forEach((week : HTMLElement) => {
+    weeks.forEach((week: HTMLElement) => {
       const button = this.renderer.createElement('button');
       const icon = this.renderer.createElement('i');
       icon.classList.add('fa-solid');
@@ -259,11 +261,11 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    * @returns {void}
    * @memberof KalendarzComponent
    */
-  private checkZaznaczanie(week_number : number) : void {
+  private checkZaznaczanie(week_number: number): void {
     const week = this.section.nativeElement.querySelectorAll('.week')[week_number] as HTMLElement;
     const days = Array.from(week.querySelectorAll('.day')) as HTMLButtonElement[];
     const selectElement = this.section.nativeElement.querySelector('.select-buttons')!.children[week_number].firstChild as HTMLElement;
-    const selectedAll : boolean = days.filter(d => !d.classList.contains('weekend') && !d.classList.contains('no-declaration') && !d.disabled)
+    const selectedAll: boolean = days.filter(d => !d.classList.contains('weekend') && !d.classList.contains('no-declaration') && !d.disabled)
       .every(d => d.classList.contains('selected'));
     selectElement.classList.remove('fa-check', 'fa-xmark');
     selectElement.classList.add(selectedAll ? 'fa-check' : 'fa-xmark');
@@ -275,16 +277,23 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    * @returns {void}
    * @memberof KalendarzComponent
    */
-  protected sendAbsence() : void {
-    if (!this.user) throw new Error('Nie można znaleźć użytkownika');
-    this.infoService.selectedDays.added.forEach(d => {
-      this.database.request('zsti.absence.add', { rok_szkolny_id: 1, dzien_wypisania: this.formatDate(d), osoby_zsti_id: this.user!.id }).then();
-    });
-    this.infoService.selectedDays.removed.forEach((d) => {
-      this.database.request('zsti.absence.delete', { dzien_wypisania: this.formatDate(d), osoby_zsti_id: this.user!.id }).then();
-    });
-    this.initializeCalendar().then(() => {
-      this.infoService.selectedDays = { added: [], removed: [] };
+  protected sendAbsence(): void {
+    if (!this.user) this.infoService.generateNotification(NotificationType.ERROR, 'Nie można znaleźć użytkownika.');
+    try {
+      this.infoService.selectedDays.added.forEach(d => {
+        this.database.request('zsti.absence.add', {rok_szkolny_id: 1, dzien_wypisania: this.formatDate(d), osoby_zsti_id: this.user!.id}).then();
+      });
+      this.infoService.selectedDays.removed.forEach((d) => {
+        this.database.request('zsti.absence.delete', {dzien_wypisania: this.formatDate(d), osoby_zsti_id: this.user!.id}).then();
+      });
+    } catch (error) {
+      console.error('Error sending absence:', error);
+      this.infoService.generateNotification(NotificationType.ERROR, 'Wystąpił błąd podczas wysyłania danych.');
+      return;
+    }
+    this.initializeCalendar().then((): void => {
+      this.infoService.selectedDays = {added: [], removed: []};
+      this.infoService.generateNotification(NotificationType.SUCCESS, 'Pomyślnie wysłano dane.');
     });
   }
 
@@ -295,10 +304,9 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    * @memberof KalendarzComponent
    */
   protected applyAnimation(openStatus: AbsenceWindowStatus): Promise<boolean> {
-    if(openStatus !== AbsenceWindowStatus.CLOSED)
+    if (openStatus !== AbsenceWindowStatus.CLOSED)
       this.openStatus = openStatus;
     this.cdr.detectChanges();
-    console.log(openStatus, openStatus !== AbsenceWindowStatus.CLOSED)
     return new Promise((resolve, reject) => {
       try {
         this.transtion.applyAnimation(this.absencesMenu!.nativeElement, openStatus !== AbsenceWindowStatus.CLOSED, this.zone).then(() => {
@@ -319,8 +327,8 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    * @returns {string} - Sformatowana data w formacie YYYY-MM-DD.
    * @memberof KalendarzComponent
    */
-  protected formatDate(date : Date, fancy : boolean = false) : string {
-    if(fancy) {
+  protected formatDate(date: Date, fancy: boolean = false): string {
+    if (fancy) {
       return date.toLocaleDateString('pl-PL', {
         day: 'numeric',
         month: 'long',
@@ -336,7 +344,7 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    * @returns {void}
    * @memberof KalendarzComponent
    */
-  protected removeAbsence(date : Date) : void {
+  protected removeAbsence(date: Date): void {
     switch (this.openStatus) {
       case AbsenceWindowStatus.DODANE:
         this.infoService.selectedDays.added = this.infoService.selectedDays.added.filter(d => d.getTime() !== date.getTime());
@@ -354,7 +362,7 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    * @returns {void}
    * @memberof KalendarzComponent
    */
-  protected closeAbsenceWindow() : void {
+  protected closeAbsenceWindow(): void {
     this.applyAnimation(AbsenceWindowStatus.CLOSED).then(() => {
       this.initializeCalendar().then();
     });
@@ -363,14 +371,14 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   public ngAfterViewInit(): void {
     this.infoService.webSocketStatus.subscribe(status => {
       if (status !== WebSocketStatus.OPEN) return;
-      this.infoService.activeUser.subscribe((user : Student | undefined) => {
+      this.infoService.activeUser.subscribe((user: Student | undefined) => {
         if (!user) return;
         this.user = user;
         this.infoService.setTitle(`${user.imie} ${user.nazwisko} - Kalendarz`);
         this.infoService.setActiveTab('KALENDARZ');
         this.infoService.setActiveMonth(new Date());
       });
-      this.infoService.activeMonth.subscribe((date : Date | undefined) => {
+      this.infoService.activeMonth.subscribe((date: Date | undefined) => {
         if (!date) return;
         this.initializeCalendar().catch(err => console.error('Init error:', err));
       })
@@ -382,4 +390,3 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
     this.destroy$.complete();
   }
 }
-

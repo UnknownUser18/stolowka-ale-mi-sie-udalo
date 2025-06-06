@@ -7,7 +7,7 @@
   @if (checkIfFilterUsed()) {
     <div>
       <span>Filtry są w użyciu.</span>
-      <abbr><i class="fa-solid fa-xmark" (click)="resetFilter()"></i></abbr>
+      <abbr title="Zresetuj Filtry"><i class="fa-solid fa-xmark" (click)="resetFilter()"></i></abbr>
     </div>
   }
   <span>Znaleziono {{ result?.length ?? '...'}} {{ (this.result?.length ?? 0) === 1 ? "wynik" : ((this.result?.length ?? 0) >= 2 && (this.result?.length ?? 0) <= 4 ? "wyniki" : "wyników") }}.</span>

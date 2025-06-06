@@ -99,14 +99,9 @@ ol i[class^="fa-"], ul i[class^="fa-"] {
 }
 
 .exit {
-  transition: i.transition(color);
+  @include i.clickable-hover($h-color: var(--color-13));
   margin: 5% 0 5% 10px;
   font-size: 3em;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--color-13);
-  }
 }
 
 .table {
@@ -155,7 +150,7 @@ ol i[class^="fa-"], ul i[class^="fa-"] {
     margin: 5px 0 5px 10px;
 
     &.placeholder {
-      cursor: default;
+      cursor: wait;
       height: 50px;
 
       &::before {

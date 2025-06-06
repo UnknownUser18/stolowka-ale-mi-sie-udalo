@@ -42,13 +42,8 @@ section:first-of-type {
     border-radius: 10px;
 
     &:not(:disabled) {
-      transition: i.transition(background-color), i.transition(color);
+      @include i.background-hover(var(--color-8), var(--color-9));
       cursor: pointer;
-      background-color: var(--color-8);
-
-      &:hover {
-        background-color: var(--color-9);
-      }
     }
 
     &:disabled {
@@ -65,10 +60,9 @@ section:first-of-type {
 
 main {
   display: grid;
-  grid-template-rows: 0.5fr repeat(auto-fit, 1fr);
+  grid-template-rows: 0.2fr auto;
   row-gap: 5px;
   padding: 5px;
-
   & > * {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -203,7 +197,7 @@ main {
     display: grid;
     background-color: var(--color-4);
     grid-template-columns: repeat(3, 1fr);
-    
+
     tr {
       &:first-child th {
         @include i.font-500(var(--color-13));

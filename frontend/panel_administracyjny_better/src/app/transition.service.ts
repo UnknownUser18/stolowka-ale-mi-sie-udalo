@@ -1,13 +1,14 @@
-import { Injectable, NgZone } from '@angular/core';
+import {Injectable, NgZone} from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TransitionService {
 
-  constructor() { }
+  constructor() {
+  }
 
-  public async applyAnimation(element: HTMLElement, open: boolean, zone : NgZone): Promise<void> {
+  public async applyAnimation(element: HTMLElement, open: boolean, zone: NgZone): Promise<void> {
     await this.waitForAllTransitions();
     return new Promise((resolve) => {
       zone.onStable.subscribe(() => {
@@ -25,6 +26,7 @@ export class TransitionService {
       });
     });
   }
+
   public waitForAllTransitions(): Promise<void> {
     return new Promise((resolve) => {
       let activeTransitions = 0;
