@@ -35,6 +35,8 @@ export class GlobalInfoService {
       });
     });
   }
+  private numberOfNotifications : number = 0;
+
 
   public title: BehaviorSubject<string> = new BehaviorSubject<string>('Strona Główna');
   public webSocketStatus: BehaviorSubject<WebSocketStatus> = new BehaviorSubject<WebSocketStatus>(WebSocketStatus.CLOSED);
@@ -66,16 +68,34 @@ export class GlobalInfoService {
       default:
         throw new Error('Nieznany typ powiadomienia');
     }
+    if (this.numberOfNotifications >= 5) {
+      const notifications = document.querySelectorAll('.notification');
+      notifications[0].remove();
+      this.numberOfNotifications--;
+    }
     const p = document.createElement('p');
     p.textContent = message;
     notification.appendChild(h2);
     notification.appendChild(p);
     document.body.appendChild(notification);
+    this.numberOfNotifications++;
+    const notifications = Array.from(document.querySelectorAll('.notification'));
+    notifications.reverse();
+    notifications.forEach((notification, idx) => {
+      if (idx === 0) {
+        (notification as HTMLElement).style.bottom = '';
+      } else {
+        const first = notifications[0] as HTMLElement;
+        const firstBottom = parseFloat(getComputedStyle(first).bottom);
+        (notification as HTMLElement).style.bottom = `${firstBottom + 120 * idx}px`;
+      }
+    });
     setTimeout(() : void => {
       notification.classList.add('done');
     }, 100);
     setTimeout(() : void => {
       notification.classList.remove('done');
+      this.numberOfNotifications--;
       notification.addEventListener('transitionend', () : void => {
         notification.remove();
       });

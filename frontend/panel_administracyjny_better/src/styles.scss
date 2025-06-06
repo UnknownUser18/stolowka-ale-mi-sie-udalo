@@ -37,7 +37,9 @@ input, select, option, button {
 button {
   cursor: pointer;
 }
-
+abbr {
+  text-decoration: none;
+}
 body {
   font-family: 'Inter', 'Roboto', sans-serif;
   background-color: var(--color-1);
@@ -88,7 +90,7 @@ app-deklaracje {
 
 .notification {
   @include i.flex-center(column, start, start);
-  transition: i.transition(right, i.$xlong);
+  transition: i.transition(right, i.$xlong), i.transition(bottom, i.$medium);
   position: absolute;
   bottom: 10%;
   right: -25%;
@@ -98,7 +100,7 @@ app-deklaracje {
   background-color: var(--color-3);
   border-radius: 5px;
   padding: 10px;
-
+  z-index: 3;
   &.done {
     right: 0;
   }

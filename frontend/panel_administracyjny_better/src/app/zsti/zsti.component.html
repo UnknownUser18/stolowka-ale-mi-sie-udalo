@@ -10,7 +10,7 @@
       <abbr title="Zresetuj Filtry"><i class="fa-solid fa-xmark" (click)="resetFilter()"></i></abbr>
     </div>
   }
-  <span>Znaleziono {{ result?.length ?? '...'}} {{ (this.result?.length ?? 0) === 1 ? "wynik" : ((this.result?.length ?? 0) >= 2 && (this.result?.length ?? 0) <= 4 ? "wyniki" : "wyników") }}.</span>
+  <span>Znaleziono {{ result?.length ? `${result?.length} ${wynikString(result?.length!)}` : '... wyników' }}.</span>
 </header>
 <table>
   <thead>
@@ -97,3 +97,4 @@
     </div>
   </section>
 }
+

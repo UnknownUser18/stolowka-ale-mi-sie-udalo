@@ -130,7 +130,7 @@ button {
 
 section {
   @include i.window;
-
+  @include i.fieldset;
   h3 {
     @include i.font(2em, 500, var(--color-13));
     text-align: center;
@@ -142,69 +142,6 @@ section {
     grid-template-columns: 1fr 1fr;
   }
 
-  fieldset {
-    transition: i.transition(border-color, i.$medium);
-    margin: 0 10px;
-    display: flex;
-    padding: 25px 10px;
-    border-radius: 10px;
-    flex-direction: column;
-    border-color: var(--color-11);
-
-    &:focus-within {
-      border-color: var(--color-12);
-
-      legend, legend i {
-        color: var(--color-13);
-      }
-    }
-
-    legend {
-      @include i.font-500(var(--color-12));
-      transition: i.transition(color);
-      margin: 0 15px 15px 15px;
-
-      i {
-        margin-right: 10px;
-      }
-    }
-  }
-
-  label {
-    display: flex;
-    flex-direction: column;
-    margin: 10px 0;
-
-    span {
-      @include i.font-500(var(--color-13));
-      margin-bottom: 15px;
-    }
-
-    input {
-      transition: i.transition(outline-color);
-      outline: 2px solid transparent;
-      border-radius: 20px;
-      padding: 10px 15px;
-      background-color: var(--color-2);
-      font-size: 1.3em;
-
-      &:focus {
-        outline-color: var(--color-10);
-      }
-    }
-
-    select {
-      border-radius: 20px;
-      padding: 10px 15px;
-      background-color: var(--color-2);
-      font-size: 1.3em;
-
-      option {
-        font-size: 0.9em;
-        color: var(--color-13);
-      }
-    }
-  }
 
   button {
     place-self: end;
