@@ -13,12 +13,11 @@ export type TabTypeKey = keyof typeof TabType;
 @Injectable({
   providedIn: 'root'
 })
-export class GlobalInfoServices {
+export class GlobalInfoService {
   constructor(private database : DataService) {
     this.webSocketStatus.subscribe((status) => {
       if (status !== WebSocketStatus.OPEN) return;
       const lastUser = localStorage.getItem('activeUser');
-      console.log(lastUser);
       if (!lastUser) return;
       this.database.request('zsti.student.getById', { id: parseInt(lastUser) }, 'studentList').then((payload): void => {
         if (!payload || payload.length === 0) return;

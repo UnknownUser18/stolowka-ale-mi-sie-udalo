@@ -5,31 +5,33 @@ import {NavigationEnd, Router, RouterLink, RouterOutlet} from '@angular/router';
 import {GlobalInfoService} from './global-info.service';
 import {filter, take} from 'rxjs';
 import {DataService, Student, TypOsoby, WebSocketStatus} from './data.service';
+import {TransitionService} from './transition.service';
 
 export type classNames = 'main-page' | 'osoby' | 'all';
 
 @Component({
-    selector: 'app-root',
-    imports: [NavComponent, NgOptimizedImage, RouterLink, RouterOutlet],
-    templateUrl: './app.component.html',
-    styleUrl: './app.component.scss'
+  selector: 'app-root',
+  imports: [NavComponent, NgOptimizedImage, RouterLink, RouterOutlet],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss'
 })
 export class AppComponent implements AfterViewInit {
-  protected persons_zsti : Student[] | undefined
+  protected persons_zsti: Student[] | undefined
   protected readonly TypOsoby = TypOsoby;
 
   @ViewChild('nav') nav!: ElementRef;
   @ViewChild('scrollable') scrollable!: ElementRef;
 
   constructor(
-    protected router : Router,
-    protected globalInfoService : GlobalInfoService,
-    private database : DataService,
-    private zone : NgZone) {
+    private database: DataService,
+    private zone: NgZone,
+    private transition: TransitionService,
+    protected router: Router,
+    protected infoService: GlobalInfoService) {
     this.database.initializeWebSocket().then(status => {
-      this.globalInfoService.setWebSocketStatus(status);
+      this.infoService.setWebSocketStatus(status);
     });
-    this.globalInfoService.webSocketStatus.subscribe(status => {
+    this.infoService.webSocketStatus.subscribe(status => {
       if (status !== WebSocketStatus.OPEN) return;
       const lastUser = localStorage.getItem('activeUser');
       if (!lastUser) return;
@@ -39,13 +41,14 @@ export class AppComponent implements AfterViewInit {
         const newUrl = url.replace('null', lastUser);
         this.database.request('zsti.student.getById', {id: parseInt(lastUser)}, 'studentList').then((payload): void => {
           if (!payload || payload.length === 0) return;
-          this.globalInfoService.setActiveUser(payload[0]);
+          this.infoService.setActiveUser(payload[0]);
           this.router.navigateByUrl(newUrl).then();
         });
       }
     })
   }
-  protected navigate(path : string, class_name : classNames, ignore : boolean = true) : void {
+
+  protected navigate(path: string, class_name: classNames, ignore: boolean = true): void {
     if (!ignore) {
       this.router.navigate([path]).then();
       return;
@@ -56,6 +59,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   private async animateElement(class_name: classNames, remove: boolean = false): Promise<boolean> {
+    await this.transition.waitForAllTransitions();
     return new Promise((resolve, reject): void => {
       const element: HTMLElement = this.nav.nativeElement.querySelector(`.${class_name}`)!;
       if (!element) {
@@ -69,20 +73,21 @@ export class AppComponent implements AfterViewInit {
     });
   };
 
-  protected selectPerson(student : Student) : void {
+  protected selectPerson(student: Student): void {
     this.router.navigate(['osoba/zsti', student.id, 'kalendarz']).then((): void => {
-      this.globalInfoService.setActiveUser(student);
+      this.infoService.setActiveUser(student);
     });
   }
 
-  private startPageLogic() : void {
+  private startPageLogic(): void {
     switch (this.router.url) {
       case '/':
-        this.globalInfoService.setTitle('Strona Główna');
-        this.animateElement('main-page').then((): void => {});
+        this.infoService.setTitle('Strona Główna');
+        this.animateElement('main-page').then((): void => {
+        });
         break;
       case '/osoby':
-        this.globalInfoService.setTitle('Osoby');
+        this.infoService.setTitle('Osoby');
         this.animateElement('osoby').then((): void => {
           this.database.request('zsti.student.get', {}, 'studentList').then((payload): void => {
             this.persons_zsti = payload;
@@ -90,7 +95,7 @@ export class AppComponent implements AfterViewInit {
         });
         break;
     }
-    if(this.router.url.startsWith('/osoba')) {
+    if (this.router.url.startsWith('/osoba')) {
       this.animateElement('osoby').then((): void => {
         this.database.request('zsti.student.get', {}, 'studentList').then((payload): void => {
           this.persons_zsti = payload;
@@ -100,7 +105,7 @@ export class AppComponent implements AfterViewInit {
   }
 
   public ngAfterViewInit(): void {
-    const mainPage : HTMLElement = this.scrollable.nativeElement.querySelector('.main-page')!;
+    const mainPage: HTMLElement = this.scrollable.nativeElement.querySelector('.main-page')!;
     mainPage.classList.add('done');
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))

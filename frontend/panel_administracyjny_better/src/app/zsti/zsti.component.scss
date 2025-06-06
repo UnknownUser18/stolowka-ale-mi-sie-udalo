@@ -9,6 +9,25 @@ header {
   span {
     @include i.font-500(var(--color-13));
   }
+  div {
+    @include i.flex-center;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    abbr {
+      cursor: pointer;
+      @include i.flex-center;
+      width: 20px;
+      height: 20px;
+      &:hover i {
+        color: var(--color-13);
+      }
+      i {
+        transition: i.transition(color);
+        font-size: 30px;
+      }
+    }
+  }
 }
 
 input {

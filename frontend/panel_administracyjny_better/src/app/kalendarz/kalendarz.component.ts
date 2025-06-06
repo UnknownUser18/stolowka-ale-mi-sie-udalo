@@ -3,6 +3,7 @@ import {DateChangerComponent} from './date-changer/date-changer.component';
 import {GlobalInfoService} from '../global-info.service';
 import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName, WebSocketStatus} from '../data.service';
 import {Subject, take} from 'rxjs';
+import {TransitionService} from '../transition.service';
 
 enum AbsenceWindowStatus  {
   CLOSED,
@@ -32,11 +33,12 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   @ViewChild('absencesMenu') absencesMenu!: ElementRef;
 
   constructor(
-    protected globalInfo : GlobalInfoService,
     private database : DataService,
     private renderer : Renderer2,
     private zone : NgZone,
     private cdr : ChangeDetectorRef,
+    private transtion : TransitionService,
+    protected infoService : GlobalInfoService
   ) {}
 
   /** @method addDay
@@ -49,15 +51,15 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   private addDay(day : Date, absence : boolean) : void {
     if(!day) return;
     if (!absence) {
-      const dayIndex = this.globalInfo.selectedDays.added.findIndex(d => d.getTime() === day.getTime());
+      const dayIndex = this.infoService.selectedDays.added.findIndex(d => d.getTime() === day.getTime());
       dayIndex === -1
-        ? this.globalInfo.selectedDays.added.push(day)
-        : this.globalInfo.selectedDays.added.splice(dayIndex, 1);
+        ? this.infoService.selectedDays.added.push(day)
+        : this.infoService.selectedDays.added.splice(dayIndex, 1);
     } else {
-      const dayIndex = this.globalInfo.selectedDays.removed.findIndex(d => d.getTime() === day.getTime());
+      const dayIndex = this.infoService.selectedDays.removed.findIndex(d => d.getTime() === day.getTime());
       dayIndex === -1
-        ? this.globalInfo.selectedDays.removed.push(day)
-        : this.globalInfo.selectedDays.removed.splice(dayIndex, 1);
+        ? this.infoService.selectedDays.removed.push(day)
+        : this.infoService.selectedDays.removed.splice(dayIndex, 1);
     }
   }
 
@@ -111,8 +113,8 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
         const absenceDay = this.absenceDays.find(a => this.formatDate(new Date(a.dzien_wypisania)) === this.formatDate(day));
         if(absenceDay) {
           d.classList.add('absence');
-          if(!this.globalInfo.selectedDays.removed.find(d => this.formatDate(d) === this.formatDate(day))) d.classList.add('selected');
-        } else if(this.globalInfo.selectedDays.added.find(d => this.formatDate(d) === this.formatDate(day))) {
+          if(!this.infoService.selectedDays.removed.find(d => this.formatDate(d) === this.formatDate(day))) d.classList.add('selected');
+        } else if(this.infoService.selectedDays.added.find(d => this.formatDate(d) === this.formatDate(day))) {
           d.classList.add('selected');
         }
         const declaration = declarations.find(d => d.data_od <= this.formatDate(day) && d.data_do >= this.formatDate(day));
@@ -150,7 +152,7 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
         this.renderer.removeChild(main, child);
       }
     }
-    const currentDate: Date = this.globalInfo.activeMonth.getValue()!;
+    const currentDate: Date = this.infoService.activeMonth.getValue()!;
     const daysInMonth: number = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
 
     let firstDay: number = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -226,23 +228,23 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
           const dayDate = new Date(day.getAttribute('date')!);
           const isAbsence = day.classList.contains('absence');
           const isSelected = day.classList.contains('selected');
-          const isAdded = this.globalInfo.selectedDays.added.some(d => d.getTime() === dayDate.getTime());
-          const isRemoved = this.globalInfo.selectedDays.removed.some(d => d.getTime() === dayDate.getTime());
+          const isAdded = this.infoService.selectedDays.added.some(d => d.getTime() === dayDate.getTime());
+          const isRemoved = this.infoService.selectedDays.removed.some(d => d.getTime() === dayDate.getTime());
           if (isSelecting) {
             day.classList.add('selected');
             if (isAbsence && !isSelected) {
-              this.globalInfo.selectedDays.removed = isRemoved
-                ? this.globalInfo.selectedDays.removed.filter(d => d.getTime() !== dayDate.getTime())
-                : [...this.globalInfo.selectedDays.removed, dayDate];
+              this.infoService.selectedDays.removed = isRemoved
+                ? this.infoService.selectedDays.removed.filter(d => d.getTime() !== dayDate.getTime())
+                : [...this.infoService.selectedDays.removed, dayDate];
             } else if (!isAbsence && !isAdded) {
-              this.globalInfo.selectedDays.added.push(dayDate);
+              this.infoService.selectedDays.added.push(dayDate);
             }
           } else {
             day.classList.remove('selected');
             if (isAbsence && !isRemoved) {
-              this.globalInfo.selectedDays.removed.push(dayDate);
+              this.infoService.selectedDays.removed.push(dayDate);
             } else {
-              this.globalInfo.selectedDays.added = this.globalInfo.selectedDays.added.filter(d => d.getTime() !== dayDate.getTime());
+              this.infoService.selectedDays.added = this.infoService.selectedDays.added.filter(d => d.getTime() !== dayDate.getTime());
             }
           }
         }
@@ -275,14 +277,14 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
    */
   protected sendAbsence() : void {
     if (!this.user) throw new Error('Nie można znaleźć użytkownika');
-    this.globalInfo.selectedDays.added.forEach(d => {
+    this.infoService.selectedDays.added.forEach(d => {
       this.database.request('zsti.absence.add', { rok_szkolny_id: 1, dzien_wypisania: this.formatDate(d), osoby_zsti_id: this.user!.id }).then();
     });
-    this.globalInfo.selectedDays.removed.forEach((d) => {
+    this.infoService.selectedDays.removed.forEach((d) => {
       this.database.request('zsti.absence.delete', { dzien_wypisania: this.formatDate(d), osoby_zsti_id: this.user!.id }).then();
     });
     this.initializeCalendar().then(() => {
-      this.globalInfo.selectedDays = { added: [], removed: [] };
+      this.infoService.selectedDays = { added: [], removed: [] };
     });
   }
 
@@ -295,28 +297,18 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   protected applyAnimation(openStatus: AbsenceWindowStatus): Promise<boolean> {
     if(openStatus !== AbsenceWindowStatus.CLOSED)
       this.openStatus = openStatus;
-    return new Promise((resolve): void => {
-      this.zone.onStable.pipe(take(1)).subscribe((): void => {
-        requestAnimationFrame((): void => {
-          const absenceBackground: HTMLElement = this.absencesMenu!.nativeElement as HTMLElement;
-          const absenceMain: HTMLElement = absenceBackground.querySelector('section > div')!;
-
-          absenceBackground.classList.toggle('done', openStatus !== AbsenceWindowStatus.CLOSED);
-          absenceMain.classList.toggle('done', openStatus !== AbsenceWindowStatus.CLOSED);
-
-          const onTransitionEnd = (e: TransitionEvent): void => {
-            if (e.target === absenceMain) {
-              absenceMain.removeEventListener('transitionend', onTransitionEnd);
-              if(openStatus === AbsenceWindowStatus.CLOSED) {
-                this.openStatus = openStatus;
-                this.cdr.detectChanges();
-              }
-              resolve(true);
-            }
-          };
-          absenceMain.addEventListener('transitionend', onTransitionEnd);
+    this.cdr.detectChanges();
+    console.log(openStatus, openStatus !== AbsenceWindowStatus.CLOSED)
+    return new Promise((resolve, reject) => {
+      try {
+        this.transtion.applyAnimation(this.absencesMenu!.nativeElement, openStatus !== AbsenceWindowStatus.CLOSED, this.zone).then(() => {
+          if (openStatus === AbsenceWindowStatus.CLOSED) this.openStatus = AbsenceWindowStatus.CLOSED;
+          resolve(true);
         });
-      });
+      } catch (error) {
+        console.error('Animation error:', error);
+        reject(error);
+      }
     });
   }
 
@@ -347,10 +339,10 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   protected removeAbsence(date : Date) : void {
     switch (this.openStatus) {
       case AbsenceWindowStatus.DODANE:
-        this.globalInfo.selectedDays.added = this.globalInfo.selectedDays.added.filter(d => d.getTime() !== date.getTime());
+        this.infoService.selectedDays.added = this.infoService.selectedDays.added.filter(d => d.getTime() !== date.getTime());
         break;
       case AbsenceWindowStatus.USUNIETE:
-        this.globalInfo.selectedDays.removed = this.globalInfo.selectedDays.removed.filter(d => d.getTime() !== date.getTime());
+        this.infoService.selectedDays.removed = this.infoService.selectedDays.removed.filter(d => d.getTime() !== date.getTime());
         break;
       default:
         throw new Error("Nieznany status okna");
@@ -369,16 +361,16 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit(): void {
-    this.globalInfo.webSocketStatus.subscribe(status => {
+    this.infoService.webSocketStatus.subscribe(status => {
       if (status !== WebSocketStatus.OPEN) return;
-      this.globalInfo.activeUser.subscribe((user : Student | undefined) => {
+      this.infoService.activeUser.subscribe((user : Student | undefined) => {
         if (!user) return;
         this.user = user;
-        this.globalInfo.setTitle(`${user.imie} ${user.nazwisko} - Kalendarz`);
-        this.globalInfo.setActiveTab('KALENDARZ');
-        this.globalInfo.setActiveMonth(new Date());
+        this.infoService.setTitle(`${user.imie} ${user.nazwisko} - Kalendarz`);
+        this.infoService.setActiveTab('KALENDARZ');
+        this.infoService.setActiveMonth(new Date());
       });
-      this.globalInfo.activeMonth.subscribe((date : Date | undefined) => {
+      this.infoService.activeMonth.subscribe((date : Date | undefined) => {
         if (!date) return;
         this.initializeCalendar().catch(err => console.error('Init error:', err));
       })
@@ -390,3 +382,4 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
     this.destroy$.complete();
   }
 }
+

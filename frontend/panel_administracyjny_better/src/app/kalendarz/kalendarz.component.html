@@ -17,7 +17,7 @@
     <div>
       <h3>Dodane nieobecności:</h3>
       <table>
-        @for (day of globalInfo.selectedDays.added.slice(Math.max(0, globalInfo.selectedDays.added.length - 4)).reverse(); track day; let last = $last) {
+        @for (day of infoService.selectedDays.added.slice(Math.max(0, infoService.selectedDays.added.length - 4)).reverse(); track day; let last = $last) {
           <tr>
             <td>{{ formatDate(day) }}</td>
             @if (last) {
@@ -34,7 +34,7 @@
     <div>
       <h3>Usunięte nieobecności:</h3>
       <table>
-        @for (day of globalInfo.selectedDays.removed.slice(Math.max(0, globalInfo.selectedDays.removed.length - 4)).reverse(); track day; let last = $last) {
+        @for (day of infoService.selectedDays.removed.slice(Math.max(0, infoService.selectedDays.removed.length - 4)).reverse(); track day; let last = $last) {
           <tr>
             <td>{{ formatDate(day) }}</td>
             @if (last) {
@@ -68,7 +68,7 @@
         </thead>
         <tbody>
           @if(openStatus === AbsenceWindowStatus.DODANE) {
-            @for (absence of globalInfo.selectedDays.added; track absence; let index = $index) {
+            @for (absence of infoService.selectedDays.added; track absence; let index = $index) {
               <tr>
                 <td>{{ index + 1 }}</td>
                 <td>{{ formatDate(absence, true) }}</td>
@@ -80,7 +80,7 @@
               </tr>
             }
           } @else if(openStatus === AbsenceWindowStatus.USUNIETE) {
-            @for (absence of globalInfo.selectedDays.removed; track absence; let index = $index) {
+            @for (absence of infoService.selectedDays.removed; track absence; let index = $index) {
               <tr>
                 <td>{{ index + 1 }}</td>
                 <td>{{ formatDate(absence, true) }}</td>
