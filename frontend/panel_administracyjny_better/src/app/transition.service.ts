@@ -1,21 +1,21 @@
-import {Injectable, NgZone} from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn : 'root'
 })
 export class TransitionService {
 
   constructor() {
   }
 
-  public async applyAnimation(element: HTMLElement, open: boolean, zone: NgZone): Promise<void> {
+  public async applyAnimation(element : HTMLElement, open : boolean, zone : NgZone) : Promise<void> {
     await this.waitForAllTransitions();
     return new Promise((resolve) => {
       zone.onStable.subscribe(() => {
         requestAnimationFrame(() => {
           element.classList.toggle('done', open);
           element.querySelector('section > div')?.classList.toggle('done', open);
-          const onTransitionEnd = (e: TransitionEvent): void => {
+          const onTransitionEnd = (e : TransitionEvent) : void => {
             if (e.target === element) {
               element.removeEventListener('transitionend', onTransitionEnd);
               resolve();
@@ -27,7 +27,7 @@ export class TransitionService {
     });
   }
 
-  public waitForAllTransitions(): Promise<void> {
+  public waitForAllTransitions() : Promise<void> {
     return new Promise((resolve) => {
       let activeTransitions = 0;
       let resolved = false;

@@ -192,7 +192,7 @@ export const Card = z.object({
     id_ucznia: z.number(),
     key_card: z.number(),
     data_wydania: z.date(),
-    ostatnie_uzycie: z.date()
+    ostatnie_uzycie: z.date().nullable()
 });
 
 export interface AbsenceDay {

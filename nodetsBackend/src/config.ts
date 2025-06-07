@@ -135,6 +135,7 @@ export const Queries: QueriesStructure = {
         "card": {
             "type": Card.array(),
             "get": `SELECT * FROM karty_zsti`,
+            "getById": `SELECT * FROM karty_zsti WHERE id_ucznia = :id_ucznia`,
             "add": `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES (:id_ucznia, :key_card, :data_wydania, :ostatnie_uzycie)`,
             "update": `UPDATE karty_zsti SET id_ucznia = :id_ucznia, key_card = :key_card, data_wydania = :data_wydania, ostatnie_uzycie = :ostatnie_uzycie WHERE id = :id`,
             "delete": `DELETE FROM karty_zsti WHERE id = :id`

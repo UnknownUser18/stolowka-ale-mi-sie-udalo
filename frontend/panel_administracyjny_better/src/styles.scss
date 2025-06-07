@@ -93,6 +93,14 @@ app-deklaracje, app-platnosci {
     place-self: center start;
   }
 }
+app-karty {
+  @include positional(50%, 50%);
+  background-color: var(--color-3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px 40px;
+}
 .notification {
   @include i.flex-center(column, start, start);
   transition: i.transition(right, i.$xlong), i.transition(bottom, i.$medium);

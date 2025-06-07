@@ -9,7 +9,7 @@
 @if (router.url.includes('osoba')) {
   <menu>
     <li [class]="infoService.activeTab.value === 'PLATNOSCI' ? 'active' : ''" [routerLink]="['osoba','zsti', infoService.activeUser.value?.id, 'platnosci']">Płatności</li>
-    <li [class]="infoService.activeTab.value === 'KARTA' ? 'active' : ''" [routerLink]="['osoba','zsti', infoService.activeUser.value?.id, 'dane']">Karta</li>
+    <li [class]="infoService.activeTab.value === 'KARTA' ? 'active' : ''" [routerLink]="['osoba','zsti', infoService.activeUser.value?.id, 'karta']">Karta</li>
     <li [class]="infoService.activeTab.value === 'RAPORT' ? 'active' : ''" [routerLink]="['osoba', 'zsti', infoService.activeUser.value?.id, 'raport']">Raport</li>
   </menu>
 }
