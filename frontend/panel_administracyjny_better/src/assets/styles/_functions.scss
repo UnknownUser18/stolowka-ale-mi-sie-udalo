@@ -1,4 +1,0 @@
-@use 'variables' as v;
-@function transition($property, $duration: v.$short, $timing: v.$cubic-bezier) {
-  @return #{$property} #{$duration} #{$timing};
-}
