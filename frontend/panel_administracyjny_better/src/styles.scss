@@ -79,7 +79,7 @@ app-kalendarz {
   grid-template-rows: 0.08fr 1fr;
 }
 
-app-deklaracje {
+app-deklaracje, app-platnosci {
   @include positional(80%, 90%);
   background-color: var(--color-3);
   display: grid;
@@ -93,7 +93,6 @@ app-deklaracje {
     place-self: center start;
   }
 }
-
 .notification {
   @include i.flex-center(column, start, start);
   transition: i.transition(right, i.$xlong), i.transition(bottom, i.$medium);

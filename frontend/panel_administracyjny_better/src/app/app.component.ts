@@ -1,11 +1,11 @@
-import {AfterViewInit, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
-import {NavComponent} from './nav/nav.component';
-import {NgOptimizedImage} from '@angular/common';
-import {NavigationEnd, Router, RouterLink, RouterOutlet} from '@angular/router';
-import {GlobalInfoService} from './global-info.service';
-import {filter, take} from 'rxjs';
-import {DataService, Student, TypOsoby, WebSocketStatus} from './data.service';
-import {TransitionService} from './transition.service';
+import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { NavComponent } from './nav/nav.component';
+import { NgOptimizedImage } from '@angular/common';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { GlobalInfoService, NotificationType } from './global-info.service';
+import { filter, take } from 'rxjs';
+import { DataService, Student, TypOsoby, WebSocketStatus } from './data.service';
+import { TransitionService } from './transition.service';
 
 export type classNames = 'main-page' | 'osoby' | 'all';
 
@@ -32,6 +32,7 @@ export class AppComponent implements AfterViewInit {
       this.infoService.setWebSocketStatus(status);
     });
     this.infoService.webSocketStatus.subscribe(status => {
+      if (status === WebSocketStatus.ERROR) this.infoService.generateNotification(NotificationType.ERROR, 'Bład podczas łączenia się z bazą danych.')
       if (status !== WebSocketStatus.OPEN) return;
       const lastUser = localStorage.getItem('activeUser');
       if (!lastUser) return;

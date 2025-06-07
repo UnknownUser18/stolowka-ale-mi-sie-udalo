@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DataService, Declaration, WebSocketStatus } from '../data.service';
 import { GlobalInfoService, NotificationType } from '../global-info.service';
 import { TransitionService } from '../transition.service';
 import { wynikString } from '../zsti/zsti.component';
+import { takeUntil, Subject } from 'rxjs';
 
 @Component({
   selector : 'app-deklaracje',
@@ -13,7 +14,8 @@ import { wynikString } from '../zsti/zsti.component';
   templateUrl : './deklaracje.component.html',
   styleUrl : './deklaracje.component.scss'
 })
-export class DeklaracjeComponent {
+export class DeklaracjeComponent implements OnDestroy {
+  private destroy$ = new Subject<void>();
   private invalidDates : Date[] = [];
   private id : number = 0;
   private user_id : number = 0;
@@ -51,20 +53,20 @@ export class DeklaracjeComponent {
   @ViewChild('filter') filter! : ElementRef;
 
   constructor(
-    protected globalInfo : GlobalInfoService,
+    protected infoService : GlobalInfoService,
     private database : DataService,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef,
     private zone : NgZone
   ) {
-    this.globalInfo.webSocketStatus.subscribe(status => {
+    this.infoService.webSocketStatus.pipe(takeUntil(this.destroy$)).subscribe(status => {
       if (status !== WebSocketStatus.OPEN) return;
 
-      this.globalInfo.activeUser.subscribe(user => {
+      this.infoService.activeUser.pipe(takeUntil(this.destroy$)).subscribe(user => {
         if (!user) return;
         this.deklaracjaForm.reset();
-        this.globalInfo.setTitle(`${ user.imie } ${ user.nazwisko } - Deklaracje`);
-        this.globalInfo.setActiveTab('DEKLARACJE');
+        this.infoService.setTitle(`${ user.imie } ${ user.nazwisko } - Deklaracje`);
+        this.infoService.setActiveTab('DEKLARACJE');
         this.user_id = user.id;
         this.reloadDeclarations();
       });
@@ -84,10 +86,10 @@ export class DeklaracjeComponent {
   private reloadDeclarations() : void {
     this.database.request('zsti.declaration.getById', { id : this.user_id }, 'declarationList').then((payload) => {
       if (!payload) {
-        this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać deklaracji.');
+        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać deklaracji.');
         return;
       } else if (payload.length === 0) {
-        this.globalInfo.generateNotification(NotificationType.WARNING, 'Brak deklaracji dla tej osoby.');
+        this.infoService.generateNotification(NotificationType.WARNING, 'Brak deklaracji dla tej osoby.');
         this.result = this.declarations = [];
         this.invalidDates = [];
         return;
@@ -147,7 +149,7 @@ export class DeklaracjeComponent {
 
   protected updateDeclaration() : void {
     if (this.deklaracjaForm.invalid) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
     }
     const formValue = this.deklaracjaForm.value;
@@ -157,13 +159,13 @@ export class DeklaracjeComponent {
       .join('');
     const declaration : Declaration = {
       id : this.id,
-      id_osoby : this.globalInfo.activeUser.value?.id || 0,
+      id_osoby : this.infoService.activeUser.value?.id || 0,
       data_od : formValue.data_od!,
       data_do : formValue.data_do!,
       dni : dni,
     }
     if (declaration.id_osoby === 0) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie można dodać deklaracji bez ID osoby.');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Nie można dodać deklaracji bez ID osoby.');
       return;
     }
     const original = this.declarations.find(d => d.id === declaration.id);
@@ -173,7 +175,7 @@ export class DeklaracjeComponent {
       this.dateInput(new Date(original.data_do)) !== declaration.data_do
     );
     if (!(dniChanged || datesChanged)) {
-      this.globalInfo.generateNotification(NotificationType.WARNING, 'Deklaracja nie została zmieniona.');
+      this.infoService.generateNotification(NotificationType.WARNING, 'Deklaracja nie została zmieniona.');
       return;
     }
     if (!dniChanged && datesChanged && this.invalidDates.some((date, idx, arr) => {
@@ -189,20 +191,20 @@ export class DeklaracjeComponent {
       const do_ = new Date(declaration.data_do).getTime();
       return (od <= end.getTime() && do_ >= start.getTime());
     })) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Deklaracja nachodzi się z istniejącymi datami.');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Deklaracja nachodzi się z istniejącymi datami.');
       return;
     }
     if (declaration.data_od > declaration.data_do) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
       return;
     }
     this.database.request('zsti.declaration.update', { ...declaration, rok_szkolny_id : 1 }, 'declaration').then((payload) => {
       if (!payload || payload.length === 0) {
-        this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować deklaracji.');
+        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować deklaracji.');
         return;
       }
 
-      this.globalInfo.generateNotification(NotificationType.SUCCESS, 'Deklaracja została zaktualizowana.');
+      this.infoService.generateNotification(NotificationType.SUCCESS, 'Deklaracja została zaktualizowana.');
 
       this.reloadDeclarations();
     });
@@ -222,7 +224,7 @@ export class DeklaracjeComponent {
 
   protected applyFilter() : void {
     if (this.filterForm.invalid) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
     }
     const formValue = this.filterForm.value;
@@ -244,9 +246,9 @@ export class DeklaracjeComponent {
       return dniMatch && dateMatch;
     });
     if (this.result.length === 0) {
-      this.globalInfo.generateNotification(NotificationType.WARNING, 'Brak wyników pasujących do filtra.');
+      this.infoService.generateNotification(NotificationType.WARNING, 'Brak wyników pasujących do filtra.');
     } else {
-      this.globalInfo.generateNotification(NotificationType.SUCCESS, `Pomyślnie zastosowano filtry. Znaleziono ${ this.result.length } ${ wynikString(this.result.length) }.`);
+      this.infoService.generateNotification(NotificationType.SUCCESS, `Pomyślnie zastosowano filtry. Znaleziono ${ this.result.length } ${ wynikString(this.result.length) }.`);
     }
     this.closeWindow();
   }
@@ -270,20 +272,20 @@ export class DeklaracjeComponent {
       }
     });
     this.result = this.declarations;
-    this.globalInfo.generateNotification(NotificationType.INFO, 'Filtr został zresetowany.');
+    this.infoService.generateNotification(NotificationType.INFO, 'Filtr został zresetowany.');
   }
 
   protected deleteDeclaration() : void {
     if (this.id === 0) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Proszę wybrać deklarację do usunięcia.');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę wybrać deklarację do usunięcia.');
       return;
     }
     this.database.request('zsti.declaration.delete', { id : this.id }, 'declaration').then((payload) => {
       if (!payload || payload.length === 0) {
-        this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się usunąć deklaracji.');
+        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się usunąć deklaracji.');
         return;
       }
-      this.globalInfo.generateNotification(NotificationType.SUCCESS, 'Deklaracja została usunięta.');
+      this.infoService.generateNotification(NotificationType.SUCCESS, 'Deklaracja została usunięta.');
       this.reloadDeclarations();
       this.closeWindow();
     });
@@ -291,7 +293,7 @@ export class DeklaracjeComponent {
 
   protected addDeclaration() : void {
     if (this.addForm.invalid) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
     }
     const formValue = this.addForm.value;
@@ -306,7 +308,7 @@ export class DeklaracjeComponent {
       dni : dni,
     } as any
     if (declaration.id_osoby === 0) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie można dodać deklaracji bez ID osoby.');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Nie można dodać deklaracji bez ID osoby.');
       return;
     }
     if (this.invalidDates.some((date, idx, arr) => {
@@ -319,21 +321,34 @@ export class DeklaracjeComponent {
       return od <= end.getTime();
 
     })) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Deklaracja nachodzi się z istniejącymi datami.');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Deklaracja nachodzi się z istniejącymi datami.');
       return;
     }
     if (declaration.data_od > declaration.data_do) {
-      this.globalInfo.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
+      this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
       return;
     }
     this.database.request('zsti.declaration.add', { ...declaration, rok_szkolny_id : 1 }, 'declaration').then((payload) => {
       if (!payload || payload.length === 0) {
-        this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się dodać deklaracji.');
+        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać deklaracji.');
         return;
       }
 
-      this.globalInfo.generateNotification(NotificationType.SUCCESS, 'Deklaracja została dodana.');
+      this.infoService.generateNotification(NotificationType.SUCCESS, 'Deklaracja została dodana.');
       this.reloadDeclarations();
     });
+  }
+
+  public ngOnDestroy() : void {
+    this.result = this.declarations = [];
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.id = 0;
+    this.user_id = 0;
+    this.invalidDates = [];
+    this.deklaracjaForm.reset();
+    this.filterForm.reset();
+    this.addForm.reset();
+    this.showWindow = '';
   }
 }

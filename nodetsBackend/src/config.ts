@@ -150,7 +150,9 @@ export const Queries: QueriesStructure = {
         "payment": {
             "type": Payment.array(),
             "get": `SELECT * FROM platnosci_zsti`,
+            "getById": `SELECT * FROM platnosci_zsti WHERE id_ucznia = :id_ucznia`,
             "add": `INSERT INTO platnosci_zsti (id_ucznia, platnosc, data_platnosci, miesiac, opis, rok) VALUES (:id_ucznia, :platnosc, :data_platnosci, :miesiac, :opis, :rok)`,
+            "update": `UPDATE platnosci_zsti SET platnosc = :platnosc, data_platnosci = :data_platnosci, miesiac = :miesiac, opis = :opis, rok = :rok WHERE id = :id`,
             "delete": `DELETE FROM platnosci_zsti WHERE id = :id`
         },
         "scan": {

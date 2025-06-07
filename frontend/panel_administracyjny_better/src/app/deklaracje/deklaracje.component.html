@@ -86,7 +86,7 @@
       } @else if (showWindow === 'delete') {
         <h3>Ostrzeżenie</h3>
         <p>Czy na pewno chcesz usunąć deklarację z dnia <b>{{ formatDate(deklaracjaForm.get('data_od')?.value!) }}</b> do dnia <b>{{ formatDate(deklaracjaForm.get('data_do')?.value!) }}</b>?</p>
-        <p>Dla osoby <b>{{ globalInfo.activeUser.value?.imie }}</b> <b>{{ globalInfo.activeUser.value?.nazwisko }}</b>?</p>
+        <p>Dla osoby <b>{{ infoService.activeUser.value?.imie }}</b> <b>{{ infoService.activeUser.value?.nazwisko }}</b>?</p>
         <button type="button" (click)="deleteDeclaration()">Usuń</button>
         <button type="button" (click)="closeWindow()">Anuluj</button>
       } @else if (showWindow === 'add') {
