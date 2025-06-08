@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
-import {animateElement} from '../app.component';
 
 @Component({
   selector: 'app-restart',
