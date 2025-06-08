@@ -1,0 +1,85 @@
+* {
+  margin: 0;
+  padding: 0;
+  transition: width 1s cubic-bezier(0.29, 0, 0, 0.94), font-size 1s cubic-bezier(0.29, 0, 0, 0.94);
+}
+
+body {
+  font-family: "Inter", "Roboto", sans-serif;
+  background-color: #00111C;
+  color: #A4C1D5;
+}
+
+:host {
+  background-color: #001A2C;
+  width: 1000px;
+  height: 400px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 3fr 5fr 4fr;
+  border-radius: 20px;
+}
+
+h2 {
+  align-self: center;
+  justify-self: center;
+  font-size: 36px;
+  font-weight: bold;
+  color: #000000;
+}
+
+#user_info {
+  background-color: #001523;
+  border-radius: 10px;
+  width: 500px;
+  height: 250px;
+  align-self: center;
+  justify-self: center;
+  display: grid;
+}
+#user_info h3 {
+  align-self: center;
+  justify-self: center;
+  color: #A4C1D5;
+  font-size: 40px;
+  text-align: center;
+}
+
+p {
+  align-self: center;
+  justify-self: center;
+  color: #000000;
+  font-size: 32px;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+@media screen and (max-width: 1360px) {
+  :host {
+    width: 60%;
+  }
+}
+@media screen and (max-width: 950px) {
+  #user_info {
+    width: 350px;
+  }
+}
+@media screen and (max-width: 650px) {
+  p {
+    font-size: 20px;
+  }
+  #user_info {
+    width: 80%;
+    height: 80%;
+  }
+}
+@media screen and (max-height: 840px) {
+  :host {
+    height: 300px;
+  }
+  #user_info {
+    height: 80%;
+  }
+}
+
+/*# sourceMappingURL=user-data-display.component.css.map */

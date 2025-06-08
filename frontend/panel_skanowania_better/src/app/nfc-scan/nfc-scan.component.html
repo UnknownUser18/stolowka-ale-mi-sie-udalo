@@ -1,0 +1,56 @@
+<h2>
+  Zeskanuj kartę NFC
+  <br> lub wpisz dane
+</h2>
+<!--<form-->
+<!--  (submit)="submitInput($event)"-->
+<!--&gt;-->
+<!--  <input-->
+<!--    type="text"-->
+<!--    placeholder="Id albo Imię i Nazwisko"-->
+<!--    class="nfc_input"-->
+<!--    (blur)="focusInput()"-->
+<!--    [formControl]="control"-->
+<!--    autofocus-->
+<!--    #nfc_input-->
+<!--  >-->
+<!--</form>-->
+
+<form (submit)="submitInput($event)">
+  <mat-form-field>
+    <mat-label>Id albo Imię i Nazwisko</mat-label>
+    <input type="text"
+           placeholder="Wybierz Opcję"
+           aria-label="Number"
+           class="nfc_input"
+           matInput
+           #nfc_input
+           (blur)="focusInput()"
+           [formControl]="control"
+           [matAutocomplete]="auto">
+    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+      @for (option of filteredOptions | async; track option) {
+        <mat-option [value]="option.key_card">{{option.imie}} {{option.nazwisko}} <span class="gray">({{option.key_card}})</span></mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</form>
+
+<!--<form class="example-form">-->
+<!--  <mat-form-field class="example-full-width">-->
+<!--    <mat-label>Number</mat-label>-->
+<!--    <input type="text"-->
+<!--           placeholder="Pick one"-->
+<!--           aria-label="Number"-->
+<!--           matInput-->
+<!--           [formControl]="myControl"-->
+<!--           [matAutocomplete]="auto">-->
+<!--    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">-->
+<!--      @for (option of filteredOptions | async; track option) {-->
+<!--        <mat-option [value]="option">{{option}}</mat-option>-->
+<!--      }-->
+<!--    </mat-autocomplete>-->
+<!--  </mat-form-field>-->
+<!--</form>-->
+
+

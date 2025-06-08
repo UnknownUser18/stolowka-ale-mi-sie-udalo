@@ -1,0 +1,71 @@
+* {
+  margin: 0;
+  padding: 0;
+  transition: width 1s cubic-bezier(0.29, 0, 0, 0.94), font-size 1s cubic-bezier(0.29, 0, 0, 0.94);
+}
+
+body {
+  font-family: "Inter", "Roboto", sans-serif;
+  background-color: #00111C;
+  color: #A4C1D5;
+}
+
+:host {
+  background-color: #001A2C;
+  width: 700px;
+  height: 250px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  border-radius: 20px;
+}
+
+h2 {
+  grid-column: 1/span 1;
+  grid-row: 1/span 1;
+  align-self: center;
+  text-align: center;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+form {
+  grid-column: 1/span 1;
+  grid-row: 2/span 1;
+  display: grid;
+  width: 80%;
+  justify-self: center;
+  align-self: center;
+}
+
+.nfc_input {
+  width: 85.7142857143%;
+  height: 32%;
+  align-self: center;
+  justify-self: center;
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  text-indent: 15px;
+}
+.nfc_input::placeholder {
+  font-style: italic;
+}
+
+.gray {
+  color: grey;
+  font-style: italic;
+}
+
+@media screen and (max-width: 950px) {
+  :host {
+    width: 400px;
+  }
+}
+@media screen and (max-height: 700px) {
+  :host {
+    height: 200px;
+  }
+}
+
+/*# sourceMappingURL=nfc-scan.component.css.map */

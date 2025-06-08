@@ -2,9 +2,19 @@
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 import {WebSocketServer} from "ws";
-import {Person, envSchema, AbsenceDay, CanceledDay, Card, Scan, Payment, Declaration, QueriesStructure, SuccessResponse} from "./types";
+import {
+    Person,
+    envSchema,
+    AbsenceDay,
+    CanceledDay,
+    Card,
+    Scan,
+    Payment,
+    Declaration,
+    QueriesStructure,
+    SuccessResponse,
+} from "./types";
 import {PoolOptions} from "mysql2/promise";
-// import { createTransport, Transporter } from 'nodemailer';
 
 /** Inicjalizacja loggera
  *  Logi są złożone z:
@@ -82,13 +92,6 @@ export const dbConfig: PoolOptions = {
     connectionLimit: 100,
     queueLimit: 100
 }
-/**
- * Inicjalizacja serwisu obsługującego maile
- * */
-// export const transporter: Transporter = createTransport({
-//     service: 'gmail',
-//     auth: { user: env.SMTP_USER, pass: env.SMTP_PASS },
-// });
 
 /**
  * Statyczne kwerendy podzielone:
@@ -126,19 +129,14 @@ export const Queries: QueriesStructure = {
             "update": `UPDATE deklaracja_zywieniowa_zsti SET id_osoby = :id_osoby, rok_szkolny_id = :rok_szkolny_id, data_od = :data_od, data_do = :data_do, dni = :dni WHERE id = :id;`,
             "delete": `DELETE FROM deklaracja_zywieniowa_zsti WHERE id = :id`
         },
-        "canceledDay": {
-            "type": CanceledDay.array(),
-            "get": `SELECT * FROM dni_nieczynne_stolowki`,
-            "add": `INSERT INTO dni_nieczynne_stolowki (dzien) VALUES(:dzien)`,
-            "delete": `DELETE FROM dni_nieczynne_stolowki WHERE id = :id`
-        },
         "card": {
             "type": Card.array(),
             "get": `SELECT * FROM karty_zsti`,
             "getById": `SELECT * FROM karty_zsti WHERE id_ucznia = :id_ucznia`,
             "add": `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES (:id_ucznia, :key_card, :data_wydania, :ostatnie_uzycie)`,
             "update": `UPDATE karty_zsti SET id_ucznia = :id_ucznia, key_card = :key_card, data_wydania = :data_wydania, ostatnie_uzycie = :ostatnie_uzycie WHERE id = :id`,
-            "delete": `DELETE FROM karty_zsti WHERE id = :id`
+            "delete": `DELETE FROM karty_zsti WHERE id = :id`,
+            "getWithDetails": `SELECT k_z.id, k_z.id_ucznia, k_z.key_card, k_z.data_wydania, k_z.ostatnie_uzycie, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto FROM karty_zsti k_z LEFT JOIN osoby_zsti o_z ON o_z.id = k_z.id_ucznia ORDER BY o_z.nazwisko asc, o_z.imie asc;`
         },
         "absence": {
             "type": AbsenceDay.array(),

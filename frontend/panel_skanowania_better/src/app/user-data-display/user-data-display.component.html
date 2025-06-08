@@ -1,0 +1,20 @@
+<h2>
+  Informacje o Uczniu
+</h2>
+@if (!!data.user && data.user.imie) {
+  <div
+    id="user_info"
+  >
+    <h3>
+      {{ formatName(data.user) }}
+    </h3>
+  </div>
+}
+@if(data.enterInfo) {
+  <p
+    id="rejection_topic"
+  >
+    {{ data.enterInfo.message }}
+  </p>
+}
+

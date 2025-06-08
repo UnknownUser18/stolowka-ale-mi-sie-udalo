@@ -5,7 +5,7 @@
     placeholder="Wpisz imię, nazwisko lub numer karty..."
     [formControl]="searchControl"
     [matAutocomplete]="auto"
-    #cardInput
+    #nfc_input
   />
   <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectUser($event.option.value)" autoActiveFirstOption>
     <mat-option *ngFor="let user of (filteredUsers | async)" [value]="user">

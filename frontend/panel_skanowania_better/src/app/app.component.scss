@@ -1,0 +1,85 @@
+@use '../styles.scss';
+nav{
+  &{
+    height: 80px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-rows: 1fr;
+    background-color: styles.$input_color;
+  }
+  h1{
+    grid-row: 1/span 1;
+    grid-column: 2/span 1;
+    align-self: center;
+    justify-self: center;
+    font-weight: bold;
+    font-size: 40px;
+  }
+  app-clock{
+    grid-row: 1/span 1;
+    grid-column: 3/span 1;
+    align-self: center;
+    justify-self: flex-end;
+    margin-right: 25px;
+  }
+}
+main{
+  &{
+    width: 100%;
+    height: calc(100vh - 80px);
+    display: grid;
+  }
+  app-restart{
+    transition: styles.$std_transition;
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
+  }
+  app-nfc-scan{
+    &{
+      transition: styles.$std_transition;
+      justify-self: center;
+      transform: translateY(100%);
+    }
+    &.loadedUser{
+      transform: translateY(20%);
+    }
+  }
+  app-user-data-display{
+    transition: styles.$std_transition;
+    justify-self: center;
+    position: relative;
+    z-index: -1;
+    transform: translateY(-300%);
+    &.loadedUser{
+      transform: translateY(10%);
+    }
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  nav{
+    grid-template-columns: 1fr 2fr 1fr;
+    h1{
+      font-size: 32px;
+    }
+  }
+}
+@media screen and (max-width: 1020px) {
+  nav{
+    h1{
+      font-size: 26px;
+    }
+  }
+}
+@media screen and (max-width: 830px) {
+  nav{
+    h1{
+      font-size: 32px;
+      span{
+        display: none;
+      }
+    }
+  }
+}

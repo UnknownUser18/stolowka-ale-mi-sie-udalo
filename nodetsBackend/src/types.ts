@@ -133,7 +133,7 @@ export interface QueryCategory {
     add?: string;
     update?: string;
     delete?: string;
-    [key: string]: string | z.ZodSchema | undefined;
+    [key: string]: string | z.ZodSchema | any;
 }
 
 export interface QueriesStructure {
@@ -268,3 +268,27 @@ export const Scan = z.object({
     id_karty: z.number(),
     czas: z.date()
 });
+
+export interface ZstiEmailData{
+    kalendarz: EmailKalendarzData,
+    dane: EmailPersonalData,
+    // deklaracje: {
+    //
+    // }
+}
+export interface EmailKalendarzData{
+    dodaneNieobecnosci: string[],
+    usunieteNieobecnosci: string[]
+}
+export interface EmailPersonalData {
+    imie: string,
+    nazwisko: string,
+    klasa: string,
+    uczeszcza: boolean,
+    miasto: boolean,
+    imie_opiekuna?: string,
+    nazwisko_opiekuna?: string,
+    nr_kierunkowy: string,
+    telefon: string,
+    email: string
+}

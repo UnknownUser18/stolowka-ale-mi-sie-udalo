@@ -10,6 +10,7 @@ import {AutoCompleteComponent} from '../auto-complete/auto-complete.component';
     AutoCompleteComponent
   ],
   templateUrl: './card-input.component.html',
+  standalone: true,
   styleUrl: './card-input.component.css'
 })
 export class CardInputComponent{

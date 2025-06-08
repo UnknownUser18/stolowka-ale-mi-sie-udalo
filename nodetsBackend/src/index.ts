@@ -7,9 +7,17 @@ import {
     ResponsePayload,
     RequestPayload,
     Params,
-    QueriesStructure
+    QueriesStructure, Person,
 } from "./types";
-import { logger, wss, dbConfig, Queries } from './config'
+import {
+    logger,
+    wss,
+    dbConfig,
+    Queries,
+} from './config'
+import {
+    updateZstiData, ZstiData, nullPersonalData, sendEmailAbtKalendarz, sendEmailAbtPersonalData
+} from './email-config';
 logger.info(``);
 logger.info(`Successfully started the server!`);
 logger.info(``);
@@ -48,6 +56,7 @@ async function sendResponse(ws: WebSocket, variable: string, value: any): Promis
 
 function standardizeData(action: ActionType, params: ResponsePayload): string
 {
+    console.warn(action, params)
     return JSON.stringify(
         {
             action,
@@ -57,7 +66,7 @@ function standardizeData(action: ActionType, params: ResponsePayload): string
 }
 
 
-async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<void>
+async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<any>
 {
     let query: string | undefined = undefined;
     try{
@@ -70,12 +79,18 @@ async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<void
         if(params.responseVar)
         {
             if (operation === 'update' || operation === 'delete' || operation === 'add') {
+
                 await sendResponse(ws, params.responseVar, [{ success: rawResult.affectedRows > 0 }]);
             } else {
-                const result = method.type.parse(rawResult);
-                await sendResponse(ws, params.responseVar, result);
+                if(operation === 'get')
+                    await sendResponse(ws, params.responseVar, method.type.parse(rawResult));
+                else
+                    await sendResponse(ws, params.responseVar, rawResult);
             }
         }
+        if(sector === 'zsti')
+            updateZstiData(category, operation, params);
+        return rawResult;
     } catch (error) {
         await sendError(ws, 300, `Failed to handle method`, query);
         logger.error(`Failed to handle method: ${query}`);
@@ -103,7 +118,28 @@ wss.on('connection', async (ws: WebSocket) => {
             logger.error(`Message formatting error: `, {error})
         }
     })
+
+    ws.on('close', () => {
+        Array.from(ZstiData.keys()).forEach(async (key) => {
+            const studentData = ZstiData.get(key)!
+            const studentDetails: Person = (await handleMethod(ws, {
+                method: 'zsti.student.getById',
+                params: {
+                    id: key
+                }
+            }))[0] as Person
+            if(!(studentData.kalendarz.dodaneNieobecnosci.length === 0 && studentData.kalendarz.usunieteNieobecnosci.length === 0)){
+                sendEmailAbtKalendarz(studentData, studentDetails)
+            }
+
+            if(studentData.dane !== nullPersonalData){
+                sendEmailAbtPersonalData(studentData, studentDetails)
+            }
+            ZstiData.delete(key);
+        })
+    })
 })
+
 
 async function sendError(
     ws: WebSocket,
