@@ -1,9 +1,0 @@
-<nav>
-  <h1>Panel Skanowania <span>- Stołówki <img ngSrc="assets/logo.svg" height="60" width="180" alt="ZSTI"></span></h1>
-  <app-clock></app-clock>
-</nav>
-<main #main>
-  <app-nfc-scan (nfcOutput)="loadNfcOutput($event)" [class]="loadedUser ? 'loadedUser': ''"></app-nfc-scan>
-  <app-user-data-display [class]="loadedUser ? 'loadedUser': ''" [data]="{user, enterInfo}"></app-user-data-display>
-  <app-restart [isDisabled]="!loadedUser" (restart)="unloadUser()"></app-restart>
-</main>

@@ -1,25 +1,42 @@
-.clock {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 10px 15px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  font-size: 18px;
-  font-family: 'Arial', sans-serif;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  letter-spacing: 1px;
-  display: inline-block;
-  white-space: nowrap;
+* {
+  margin: 0;
+  padding: 0;
+  transition: width 1s cubic-bezier(0.29, 0, 0, 0.94), font-size 1s cubic-bezier(0.29, 0, 0, 0.94);
 }
 
-.clock .day {
-  font-weight: bold;
-  color: #f1c40f;
+body {
+  font-family: "Inter", "Roboto", sans-serif;
+  background-color: #00111C;
+  color: #A4C1D5;
 }
 
-.clock .time {
-  font-weight: bold;
-  color: #1abc9c;
+:host {
+  display: grid;
+  width: fit-content;
+  height: fit-content;
 }
+
+span {
+  font-weight: normal;
+  font-size: 32px;
+  align-self: center;
+  justify-self: center;
+}
+
+@media screen and (max-width: 1020px) {
+  span {
+    font-size: 24px;
+  }
+}
+@media screen and (max-width: 740px) {
+  span {
+    font-size: 20px;
+  }
+}
+@media screen and (max-width: 635px) {
+  span {
+    font-size: 16px;
+  }
+}
+
+/*# sourceMappingURL=clock.component.css.map */
