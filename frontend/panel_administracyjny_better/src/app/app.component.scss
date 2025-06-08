@@ -1,0 +1,184 @@
+@use 'index' as i;
+
+app-nav {
+  grid-column: 2 / span 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  padding: 10px 0 0 0;
+  background-color: var(--color-2);
+  place-items: center;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-3);
+  grid-row: 1 / span 2;
+}
+
+nav .osoby, .main-page {
+  transition: transform 0.5s i.$cubic-bezier;
+
+  &.done {
+    transform: translateX(0);
+  }
+}
+
+nav .osoby {
+  transform: translateX(30vw);
+}
+
+.main-page {
+  transform: translateX(-30vw);
+  margin-top: 5%;
+
+  li {
+    @include i.font-500(var(--color-13));
+    transition: i.transition(background-color);
+    margin: 15% auto;
+    width: 90%;
+    border-radius: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      background-color: var(--color-5);
+    }
+  }
+}
+
+.osoby {
+  h1, p {
+    text-align: center;
+  }
+
+  h1 {
+    @include i.font(3em, 600, var(--color-13));
+    margin-bottom: 5px;
+  }
+
+  p {
+    @include i.font(1.5em, 200);
+    font-family: 'Roboto', sans-serif;
+  }
+}
+
+.logo {
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin: 10px 0 0 10px;
+}
+
+.round {
+  @extend .logo;
+  background-color: var(--color-12);
+}
+
+.scrollable {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: calc(100vh - 10%);
+  padding: 5px 10px;
+}
+
+main {
+  @include i.flex-center(column)
+}
+
+ol i[class^="fa-"], ul i[class^="fa-"] {
+  font-size: 1.2em;
+  margin-right: 10px;
+  color: var(--color-12);
+}
+
+.exit {
+  @include i.clickable-hover($h-color: var(--color-13));
+  margin: 5% 0 5% 10px;
+  font-size: 3em;
+}
+
+.table {
+  padding-bottom: 2%;
+  width: 95%;
+  margin: 10% auto;
+  border-radius: 10px;
+  background-color: var(--color-4);
+
+  h1 {
+    @include i.font(2em, 500, var(--color-13));
+    transition: i.transition(background-color);
+    display: inline-grid;
+    width: 100%;
+    grid-template-columns: auto 1fr;
+    place-items: center;
+    padding: 5px 10px;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    background-color: var(--color-5);
+    margin-bottom: 2%;
+
+    i {
+      color: var(--color-12);
+    }
+
+    &:hover {
+      background-color: var(--color-6);
+    }
+  }
+
+  ol {
+    counter-reset: list;
+  }
+
+  li {
+    @include i.font(1.8em, 400, var(--color-13));
+    transition: i.transition(background-color);
+    width: calc(100% - 20px);
+    padding: 10px;
+    border-radius: 10px;
+    counter-increment: list;
+    position: relative;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    margin: 5px 0 5px 10px;
+
+    &.placeholder {
+      cursor: wait;
+      height: 50px;
+
+      &::before {
+        content: '';
+      }
+    }
+
+    &.selected {
+      background-color: var(--color-9);
+    }
+
+    &::before {
+      font-weight: 200;
+      content: counter(list) '. ';
+    }
+
+    &:hover:not(.selected) {
+      background-color: var(--color-7);
+    }
+
+    i {
+      @include i.font(0.7em, 300);
+      margin-right: 16px;
+    }
+  }
+
+  h3 {
+    @include i.font(0.6em, 300);
+    display: inline-block;
+  }
+}

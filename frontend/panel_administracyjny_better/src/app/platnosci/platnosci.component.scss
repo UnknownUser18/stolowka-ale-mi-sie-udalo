@@ -1,0 +1,19 @@
+@use 'index' as i;
+@use 'mixed-apps';
+h2 span {
+  font-size: 0.6em;
+}
+form {
+  @include i.flex-center(column, space-between, start);
+  input {
+    transition: i.transition(outline-color), i.transition(color);
+    outline: 2px solid transparent;
+    &:focus {
+      color: var(--color-13);
+      outline-color: var(--color-10);
+    }
+  }
+}
+.add button, .filter button {
+  margin-top: 10px;
+}

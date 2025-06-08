@@ -1,0 +1,66 @@
+@use 'index' as i;
+@use 'mixed-apps';
+
+form {
+  @include i.flex-center(column, space-between, start);
+  margin-right: 5%;
+  gap: 25px;
+  height: 100%;
+
+  h3 {
+    @include i.font(1.5em, 500, var(--color-13));
+  }
+
+  .checkbox-label {
+    user-select: none;
+    cursor: pointer;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: space-between;
+    width: clamp(200px, 60%, 350px);
+
+    input {
+      display: none;
+    }
+
+    div {
+      @include i.flex-center;
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      background-color: var(--color-4);
+      cursor: pointer;
+      position: relative;
+    }
+
+    input[type="checkbox"]:checked + div::after {
+      content: '✓';
+      font-size: 1.5em;
+      width: 24px;
+      height: 24px;
+      border-radius: 3px;
+      position: absolute;
+      top: -2px;
+      left: 2px;
+    }
+  }
+}
+
+
+.window {
+  form .checkbox-label {
+    span {
+      margin-bottom: 0;
+    }
+
+    div {
+      margin-top: 0;
+      padding: 0;
+    }
+
+    input[type="checkbox"]:checked + div::after {
+      top: -3px;
+      left: 1px;
+    }
+  }
+}

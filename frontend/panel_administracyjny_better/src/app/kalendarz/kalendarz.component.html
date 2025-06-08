@@ -1,0 +1,98 @@
+<app-date-changer></app-date-changer>
+<section #section>
+  <div class="select-buttons"></div>
+  <main>
+    <div class="weekdays">
+      @for (i of ['Pon','Wto','Śro','Czw','Pią','Sob','Nie']; track i) {
+        <span>{{ i }}</span>
+      }
+    </div>
+  </main>
+  <div>
+    <button (click)="sendAbsence()">Prześlij</button>
+  </div>
+  <div class="diff">
+    <div>
+      <h3>Dodane nieobecności:</h3>
+      <table>
+        @for (day of infoService.selectedDays.added.slice(Math.max(0, infoService.selectedDays.added.length - 4)).reverse(); track day; let last = $last) {
+          <tr>
+            <td>{{ formatDate(day) }}</td>
+            @if (last) {
+              <td><i class="fa-solid fa-up-right-and-down-left-from-center" (click)="applyAnimation(AbsenceWindowStatus.DODANE)"></i></td>
+            }
+          </tr>
+        } @empty {
+          <tr class="empty">
+            <td>Brak dodanych nieobecności...</td>
+          </tr>
+        }
+      </table>
+    </div>
+    <div>
+      <h3>Usunięte nieobecności:</h3>
+      <table>
+        @for (day of infoService.selectedDays.removed.slice(Math.max(0, infoService.selectedDays.removed.length - 4)).reverse(); track day; let last = $last) {
+          <tr>
+            <td>{{ formatDate(day) }}</td>
+            @if (last) {
+              <td><i class="fa-solid fa-up-right-and-down-left-from-center" (click)="applyAnimation(AbsenceWindowStatus.USUNIETE)"></i></td>
+            }
+          </tr>
+        } @empty {
+          <tr class="empty">
+            <td>Brak usuniętych nieobecności...</td>
+          </tr>
+        }
+      </table>
+    </div>
+  </div>
+</section>
+@if (openStatus !== AbsenceWindowStatus.CLOSED) {
+  <section class="absenceWindow" #absencesMenu>
+    <div>
+      @if (openStatus === AbsenceWindowStatus.DODANE) {
+        <h3>Dodane nieobecności</h3>
+      } @else if (openStatus === AbsenceWindowStatus.USUNIETE) {
+        <h3>Usunięte nieobecności</h3>
+      }
+      <table>
+        <thead>
+          <tr>
+            <th>Numer</th>
+            <th>Data</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @if(openStatus === AbsenceWindowStatus.DODANE) {
+            @for (absence of infoService.selectedDays.added; track absence; let index = $index) {
+              <tr>
+                <td>{{ index + 1 }}</td>
+                <td>{{ formatDate(absence, true) }}</td>
+                <td><button (click)="removeAbsence(absence)">Usuń</button></td>
+              </tr>
+            } @empty {
+              <tr class="empty">
+                <td>Brak dodanych nieobecności...</td>
+              </tr>
+            }
+          } @else if(openStatus === AbsenceWindowStatus.USUNIETE) {
+            @for (absence of infoService.selectedDays.removed; track absence; let index = $index) {
+              <tr>
+                <td>{{ index + 1 }}</td>
+                <td>{{ formatDate(absence, true) }}</td>
+                <td><button (click)="removeAbsence(absence)">Usuń</button></td>
+              </tr>
+            } @empty {
+              <tr class="empty">
+                <td>Brak dodanych nieobecności...</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+      <i class="fa-solid fa-xmark close" (click)="closeAbsenceWindow()"></i>
+    </div>
+  </section>
+}
