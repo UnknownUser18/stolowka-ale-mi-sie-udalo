@@ -1,205 +1,193 @@
-import {Component, ElementRef} from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import {CardInputComponent} from './card-input/card-input.component';
-import {CardOutputComponent} from './card-output/card-output.component';
-import {DataBaseService} from './data-base.service';
+import {Component, ElementRef, ViewChild} from '@angular/core';
+import {NfcScanComponent} from './nfc-scan/nfc-scan.component';
 import {ClockComponent} from './clock/clock.component';
+import {UserDataDisplayComponent} from './user-data-display/user-data-display.component';
+import {RestartComponent} from './restart/restart.component';
+import {AbsenceDay, CardDetails, DataService, Declaration, Payment, Scan} from './data.service';
+import {NgOptimizedImage} from '@angular/common';
+
+export interface affirmationInfo{
+  message: string;
+  isAbleToEnter: boolean;
+}
+
+export const animateElement = async(element: HTMLElement, remove: boolean = false): Promise<boolean> => {
+  return new Promise((resolve, reject): void => {
+    if (!element) {
+      reject('Element not found');
+      return;
+    }
+    element.classList.toggle('done', !remove);
+    element.addEventListener('transitionend', (): void => {
+      resolve(true);
+    });
+  });
+};
 
 @Component({
   selector: 'app-root',
-  imports: [CardInputComponent, CardOutputComponent, ClockComponent],
+  imports: [
+    NfcScanComponent,
+    ClockComponent,
+    UserDataDisplayComponent,
+    RestartComponent,
+    NgOptimizedImage,
+  ],
   templateUrl: './app.component.html',
   standalone: true,
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'panel_skanowania2';
-  DOMelement: any | undefined;
-  constructor(private dataService: DataBaseService, private el: ElementRef) {
-    this.DOMelement = this.el.nativeElement;
-    setTimeout(() => {
-      (this.DOMelement?.querySelector('app-card-input') as HTMLElement).style.display = 'block';
-      (this.DOMelement?.querySelector('app-card-output') as HTMLElement).style.display = 'none';
-    }, 100)
+  @ViewChild('main') main!: ElementRef;
+  title = 'Panel Skanowania';
+  loadedUser: boolean = false;
+  user: CardDetails | undefined;
+  enterInfo: affirmationInfo = {message: "nothing happened", isAbleToEnter: true};
+  today: Date = new Date();
+
+  constructor(private dataService: DataService) {
+    this.dataService.WS_OPENED.subscribe(async () => {await this.fetchInitialData()})
   }
 
-  handleCardInput(inputEvent: string): void
-  {
-    console.log(inputEvent);
-    (this.DOMelement?.querySelector('app-card-input') as HTMLElement).style.display = 'none';
-    (this.DOMelement?.querySelector('app-card-output') as HTMLElement).style.display = 'block';
-    this.dataService.keycardInput.next(inputEvent);
+  private async fetchInitialData(): Promise<void> {
+    await this.dataService.request('zsti.payment.get', {}, 'paymentList');
+    await this.dataService.request('zsti.scan.get', {}, 'scanList');
+    await this.dataService.request('zsti.absence.get', {}, 'absenceDayList');
+    await this.dataService.request('zsti.declaration.get', {}, 'declarationList');
+    await this.dataService.request('zsti.card.getWithDetails', {}, "cardDetailsList")
+    // alert('All initial data is fetched!')
   }
 
-  handleReset() : void
-  {
-    (this.DOMelement?.querySelector('app-card-input') as HTMLElement).style.display = 'block';
-    (this.DOMelement?.querySelector('app-card-output') as HTMLElement).style.display = 'none';
+  public unloadUser(): void {
+    this.loadedUser = false;
+    console.log('loadedUser');
   }
-}
 
-export function toBinary(num: number, len: number): string {
-  console.log('num: ', num, 'len: ', len);
-  let binary : string = Number(num).toString(2)
-  for (let i : number = 0; i < len - binary.length; i++) {
-    binary = '0' + binary
+  public async loadNfcOutput(input: string) {
+    console.log(input);
+    this.user = this.findUser(await this.dataService.request('zsti.card.getWithDetails', {}, "cardDetailsList"), input)
+    console.log(this.user);
+    if (!this.user) {
+      this.noUserFound();
+      return;
+    }
+    const [declaration, absences, payments, scans] =
+      [this.getDeclarationForUser(this.user),
+      this.getAbsenceForUser(this.user),
+      this.getPaymentsForUser(this.user),
+      this.getScansForUser(this.user)];
+    this.enterInfo = this.parseUserData(declaration, absences, payments, scans)
+    this.loadedUser = true;
+    console.log(this.user, this.enterInfo);
+    if(this.enterInfo.isAbleToEnter)
+      this.scanUser(this.user).then(() => {
+        this.fetchInitialData()
+      })
+    else
+      await this.fetchInitialData()
   }
-  return binary;
-}
 
-export class daneOsobowe{
-  name: string;
-  surname: string;
-  znaleziony?: boolean
-  constructor(name: string, surname: string, znaleziony?: boolean) {
-    this.name = name;
-    this.surname = surname;
-    if(znaleziony) this.znaleziony = znaleziony;
-    else this.znaleziony = false;
+  private dateToDBDate(date: Date): string {
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
   }
-  setAttributes(name: string, surname: string, znaleziony?: boolean) {
-    this.name = name;
-    this.surname = surname;
-    if(znaleziony) this.znaleziony = znaleziony;
-    else this.znaleziony = false;
-  }
-}
 
-export interface Osoba {
-  imie : string | undefined;
-  nazwisko : string | undefined;
-  uczeszcza : number | undefined;
-  assignValues(student : any) : this;
-}
-export class OsobaZSTI implements Osoba {
-  id: number | undefined;
-  imie: string | undefined;
-  nazwisko: string | undefined;
-  typ_osoby_id: number | undefined;
-  klasa: string | undefined;
-  uczeszcza: number | undefined;
-  constructor(id? : number, imie?: string, nazwisko?: string, typ_osoby_id?: number, klasa?: string, uczeszcza?: number) {
-    this.id = id;
-    this.imie = imie;
-    this.nazwisko = nazwisko;
-    this.typ_osoby_id = typ_osoby_id;
-    this.klasa = klasa;
-    this.uczeszcza = uczeszcza;
+  private async scanUser(user: CardDetails) {
+    this.dataService.request('zsti.scan.add', {
+     id_karty: user.id,
+      czas: this.dateToDBDate(new Date())
+    }).then(() => {
+      console.log('promise resolved')
+      return this.dataService.request('zsti.scan.get', {}, 'scanList');
+    })
   }
-  assignValues(student : OsobaZSTI) : this {
-    this.id = student.id;
-    this.imie = student.imie;
-    this.nazwisko = student.nazwisko;
-    this.typ_osoby_id = student.typ_osoby_id;
-    this.klasa = student.klasa;
-    this.uczeszcza = student.uczeszcza;
-    return this;
-  }
-}
-export class OsobaInternat implements Osoba {
-  id : number | undefined;
-  imie: string | undefined;
-  nazwisko: string | undefined;
-  uczeszcza: number | undefined;
-  grupa: string | undefined;
-  constructor(id? : number, imie?: string, nazwisko?: string, uczeszcza?: number, grupa?: string) {
-    this.id = id;
-    this.imie = imie;
-    this.nazwisko = nazwisko;
-    this.uczeszcza = uczeszcza;
-    this.grupa = grupa;
-  }
-  assignValues(student : OsobaInternat) : this {
-    this.id = student.id
-    this.imie = student.imie;
-    this.nazwisko = student.nazwisko;
-    this.uczeszcza = student.uczeszcza;
-    this.grupa = student.grupa;
-    return this;
-  }
-}
-interface GetDisabledDays {
-  dzien_wypisania: string;
-  uwagi: string;
-}
-export class GetZSTIDisabledDays implements GetDisabledDays {
-  constructor(
-    public dzien_wypisania: string,
-    public osoby_zsti_id: number,
-    public uwagi: string
-  ) {}
-}
-export class GetInternatDisabledDays implements GetDisabledDays {
-  constructor(
-    public posilki_id : number,
-    public dzien_wypisania : string,
-    public osoby_internat_id : number,
-    public uwagi : string,
-  ) {}
-}
-export class Deklaracja {
-  data_od : string | undefined;
-  data_do : string | undefined;
-  rok_szkolny_id : number | undefined;
-  rok_szkolny : string | undefined;
-  id_osoby : number | undefined;
-  constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number) {
-    this.data_od = data_od;
-    this.data_do = data_do;
-    this.rok_szkolny_id = rok_szkolny_id;
-    this.id_osoby = id_osoby;
-  }
-  assignValues(declaration : DeklaracjaZSTI | DeklaracjaInternat) : this   {
-    this.data_od = declaration.data_od;
-    this.data_do = declaration.data_do;
-    this.rok_szkolny_id = declaration.rok_szkolny_id;
-    this.id_osoby = declaration.id_osoby;
-    return this;
-  }
-}
-export class DeklaracjaZSTI extends Deklaracja {
-  dni: {type : string, data : number[] }| undefined;
-  constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number, dni?: {type : string, data : number[] }) {
-    super(data_od, data_do, rok_szkolny_id, id_osoby);
-    this.dni = dni;
-  }
-  override assignValues(declaration : DeklaracjaZSTI) : this {
-    super.assignValues(declaration);
-    this.dni = declaration.dni;
-    return this;
-  }
-}
-export class DeklaracjaInternat extends Deklaracja {
-  wersja: number | undefined;
-  constructor(data_od?: string, data_do?: string, rok_szkolny_id?: number, id_osoby?: number, wersja?: number) {
-    super(data_od, data_do, rok_szkolny_id, id_osoby);
-    this.wersja = wersja;
-  }
-  override assignValues(declaration : DeklaracjaInternat) : this {
-    super.assignValues(declaration);
-    this.wersja = declaration.wersja;
-    return this;
-  }
-}
-export interface DisabledDays{
-  id:number,
-  dzien: string
-}
 
-export interface Payments{
-  id: number,
-  id_ucznia: number,
-  platnosc: number,
-  data_platnosci: string,
-  miesiac: number,
-  opis: string,
-  rok: number
-}
+  private formatAbsence(date: Date): string{
+    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+  }
 
-export interface Cards{
-  id: number,
-  id_ucznia: number,
-  key_card:number,
-  data_wydania: string,
-  ostatnie_uzycie:string
+  private checkAbsences(absences: AbsenceDay[]): boolean {
+    return !absences.find((absence: AbsenceDay) =>
+      (this.formatAbsence(new Date(absence.dzien_wypisania)) === this.formatAbsence(this.today))
+    )
+  }
+
+  private checkDeclaration(declaration: Declaration): boolean {
+    const day = this.today.getDay();
+    if([0, 6].includes(day)) return false;
+    return declaration.dni[day - 1] === '1';
+  }
+
+  private checkPayments(payments: Payment[], user: CardDetails): boolean {
+    if(user.miasto) return true;
+    return !payments.find((payment: Payment) => (payment.miesiac === (this.today.getMonth() + 1)));
+  }
+
+  private checkScans(scans: Scan[]){
+    return !scans.find((scan: Scan) =>
+      (this.formatAbsence(new Date(scan.czas)) === this.formatAbsence(this.today))
+    )
+  }
+
+  private checkDate(){
+    const date = new Date();
+    const start = (new Date());
+    start.setHours(12, 0, 0, 0);
+    const end = (new Date());
+    end.setHours(18, 0, 0,0);
+    return (start <= date) && (date <= end);
+  }
+
+  private parseUserData(declaration?: Declaration, absences: AbsenceDay[] = [], payments: Payment[] = [], scans: Scan[] = []): affirmationInfo {
+    let info: affirmationInfo = {message: "Uczeń może wejść", isAbleToEnter: true};
+    if (!declaration)
+      return {message: 'Uczeń nie posiada deklaracji', isAbleToEnter: false};
+    if(!this.checkScans(scans))
+      info = {message: 'Uczeń już odebrał obiad w dniu dzisiejszym', isAbleToEnter: false};
+    if(!this.checkPayments(payments, this.user!))
+      info = {message: 'Uczeń nie zapłacił za obiad w dniu dzisiejszym', isAbleToEnter: false};
+    if(!this.checkAbsences(absences))
+      info = {message: 'Uczeń jest zwolniony z obiadów w dniu dzisiejszym', isAbleToEnter: false};
+    if(!this.checkDeclaration(declaration))
+      info = {message: 'Uczeń nie je obiadów w ten dzień tygodnia', isAbleToEnter: false};
+    if(!this.checkDate())
+      info = {message: 'Poza godzinami obiadowymi', isAbleToEnter: false};
+    return info;
+  }
+
+  noUserFound() {
+    this.user = {id: 0, imie: 'Nie znaleziono', nazwisko: 'ucznia :/', uczeszcza: false, typ_osoby_id: 0, id_ucznia: 0, klasa: '', ostatnie_uzycie: '', data_wydania: '', key_card: 0, miasto: false}
+    this.enterInfo = {message: 'Wprowadzono złe ID lub napotkano nieznany błąd', isAbleToEnter: false};
+    this.loadedUser = true;
+  }
+
+  public findUser(list: CardDetails[], input: string): CardDetails | undefined {
+    console.table(list);
+
+    return list.find((userCard: CardDetails) => userCard.key_card.toString() === input);
+  }
+
+  private getDeclarationForUser(user: CardDetails): Declaration | undefined {
+    return this.dataService.get('declarationList')?.find((declaration: Declaration) =>
+      (new Date(declaration.data_od) <= this.today && this.today <= new Date(declaration.data_do)) &&
+      (declaration.id_osoby === user.id_ucznia)
+    )
+  }
+
+  private getAbsenceForUser(user: CardDetails): Array<AbsenceDay> | undefined {
+    return this.dataService.get('absenceDayList')?.filter((absDay: AbsenceDay) =>
+      (absDay.osoby_zsti_id == user.id_ucznia)
+    )
+  }
+
+  private getPaymentsForUser(user: CardDetails): Array<Payment> | undefined {
+    return this.dataService.get('paymentList')?.filter((payment: Payment) =>
+      (payment.id_ucznia === user.id_ucznia)
+    )
+  }
+
+  private getScansForUser(user: CardDetails): Array<Scan> | undefined {
+    return this.dataService.get('scanList')?.filter((scan: Scan) =>
+      (scan.id_karty === user.id)
+    )
+  }
 }

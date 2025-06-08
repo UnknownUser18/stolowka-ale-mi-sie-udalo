@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CardInputComponent } from './card-input.component';
+import { RestartComponent } from './restart.component';
 
-describe('CardInputComponent', () => {
-  let component: CardInputComponent;
-  let fixture: ComponentFixture<CardInputComponent>;
+describe('RestartComponent', () => {
+  let component: RestartComponent;
+  let fixture: ComponentFixture<RestartComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CardInputComponent]
+      imports: [RestartComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CardInputComponent);
+    fixture = TestBed.createComponent(RestartComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

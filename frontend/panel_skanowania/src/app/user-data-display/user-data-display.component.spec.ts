@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CardOutputComponent } from './card-output.component';
+import { UserDataDisplayComponent } from './user-data-display.component';
 
-describe('CardOutputComponent', () => {
-  let component: CardOutputComponent;
-  let fixture: ComponentFixture<CardOutputComponent>;
+describe('UserDataDisplayComponent', () => {
+  let component: UserDataDisplayComponent;
+  let fixture: ComponentFixture<UserDataDisplayComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CardOutputComponent]
+      imports: [UserDataDisplayComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CardOutputComponent);
+    fixture = TestBed.createComponent(UserDataDisplayComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

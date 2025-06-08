@@ -1,0 +1,72 @@
+@use '../../styles.scss';
+:host {
+  background-color: styles.$blocks_fill_color;
+  width: 1000px;
+  height: 400px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 3fr 5fr 4fr;
+  border-radius: 20px;
+}
+h2{
+  align-self: center;
+  justify-self: center;
+  font-size: 36px;
+  font-weight: bold;
+  color: styles.$black;
+}
+#user_info{
+  &{
+    background-color: styles.$input_color;
+    border-radius: 10px;
+    width: 500px;
+    height: 250px;
+    align-self: center;
+    justify-self: center;
+    display: grid;
+  }
+  h3{
+    align-self: center;
+    justify-self: center;
+    color: styles.$text_color;
+    font-size: 40px;
+    text-align: center;
+  }
+}
+p{
+  align-self: center;
+  justify-self: center;
+  color: styles.$black;
+  font-size: 32px;
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+@media screen and (max-width: 1360px) {
+  :host{
+    width: 60%;
+  }
+}
+
+@media screen and (max-width: 950px) {
+  #user_info{
+    width: 350px;
+  }
+}
+@media screen and (max-width: 650px) {
+  p{
+    font-size: 20px;
+  }
+  #user_info{
+    width: 80%;
+    height: 80%;
+  }
+}
+@media screen and (max-height: 840px){
+  :host{
+    height: 300px;
+  }
+  #user_info{
+    height: 80%;
+  }
+}

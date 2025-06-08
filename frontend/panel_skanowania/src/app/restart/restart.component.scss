@@ -1,0 +1,42 @@
+@use '../../styles.scss';
+button{
+  &{
+    transition: styles.$std_transition;
+    all: unset;
+    width: 96px;
+    height: 96px;
+    background-color: styles.$blocks_fill_color;
+    border-radius: 8px;
+    display: grid;
+  }
+  &:disabled{
+    background-color: styles.$grayed_text;
+    cursor: not-allowed;
+  }
+  &:not(:disabled){
+    cursor: pointer;
+  }
+}
+mat-icon{
+  &{
+    transition: styles.$std_transition;
+    display: block;
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    align-self: center;
+    justify-self: center;
+
+  }
+}
+@media screen and ((max-width: 1050px) or (max-height: 650px)){
+  button{
+    width: 64px;
+    height: 64px;
+  }
+  mat-icon{
+    width: 42px;
+    height: 42px;
+    font-size: 42px;
+  }
+}

@@ -1,0 +1,19 @@
+$text_color: #A4C1D5;
+$grayed_text: #395368;
+$black: #000000;
+$white: #ffffff;
+$bg_color: #00111C;
+$blocks_fill_color: #001A2C;
+$input_color: #001523;
+$nav_color: $input_color;
+$std_transition: transform 0.5s cubic-bezier(.29,0,0,.94), width 1s cubic-bezier(.29,0,0,.94), height 1s cubic-bezier(.29,0,0,.94), font-size 1s cubic-bezier(.29,0,0,.94);
+*{
+  margin: 0;
+  padding: 0;
+  transition: width 1s cubic-bezier(.29,0,0,.94), font-size 1s cubic-bezier(.29,0,0,.94);
+}
+body{
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background-color: $bg_color;
+  color: $text_color;
+}

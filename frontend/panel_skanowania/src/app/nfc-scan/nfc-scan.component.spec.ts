@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AutoCompleteComponent } from './auto-complete.component';
+import { NfcScanComponent } from './nfc-scan.component';
 
-describe('AutoCompleteComponent', () => {
-  let component: AutoCompleteComponent;
-  let fixture: ComponentFixture<AutoCompleteComponent>;
+describe('NfcScanComponent', () => {
+  let component: NfcScanComponent;
+  let fixture: ComponentFixture<NfcScanComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AutoCompleteComponent]
+      imports: [NfcScanComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AutoCompleteComponent);
+    fixture = TestBed.createComponent(NfcScanComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

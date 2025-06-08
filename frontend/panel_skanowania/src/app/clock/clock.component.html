@@ -1,5 +1,1 @@
-<p class="clock">
-  {{ currentTime.getFullYear() }}-{{ currentTime.getMonth() + 1 }}-{{ currentTime.getDate() }}
-  <span class="day">{{ dniTygodnia[currentTime.getDay()] }}</span>,
-  <span class="time">{{ currentTime.getHours() }}:{{ dataService.toLength(currentTime.getMinutes().toString(), 2, '0') }}:{{ dataService.toLength(currentTime.getSeconds().toString(), 2, '0') }}</span>
-</p>
+<span>{{ time }}</span>

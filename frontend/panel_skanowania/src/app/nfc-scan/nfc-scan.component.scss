@@ -1,0 +1,59 @@
+@use '../../styles.scss';
+:host {
+  background-color: styles.$blocks_fill_color;
+  width: 700px;
+  height: 250px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(2, 1fr);
+  border-radius: 20px;
+}
+
+h2{
+  grid-column: 1/span 1;
+  grid-row: 1/span 1;
+  align-self: center;
+  text-align: center;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+form {
+  grid-column: 1/span 1;
+  grid-row: 2/span 1;
+  display: grid;
+  width:80%;
+  justify-self: center;
+  align-self: center;
+}
+
+.nfc_input{
+  &{
+    width: calc(600%/7);
+    height: 32%;
+    align-self: center;
+    justify-self: center;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    text-indent: 15px;
+  }
+  &::placeholder {
+    font-style: italic;
+  }
+}
+.gray{
+  color: grey;
+  font-style: italic;
+}
+
+@media screen and (max-width: 950px){
+  :host{
+    width: 400px;
+  }
+}
+@media screen and (max-height: 700px){
+  :host{
+    height: 200px;
+  }
+}
