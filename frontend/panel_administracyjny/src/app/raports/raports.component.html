@@ -1,0 +1,52 @@
+@if (router.url.includes('/raporty/')) {
+  @switch (router.url) {
+    @case ('/raporty/korekty') {
+      <form [formGroup]="korektyForm">
+        <label>
+          <span>Data od:</span>
+          <input type="date" formControlName="data_od">
+        </label>
+        <label>
+          <span>Data do:</span>
+          <input type="date" formControlName="data_do">
+        </label>
+        <button type="submit" (click)="generateKorektyReport()">Generuj raport</button>
+      </form>
+    }
+  }
+  <main>
+    @defer (when result) {
+      @if (router.url === '/raporty/korekty') {
+        <table>
+          <thead>
+          <tr>
+            <th>Numer</th>
+            <th>Imie</th>
+            <th>Nazwisko</th>
+            <th>Data korekty</th>
+          </tr>
+          </thead>
+          <tbody>
+          @for (korekta of result; track korekta.id; let i = $index) {
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>{{ korekta.imie }}</td>
+              <td>{{ korekta.nazwisko }}</td>
+              <td>{{ korekta.dzien_wypisania | date : 'pl-PL' }}</td>
+            </tr>
+          }
+          </tbody>
+        </table>
+      }
+    } @placeholder (minimum 500ms) {
+      <h2>Nie wygenerowano jeszcze raportu...</h2>
+      <p>Wybierz opcje u góry aby wygenerować.</p>
+    }
+  </main>
+
+} @else {
+  <div class="raports">
+    <h1>Wybierz raport</h1>
+    <p>Wybierz raport z menu po lewej stronie.</p>
+  </div>
+}

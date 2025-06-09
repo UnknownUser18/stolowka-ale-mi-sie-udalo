@@ -124,6 +124,7 @@ export const Queries: QueriesStructure = {
         "declaration": {
             "type": Declaration.array(),
             "get": `SELECT * FROM deklaracja_zywieniowa_zsti`,
+            "getWithUser": `SELECT n.id AS "id", dzien_wypisania, imie, nazwisko FROM nieobecnosci_zsti n JOIN osoby_zsti o ON o.id = n.osoby_zsti_id WHERE (:data_od IS NULL OR dzien_wypisania > :data_od) AND (:data_do IS NULL OR dzien_wypisania < :data_do);`,
             "getById": `SELECT * FROM deklaracja_zywieniowa_zsti WHERE id_osoby = :id`,
             "add": `INSERT INTO deklaracja_zywieniowa_zsti (id_osoby, rok_szkolny_id, data_od, data_do, dni) VALUES(:id_osoby, :rok_szkolny_id, :data_od, :data_do, :dni);`,
             "update": `UPDATE deklaracja_zywieniowa_zsti SET id_osoby = :id_osoby, rok_szkolny_id = :rok_szkolny_id, data_od = :data_od, data_do = :data_do, dni = :dni WHERE id = :id;`,

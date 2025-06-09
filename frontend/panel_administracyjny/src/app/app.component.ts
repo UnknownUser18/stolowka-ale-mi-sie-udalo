@@ -7,7 +7,7 @@ import { filter, take } from 'rxjs';
 import { DataService, Student, TypOsoby, WebSocketStatus } from './data.service';
 import { TransitionService } from './transition.service';
 
-export type classNames = 'main-page' | 'osoby' | 'all';
+export type classNames = 'main-page' | 'osoby' | 'raporty' | 'all';
 
 @Component({
   selector: 'app-root',
@@ -94,6 +94,10 @@ export class AppComponent implements AfterViewInit {
             this.persons_zsti = payload;
           });
         });
+        break;
+      case '/raporty':
+        this.infoService.setTitle('Raporty');
+        this.animateElement('raporty').then();
         break;
     }
     if (this.router.url.startsWith('/osoba')) {

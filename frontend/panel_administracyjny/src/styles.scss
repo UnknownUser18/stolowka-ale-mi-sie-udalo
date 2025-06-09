@@ -37,9 +37,11 @@ input, select, option, button {
 button {
   cursor: pointer;
 }
+
 abbr {
   text-decoration: none;
 }
+
 body {
   font-family: 'Inter', 'Roboto', sans-serif;
   background-color: var(--color-1);
@@ -89,18 +91,29 @@ app-deklaracje, app-platnosci {
   row-gap: 10px;
   justify-content: space-between;
   padding: 30px 40px;
+
   & > button {
     place-self: center start;
   }
 }
+
 app-karty {
   @include positional(50%, 50%);
+  @include i.flex-center($direction: column, $justify: space-between);
   background-color: var(--color-3);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   padding: 30px 40px;
 }
+
+app-raports {
+  @include positional(95%, 95%);
+  display: grid;
+  grid-template-rows: 0.25fr 1fr;
+  grid-template-columns: 1fr;
+  row-gap: 20px;
+  background-color: var(--color-3);
+  overflow-x: hidden;
+}
+
 .notification {
   @include i.flex-center(column, start, start);
   transition: i.transition(right, i.$xlong), i.transition(bottom, i.$medium);
@@ -114,6 +127,7 @@ app-karty {
   border-radius: 5px;
   padding: 10px;
   z-index: 3;
+
   &.done {
     right: 0;
   }

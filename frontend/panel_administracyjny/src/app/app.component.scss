@@ -18,7 +18,7 @@ nav {
   grid-row: 1 / span 2;
 }
 
-nav .osoby, .main-page {
+nav .all {
   transition: transform 0.5s i.$cubic-bezier;
 
   &.done {
@@ -26,8 +26,36 @@ nav .osoby, .main-page {
   }
 }
 
-nav .osoby {
+nav .osoby, .raporty {
   transform: translateX(30vw);
+}
+
+.raporty {
+  &.done {
+    transform: translateX(0);
+  }
+
+  li {
+    @extend %main-page-li;
+    margin: 10% auto;
+    background-color: var(--color-4);
+  }
+}
+
+%main-page-li {
+  @include i.font-500(var(--color-13));
+  transition: i.transition(background-color);
+  margin: 15% auto;
+  width: 90%;
+  border-radius: 10px;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background-color: var(--color-5);
+  }
 }
 
 .main-page {
@@ -35,19 +63,7 @@ nav .osoby {
   margin-top: 5%;
 
   li {
-    @include i.font-500(var(--color-13));
-    transition: i.transition(background-color);
-    margin: 15% auto;
-    width: 90%;
-    border-radius: 10px;
-    padding: 10px 15px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-
-    &:hover {
-      background-color: var(--color-5);
-    }
+    @extend %main-page-li;
   }
 }
 
