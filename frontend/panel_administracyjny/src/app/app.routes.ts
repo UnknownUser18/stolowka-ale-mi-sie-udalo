@@ -3,8 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { ZstiComponent } from './users/zsti/zsti.component';
 import { KalendarzComponent } from './users/kalendarz/kalendarz.component';
-import { DaneComponent } from './dane/dane.component';
-import { DeklaracjeComponent } from './deklaracje/deklaracje.component';
+import { DaneComponent } from './users/dane/dane.component';
+import { DeklaracjeComponent } from './users/deklaracje/deklaracje.component';
 import { PlatnosciComponent } from './users/platnosci/platnosci.component';
 import { KartyComponent } from './users/karty/karty.component';
 

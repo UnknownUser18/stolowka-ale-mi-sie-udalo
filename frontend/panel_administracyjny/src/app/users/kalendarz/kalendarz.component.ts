@@ -119,8 +119,9 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
         } else if (this.infoService.selectedDays.added.find(d => this.formatDate(d) === this.formatDate(day))) {
           d.classList.add('selected');
         }
-        const declaration = declarations.find(d => d.data_od <= this.formatDate(day) && d.data_do >= this.formatDate(day));
+        const declaration = declarations.find(d => this.formatDate(new Date(d.data_od)) <= this.formatDate(day) && this.formatDate(new Date(d.data_do)) >= this.formatDate(day));
         const canceledDay = this.closedDays.find(c => this.formatDate(new Date(c.dzien)) === this.formatDate(day));
+        console.log(declarations)
         if (!(declaration && !d.disabled && declaration?.dni.split('')[day.getDay() - 1] === '1')) {
           d.classList.add('no-declaration');
         } else if (canceledDay) {
