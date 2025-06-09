@@ -14,7 +14,7 @@
     <tbody>
       @for (platnosc of result; track platnosc.id; let i = $index) {
         <tr>
-          <td>{{ $index + 1 }}</td>
+          <td>{{ i + 1 }}</td>
           <td>{{ formatMonth(platnosc.miesiac) }} {{ platnosc.rok }}</td>
           <td>{{ platnosc.platnosc }} zł</td>
           <td>

@@ -1,4 +1,4 @@
-@use 'index' as i;
+@use '../../../assets/styles/index' as i;
 
 header {
   @include i.flex-center($justify: space-between, $align: center);

@@ -1,5 +1,5 @@
-@use 'index' as i;
-@use 'mixed-apps';
+@use '../../../assets/styles/index' as i;
+@use '../../../assets/styles/mixed-apps';
 h2 span {
   font-size: 0.6em;
 }

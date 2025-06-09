@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { Card, DataService, WebSocketStatus } from '../data.service';
-import { TransitionService } from '../transition.service';
-import { GlobalInfoService, NotificationType } from '../global-info.service';
+import { Card, DataService, WebSocketStatus } from '../../data.service';
+import { TransitionService } from '../../transition.service';
+import { GlobalInfoService, NotificationType } from '../../global-info.service';
 import { Subject, takeUntil } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 

@@ -1,9 +1,9 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { DataService, Student, TypOsoby, WebSocketStatus } from '../data.service';
+import { DataService, Student, TypOsoby, WebSocketStatus } from '../../data.service';
 import { Router } from '@angular/router';
-import { GlobalInfoService, NotificationType } from '../global-info.service';
+import { GlobalInfoService, NotificationType } from '../../global-info.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TransitionService } from '../transition.service';
+import { TransitionService } from '../../transition.service';
 
 export function wynikString(number : number) : string {
   if (number < 0) console.warn('Number cannot be negative in wynikString function');

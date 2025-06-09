@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { GlobalInfoService, NotificationType } from '../global-info.service';
-import { DataService, Payment, WebSocketStatus } from '../data.service';
-import { TransitionService } from '../transition.service';
+import { GlobalInfoService, NotificationType } from '../../global-info.service';
+import { DataService, Payment, WebSocketStatus } from '../../data.service';
+import { TransitionService } from '../../transition.service';
 import { Subject, takeUntil } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { wynikString } from '../zsti/zsti.component';
