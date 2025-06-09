@@ -1,4 +1,4 @@
-@use 'index' as i;
+@use '../../../../assets/styles/index' as i;
 
 span {
   @include i.font-500;
