@@ -192,6 +192,7 @@ main {
 
   table {
     @include i.table;
+    max-height: 400px;
     position: relative;
     overflow-y: auto;
     display: grid;

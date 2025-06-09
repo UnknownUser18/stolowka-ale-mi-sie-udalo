@@ -1,6 +1,6 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy} from '@angular/core';
-import {DataService, Declaration, Student, TypOsoby, WebSocketStatus} from '../data.service';
-import {GlobalInfoService, NotificationType} from '../global-info.service';
+import {DataService, Declaration, Student, TypOsoby, WebSocketStatus} from '../../data.service';
+import {GlobalInfoService, NotificationType} from '../../global-info.service';
 import {Subject} from 'rxjs';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 
@@ -21,16 +21,6 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
   protected declaration : Declaration | undefined;
   protected readonly Number = Number;
 
-  // protected forms  = {
-  //   imie_nazwisko: '',
-  //   klasa: '',
-  //   miasto: false,
-  //   typ_osoby: TypOsoby.UCZEN,
-  //   imie_nazwisko_opiekuna: '',
-  //   telefon: '',
-  //   email: '',
-  //   uczeszcza: true,
-  // }
   protected forms = new FormGroup({
     imie_nazwisko: new FormControl('', [Validators.required, Validators.pattern(/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]+$/)]),
     klasa: new FormControl('', Validators.required),
