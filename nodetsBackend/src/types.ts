@@ -128,7 +128,7 @@ export interface ResponsePayload {
  *
  * */
 export interface QueryCategory {
-    type: z.ZodSchema<any>;
+    type?: z.ZodSchema<any>;
     get: string;
     add?: string;
     update?: string;

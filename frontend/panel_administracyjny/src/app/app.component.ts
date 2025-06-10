@@ -7,7 +7,7 @@ import { filter, take } from 'rxjs';
 import { DataService, Student, TypOsoby, WebSocketStatus } from './data.service';
 import { TransitionService } from './transition.service';
 
-export type classNames = 'main-page' | 'osoby' | 'raporty' | 'all';
+export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne'| 'raporty';
 
 @Component({
   selector: 'app-root',
@@ -99,12 +99,27 @@ export class AppComponent implements AfterViewInit {
         this.infoService.setTitle('Raporty');
         this.animateElement('raporty').then();
         break;
+      case '/cennik':
+        this.infoService.setTitle('Cennik');
+        this.animateElement('cennik').then((): void => {
+        });
+        break;
+      case '/nieczynne':
+        this.infoService.setTitle('Dni Nieczynne');
+        this.animateElement('nieczynne').then((): void => {
+        });
     }
     if (this.router.url.startsWith('/osoba')) {
       this.animateElement('osoby').then((): void => {
         this.database.request('zsti.student.get', {}, 'studentList').then((payload): void => {
           this.persons_zsti = payload;
         });
+      })
+    } else if(this.router.url.startsWith('/cennik')) {
+      this.animateElement('cennik').then((): void => {
+      })
+    } else if(this.router.url.startsWith('/nieczynne')) {
+      this.animateElement('nieczynne').then((): void => {
       })
     }
   }

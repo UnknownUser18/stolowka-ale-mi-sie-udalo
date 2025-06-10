@@ -1,0 +1,62 @@
+<section>
+  <h2>Lista dostępnych deklaracji:</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>Numer</th>
+      <th>Dzień nieczynny</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (canceledDay of canceled_days_zsti; track canceledDay.id; let i = $index) {
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ formatDate(canceledDay.dzien) }}</td>
+          <td>
+            <button (click)="selectPricing(canceledDay)">Wybierz</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="empty">Brak dostępnych dni nieczynnych...</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>
+<form [formGroup]="pricingForm">
+  @defer (when id) {
+    <label>
+      <span>Data Rozpoczęcia : </span>
+      <input type="date" formControlName="dzien" [disabled]="true">
+    </label>
+    <button type="button" (click)="openWindow('delete')">Usuń dzień nieczynny</button>
+  }
+</form>
+<button (click)="openWindow('add')">Dodaj dzień nieczynny</button>
+@if (showWindow !== '') {
+  <section #filter [class]="{'delete': showWindow === 'delete','add': showWindow === 'add'}" class="window">
+    <div>
+      <i class="fa-solid fa-xmark close" (click)="closeWindow()"></i>
+      @if (showWindow === 'delete') {
+        <h3>Ostrzeżenie</h3>
+        <p>Czy na pewno chcesz usunąć dzień nieczynny z dnia: <b>{{ formatDate(pricingForm.get('dzien')?.value!) }}</b> ?</p>
+        <button type="button" (click)="deletePricing()">Usuń</button>
+        <button type="button" (click)="closeWindow()">Anuluj</button>
+      } @else if (showWindow === 'add') {
+        <h3>Dodaj Dzień Nieczynny</h3>
+        <form [formGroup]="addForm">
+          <fieldset>
+            <legend><i class="fa-solid fa-money-bill"></i> Dzień nieczynny:</legend>
+            <label>
+              <span>Data:</span>
+              <input type="date" formControlName="dzien">
+            </label>
+          </fieldset>
+          <button type="button" (click)="addCanceledDay()">Dodaj</button>
+        </form>
+      }
+    </div>
+  </section>
+}

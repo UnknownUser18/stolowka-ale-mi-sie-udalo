@@ -107,12 +107,20 @@ export const Queries: QueriesStructure = {
         },
         "canceledDay": {
             "type": CanceledDay.array(),
-            "get": `SELECT * FROM dni_nieczynne_stolowki`,
+            "get": `SELECT * FROM dni_nieczynne_stolowki ORDER BY dzien`,
             "add": `INSERT INTO dni_nieczynne_stolowki (dzien) VALUES(:dzien)`,
             "delete": `DELETE FROM dni_nieczynne_stolowki WHERE id = :id`
         }
     },
     "zsti": {
+        "pricing":{
+            "get": `SELECT * FROM cennik_zsti ORDER BY data_od;`,
+            "add": `INSERT INTO cennik_zsti (data_od, cena, data_do) VALUES (:data_od, :cena, :data_do);`,
+            "addWOdatado": `INSERT INTO cennik_zsti (data_od, cena, data_do) VALUES (:data_od, :cena, NULL);`,
+            "update": `UPDATE cennik_zsti SET data_od = :data_od, cena = :cena, data_do = :data_do WHERE id = :id;`,
+            "updateWOdatado": `UPDATE cennik_zsti SET data_od = :data_od, data_do = NULL, cena = :cena WHERE id = :id;`,
+            "delete": `DELETE FROM cennik_zsti WHERE id = :id`,
+        },
         "student": {
             "type": Person.array(),
             "get": `SELECT * FROM osoby_zsti ORDER BY nazwisko, imie;`,
@@ -137,7 +145,7 @@ export const Queries: QueriesStructure = {
             "add": `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES (:id_ucznia, :key_card, :data_wydania, :ostatnie_uzycie)`,
             "update": `UPDATE karty_zsti SET id_ucznia = :id_ucznia, key_card = :key_card, data_wydania = :data_wydania, ostatnie_uzycie = :ostatnie_uzycie WHERE id = :id`,
             "delete": `DELETE FROM karty_zsti WHERE id = :id`,
-            "getWithDetails": `SELECT k_z.id, k_z.id_ucznia, k_z.key_card, k_z.data_wydania, k_z.ostatnie_uzycie, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto FROM karty_zsti k_z LEFT JOIN osoby_zsti o_z ON o_z.id = k_z.id_ucznia ORDER BY o_z.nazwisko asc, o_z.imie asc;`
+            "getWithDetails": `SELECT k_z.id, k_z.id_ucznia, k_z.key_card, k_z.data_wydania, k_z.ostatnie_uzycie, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto FROM karty_zsti k_z LEFT JOIN osoby_zsti o_z ON o_z.id = k_z.id_ucznia ORDER BY o_z.nazwisko, o_z.imie;`
         },
         "absence": {
             "type": AbsenceDay.array(),

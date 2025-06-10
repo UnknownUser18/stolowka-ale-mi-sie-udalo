@@ -1,0 +1,92 @@
+<section>
+  <h2>Lista dostępnych deklaracji:</h2>
+  <table>
+    <thead>
+    <tr>
+      <th>Numer</th>
+      <th>Cena</th>
+      <th>Data rozpoczęcia</th>
+      <th>Data zakończenia</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+      @for (price of pricing_zsti; track price.id; let i = $index) {
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ formatPrice(price.cena) }}</td>
+          <td>{{ formatDate(price.data_od) }}</td>
+          @if(price.data_do)
+          {
+            <td>{{ formatDate(price.data_do)}}</td>
+          } @else{
+            <td>Brak daty końcowej</td>
+          }
+          <td>
+            <button (click)="selectPricing(price)">Wybierz</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td class="empty">Brak dostępnych cenników...</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</section>
+<form [formGroup]="pricingForm">
+  @defer (when id) {
+    <label>
+      <span>Cena : </span>
+      <input type="number" formControlName="cena">
+    </label>
+    <label>
+      <span>Data Rozpoczęcia : </span>
+      <input type="date" formControlName="data_od">
+    </label>
+    <label>
+      <span>Data Zakończenia : </span>
+      <input type="date" formControlName="data_do">
+    </label>
+    <button type="submit" (click)="updatePricing()">Prześlij dane
+    </button>
+    <button type="button" (click)="openWindow('delete')">Usuń deklaracje</button>
+  }
+</form>
+<button (click)="openWindow('add')">Dodaj deklarację</button>
+@if (showWindow !== '') {
+  <section #filter [class]="{'delete': showWindow === 'delete','add': showWindow === 'add'}" class="window">
+    <div>
+      <i class="fa-solid fa-xmark close" (click)="closeWindow()"></i>
+      @if (showWindow === 'delete') {
+        <h3>Ostrzeżenie</h3>
+        <p>Czy na pewno chcesz usunąć cennik od dnia <b>{{ formatDate(pricingForm.get('data_od')?.value!) }}</b> do dnia <b>{{ formatDate(pricingForm.get('data_do')?.value!) }}</b>?</p>
+        <button type="button" (click)="deletePricing()">Usuń</button>
+        <button type="button" (click)="closeWindow()">Anuluj</button>
+      } @else if (showWindow === 'add') {
+        <h3>Dodaj Deklarację</h3>
+        <form [formGroup]="addForm">
+          <fieldset>
+            <legend><i class="fa-solid fa-money-bill"></i> Cena:</legend>
+            <label>
+              <span>Cena:</span>
+              <input type="number" formControlName="cena">
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend><i class="fa-solid fa-calendar"></i> Daty:</legend>
+            <label>
+              <span>Data rozpoczęcia:</span>
+              <input type="date" formControlName="data_od">
+            </label>
+            <label>
+              <span>Data zakończenia:</span>
+              <input type="date" formControlName="data_do">
+            </label>
+          </fieldset>
+          <button type="button" (click)="addPricing()">Dodaj</button>
+        </form>
+      }
+    </div>
+  </section>
+}

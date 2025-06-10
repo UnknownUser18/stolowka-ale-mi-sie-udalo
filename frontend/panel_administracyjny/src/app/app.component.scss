@@ -26,7 +26,7 @@ nav .all {
   }
 }
 
-nav .osoby, .raporty {
+nav .osoby, nav .cennik, nav .nieczynne, nav .raporty {
   transform: translateX(30vw);
 }
 
@@ -67,7 +67,7 @@ nav .osoby, .raporty {
   }
 }
 
-.osoby {
+.osoby, .cennik, .nieczynne {
   h1, p {
     text-align: center;
   }

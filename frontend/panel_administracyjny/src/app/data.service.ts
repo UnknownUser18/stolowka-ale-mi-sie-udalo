@@ -69,6 +69,13 @@ export interface Scan {
   czas: string;
 }
 
+export interface Pricing {
+  id: number;
+  data_od: string;
+  cena: number;
+  data_do?: string;
+}
+
 export type ActionType = 'request' | 'response';
 
 export type Params = {[key: string]: any};
@@ -95,6 +102,7 @@ type VariableTypeMap = {
   paymentList: Payment[],
   scanList: Scan[],
   closedDays: CanceledDay[],
+  pricingList: Pricing[],
   dump: any[], // used for updaing, deleting etc.
 };
 

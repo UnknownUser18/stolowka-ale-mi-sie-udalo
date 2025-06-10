@@ -82,7 +82,7 @@ async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<any>
 
                 await sendResponse(ws, params.responseVar, [{ success: rawResult.affectedRows > 0 }]);
             } else {
-                if(operation === 'get')
+                if(operation === 'get' && method.type)
                     await sendResponse(ws, params.responseVar, method.type.parse(rawResult));
                 else
                     await sendResponse(ws, params.responseVar, rawResult);

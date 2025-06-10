@@ -81,7 +81,7 @@ app-kalendarz {
   grid-template-rows: 0.08fr 1fr;
 }
 
-app-deklaracje, app-platnosci {
+app-deklaracje, app-platnosci, app-cennik, app-nieczynne {
   @include positional(80%, 90%);
   background-color: var(--color-3);
   display: grid;

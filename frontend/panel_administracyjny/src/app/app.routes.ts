@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
+import {CennikComponent} from './cennik/cennik.component';
+import {NieczynneComponent} from './nieczynne/nieczynne.component';
 import { ZstiComponent } from './users/zsti/zsti.component';
 import { KalendarzComponent } from './users/kalendarz/kalendarz.component';
 import { DaneComponent } from './users/dane/dane.component';
@@ -23,6 +25,11 @@ export const routes : Routes = [
   { path : 'osoba/zsti/:id/dane', component : DaneComponent },
   { path : 'osoba/zsti/:id/deklaracje', component : DeklaracjeComponent },
   { path : 'osoba/zsti/:id/platnosci', component : PlatnosciComponent },
+  { path : 'osoba/zsti/:id/karta', component : KartyComponent },
+  { path : 'cennik', component : CennikComponent },
+  { path : 'cennik/zsti', component : CennikComponent},
+  { path : 'nieczynne', component : NieczynneComponent },
+  { path : 'nieczynne/zsti', component : NieczynneComponent },
   { path : 'osoba/zsti/:id/karta', component : KartyComponent },
   {
     path : 'raporty', component : RaportsComponent,
