@@ -27,6 +27,7 @@ export class GlobalInfoService {
   constructor(private database : DataService) {
     this.webSocketStatus.subscribe((status) => {
       if (status !== WebSocketStatus.OPEN) return;
+
       const lastUser = localStorage.getItem('activeUser');
       if (!lastUser) return;
       this.database.request('zsti.student.getById', { id : parseInt(lastUser) }, 'studentList').then((payload) : void => {

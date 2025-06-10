@@ -114,6 +114,10 @@ app-raports {
   overflow-x: hidden;
 }
 
+app-login {
+
+}
+
 .notification {
   @include i.flex-center(column, start, start);
   transition: i.transition(right, i.$xlong), i.transition(bottom, i.$medium);
