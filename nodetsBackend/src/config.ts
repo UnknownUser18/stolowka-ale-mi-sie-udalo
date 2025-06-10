@@ -125,7 +125,7 @@ export const Queries: QueriesStructure = {
             "type": Person.array(),
             "get": `SELECT * FROM osoby_zsti ORDER BY nazwisko, imie;`,
             "getById": `SELECT * FROM osoby_zsti WHERE id = :id`,
-            "add": `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id, imie_opiekuna, nazwisko_opiekuna, telefon, email) values(:imie, :nazwisko, :klasa, :uczeszcza, :typ_osoby_id, :imie_opiekuna, :nazwisko_opiekuna, :telefon, :email);`,
+            "add": `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id) values(:imie, :nazwisko, :klasa, :uczeszcza, :typ_osoby_id);`,
             "update": `UPDATE osoby_zsti SET imie = :imie, nazwisko = :nazwisko, klasa = :klasa, uczeszcza = :uczeszcza, typ_osoby_id = :typ_osoby_id, imie_opiekuna = :imie_opiekuna, nazwisko_opiekuna = :nazwisko_opiekuna, telefon = :telefon, email = :email, nr_kierunkowy = :nr_kierunkowy, miasto = :miasto WHERE id = :id;`,
             "delete": `DELETE FROM osoby_zsti WHERE id = :id`
         },
@@ -134,8 +134,8 @@ export const Queries: QueriesStructure = {
             "get": `SELECT * FROM deklaracja_zywieniowa_zsti`,
             "getWithUser": `SELECT n.id AS "id", dzien_wypisania, imie, nazwisko FROM nieobecnosci_zsti n JOIN osoby_zsti o ON o.id = n.osoby_zsti_id WHERE (:data_od IS NULL OR dzien_wypisania > :data_od) AND (:data_do IS NULL OR dzien_wypisania < :data_do);`,
             "getById": `SELECT * FROM deklaracja_zywieniowa_zsti WHERE id_osoby = :id`,
-            "add": `INSERT INTO deklaracja_zywieniowa_zsti (id_osoby, rok_szkolny_id, data_od, data_do, dni) VALUES(:id_osoby, :rok_szkolny_id, :data_od, :data_do, :dni);`,
-            "update": `UPDATE deklaracja_zywieniowa_zsti SET id_osoby = :id_osoby, rok_szkolny_id = :rok_szkolny_id, data_od = :data_od, data_do = :data_do, dni = :dni WHERE id = :id;`,
+            "add": `INSERT INTO deklaracja_zywieniowa_zsti (id_osoby, data_od, data_do, dni) VALUES(:id_osoby, :data_od, :data_do, :dni);`,
+            "update": `UPDATE deklaracja_zywieniowa_zsti SET id_osoby = :id_osoby, data_od = :data_od, data_do = :data_do, dni = :dni WHERE id = :id;`,
             "delete": `DELETE FROM deklaracja_zywieniowa_zsti WHERE id = :id`
         },
         "card": {
@@ -151,8 +151,8 @@ export const Queries: QueriesStructure = {
             "type": AbsenceDay.array(),
             "get": `SELECT * FROM nieobecnosci_zsti`,
             "getById": `SELECT * FROM nieobecnosci_zsti WHERE osoby_zsti_id = :id`,
-            "add": `INSERT INTO nieobecnosci_zsti (rok_szkolny_id, dzien_wypisania, osoby_zsti_id) VALUES (:rok_szkolny_id, :dzien_wypisania, :osoby_zsti_id)`,
-            "update": `UPDATE nieobecnosci_zsti SET rok_szkolny_id = :rok_szkolny_id, dzien_wypisania = :dzien_wypisania, osoby_zsti_id = :osoby_zsti_id WHERE id = :id`,
+            "add": `INSERT INTO nieobecnosci_zsti (dzien_wypisania, osoby_zsti_id) VALUES (:dzien_wypisania, :osoby_zsti_id)`,
+            "update": `UPDATE nieobecnosci_zsti SET dzien_wypisania = :dzien_wypisania, osoby_zsti_id = :osoby_zsti_id WHERE id = :id`,
             "delete": `DELETE FROM nieobecnosci_zsti WHERE dzien_wypisania = :dzien_wypisania AND osoby_zsti_id = :osoby_zsti_id`
         },
         "payment": {

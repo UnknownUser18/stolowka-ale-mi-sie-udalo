@@ -153,6 +153,41 @@ export const envSchema = z.object({
     SMTP_PASS: z.string(),
 });
 
+export interface Permissions {
+    id: number;
+    nazwa: string;
+}
+
+export const Permissions = z.object({
+    id: z.number(),
+    nazwa: z.string()
+});
+
+
+export interface Klasa {
+    id: number;
+    nazwa: string;
+}
+
+const Klasa = z.object({
+    id: z.number(),
+    nazwa: z.string()
+});
+
+export interface Users {
+    id: number;
+    nazwa: string;
+    haslo: string;
+    uprawnienie: number;
+}
+
+export const Users = z.object({
+    id: z.number(),
+    nazwa: z.string(),
+    haslo: z.string(),
+    uprawnienie: z.number()
+});
+
 export interface Declaration {
     id: number;
     id_osoby: number;
@@ -207,19 +242,33 @@ export const AbsenceDay = z.object({
     osoby_zsti_id: z.number()
 });
 
+export interface Opiekun {
+    id: number;
+    imie_opiekuna: string;
+    nazwisko_opiekuna: string;
+    nr_kierunkowy: number;
+    telefon: string;
+    email: string;
+}
+
+export const Opiekun = z.object({
+    id: z.number(),
+    imie_opiekuna: z.string(),
+    nazwisko_opiekuna: z.string(),
+    nr_kierunkowy: z.number().nonnegative(),
+    telefon: z.string(),
+    email: z.string()
+});
+
 export interface Person {
     id: number;
     typ_osoby_id: number;
     imie: string;
     nazwisko: string;
-    klasa: string;
+    klasa?: number;
     uczeszcza: boolean;
     miasto: boolean;
-    imie_opiekuna: string;
-    nazwisko_opiekuna: string;
-    nr_kierunkowy: string;
-    telefon: string;
-    email: string;
+    opiekun_id?: number;
 }
 
 export const Person = z.object({
@@ -227,14 +276,10 @@ export const Person = z.object({
     typ_osoby_id: z.number(),
     imie: z.string(),
     nazwisko: z.string(),
-    klasa: z.string(),
+    klasa: z.number().nullable(),
     uczeszcza: z.number(),
     miasto: z.number(),
-    imie_opiekuna: z.string(),
-    nazwisko_opiekuna: z.string(),
-    nr_kierunkowy: z.string(),
-    telefon: z.string(),
-    email: z.string()
+    opiekun_id: z.number().nullable()
 });
 
 export interface Payment {
@@ -272,9 +317,6 @@ export const Scan = z.object({
 export interface ZstiEmailData{
     kalendarz: EmailKalendarzData,
     dane: EmailPersonalData,
-    // deklaracje: {
-    //
-    // }
 }
 export interface EmailKalendarzData{
     dodaneNieobecnosci: string[],

@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { DataService } from '../data.service';
 import { Router } from '@angular/router';
 import { GlobalInfoService } from '../global-info.service';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 
 @Component({
@@ -16,6 +16,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 })
 export class LoginComponent implements OnDestroy {
   private destroy$ : Subject<void> = new Subject();
+
+  protected loginForm = new FormGroup({
+    username : new FormControl(''),
+    password : new FormControl(''),
+  });
 
   constructor(
     private database : DataService,
