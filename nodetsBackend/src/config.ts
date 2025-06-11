@@ -114,9 +114,10 @@ export const Queries: QueriesStructure = {
     },
     "zsti": {
         "guardian": {
-            type: Opiekun.array(),
+            "type": Opiekun.array(),
             "get": `SELECT * FROM opiekun_zsti`,
-            "getById": `SELECT * FROM opiekun_zsti WHERE opiekun_zsti.id = :id`
+            "getById": `SELECT * FROM opiekun_zsti WHERE opiekun_zsti.id_opiekun = :id`,
+            "getByStudentId": `SELECT * FROM opiekun_zsti WHERE id_opiekun = (SELECT opiekun_id FROM osoby_zsti WHERE id = :id)`,
         },
         "pricing":{
             "get": `SELECT * FROM cennik_zsti ORDER BY data_od;`,
@@ -128,10 +129,10 @@ export const Queries: QueriesStructure = {
         },
         "student": {
             "type": Person.array(),
-            "get": `SELECT * FROM osoby_zsti ORDER BY nazwisko, imie;`,
+            "get": `SELECT o.id as id, typ_osoby_id, imie, nazwisko, nazwa AS klasa, uczeszcza, miasto, opiekun_id FROM osoby_zsti o LEFT JOIN slownik_klasa s ON o.klasa = s.id ORDER BY nazwisko, imie;`,
             "getById": `SELECT * FROM osoby_zsti WHERE id = :id`,
             "add": `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id) values(:imie, :nazwisko, :klasa, :uczeszcza, :typ_osoby_id);`,
-            "update": `UPDATE osoby_zsti SET imie = :imie, nazwisko = :nazwisko, klasa = :klasa, uczeszcza = :uczeszcza, typ_osoby_id = :typ_osoby_id, imie_opiekuna = :imie_opiekuna, nazwisko_opiekuna = :nazwisko_opiekuna, telefon = :telefon, email = :email, nr_kierunkowy = :nr_kierunkowy, miasto = :miasto WHERE id = :id;`,
+            "update": `UPDATE osoby_zsti SET imie = :imie, nazwisko = :nazwisko, klasa = :klasa, uczeszcza = :uczeszcza, typ_osoby_id = :typ_osoby_id WHERE id = :id;`,
             "delete": `DELETE FROM osoby_zsti WHERE id = :id`
         },
         "declaration": {

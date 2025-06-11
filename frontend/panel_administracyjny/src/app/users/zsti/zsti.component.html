@@ -27,7 +27,7 @@
         <tr>
           <td>{{ index+1 }}</td>
           <td>{{ person.imie }} {{ person.nazwisko }}</td>
-          <td>{{ person.klasa === '' ? 'Nauczyciel' : person.klasa }}</td>
+          <td>{{ person.klasa ? person.klasa : 'Nauczyciel' }}</td>
           <td>
             <button (click)="selectPerson(person)">Wybierz</button>
           </td>

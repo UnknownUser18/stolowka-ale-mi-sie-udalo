@@ -38,20 +38,31 @@ export enum TypOsoby {
   NAUCZYCIEL = 2,
 }
 
+export interface Klasa {
+  id: number;
+  nazwa: string;
+}
+
 export interface Student {
   id: number;
   typ_osoby_id: TypOsoby;
   imie: string;
   nazwisko: string;
-  klasa: string;
+  klasa?: number | string;
   uczeszcza: boolean;
   miasto: boolean;
-  imie_opiekuna: string,
+  opiekun_id?: number;
+}
+
+export interface Opiekun {
+  id: number;
+  imie_opiekuna: string;
   nazwisko_opiekuna: string;
-  nr_kierunkowy: string;
-  telefon: string;
+  nr_kierunkowy: number;
+  telefon: number;
   email: string;
 }
+
 
 export interface Payment {
   id: number;
@@ -103,6 +114,7 @@ type VariableTypeMap = {
   scanList: Scan[],
   closedDays: CanceledDay[],
   pricingList: Pricing[],
+  guardianList: Opiekun[],
   dump: any[], // used for updaing, deleting etc.
 };
 
