@@ -323,14 +323,19 @@ export interface EmailKalendarzData{
     usunieteNieobecnosci: string[]
 }
 export interface EmailPersonalData {
-    imie: string,
-    nazwisko: string,
-    klasa: string,
-    uczeszcza: boolean,
-    miasto: boolean,
-    imie_opiekuna?: string,
-    nazwisko_opiekuna?: string,
-    nr_kierunkowy: string,
-    telefon: string,
-    email: string
+    imie: string;
+    nazwisko: string;
+    klasa?: number;
+    uczeszcza: boolean;
+    miasto: boolean;
+    opiekun_id?: number;
+}
+
+export interface EmailGuardianData {
+    id: number;
+    imie_opiekuna: string;
+    nazwisko_opiekuna: string;
+    nr_kierunkowy: number;
+    telefon: string;
+    email: string;
 }

@@ -1,6 +1,13 @@
-import {EmailKalendarzData, EmailPersonalData, Person, RequestPayload, ZstiEmailData} from "./types";
+import {
+    EmailKalendarzData,
+    EmailPersonalData, Opiekun,
+    Person,
+    RequestPayload,
+    ZstiEmailData
+} from "./types";
 import {createTransport, Transporter} from "nodemailer";
-import {env} from "./config";
+import {env, Queries} from "./config";
+import {executeQuery} from "./index";
 
 export function updateZstiEmailKalendarz(id: number, kalendarz: EmailKalendarzData){
     if(!ZstiData.has(id)) return;
@@ -26,11 +33,6 @@ export function updateZstiData(category: string, operation: string, params: Requ
                 klasa: params.params.klasa,
                 uczeszcza: params.params.uczeszcza,
                 miasto: params.params.miasto,
-                nr_kierunkowy: params.params.nr_kierunkowy,
-                telefon: params.params.telefon,
-                email: params.params.email,
-                imie_opiekuna: params.params.imie_opiekuna,
-                nazwisko_opiekuna: params.params.nazwisko_opiekuna
             })
         }
     }
@@ -86,14 +88,9 @@ export const ZstiData: Map<number, ZstiEmailData> = new Map<number, ZstiEmailDat
 export const nullPersonalData: EmailPersonalData = {
     imie: '',
     nazwisko: '',
-    klasa: '',
+    klasa: undefined,
     uczeszcza: false,
     miasto: false,
-    imie_opiekuna: undefined,
-    nazwisko_opiekuna: undefined,
-    nr_kierunkowy: '',
-    telefon: '',
-    email: ''
 };
 
 export function initZstiEmailData(kalendarz: EmailKalendarzData = {usunieteNieobecnosci: [], dodaneNieobecnosci: []}, dane: EmailPersonalData = nullPersonalData) {
@@ -103,18 +100,19 @@ export function initZstiEmailData(kalendarz: EmailKalendarzData = {usunieteNieob
     } as ZstiEmailData;
 }
 
-export function sendEmailAbtKalendarz(studentData: ZstiEmailData, studentDetails: Person){
+export async function sendEmailAbtKalendarz(studentData: ZstiEmailData, studentDetails: Person){
     console.log(studentData, studentDetails)
-    sendEmail(studentDetails.email, "Zmiana Przyszłych Nieobecności Na Obiedzie", generateEmailTemplate(studentData.kalendarz, studentDetails))
+    const opiekun = await executeQuery<Opiekun>(Queries['zsti']['guardian']['getById'], {id: studentDetails.id});
+    sendEmail(opiekun.email, "Zmiana Przyszłych Nieobecności Na Obiedzie", generateEmailTemplate(studentData.kalendarz, studentDetails))
     sendEmail('xxxxxxszymi@gmail.com', "Zmiana Przyszłych Nieobecności Na Obiedzie - Backup", generateEmailTemplate(studentData.kalendarz, studentDetails))
 }
 
-export function sendEmailAbtPersonalData(studentData: ZstiEmailData, studentDetails: Person){
+export async function sendEmailAbtPersonalData(studentData: ZstiEmailData, studentDetails: Person){
     console.log(studentData, studentDetails)
     const fields: (keyof EmailPersonalData)[] = [
         'imie', 'nazwisko', 'klasa', 'uczeszcza', 'miasto',
-        'imie_opiekuna', 'nazwisko_opiekuna', 'nr_kierunkowy', 'telefon', 'email'
     ];
+    // 'imie_opiekuna', 'nazwisko_opiekuna', 'nr_kierunkowy', 'telefon', 'email'
     fields.forEach(field => {
         if((studentData.dane as EmailPersonalData)[field] !== (studentData.dane as EmailPersonalData)[field] ){
             fields.splice(fields.indexOf(field), 1);
@@ -124,7 +122,8 @@ export function sendEmailAbtPersonalData(studentData: ZstiEmailData, studentDeta
         newData: studentData.dane as Person,
         changedFields: fields
     }
-    sendEmail(studentDetails.email, "Zmiana Danych Osobowych", generateDataChangeEmail(datachange))
+    const opiekun = await executeQuery<Opiekun>(Queries['zsti']['guardian']['getById'], {id: studentDetails.id});
+    sendEmail(opiekun.email, "Zmiana Danych Osobowych", generateDataChangeEmail(datachange))
     sendEmail('xxxxxxszymi@gmail.com', "Zmiana Danych Osobowych - Backup", generateDataChangeEmail(datachange))
 }
 
@@ -403,13 +402,14 @@ const getFieldLabel = (field: keyof Person, isChanged: boolean): string => {
         klasa: 'Klasa',
         uczeszcza: 'Uczęszcza na obiady',
         miasto: 'Dofinansowanie',
-        imie_opiekuna: 'Imię rodzica/opiekuna',
-        nazwisko_opiekuna: 'Nazwisko rodzica/opiekuna',
-        nr_kierunkowy: 'Nr kierunkowy',
-        telefon: 'Telefon',
-        email: 'Email',
+        // imie_opiekuna: 'Imię rodzica/opiekuna',
+        // nazwisko_opiekuna: 'Nazwisko rodzica/opiekuna',
+        // nr_kierunkowy: 'Nr kierunkowy',
+        // telefon: 'Telefon',
+        // email: 'Email',
         id: '',
-        typ_osoby_id: ''
+        typ_osoby_id: '',
+        opiekun_id: '',
     };
 
     const label = labels[field];
@@ -423,16 +423,16 @@ const formatFieldValue = (field: keyof Person, value: any): string => {
         return formatBoolean(value);
     }
 
-    if (field === 'telefon' || field === 'nr_kierunkowy') {
-        return value || 'Brak danych';
-    }
+    // if (field === 'telefon' || field === 'nr_kierunkowy') {
+    //     return value || 'Brak danych';
+    // }
 
     return value || 'Nie podano';
 };
 
 const generateDataRow = (
     field: keyof Person,
-    value: string | number | boolean,
+    value: string | number | boolean | undefined,
     isChanged: boolean
 ): string => {
     const formattedValue = formatFieldValue(field, value);
@@ -450,7 +450,7 @@ const generateDataRow = (
 const generateChangesTablePersonal = (data: DataChange): string => {
     const fields: (keyof Person)[] = [
         'imie', 'nazwisko', 'klasa', 'uczeszcza', 'miasto',
-        'imie_opiekuna', 'nazwisko_opiekuna', 'nr_kierunkowy', 'telefon', 'email'
+        // 'imie_opiekuna', 'nazwisko_opiekuna', 'nr_kierunkowy', 'telefon', 'email'
     ];
 
     const rows = fields.map(field =>

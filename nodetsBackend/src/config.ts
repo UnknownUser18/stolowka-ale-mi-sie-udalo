@@ -12,7 +12,7 @@ import {
     Payment,
     Declaration,
     QueriesStructure,
-    SuccessResponse,
+    SuccessResponse, Opiekun,
 } from "./types";
 import {PoolOptions} from "mysql2/promise";
 
@@ -113,6 +113,11 @@ export const Queries: QueriesStructure = {
         }
     },
     "zsti": {
+        "guardian": {
+            type: Opiekun.array(),
+            "get": `SELECT * FROM opiekun_zsti`,
+            "getById": `SELECT * FROM opiekun_zsti WHERE opiekun_zsti.id = :id`
+        },
         "pricing":{
             "get": `SELECT * FROM cennik_zsti ORDER BY data_od;`,
             "add": `INSERT INTO cennik_zsti (data_od, cena, data_do) VALUES (:data_od, :cena, :data_do);`,

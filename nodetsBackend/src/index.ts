@@ -24,7 +24,7 @@ logger.info(``);
 
 const pool: Pool = createPool(dbConfig);
 
-async function executeQuery<T = any>(query: string, params?: Params): Promise<T>
+export async function executeQuery<T = any>(query: string, params?: Params): Promise<T>
 {
     const conn: PoolConnection = await pool.getConnection();
     try{
@@ -66,7 +66,7 @@ function standardizeData(action: ActionType, params: ResponsePayload): string
 }
 
 
-async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<any>
+export async function handleMethod(ws: WebSocket, params: RequestPayload): Promise<any>
 {
     let query: string | undefined = undefined;
     try{
@@ -129,11 +129,11 @@ wss.on('connection', async (ws: WebSocket) => {
                 }
             }))[0] as Person
             if(!(studentData.kalendarz.dodaneNieobecnosci.length === 0 && studentData.kalendarz.usunieteNieobecnosci.length === 0)){
-                sendEmailAbtKalendarz(studentData, studentDetails)
+                await sendEmailAbtKalendarz(studentData, studentDetails)
             }
 
             if(studentData.dane !== nullPersonalData){
-                sendEmailAbtPersonalData(studentData, studentDetails)
+                await sendEmailAbtPersonalData(studentData, studentDetails)
             }
             ZstiData.delete(key);
         })
