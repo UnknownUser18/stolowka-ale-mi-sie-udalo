@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Student, WebSocketStatus, DataService } from './data.service';
+import { Student, WebSocketStatus, DataService, Opiekun } from './data.service';
 
 export enum TabType {
   KALENDARZ = 'kalendarz',
@@ -30,9 +30,14 @@ export class GlobalInfoService {
 
       const lastUser = localStorage.getItem('activeUser');
       if (!lastUser) return;
-      this.database.request('zsti.student.getById', { id : parseInt(lastUser) }, 'studentList').then((payload) : void => {
+      this.database.request('zsti.student.getById', { id : parseInt(lastUser) }).then((payload) : void => {
         if (!payload || payload.length === 0) return;
-        this.setActiveUser(payload[0]);
+
+        this.database.request('zsti.guardian.getById', { id : parseInt(lastUser) }).then((payload2) : void => {
+          if (!payload2 || payload2.length === 0) return;
+          const user = payload[0] + payload2[0] as Student & Opiekun;
+          this.setActiveUser(user);
+        });
       });
     });
   }
@@ -42,7 +47,7 @@ export class GlobalInfoService {
 
   public title : BehaviorSubject<string> = new BehaviorSubject<string>('Strona Główna');
   public webSocketStatus : BehaviorSubject<WebSocketStatus> = new BehaviorSubject<WebSocketStatus>(WebSocketStatus.CLOSED);
-  public activeUser : BehaviorSubject<Student | undefined> = new BehaviorSubject<Student | undefined>(undefined);
+  public activeUser : BehaviorSubject<(Student & Opiekun) | undefined> = new BehaviorSubject<(Student & Opiekun) | undefined>(undefined);
   public activeTab : BehaviorSubject<TabTypeKey | undefined> = new BehaviorSubject<TabTypeKey | undefined>(undefined);
   public activeMonth : BehaviorSubject<Date | undefined> = new BehaviorSubject<Date | undefined>(undefined);
   public selectedDays = {
@@ -108,7 +113,7 @@ export class GlobalInfoService {
     this.title.next(title);
   }
 
-  public setActiveUser(student : Student) : void {
+  public setActiveUser(student : Student & Opiekun) : void {
     localStorage.setItem('activeUser', student.id.toString());
     this.activeUser.next(student);
   }
