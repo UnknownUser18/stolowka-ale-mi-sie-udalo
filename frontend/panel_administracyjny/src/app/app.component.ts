@@ -101,8 +101,7 @@ export class AppComponent implements AfterViewInit {
             }
             const persons : (Student & Opiekun)[] = [];
             for (const student of payload) {
-              const guardian = payload2.find(g => g.opiekun_id === student.id_opiekun);
-              if (!guardian) continue;
+              const guardian = payload2.find(g => g.id_opiekun === student.opiekun_id);
               persons.push({ ...student, ...guardian } as Student & Opiekun);
             }
             if (persons.length === 0) {

@@ -1,8 +1,8 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
-import { DataService, Declaration, Opiekun, Student, TypOsoby, WebSocketStatus } from '../../data.service';
-import { GlobalInfoService, NotificationType } from '../../global-info.service';
-import { Subject } from 'rxjs';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy} from '@angular/core';
+import {DataService, Declaration, Opiekun, Student, TypOsoby, WebSocketStatus} from '../../data.service';
+import {GlobalInfoService, NotificationType} from '../../global-info.service';
+import {Subject} from 'rxjs';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 
 @Component({
   selector : 'app-dane',
@@ -60,7 +60,7 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
       uczeszcza : forms.uczeszcza ? 1 : 0,
     }
     let result = await this.database.request('zsti.klasa.getId', { nazwa : studentData.klasa }, 'dump');
-    if (!result[0]) {
+    if (!result[0] && studentData.typ_osoby_id === TypOsoby.UCZEN) {
       this.globalInfo.generateNotification(NotificationType.ERROR, 'Podana klasa nie istnieje.');
       return;
     }
@@ -144,17 +144,21 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
         this.user = user;
         if (!isNaN(Number(user.klasa))) {
           this.database.request('zsti.klasa.getById', { id : user.klasa }, 'klasaList').then((klasa) => {
-            if (!klasa[0]) {
-              console.log('Nie udało się pobrać danych klasy.');
+            if (!klasa[0] && user.typ_osoby_id === TypOsoby.UCZEN) {
               this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać danych klasy.');
               return;
             }
-
-            user.klasa = klasa[0].nazwa;
+            if (user.typ_osoby_id === TypOsoby.UCZEN) {
+              user.klasa = klasa[0].nazwa;
+            }
             this.opiekun_id = user.opiekun_id;
             this.globalInfo.setTitle(`${ user.imie } ${ user.nazwisko } - Dane`);
             this.globalInfo.setActiveTab('DANE');
             this.setForm(user);
+            if (user.typ_osoby_id === TypOsoby.NAUCZYCIEL) {
+              this.forms.get('imie_nazwisko_opiekuna')?.disable();
+              this.forms.get('klasa')?.disable();
+            }
             this.cdr.detectChanges();
           });
         } else {
