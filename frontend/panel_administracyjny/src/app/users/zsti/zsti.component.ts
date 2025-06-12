@@ -1,9 +1,11 @@
-import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { DataService, Opiekun, Student, TypOsoby, WebSocketStatus } from '../../data.service';
+import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
+import { Opiekun, Student, TypOsoby, WebSocketStatus } from '../../services/data.service';
 import { Router } from '@angular/router';
-import { GlobalInfoService, NotificationType } from '../../global-info.service';
+import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TransitionService } from '../../transition.service';
+import { TransitionService } from '../../services/transition.service';
+import { VariablesService } from '../../services/variables.service';
+import { Subject, takeUntil } from 'rxjs';
 
 export function wynikString(number : number) : string {
   if (number < 0) console.warn('Number cannot be negative in wynikString function');
@@ -22,7 +24,9 @@ export function wynikString(number : number) : string {
   templateUrl : './zsti.component.html',
   styleUrl : './zsti.component.scss'
 })
-export class ZstiComponent {
+export class ZstiComponent implements OnDestroy {
+  private destroy$ = new Subject<void>();
+
   protected readonly wynikString = wynikString;
   protected readonly TypOsoby = TypOsoby;
   protected searchTerm : string | undefined;
@@ -41,57 +45,52 @@ export class ZstiComponent {
 
 
   constructor(
+    private variables : VariablesService,
     private infoService : GlobalInfoService,
-    private database : DataService,
     private router : Router,
     private zone : NgZone,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef) {
     this.infoService.setTitle('ZSTI - Osoby');
-    this.infoService.webSocketStatus.subscribe(status => {
+    this.infoService.webSocketStatus.pipe(takeUntil(this.destroy$)).subscribe(status => {
       if (status !== WebSocketStatus.OPEN) return;
-      this.database.request('zsti.student.get', {}, 'student').then((payload) => {
-        if (payload === undefined || payload.length === 0) {
-          this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
-          this.result = this.persons_zsti = [];
-          return;
-        }
-        this.database.request('zsti.guardian.get', {}, 'guardianList').then((payload2) : void => {
-          const users = Array.from(payload).map((student : Student) : Student & Opiekun => {
-            const guardian = Array.from(payload2).find(opiekun => opiekun.id === student.opiekun_id);
-            return { ...student, ...guardian } as Student & Opiekun;
-          });
-
-          this.result = this.persons_zsti = users;
-        });
+      this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
+        this.result = this.persons_zsti = persons;
       });
-    })
+    });
   }
 
   private applyFilterLogic(use_filter : boolean = false) : void {
     if (this.filter.get('typ_osoby')?.value! === (TypOsoby.NAUCZYCIEL + '')) this.filter.get('klasa')?.setValue('');
-    const filter = this.filter.value;
-    this.result = this.persons_zsti!.filter((person : Student) : boolean => {
-      const { imie, nazwisko, klasa, miasto, typ_osoby_id, uczeszcza } = person;
+    const filter = this.filter.getRawValue();
+    if (this.checkIfFilterUsed() && use_filter) return;
+
+    this.result = this.persons_zsti!.filter((person : Student & Opiekun) : boolean => {
+      const searchTerm : string = this.searchTerm?.trim().toLowerCase() ?? '';
+
       if (use_filter) {
-        const searchTerm : string = this.searchTerm?.toLowerCase()!;
+        if (searchTerm.split(' ').length > 1) {
+          return (
+            (person.imie.toLowerCase().includes(searchTerm.split(' ')[0])) &&
+            (person.nazwisko.toLowerCase().includes(searchTerm.split(' ')[1]))
+          )
+        } else {
+          return (
+            (person.imie.toLowerCase().includes(searchTerm)) ||
+            (person.nazwisko.toLowerCase().includes(searchTerm))
+          )
+        }
+
+      } else {
         return (
-          imie.toLowerCase().includes(searchTerm) ||
-          nazwisko.toLowerCase().includes(searchTerm) &&
-          klasa!.toString().toLowerCase().includes(filter.klasa!.toLowerCase()) &&
-          (filter.miasto === 'wszyscy' ? true : filter.miasto === 'true' ? miasto : !miasto) &&
-          (filter.typ_osoby === '3' || Number(filter.typ_osoby) === typ_osoby_id as TypOsoby) &&
-          (filter.uczeszcza === 'wszyscy' ? true : filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
-        );
+          (person.imie.toLowerCase().includes(filter.imie?.toLowerCase() ?? '')) &&
+          (person.nazwisko.toLowerCase().includes(filter.nazwisko?.toLowerCase() ?? '')) &&
+          (person.klasa ? person.klasa.toString().toLowerCase() : '').includes(filter.klasa?.toLowerCase() || '') &&
+          (filter.miasto === 'wszyscy' ? true : filter.miasto === 'true' ? person.miasto : !person.miasto) &&
+          (filter.typ_osoby === '3' || Number(filter.typ_osoby) === Number(person.typ_osoby_id)) &&
+          (filter.uczeszcza === 'wszyscy' ? true : filter.uczeszcza === 'true' ? person.uczeszcza : !person.uczeszcza)
+        )
       }
-      return (
-        imie.toLowerCase().includes(filter.imie!.toLowerCase()) &&
-        nazwisko.toLowerCase().includes(filter.nazwisko!.toLowerCase()) &&
-        klasa!.toString().toLowerCase().includes(filter.klasa?.toLowerCase() || '') &&
-        (filter.miasto === 'wszyscy' ? true : filter.miasto === 'true' ? miasto : !miasto) &&
-        (filter.typ_osoby === '3' || Number(filter.typ_osoby) === typ_osoby_id as TypOsoby) &&
-        (filter.uczeszcza === 'wszyscy' ? true : filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
-      );
     });
   }
 
@@ -158,11 +157,11 @@ export class ZstiComponent {
     });
     this.searchTerm = '';
     this.applyFilterLogic();
-    this.infoService.generateNotification(NotificationType.SUCCESS, 'Pomyślnie zresetowano filtr.');
+    this.infoService.generateNotification(NotificationType.INFO, 'Pomyślnie zresetowano filtr.');
   }
 
   protected checkIfFilterUsed() : boolean {
-    const filter = this.filter.value;
+    const filter = this.filter.getRawValue();
     return (
       filter.imie !== '' ||
       filter.nazwisko !== '' ||
@@ -174,7 +173,8 @@ export class ZstiComponent {
     );
   }
 
-
+  public ngOnDestroy() : void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }
-
-

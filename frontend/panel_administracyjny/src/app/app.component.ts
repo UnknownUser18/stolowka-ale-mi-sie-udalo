@@ -2,10 +2,11 @@ import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angula
 import { NavComponent } from './nav/nav.component';
 import { NgOptimizedImage } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { GlobalInfoService, NotificationType } from './global-info.service';
+import { GlobalInfoService, NotificationType } from './services/global-info.service';
 import { filter, take } from 'rxjs';
-import { DataService, Opiekun, Student, TypOsoby, WebSocketStatus } from './data.service';
-import { TransitionService } from './transition.service';
+import { DataService, Opiekun, Student, TypOsoby, WebSocketStatus } from './services/data.service';
+import { TransitionService } from './services/transition.service';
+import { VariablesService } from './services/variables.service';
 
 export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne' | 'raporty';
 
@@ -23,6 +24,7 @@ export class AppComponent implements AfterViewInit {
   @ViewChild('scrollable') scrollable! : ElementRef;
 
   constructor(
+    private variables : VariablesService,
     private database : DataService,
     private zone : NgZone,
     private transition : TransitionService,
@@ -40,28 +42,16 @@ export class AppComponent implements AfterViewInit {
 
       if (url.includes('null')) {
         const newUrl = url.replace('null', lastUser);
-        this.database.request('zsti.student.getById', { id : parseInt(lastUser) }, 'studentList').then((payload) : void => {
-          if (!payload || payload.length === 0) return;
-
-          this.database.request('zsti.guardian.getById', { id : parseInt(lastUser) }, 'guardianList').then((payload2) : void => {
-            if (!payload2 || payload2.length === 0) return;
-            const user = { ...payload[0], ...payload2[0] } as Student & Opiekun;
-            this.infoService.setActiveUser(user);
-            this.router.navigateByUrl(newUrl).then();
-          });
+        this.variables.getStudentFromId(parseInt(lastUser)).then(student => {
+          if (!student) {
+            this.infoService.generateNotification(NotificationType.ERROR, 'Nie znaleziono użytkownika.');
+            return;
+          }
+          this.infoService.setActiveUser(student);
+          this.router.navigateByUrl(newUrl).then();
         });
       }
     })
-  }
-
-  protected navigate(path : string, class_name : classNames, ignore : boolean = true) : void {
-    if (!ignore) {
-      this.router.navigate([path]).then();
-      return;
-    }
-    this.animateElement(class_name, true).then(() : void => {
-      this.router.navigate([path]).then();
-    });
   }
 
   private async animateElement(class_name : classNames, remove : boolean = false) : Promise<boolean> {
@@ -79,54 +69,31 @@ export class AppComponent implements AfterViewInit {
     });
   };
 
-  protected selectPerson(student : Student & Opiekun) : void {
-    this.router.navigate(['osoba/zsti', student.id, 'kalendarz']).then(() : void => {
-      this.infoService.setActiveUser(student);
-    });
-  }
-
-  private personZsti() : Promise<(Student & Opiekun)[] | undefined> {
-    return new Promise((resolve) : void => {
-      this.infoService.webSocketStatus.subscribe(status => {
-        if (status !== WebSocketStatus.OPEN) return;
-        this.database.request('zsti.student.get', {}, 'student').then((payload) => {
-          if (!payload || payload.length === 0) {
-            this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
-            return;
-          }
-          this.database.request('zsti.guardian.get', {}, 'guardianList').then((payload2) => {
-            if (!payload2 || payload2.length === 0) {
-              this.infoService.generateNotification(NotificationType.WARNING, 'Brak opiekunów w bazie danych.');
-              return;
-            }
-            const persons : (Student & Opiekun)[] = [];
-            for (const student of payload) {
-              const guardian = payload2.find(g => g.id_opiekun === student.opiekun_id);
-              persons.push({ ...student, ...guardian } as Student & Opiekun);
-            }
-            if (persons.length === 0) {
-              this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
-              return;
-            }
-            resolve(persons);
-          });
-        });
-      });
-    })
-  }
-
   private startPageLogic() : void {
     switch (this.router.url) {
       case '/':
         this.infoService.setTitle('Strona Główna');
-        this.animateElement('main-page').then(() : void => {
-        });
+        this.animateElement('main-page').then();
         break;
+      case '/osoby/zsti':
       case '/osoby':
-        this.infoService.setTitle('Osoby');
+        if (this.router.url === '/osoby') {
+          this.infoService.setTitle('Osoby');
+        }
         this.animateElement('osoby').then(() : void => {
-          this.personZsti().then((payload) : void => {
-            this.persons_zsti = payload;
+          if (this.persons_zsti) return;
+          this.variables.fetchUsersZsti().then(() => {
+
+            this.variables.fetchOpiekunZsti().then(() : void => {
+              this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
+                this.persons_zsti = persons;
+              });
+            }).catch((error) : void => {
+              this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania opiekunów: ' + error);
+            });
+
+          }).catch((error) : void => {
+            this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania osób: ' + error);
           });
         });
         break;
@@ -144,9 +111,6 @@ export class AppComponent implements AfterViewInit {
     }
     if (this.router.url.startsWith('/osoba')) {
       this.animateElement('osoby').then(() : void => {
-        this.personZsti().then((payload) => {
-          this.persons_zsti = payload;
-        });
       })
     } else if (this.router.url.startsWith('/cennik')) {
       this.animateElement('cennik').then(() : void => {
@@ -156,6 +120,23 @@ export class AppComponent implements AfterViewInit {
       })
     }
   }
+
+  protected navigate(path : string, class_name : classNames, ignore : boolean = true) : void {
+    if (!ignore) {
+      this.router.navigate([path]).then();
+      return;
+    }
+    this.animateElement(class_name, true).then(() : void => {
+      this.router.navigate([path]).then();
+    });
+  }
+
+  protected selectPerson(student : Student & Opiekun) : void {
+    this.router.navigate(['osoba/zsti', student.id, 'kalendarz']).then(() : void => {
+      this.infoService.setActiveUser(student);
+    });
+  }
+
 
   public ngAfterViewInit() : void {
     const mainPage : HTMLElement = this.scrollable.nativeElement.querySelector('.main-page')!;

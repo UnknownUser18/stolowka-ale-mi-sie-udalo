@@ -1,29 +1,31 @@
-import { Component } from '@angular/core';
-import { GlobalInfoService, TabTypeKey } from '../global-info.service';
+import { ChangeDetectorRef, Component, AfterViewInit } from '@angular/core';
+import { GlobalInfoService } from '../services/global-info.service';
 import { Router, RouterLink } from '@angular/router';
-import { delay } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector : 'app-nav',
   imports : [
-    RouterLink
+    RouterLink,
+    AsyncPipe
   ],
   templateUrl : './nav.component.html',
   styleUrl : './nav.component.scss',
 })
-export class NavComponent {
-  protected title : string = 'Strona główna';
-  protected tab : TabTypeKey | undefined = undefined;
+export class NavComponent implements AfterViewInit {
+
   constructor(
+    private cdr : ChangeDetectorRef,
     protected infoService : GlobalInfoService,
     protected router : Router
-  ) {
-    this.infoService.title.pipe(delay(0)).subscribe(title => {
-      this.title = title;
-    });
+  ) {}
 
-    this.infoService.activeTab.pipe(delay(0)).subscribe(tab => {
-      this.tab = tab;
+  public ngAfterViewInit(): void {
+    this.infoService.title.subscribe(() => {
+      this.cdr.detectChanges();
+    });
+    this.infoService.activeTab.subscribe(() => {
+      this.cdr.detectChanges();
     });
   }
 }

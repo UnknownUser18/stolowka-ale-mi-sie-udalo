@@ -1,6 +1,6 @@
 import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy} from '@angular/core';
-import {DataService, Declaration, Opiekun, Student, TypOsoby, WebSocketStatus} from '../../data.service';
-import {GlobalInfoService, NotificationType} from '../../global-info.service';
+import {DataService, Declaration, Opiekun, Student, TypOsoby, WebSocketStatus} from '../../services/data.service';
+import {GlobalInfoService, NotificationType} from '../../services/global-info.service';
 import {Subject} from 'rxjs';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 

@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
-import { AbsenceDay, DataService, Student, WebSocketStatus } from '../data.service';
-import { GlobalInfoService, NotificationType } from '../global-info.service';
+import { AbsenceDay, DataService, Student, WebSocketStatus } from '../services/data.service';
+import { GlobalInfoService, NotificationType } from '../services/global-info.service';
 import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
