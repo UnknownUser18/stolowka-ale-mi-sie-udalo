@@ -12,7 +12,7 @@ import {
     Payment,
     Declaration,
     QueriesStructure,
-    SuccessResponse, Opiekun,
+    SuccessResponse, Opiekun, Klasa,
 } from "./types";
 import {PoolOptions} from "mysql2/promise";
 
@@ -118,6 +118,13 @@ export const Queries: QueriesStructure = {
             "get": `SELECT * FROM opiekun_zsti`,
             "getById": `SELECT * FROM opiekun_zsti WHERE opiekun_zsti.id_opiekun = :id`,
             "getByStudentId": `SELECT * FROM opiekun_zsti WHERE id_opiekun = (SELECT opiekun_id FROM osoby_zsti WHERE id = :id)`,
+            "update": `UPDATE opiekun_zsti SET imie_opiekuna = :imie_opiekuna, nazwisko_opiekuna = :nazwisko_opiekuna, telefon = :telefon, nr_kierunkowy = :nr_kierunkowy, email = :email WHERE id_opiekun = :id;`,
+        },
+        "klasa": {
+            "type": Klasa.array(),
+            "get": `SELECT * FROM slownik_klasa ORDER BY nazwa;`,
+            "getById": `SELECT * FROM slownik_klasa WHERE id = :id;`,
+            "getId": `SELECT id FROM slownik_klasa WHERE nazwa = :nazwa;`,
         },
         "pricing":{
             "get": `SELECT * FROM cennik_zsti ORDER BY data_od;`,

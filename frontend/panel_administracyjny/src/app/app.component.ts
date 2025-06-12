@@ -40,7 +40,7 @@ export class AppComponent implements AfterViewInit {
 
       if (url.includes('null')) {
         const newUrl = url.replace('null', lastUser);
-        this.database.request('zsti.student.getById', {id: parseInt(lastUser)}, 'studentList').then((payload): void => {
+        this.database.request('zsti.student.getById', { id : parseInt(lastUser) }, 'studentList').then((payload) : void => {
           if (!payload || payload.length === 0) return;
 
           this.database.request('zsti.guardian.getById', { id : parseInt(lastUser) }, 'guardianList').then((payload2) : void => {
@@ -85,28 +85,35 @@ export class AppComponent implements AfterViewInit {
     });
   }
 
-  private async personZsti() : Promise<(Student & Opiekun)[] | undefined> {
-    const payload = await this.database.request('zsti.student.get', {}, 'student');
-    if (!payload || payload.length === 0) {
-      this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
-      return;
-    }
-    const payload2 = await this.database.request('zsti.guardian.get', {}, 'guardianList');
-    if (!payload2 || payload2.length === 0) {
-      this.infoService.generateNotification(NotificationType.WARNING, 'Brak opiekunów w bazie danych.');
-      return;
-    }
-    const persons : (Student & Opiekun)[] = [];
-    for (const student of payload) {
-      const guardian = payload2.find(g => g.opiekun_id === student.id_opiekun);
-      if (!guardian) continue;
-      persons.push({ ...student, ...guardian } as Student & Opiekun);
-    }
-    if (persons.length === 0) {
-      this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
-      return;
-    }
-    return persons;
+  private personZsti() : Promise<(Student & Opiekun)[] | undefined> {
+    return new Promise((resolve) : void => {
+      this.infoService.webSocketStatus.subscribe(status => {
+        if (status !== WebSocketStatus.OPEN) return;
+        this.database.request('zsti.student.get', {}, 'student').then((payload) => {
+          if (!payload || payload.length === 0) {
+            this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
+            return;
+          }
+          this.database.request('zsti.guardian.get', {}, 'guardianList').then((payload2) => {
+            if (!payload2 || payload2.length === 0) {
+              this.infoService.generateNotification(NotificationType.WARNING, 'Brak opiekunów w bazie danych.');
+              return;
+            }
+            const persons : (Student & Opiekun)[] = [];
+            for (const student of payload) {
+              const guardian = payload2.find(g => g.opiekun_id === student.id_opiekun);
+              if (!guardian) continue;
+              persons.push({ ...student, ...guardian } as Student & Opiekun);
+            }
+            if (persons.length === 0) {
+              this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
+              return;
+            }
+            resolve(persons);
+          });
+        });
+      });
+    })
   }
 
   private startPageLogic() : void {
