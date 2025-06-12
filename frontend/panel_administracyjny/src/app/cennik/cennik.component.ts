@@ -101,22 +101,6 @@ export class CennikComponent {  protected pricing_zsti: Pricing[] = [];
       this.infoService.generateNotification(NotificationType.WARNING, 'Cennik nie został zmieniony.');
       return;
     }
-    // if (datesChanged && this.invalidDates.some((date, idx, arr) => {
-    //   if (idx % 2 !== 0) return false;
-    //   const start = arr[idx];
-    //   const end = arr[idx + 1];
-    //   const conflictingDeclaration = this.pricing_zsti.find(p =>
-    //     this.dateInput(new Date(p.data_od)) === this.dateInput(start) &&
-    //     this.dateInput(new Date(p.data_do ?? null)) === this.dateInput(end)
-    //   );
-    //   if (conflictingDeclaration && conflictingDeclaration.id === pricing.id) return false;
-    //   const od = new Date(pricing.data_od).getTime();
-    //   const do_ = new Date(pricing.data_do ?? null).getTime();
-    //   return (od <= end.getTime() && do_ >= start.getTime());
-    // })) {
-    //   this.infoService.generateNotification(NotificationType.ERROR, 'Deklaracja nachodzi się z istniejącymi datami.');
-    //   return;
-    // }
     if (pricing.data_do && pricing.data_od > pricing.data_do) {
       this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
       return;
@@ -184,19 +168,6 @@ export class CennikComponent {  protected pricing_zsti: Pricing[] = [];
       data_od : formValue.data_od!,
       data_do : formValue.data_do ?? null,
     } as any
-    // if (this.invalidDates.some((date, idx, arr) => {
-    //   if (idx % 2 !== 0) return false;
-    //   const start = arr[idx];
-    //   const end = arr[idx + 1];
-    //   const od = new Date(declaration.data_od).getTime();
-    //   const do_ = new Date(declaration.data_do).getTime();
-    //   if (do_ < start.getTime()) return false;
-    //   return od <= end.getTime();
-    //
-    // })) {
-    //   this.infoService.generateNotification(NotificationType.ERROR, 'Deklaracja nachodzi się z istniejącymi datami.');
-    //   return;
-    // }
     if (pricing.data_do && pricing.data_od > pricing.data_do) {
       this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
       return;

@@ -113,19 +113,6 @@ export class NieczynneComponent {
     const canceledDay : CanceledDay = {
       dzien : formValue.dzien!,
     } as CanceledDay;
-    // if (this.invalidDates.some((date, idx, arr) => {
-    //   if (idx % 2 !== 0) return false;
-    //   const start = arr[idx];
-    //   const end = arr[idx + 1];
-    //   const od = new Date(declaration.data_od).getTime();
-    //   const do_ = new Date(declaration.data_do).getTime();
-    //   if (do_ < start.getTime()) return false;
-    //   return od <= end.getTime();
-    //
-    // })) {
-    //   this.infoService.generateNotification(NotificationType.ERROR, 'Deklaracja nachodzi się z istniejącymi datami.');
-    //   return;
-    // }
     this.database.request('global.canceledDay.add', canceledDay, 'dump').then((payload) => {
       if (!payload || payload.length === 0) {
         this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać nieczynnego dnia.');
@@ -137,3 +124,4 @@ export class NieczynneComponent {
     });
   }
 }
+

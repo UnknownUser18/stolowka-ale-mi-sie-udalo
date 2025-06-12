@@ -100,7 +100,6 @@ export interface RequestPayload {
  *
  * */
 export interface ResponsePayload {
-    variable: string;
     value: any;
 }
 
@@ -169,7 +168,7 @@ export interface Klasa {
     nazwa: string;
 }
 
-const Klasa = z.object({
+export const Klasa = z.object({
     id: z.number(),
     nazwa: z.string()
 });
@@ -243,7 +242,7 @@ export const AbsenceDay = z.object({
 });
 
 export interface Opiekun {
-    id: number;
+    id_opiekun: number;
     imie_opiekuna: string;
     nazwisko_opiekuna: string;
     nr_kierunkowy: number;
@@ -252,7 +251,7 @@ export interface Opiekun {
 }
 
 export const Opiekun = z.object({
-    id: z.number(),
+    id_opiekun: z.number(),
     imie_opiekuna: z.string(),
     nazwisko_opiekuna: z.string(),
     nr_kierunkowy: z.number().nonnegative(),
@@ -265,7 +264,7 @@ export interface Person {
     typ_osoby_id: number;
     imie: string;
     nazwisko: string;
-    klasa?: number;
+    klasa?: number | string;
     uczeszcza: boolean;
     miasto: boolean;
     opiekun_id?: number;
@@ -276,7 +275,7 @@ export const Person = z.object({
     typ_osoby_id: z.number(),
     imie: z.string(),
     nazwisko: z.string(),
-    klasa: z.number().nullable(),
+    klasa: z.number().or(z.string()).nullable(),
     uczeszcza: z.number(),
     miasto: z.number(),
     opiekun_id: z.number().nullable()

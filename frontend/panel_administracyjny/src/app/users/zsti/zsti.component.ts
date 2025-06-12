@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { DataService, Student, TypOsoby, WebSocketStatus } from '../../data.service';
+import { DataService, Opiekun, Student, TypOsoby, WebSocketStatus } from '../../data.service';
 import { Router } from '@angular/router';
 import { GlobalInfoService, NotificationType } from '../../global-info.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -26,8 +26,8 @@ export class ZstiComponent {
   protected readonly wynikString = wynikString;
   protected readonly TypOsoby = TypOsoby;
   protected searchTerm : string | undefined;
-  protected persons_zsti : Student[] | undefined;
-  protected result : Student[] | undefined;
+  protected persons_zsti : (Student & Opiekun)[] | undefined;
+  protected result : (Student & Opiekun)[] | undefined;
   protected showFilter : boolean = false;
   protected filter = new FormGroup({
     imie : new FormControl('', Validators.pattern('[a-zA-ZżźćńśłóęąŻŹĆŃŚŁÓĘĄ]')),
@@ -50,8 +50,20 @@ export class ZstiComponent {
     this.infoService.setTitle('ZSTI - Osoby');
     this.infoService.webSocketStatus.subscribe(status => {
       if (status !== WebSocketStatus.OPEN) return;
-      this.database.request('zsti.student.get', {}, 'studentList').then((payload) => {
-        this.result = this.persons_zsti = payload;
+      this.database.request('zsti.student.get', {}, 'student').then((payload) => {
+        if (payload === undefined || payload.length === 0) {
+          this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
+          this.result = this.persons_zsti = [];
+          return;
+        }
+        this.database.request('zsti.guardian.get', {}, 'guardianList').then((payload2) : void => {
+          const users = Array.from(payload).map((student : Student) : Student & Opiekun => {
+            const guardian = Array.from(payload2).find(opiekun => opiekun.id === student.opiekun_id);
+            return { ...student, ...guardian } as Student & Opiekun;
+          });
+
+          this.result = this.persons_zsti = users;
+        });
       });
     })
   }
@@ -66,7 +78,7 @@ export class ZstiComponent {
         return (
           imie.toLowerCase().includes(searchTerm) ||
           nazwisko.toLowerCase().includes(searchTerm) &&
-          klasa.toLowerCase().includes(filter.klasa!.toLowerCase()) &&
+          klasa!.toString().toLowerCase().includes(filter.klasa!.toLowerCase()) &&
           (filter.miasto === 'wszyscy' ? true : filter.miasto === 'true' ? miasto : !miasto) &&
           (filter.typ_osoby === '3' || Number(filter.typ_osoby) === typ_osoby_id as TypOsoby) &&
           (filter.uczeszcza === 'wszyscy' ? true : filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
@@ -75,7 +87,7 @@ export class ZstiComponent {
       return (
         imie.toLowerCase().includes(filter.imie!.toLowerCase()) &&
         nazwisko.toLowerCase().includes(filter.nazwisko!.toLowerCase()) &&
-        klasa.toLowerCase().includes(filter.klasa?.toLowerCase() || '') &&
+        klasa!.toString().toLowerCase().includes(filter.klasa?.toLowerCase() || '') &&
         (filter.miasto === 'wszyscy' ? true : filter.miasto === 'true' ? miasto : !miasto) &&
         (filter.typ_osoby === '3' || Number(filter.typ_osoby) === typ_osoby_id as TypOsoby) &&
         (filter.uczeszcza === 'wszyscy' ? true : filter.uczeszcza === 'true' ? uczeszcza : !uczeszcza)
@@ -119,7 +131,7 @@ export class ZstiComponent {
     });
   }
 
-  protected selectPerson(user : Student) : void {
+  protected selectPerson(user : Student & Opiekun) : void {
     this.router.navigate(['osoba/zsti', user.id, 'kalendarz']).then(() : void => {
       this.infoService.setActiveUser(user);
     });
@@ -164,4 +176,5 @@ export class ZstiComponent {
 
 
 }
+
 
