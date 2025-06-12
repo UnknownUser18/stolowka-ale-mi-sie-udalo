@@ -168,7 +168,7 @@ export interface Klasa {
     nazwa: string;
 }
 
-const Klasa = z.object({
+export const Klasa = z.object({
     id: z.number(),
     nazwa: z.string()
 });

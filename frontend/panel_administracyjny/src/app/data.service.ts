@@ -115,6 +115,7 @@ type VariableTypeMap = {
   closedDays: CanceledDay[],
   pricingList: Pricing[],
   guardianList: Opiekun[],
+  klasaList: Klasa[],
   dump: any[], // used for updaing, deleting etc.
 };
 
