@@ -50,13 +50,13 @@ export class ZstiComponent {
     this.infoService.setTitle('ZSTI - Osoby');
     this.infoService.webSocketStatus.subscribe(status => {
       if (status !== WebSocketStatus.OPEN) return;
-      this.database.request('zsti.student.get', {}).then((payload) => {
+      this.database.request('zsti.student.get', {}, 'student').then((payload) => {
         if (payload === undefined || payload.length === 0) {
           this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
           this.result = this.persons_zsti = [];
           return;
         }
-        this.database.request('zsti.opiekun.get', {}).then((payload2) : void => {
+        this.database.request('zsti.guardian.get', {}, 'guardianList').then((payload2) : void => {
           const users = Array.from(payload).map((student : Student) : Student & Opiekun => {
             const guardian = Array.from(payload2).find(opiekun => opiekun.id === student.opiekun_id);
             return { ...student, ...guardian } as Student & Opiekun;
@@ -176,4 +176,5 @@ export class ZstiComponent {
 
 
 }
+
 

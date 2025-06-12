@@ -45,7 +45,7 @@ export class AppComponent implements AfterViewInit {
 
           this.database.request('zsti.guardian.getById', { id : parseInt(lastUser) }, 'guardianList').then((payload2) : void => {
             if (!payload2 || payload2.length === 0) return;
-            const user = payload[0] + payload2[0] as Student & Opiekun;
+            const user = { ...payload[0], ...payload2[0] } as Student & Opiekun;
             this.infoService.setActiveUser(user);
             this.router.navigateByUrl(newUrl).then();
           });
@@ -96,10 +96,17 @@ export class AppComponent implements AfterViewInit {
       this.infoService.generateNotification(NotificationType.WARNING, 'Brak opiekunów w bazie danych.');
       return;
     }
-    return payload.map((student : Student) : Student & Opiekun => {
-      const guardian = payload2.find(opiekun => opiekun.id === student.opiekun_id);
-      return { ...student, ...guardian } as Student & Opiekun;
-    });
+    const persons : (Student & Opiekun)[] = [];
+    for (const student of payload) {
+      const guardian = payload2.find(g => g.opiekun_id === student.id_opiekun);
+      if (!guardian) continue;
+      persons.push({ ...student, ...guardian } as Student & Opiekun);
+    }
+    if (persons.length === 0) {
+      this.infoService.generateNotification(NotificationType.WARNING, 'Brak osób w bazie danych.');
+      return;
+    }
+    return persons;
   }
 
   private startPageLogic() : void {

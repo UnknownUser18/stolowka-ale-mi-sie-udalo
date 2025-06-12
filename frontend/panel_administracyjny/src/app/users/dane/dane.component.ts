@@ -55,17 +55,17 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
       email : forms.email,
       uczeszcza : forms.uczeszcza ? 1 : 0,
     }
-    this.database.request('zsti.student.update', { ...data, id : this.user.id }).then((r) => {
+    this.database.request('zsti.student.update', { ...data, id : this.user.id }, 'dump').then((r) => {
       if (!r[0]) {
         this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować danych użytkownika.');
         return;
       }
-      this.database.request('zsti.student.getById', { id : this.user?.id }).then(([user]) => {
+      this.database.request('zsti.student.getById', { id : this.user?.id }, 'student').then(([user]) => {
         if (!user) {
           this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać danych użytkownika.');
           return;
         }
-        this.database.request('zsti.guardian.getByStudentId', { id : user.id }).then((guardians) => {
+        this.database.request('zsti.guardian.getByStudentId', { id : user.id }, 'guardianList').then((guardians) => {
           const guardian = guardians[0] || { imie_opiekuna : '', nazwisko_opiekuna : '', telefon : '', nr_kierunkowy : '' };
           const updatedUser = { ...user, ...guardian } as Student & Opiekun;
           this.globalInfo.setActiveUser(updatedUser);
