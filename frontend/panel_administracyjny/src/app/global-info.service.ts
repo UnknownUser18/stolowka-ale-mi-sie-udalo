@@ -118,6 +118,7 @@ export class GlobalInfoService {
 
   public setActiveUser(student : Student & Opiekun) : void {
     localStorage.setItem('activeUser', student.id.toString());
+    console.log(student);
     this.activeUser.next(student);
   }
 
