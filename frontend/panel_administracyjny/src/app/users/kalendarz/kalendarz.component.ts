@@ -1,9 +1,9 @@
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, Renderer2, ViewChild} from '@angular/core';
 import {DateChangerComponent} from './date-changer/date-changer.component';
-import {GlobalInfoService, NotificationType} from '../../global-info.service';
-import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName, WebSocketStatus} from '../../data.service';
+import {GlobalInfoService, NotificationType} from '../../services/global-info.service';
+import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName, WebSocketStatus} from '../../services/data.service';
 import {Subject} from 'rxjs';
-import {TransitionService} from '../../transition.service';
+import {TransitionService} from '../../services/transition.service';
 
 enum AbsenceWindowStatus {
   CLOSED,

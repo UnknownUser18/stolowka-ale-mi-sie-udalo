@@ -1,8 +1,8 @@
 import {ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {CanceledDay, DataService, Pricing, WebSocketStatus} from '../data.service';
-import {GlobalInfoService, NotificationType} from '../global-info.service';
-import {TransitionService} from '../transition.service';
+import {CanceledDay, DataService, Pricing, WebSocketStatus} from '../services/data.service';
+import {GlobalInfoService, NotificationType} from '../services/global-info.service';
+import {TransitionService} from '../services/transition.service';
 
 @Component({
   selector: 'app-nieczynne',

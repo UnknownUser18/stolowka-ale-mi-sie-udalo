@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { GlobalInfoService } from '../../../global-info.service';
+import { GlobalInfoService } from '../../../services/global-info.service';
 
 @Component({
   selector: 'app-date-changer',

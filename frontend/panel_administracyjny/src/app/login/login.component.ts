@@ -1,8 +1,8 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
-import { DataService } from '../data.service';
+import { DataService } from '../services/data.service';
 import { Router } from '@angular/router';
-import { GlobalInfoService } from '../global-info.service';
+import { GlobalInfoService } from '../services/global-info.service';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 

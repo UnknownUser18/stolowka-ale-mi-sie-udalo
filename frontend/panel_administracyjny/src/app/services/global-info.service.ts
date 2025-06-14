@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Student, WebSocketStatus, DataService, Opiekun } from './data.service';
+import { Student, WebSocketStatus, Opiekun } from './data.service';
+import { VariablesService } from './variables.service';
+import { Router } from '@angular/router';
 
 export enum TabType {
   KALENDARZ = 'kalendarz',
@@ -24,20 +26,19 @@ export type TabTypeKey = keyof typeof TabType;
   providedIn : 'root'
 })
 export class GlobalInfoService {
-  constructor(private database : DataService) {
+  constructor(private variables : VariablesService, private router : Router) {
     this.webSocketStatus.subscribe((status) => {
       if (status !== WebSocketStatus.OPEN) return;
 
       const lastUser = localStorage.getItem('activeUser');
       if (!lastUser) return;
-      this.database.request('zsti.student.getById', { id : parseInt(lastUser) }, 'student').then((payload) : void => {
-        if (!payload || payload.length === 0) return;
 
-        this.database.request('zsti.guardian.getByStudentId', { id : parseInt(lastUser) }, 'guardianList').then((payload2) : void => {
-          if (!payload2 || payload2.length === 0) return;
-          const user = { ...payload[0], ...payload2[0] } as Student & Opiekun;
-          this.setActiveUser(user);
-        });
+      this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
+        const user = persons.find((p) => p.id === parseInt(lastUser));
+        if (!user) return;
+        this.setActiveUser(user);
+        const url = this.router.url;
+        this.router.navigate([url]).then();
       });
     });
   }
@@ -45,7 +46,7 @@ export class GlobalInfoService {
   private numberOfNotifications : number = 0;
   private maxNotifications : number = 5; // User can set this to limit the number of notifications displayed at once
 
-  private pendingNotifications: Array<{type: NotificationType, message: string}> = [];
+  private pendingNotifications : Array<{ type : NotificationType, message : string }> = [];
   public title : BehaviorSubject<string> = new BehaviorSubject<string>('Strona Główna');
   public webSocketStatus : BehaviorSubject<WebSocketStatus> = new BehaviorSubject<WebSocketStatus>(WebSocketStatus.CLOSED);
   public activeUser : BehaviorSubject<(Student & Opiekun) | undefined> = new BehaviorSubject<(Student & Opiekun) | undefined>(undefined);
@@ -58,7 +59,7 @@ export class GlobalInfoService {
 
   public generateNotification(type : NotificationType, message : string) : void {
     if (this.numberOfNotifications >= this.maxNotifications) {
-      this.pendingNotifications.push({type, message});
+      this.pendingNotifications.push({ type, message });
       return;
     }
     const notification = document.createElement('div')
@@ -118,7 +119,6 @@ export class GlobalInfoService {
 
   public setActiveUser(student : Student & Opiekun) : void {
     localStorage.setItem('activeUser', student.id.toString());
-    console.log(student);
     this.activeUser.next(student);
   }
 
