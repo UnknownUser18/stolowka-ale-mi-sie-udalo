@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { DataService, Declaration, Opiekun, Student, TypOsoby, WebSocketStatus } from '../../services/data.service';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { Subject } from 'rxjs';

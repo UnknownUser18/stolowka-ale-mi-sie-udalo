@@ -54,42 +54,42 @@ export class AppComponent implements AfterViewInit {
     });
   };
 
-  private startPageLogic() : void {
-    switch (this.router.url) {
-      case '/':
-        this.infoService.setTitle('Strona Główna');
-        this.animateElement('main-page').then();
-        break;
-      case '/osoby/zsti':
-      case '/osoby':
-        if (this.router.url === '/osoby') {
-          this.infoService.setTitle('Osoby');
-        }
-        this.animateElement('osoby').then(() : void => {
-          if (this.persons_zsti) return;
-          this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
-            this.persons_zsti = persons;
-          });
-        });
-        break;
-      case '/raporty':
-        this.infoService.setTitle('Raporty');
-        this.animateElement('raporty').then();
-        break;
-      case '/cennik':
-        this.infoService.setTitle('Cennik');
-        this.animateElement('cennik').then();
-        break;
-      case '/nieczynne':
-        this.infoService.setTitle('Dni Nieczynne');
-        this.animateElement('nieczynne').then();
+  private async startPageLogic() : Promise<void> {
+    const url = this.router.url;
+    if (url === '/') {
+      this.infoService.setTitle('Strona Główna');
+      await this.animateElement('main-page');
+      return;
     }
-    if (this.router.url.startsWith('/osoba')) {
-      this.animateElement('osoby').then()
-    } else if (this.router.url.startsWith('/cennik')) {
-      this.animateElement('cennik').then()
-    } else if (this.router.url.startsWith('/nieczynne')) {
-      this.animateElement('nieczynne').then()
+
+    if (url.startsWith('/osoby') || url.startsWith('/osoba')) {
+      if (url === '/osoby')
+        this.infoService.setTitle('Osoby');
+
+      this.animateElement('osoby').then(() : void => {
+        if (this.persons_zsti) return;
+
+        this.infoService.webSocketStatus.subscribe(async (status) => {
+          if (status !== WebSocketStatus.OPEN) return;
+          this.persons_zsti = await this.variables.mapStudentsToOpiekun();
+        });
+      });
+      return;
+    }
+    if (url.startsWith('/cennik')) {
+      this.infoService.setTitle('Cennik');
+      await this.animateElement('cennik');
+      return;
+    }
+    if (url.startsWith('/nieczynne')) {
+      this.infoService.setTitle('Dni Nieczynne');
+      await this.animateElement('nieczynne');
+      return;
+    }
+    if (url.startsWith('/raporty')) {
+      this.infoService.setTitle('Raporty');
+      await this.animateElement('raporty');
+      return;
     }
   }
 
@@ -118,7 +118,7 @@ export class AppComponent implements AfterViewInit {
       .subscribe(() => {
         this.zone.onStable.pipe(take(1)).subscribe(() => {
           requestAnimationFrame(() => {
-            this.startPageLogic();
+            this.startPageLogic().then();
           });
         });
       });
