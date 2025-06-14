@@ -3,7 +3,7 @@
   <div class="select-buttons"></div>
   <main>
     <div class="weekdays">
-      @for (i of ['Pon','Wto','Śro','Czw','Pią','Sob','Nie']; track i) {
+      @for (i of ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie']; track i) {
         <span>{{ i }}</span>
       }
     </div>
@@ -51,38 +51,45 @@
 @if (openStatus !== AbsenceWindowStatus.CLOSED) {
   <section class="absenceWindow" #absencesMenu>
     <div>
-      @if (openStatus === AbsenceWindowStatus.DODANE) {
-        <h3>Dodane nieobecności</h3>
-      } @else if (openStatus === AbsenceWindowStatus.USUNIETE) {
-        <h3>Usunięte nieobecności</h3>
+      @switch (openStatus) {
+        @case (AbsenceWindowStatus.DODANE) {
+          <h2>Dodane nieobecności</h2>
+        }
+        @case (AbsenceWindowStatus.USUNIETE) {
+          <h2>Usunięte nieobecności</h2>
+        }
       }
       <table>
         <thead>
-          <tr>
-            <th>Numer</th>
-            <th>Data</th>
-            <th></th>
-          </tr>
+        <tr>
+          <th>Numer</th>
+          <th>Data</th>
+          <th></th>
+        </tr>
         </thead>
         <tbody>
-          @if(openStatus === AbsenceWindowStatus.DODANE) {
+          @if (openStatus === AbsenceWindowStatus.DODANE) {
             @for (absence of infoService.selectedDays.added; track absence; let index = $index) {
               <tr>
                 <td>{{ index + 1 }}</td>
                 <td>{{ absence | date : 'longDate' }}</td>
-                <td><button (click)="removeAbsence(absence)">Usuń</button></td>
+                <td>
+                  <button (click)="removeAbsence(absence)">Usuń</button>
+                </td>
               </tr>
             } @empty {
               <tr class="empty">
                 <td>Brak dodanych nieobecności...</td>
               </tr>
             }
-          } @else if(openStatus === AbsenceWindowStatus.USUNIETE) {
+          } @else if (openStatus === AbsenceWindowStatus.USUNIETE) {
             @for (absence of infoService.selectedDays.removed; track absence; let index = $index) {
               <tr>
                 <td>{{ index + 1 }}</td>
                 <td>{{ absence | date : 'longDate' }}</td>
-                <td><button (click)="removeAbsence(absence)">Usuń</button></td>
+                <td>
+                  <button (click)="removeAbsence(absence)">Usuń</button>
+                </td>
               </tr>
             } @empty {
               <tr class="empty">

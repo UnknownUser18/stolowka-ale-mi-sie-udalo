@@ -14,29 +14,52 @@
       </form>
     }
   }
-  <main>
+  <main [class.table]="result">
     @defer (when result) {
+      <div>
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="condensedMode" (change)="toggleCondensedMode()">
+          <div></div>
+          <span>Włącz tryb skondensowany</span>
+        </label>
+        <button (click)="exportRaport()">Pobierz raport</button>
+      </div>
       @if (router.url === '/raporty/korekty') {
         <table #table>
           <thead>
           <tr>
             <th>Nazwisko</th>
-            <th>Imie</th>
+            <th>Imię</th>
             <th>Data korekty</th>
           </tr>
           </thead>
           <tbody>
-          @for (korekta of result; track korekta.id) {
-            <tr>
-              <td>{{ korekta.nazwisko }}</td>
-              <td>{{ korekta.imie }}</td>
-              <td>{{ korekta.dzien_wypisania | date : 'fullDate' }}</td>
-            </tr>
-          }
+            @if (!condensedMode) {
+              @for (korekta of result; track korekta.id) {
+                <tr>
+                  <td>{{ korekta.nazwisko }}</td>
+                  <td>{{ korekta.imie }}</td>
+                  <td>{{ korekta.dzien_wypisania | date : 'fullDate' }}</td>
+                </tr>
+              }
+            } @else {
+              @for (korekta of result; track korekta.nazwisko + '-' + korekta.imie + '-' + (Array.isArray(korekta.dni) ? korekta.dni[0] : korekta.dni)) {
+                <tr>
+                  <td>{{ korekta.nazwisko }}</td>
+                  <td>{{ korekta.imie }}</td>
+                  <td>
+                    @if (Array.isArray(korekta.dni)) {
+                      {{ formatDni(korekta.dni) }}
+                    } @else {
+                      {{ korekta.dni | date:'fullDate' }}
+                    }
+                  </td>
+                </tr>
+              }
+            }
           </tbody>
         </table>
       }
-      <button (click)="exportRaport()">Pobierz raport</button>
     } @placeholder (minimum 500ms) {
       <h2>Nie wygenerowano jeszcze raportu...</h2>
       <p>Wybierz opcje u góry aby wygenerować.</p>

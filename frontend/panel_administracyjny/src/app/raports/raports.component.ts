@@ -3,23 +3,27 @@ import { DataService, WebSocketStatus } from '../services/data.service';
 import { GlobalInfoService, NotificationType } from '../services/global-info.service';
 import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import * as xlsx from 'xlsx';
+import { wynikString } from '../users/zsti/zsti.component';
 
 @Component({
   selector : 'app-raports',
   imports : [
     ReactiveFormsModule,
-    DatePipe
+    DatePipe,
+    FormsModule
   ],
   templateUrl : './raports.component.html',
-  styleUrl : './raports.component.scss'
+  styleUrl : './raports.component.scss',
+  providers : [DatePipe]
 })
 export class RaportsComponent implements OnDestroy {
   private destroy$ : Subject<void> = new Subject()
 
   protected result : any | null = null;
+  protected condensedMode : boolean = false;
 
   @ViewChild('table') table! : ElementRef;
 
@@ -29,6 +33,7 @@ export class RaportsComponent implements OnDestroy {
   });
 
   constructor(
+    private datePipe : DatePipe,
     private database : DataService,
     private infoService : GlobalInfoService,
     protected router : Router,
@@ -38,7 +43,7 @@ export class RaportsComponent implements OnDestroy {
     });
   }
 
-  protected generateKorektyReport() : void {
+  protected generateKorektyReport(ignore_notfication = false) : void {
     if (this.korektyForm.invalid) {
       this.infoService.generateNotification(NotificationType.ERROR, 'Proszę naprawić błedy w formularzu.');
       return;
@@ -57,7 +62,45 @@ export class RaportsComponent implements OnDestroy {
         return;
       }
       this.result = payload;
+      if (!ignore_notfication) {
+        this.infoService.generateNotification(NotificationType.SUCCESS, `Raport został wygenerowany. Znaleziono ${ payload.length } ${ wynikString(payload.length) }.`);
+      }
     });
+  }
+
+  protected formatDni(dni : any[]) : string {
+    return dni.map(day => this.datePipe.transform(day, 'shortDate')).join(', ');
+  }
+
+  protected toggleCondensedMode() : void {
+    if (!this.condensedMode) {
+      this.generateKorektyReport(true);
+      return;
+    }
+    switch (this.router.url.split('/')[2]) {
+      case 'korekty':
+
+        this.result = Object.values(
+          this.result.reduce((acc : any, item : any) => {
+            const key = `${ item.nazwisko }|${ item.imie }`;
+            if (!acc[key]) {
+              acc[key] = {
+                nazwisko : item.nazwisko,
+                imie : item.imie,
+                dni : [item.dzien_wypisania]
+              };
+            } else {
+              acc[key].dni.push(item.dzien_wypisania);
+            }
+            return acc;
+          }, {})
+        ).map((item : any) => ({
+          nazwisko : item.nazwisko,
+          imie : item.imie,
+          dni : item.dni
+        }));
+        break;
+    }
   }
 
   protected exportRaport() : void {
@@ -87,10 +130,13 @@ export class RaportsComponent implements OnDestroy {
     xlsx.utils.book_append_sheet(wb, ws, `${ raportName[0].toUpperCase() }${ raportName.slice(1) } - ZSTI`);
 
     xlsx.writeFile(wb, `${ raportName[0].toUpperCase() }${ raportName.slice(1) } - ZSTI ${ new Date().toISOString().slice(0, 10) }.xlsx`);
+    this.infoService.generateNotification(NotificationType.SUCCESS, 'Raport został wyeksportowany.');
   }
 
   public ngOnDestroy() : void {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  protected readonly Array = Array;
 }

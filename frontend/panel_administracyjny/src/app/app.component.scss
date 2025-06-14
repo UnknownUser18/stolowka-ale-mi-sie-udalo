@@ -5,7 +5,7 @@ app-nav {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   width: 100%;
-  padding: 10px 0 0 0;
+  padding: 10px 0;
   background-color: var(--color-2);
   place-items: center;
 }
