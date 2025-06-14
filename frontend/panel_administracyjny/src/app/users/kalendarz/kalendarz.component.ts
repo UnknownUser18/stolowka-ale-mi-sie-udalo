@@ -4,6 +4,7 @@ import {GlobalInfoService, NotificationType} from '../../services/global-info.se
 import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName, WebSocketStatus} from '../../services/data.service';
 import {Subject} from 'rxjs';
 import {TransitionService} from '../../services/transition.service';
+import { DatePipe } from '@angular/common';
 
 enum AbsenceWindowStatus {
   CLOSED,
@@ -13,8 +14,9 @@ enum AbsenceWindowStatus {
 
 @Component({
   selector: 'app-kalendarz',
-  imports: [
-    DateChangerComponent
+  imports : [
+    DateChangerComponent,
+    DatePipe
   ],
   templateUrl: './kalendarz.component.html',
   styleUrl: './kalendarz.component.scss'
@@ -323,18 +325,10 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   /** @method formatDate
    * @description Formatuje datę do formatu YYYY-MM-DD.
    * @param date{Date} - Data do sformatowania.
-   * @param fancy{boolean} - Formatowanie daty w formacie DD miesiąc YYYY.
    * @returns {string} - Sformatowana data w formacie YYYY-MM-DD.
    * @memberof KalendarzComponent
    */
-  protected formatDate(date: Date, fancy: boolean = false): string {
-    if (fancy) {
-      return date.toLocaleDateString('pl-PL', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    }
+  protected formatDate(date: Date): string {
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${(date.getDate()).toString().padStart(2, '0')}`;
   }
 

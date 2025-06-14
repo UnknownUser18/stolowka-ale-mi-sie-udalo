@@ -12,7 +12,7 @@ import {
     Payment,
     Declaration,
     QueriesStructure,
-    SuccessResponse, Opiekun, Klasa,
+    SuccessResponse, Opiekun, Klasa, ReportAbsenceDay,
 } from "./types";
 import {PoolOptions} from "mysql2/promise";
 
@@ -100,6 +100,12 @@ export const dbConfig: PoolOptions = {
  * - operacje na danych;
  * */
 export const Queries: QueriesStructure = {
+    "raportsZsti": {
+        "absence": {
+            "type": ReportAbsenceDay.array(),
+            "get": `SELECT n.id AS "id", dzien_wypisania, imie, nazwisko, sk.nazwa AS "klasa" FROM nieobecnosci_zsti n JOIN osoby_zsti o_z ON o_z.id = n.osoby_zsti_id JOIN slownik_klasa sk on o_z.klasa = sk.id WHERE (:data_od IS NULL OR dzien_wypisania >= :data_od) AND (:data_do IS NULL OR dzien_wypisania <= :data_do) ORDER BY dzien_wypisania DESC`,
+        }
+    },
     "global": {
         "success": {
             "type": SuccessResponse.array(),

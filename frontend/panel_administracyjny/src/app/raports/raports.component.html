@@ -17,27 +17,26 @@
   <main>
     @defer (when result) {
       @if (router.url === '/raporty/korekty') {
-        <table>
+        <table #table>
           <thead>
           <tr>
-            <th>Numer</th>
-            <th>Imie</th>
             <th>Nazwisko</th>
+            <th>Imie</th>
             <th>Data korekty</th>
           </tr>
           </thead>
           <tbody>
-          @for (korekta of result; track korekta.id; let i = $index) {
+          @for (korekta of result; track korekta.id) {
             <tr>
-              <td>{{ i + 1 }}</td>
-              <td>{{ korekta.imie }}</td>
               <td>{{ korekta.nazwisko }}</td>
-              <td>{{ korekta.dzien_wypisania | date : 'pl-PL' }}</td>
+              <td>{{ korekta.imie }}</td>
+              <td>{{ korekta.dzien_wypisania | date : 'fullDate' }}</td>
             </tr>
           }
           </tbody>
         </table>
       }
+      <button (click)="exportRaport()">Pobierz raport</button>
     } @placeholder (minimum 500ms) {
       <h2>Nie wygenerowano jeszcze raportu...</h2>
       <p>Wybierz opcje u góry aby wygenerować.</p>

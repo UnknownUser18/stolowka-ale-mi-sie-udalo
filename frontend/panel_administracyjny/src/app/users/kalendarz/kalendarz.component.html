@@ -17,7 +17,7 @@
       <table>
         @for (day of infoService.selectedDays.added.slice(Math.max(0, infoService.selectedDays.added.length - 4)).reverse(); track day; let last = $last) {
           <tr>
-            <td>{{ formatDate(day) }}</td>
+            <td>{{ day | date : 'shortDate' }}</td>
             @if (last) {
               <td><i class="fa-solid fa-up-right-and-down-left-from-center" (click)="applyAnimation(AbsenceWindowStatus.DODANE)"></i></td>
             }
@@ -34,7 +34,7 @@
       <table>
         @for (day of infoService.selectedDays.removed.slice(Math.max(0, infoService.selectedDays.removed.length - 4)).reverse(); track day; let last = $last) {
           <tr>
-            <td>{{ formatDate(day) }}</td>
+            <td>{{ day | date : 'shortDate' }}</td>
             @if (last) {
               <td><i class="fa-solid fa-up-right-and-down-left-from-center" (click)="applyAnimation(AbsenceWindowStatus.USUNIETE)"></i></td>
             }
@@ -69,7 +69,7 @@
             @for (absence of infoService.selectedDays.added; track absence; let index = $index) {
               <tr>
                 <td>{{ index + 1 }}</td>
-                <td>{{ formatDate(absence, true) }}</td>
+                <td>{{ absence | date : 'longDate' }}</td>
                 <td><button (click)="removeAbsence(absence)">Usuń</button></td>
               </tr>
             } @empty {
@@ -81,7 +81,7 @@
             @for (absence of infoService.selectedDays.removed; track absence; let index = $index) {
               <tr>
                 <td>{{ index + 1 }}</td>
-                <td>{{ formatDate(absence, true) }}</td>
+                <td>{{ absence | date : 'longDate' }}</td>
                 <td><button (click)="removeAbsence(absence)">Usuń</button></td>
               </tr>
             } @empty {
