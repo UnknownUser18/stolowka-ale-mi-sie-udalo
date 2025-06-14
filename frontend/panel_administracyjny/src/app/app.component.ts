@@ -36,21 +36,6 @@ export class AppComponent implements AfterViewInit {
     this.infoService.webSocketStatus.subscribe(status => {
       if (status === WebSocketStatus.ERROR) this.infoService.generateNotification(NotificationType.ERROR, 'Bład podczas łączenia się z bazą danych.')
       if (status !== WebSocketStatus.OPEN) return;
-      const lastUser = localStorage.getItem('activeUser');
-      if (!lastUser) return;
-      const url = this.router.url;
-
-      if (url.includes('null')) {
-        const newUrl = url.replace('null', lastUser);
-        this.variables.getStudentFromId(parseInt(lastUser)).then(student => {
-          if (!student) {
-            this.infoService.generateNotification(NotificationType.ERROR, 'Nie znaleziono użytkownika.');
-            return;
-          }
-          this.infoService.setActiveUser(student);
-          this.router.navigateByUrl(newUrl).then();
-        });
-      }
     })
   }
 

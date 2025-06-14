@@ -55,7 +55,7 @@ export interface Student {
 }
 
 export interface Opiekun {
-  id: number;
+  id_opiekun: number;
   imie_opiekuna: string;
   nazwisko_opiekuna: string;
   nr_kierunkowy: number;

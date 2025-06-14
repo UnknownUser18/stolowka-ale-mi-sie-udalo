@@ -1,8 +1,8 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy} from '@angular/core';
-import {DataService, Declaration, Opiekun, Student, TypOsoby, WebSocketStatus} from '../../services/data.service';
-import {GlobalInfoService, NotificationType} from '../../services/global-info.service';
-import {Subject} from 'rxjs';
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy } from '@angular/core';
+import { DataService, Declaration, Opiekun, Student, TypOsoby, WebSocketStatus } from '../../services/data.service';
+import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
+import { Subject } from 'rxjs';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector : 'app-dane',
@@ -15,10 +15,9 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} fr
 })
 export class DaneComponent implements AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  private opiekun_id : number | undefined;
+  private user : Student | undefined;
 
   protected TypOsoby = TypOsoby;
-  protected user : Student | undefined;
   protected declaration : Declaration | undefined;
   protected readonly Number = Number;
 
@@ -33,7 +32,8 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
     uczeszcza : new FormControl(true, Validators.required),
   })
 
-  constructor(private database : DataService, private globalInfo : GlobalInfoService, private cdr : ChangeDetectorRef) {}
+  constructor(private database : DataService, private globalInfo : GlobalInfoService) {
+  }
 
   protected async sendChanges() : Promise<void> {
     if (!this.user) return;
@@ -72,7 +72,7 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    let guardianResult = await this.database.request('zsti.guardian.update', { ...opiekunData, id : this.opiekun_id }, 'dump')
+    let guardianResult = await this.database.request('zsti.guardian.update', { ...opiekunData, id : this.user.opiekun_id }, 'dump')
     if (!guardianResult[0]) {
       this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować danych opiekuna.');
       return;
@@ -118,52 +118,34 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
   }
 
   protected onTypOsobyChange() : void {
-    const typOsoby = this.forms.get('typ_osoby')?.value;
+    const typOsoby = Number(this.forms.get('typ_osoby')?.value);
     const klasa = this.forms.get('klasa');
     const opiekun = this.forms.get('imie_nazwisko_opiekuna');
-    if (Number(typOsoby) === TypOsoby.UCZEN) {
+
+    if (typOsoby === TypOsoby.UCZEN) {
       klasa?.setValidators(Validators.required);
-      klasa?.enable({ emitEvent : false });
       opiekun?.setValidators([Validators.required, Validators.pattern(/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]+$/)]);
+      klasa?.enable({ emitEvent : false });
       opiekun?.enable({ emitEvent : false });
-      this.forms.patchValue({ klasa : '', imie_nazwisko_opiekuna : '' }, { emitEvent : false });
-    } else if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
+    } else if (typOsoby === TypOsoby.NAUCZYCIEL) {
       klasa?.setValidators(null);
-      klasa?.disable({ emitEvent : false });
       opiekun?.setValidators(null);
+      klasa?.disable({ emitEvent : false });
       opiekun?.disable({ emitEvent : false });
       this.forms.patchValue({ klasa : '', imie_nazwisko_opiekuna : '' }, { emitEvent : false });
+
     }
   }
-
   public ngAfterViewInit() : void {
     this.globalInfo.webSocketStatus.subscribe((status) => {
       if (status !== WebSocketStatus.OPEN) return;
       this.globalInfo.activeUser.subscribe((user : (Student & Opiekun) | undefined) => {
         if (!user) return;
         this.user = user;
-        if (!isNaN(Number(user.klasa))) {
-          this.database.request('zsti.klasa.getById', { id : user.klasa }, 'klasaList').then((klasa) => {
-            if (!klasa[0] && user.typ_osoby_id === TypOsoby.UCZEN) {
-              this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać danych klasy.');
-              return;
-            }
-            if (user.typ_osoby_id === TypOsoby.UCZEN) {
-              user.klasa = klasa[0].nazwa;
-            }
-            this.opiekun_id = user.opiekun_id;
-            this.globalInfo.setTitle(`${ user.imie } ${ user.nazwisko } - Dane`);
-            this.globalInfo.setActiveTab('DANE');
-            this.setForm(user);
-            if (user.typ_osoby_id === TypOsoby.NAUCZYCIEL) {
-              this.forms.get('imie_nazwisko_opiekuna')?.disable();
-              this.forms.get('klasa')?.disable();
-            }
-            this.cdr.detectChanges();
-          });
-        } else {
-          this.setForm(user);
-        }
+        this.globalInfo.setActiveTab('DANE');
+        this.globalInfo.setTitle(`${ user.imie } ${ user.nazwisko } - Dane`);
+        this.setForm(user);
+        this.onTypOsobyChange();
       });
     });
   }
