@@ -6,8 +6,8 @@ import { DataService, Opiekun, Student } from './data.service';
 })
 export class VariablesService {
 
-  private persons_zsti : Student[] = [];
-  private opiekun_zsti : Opiekun[] = [];
+  private persons_zsti : Student[] | undefined;
+  private opiekun_zsti : Opiekun[] | undefined;
 
   constructor(
     private database : DataService
@@ -18,7 +18,7 @@ export class VariablesService {
     this.persons_zsti = users;
   }
 
-  public getUsersZsti() : Student[] {
+  public getUsersZsti() : Student[] | undefined {
     return this.persons_zsti;
   }
 
@@ -26,7 +26,7 @@ export class VariablesService {
     this.opiekun_zsti = opiekunowie;
   }
 
-  public getOpiekunZsti() : Opiekun[] {
+  public getOpiekunZsti() : Opiekun[] | undefined {
     return this.opiekun_zsti;
   }
 
@@ -55,12 +55,20 @@ export class VariablesService {
    * @description Mapuje tablicę studentów do tablicy opiekunów, łącząc je na podstawie opiekun_id. Bierze na podstawie `this.persons_zsti` i `this.opiekun_zsti` z **VariablesService**.
    * @return Tablica studentów z dodanymi danymi opiekunów.
    * @example
-   * const studentsWithGuardians = this.mapStudentsToOpiekun();
+   * this.mapStudentsToOpiekun().then((persons) => {
+   *    this.persons_zsti = persons;
+   * });
    * @memberOf VariablesService
    */
   public async mapStudentsToOpiekun() : Promise<(Student & Opiekun)[]> {
-    return this.persons_zsti.map((student) : Student & Opiekun => {
-      const opiekun = this.opiekun_zsti.find((opiekun) => opiekun.id === student.opiekun_id);
+    if (!this.persons_zsti || !this.opiekun_zsti)
+      await Promise.all([this.fetchUsersZsti(), this.fetchOpiekunZsti()]);
+
+    if (this.persons_zsti?.length === 0 || this.opiekun_zsti?.length === 0)
+      return [];
+
+    return this.persons_zsti!.map((student) : Student & Opiekun => {
+      const opiekun = this.opiekun_zsti!.find((opiekun) => opiekun.id === student.opiekun_id);
       return { ...student, ...opiekun } as Student & Opiekun;
     });
   }
@@ -72,6 +80,7 @@ export class VariablesService {
    * @return {Promise<(Student & Opiekun) | undefined>} - Obiekt studenta z danymi opiekuna lub undefined, jeśli nie znaleziono.
    * @example
    * const student = await this.getStudentFromId(1);
+   * @memberOf VariablesService
    */
   public async getStudentFromId(id : number) : Promise<(Student & Opiekun) | undefined> {
     const student = this.database.request('zsti.student.getById', { id }, 'studentList');

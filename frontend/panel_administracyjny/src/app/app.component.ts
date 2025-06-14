@@ -82,18 +82,8 @@ export class AppComponent implements AfterViewInit {
         }
         this.animateElement('osoby').then(() : void => {
           if (this.persons_zsti) return;
-          this.variables.fetchUsersZsti().then(() => {
-
-            this.variables.fetchOpiekunZsti().then(() : void => {
-              this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
-                this.persons_zsti = persons;
-              });
-            }).catch((error) : void => {
-              this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania opiekunów: ' + error);
-            });
-
-          }).catch((error) : void => {
-            this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania osób: ' + error);
+          this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
+            this.persons_zsti = persons;
           });
         });
         break;
@@ -110,14 +100,11 @@ export class AppComponent implements AfterViewInit {
         this.animateElement('nieczynne').then();
     }
     if (this.router.url.startsWith('/osoba')) {
-      this.animateElement('osoby').then(() : void => {
-      })
+      this.animateElement('osoby').then()
     } else if (this.router.url.startsWith('/cennik')) {
-      this.animateElement('cennik').then(() : void => {
-      })
+      this.animateElement('cennik').then()
     } else if (this.router.url.startsWith('/nieczynne')) {
-      this.animateElement('nieczynne').then(() : void => {
-      })
+      this.animateElement('nieczynne').then()
     }
   }
 

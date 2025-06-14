@@ -54,6 +54,8 @@ export class ZstiComponent implements OnDestroy {
     this.infoService.setTitle('ZSTI - Osoby');
     this.infoService.webSocketStatus.pipe(takeUntil(this.destroy$)).subscribe(status => {
       if (status !== WebSocketStatus.OPEN) return;
+      if (this.persons_zsti) return;
+
       this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
         this.result = this.persons_zsti = persons;
       });
@@ -63,11 +65,14 @@ export class ZstiComponent implements OnDestroy {
   private applyFilterLogic(use_filter : boolean = false) : void {
     if (this.filter.get('typ_osoby')?.value! === (TypOsoby.NAUCZYCIEL + '')) this.filter.get('klasa')?.setValue('');
     const filter = this.filter.getRawValue();
-    if (this.checkIfFilterUsed() && use_filter) return;
+    if (!this.persons_zsti) {
+      this.infoService.generateNotification(NotificationType.ERROR, 'Nie można zastosować filtru, ponieważ nie załadowano jeszcze osób.');
+      return;
+    }
+    if (!this.checkIfFilterUsed() && use_filter && this.searchTerm !== '') return;
 
     this.result = this.persons_zsti!.filter((person : Student & Opiekun) : boolean => {
       const searchTerm : string = this.searchTerm?.trim().toLowerCase() ?? '';
-
       if (use_filter) {
         if (searchTerm.split(' ').length > 1) {
           return (
