@@ -11,6 +11,7 @@ import { PlatnosciComponent } from './users/platnosci/platnosci.component';
 import { KartyComponent } from './users/karty/karty.component';
 import { RaportsComponent } from './raports/raports.component';
 import { LoginComponent } from './login/login.component';
+import { IndividualRaportComponent } from './users/individual-raport/individual-raport.component';
 
 export const routes : Routes = [
   { path : '', component : HomeComponent },
@@ -27,6 +28,7 @@ export const routes : Routes = [
   { path : 'osoba/zsti/:id/deklaracje', component : DeklaracjeComponent },
   { path : 'osoba/zsti/:id/platnosci', component : PlatnosciComponent },
   { path : 'osoba/zsti/:id/karta', component : KartyComponent },
+  { path : 'osoba/zsti/:id/raport', component : IndividualRaportComponent },
   { path : 'cennik', component : CennikComponent },
   { path : 'cennik/zsti', component : CennikComponent },
   { path : 'nieczynne', component : NieczynneComponent },
@@ -37,6 +39,7 @@ export const routes : Routes = [
     children : [
       { path : 'korekty', component : RaportsComponent },
       { path : 'obecnosci', component : RaportsComponent },
+      { path : 'platnosci', component : RaportsComponent },
     ]
   },
   { path : 'login', component : LoginComponent },

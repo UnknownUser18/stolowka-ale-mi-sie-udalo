@@ -104,14 +104,12 @@ app-karty {
   padding: 30px 40px;
 }
 
-app-raports {
+app-raports, app-individual-raport {
   @include positional(95%, 95%);
   display: grid;
-  grid-template-rows: 0.25fr 1fr;
   grid-template-columns: 1fr;
   row-gap: 20px;
   background-color: var(--color-3);
-  overflow-x: hidden;
 }
 
 app-login {

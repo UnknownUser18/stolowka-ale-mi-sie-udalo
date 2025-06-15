@@ -12,7 +12,7 @@ import {
     Payment,
     Declaration,
     QueriesStructure,
-    SuccessResponse, Opiekun, Klasa,
+    SuccessResponse, Opiekun, Klasa, ReportAbsenceDay, ReportCheckedCard, ReportPayment,
 } from "./types";
 import {PoolOptions} from "mysql2/promise";
 
@@ -100,6 +100,20 @@ export const dbConfig: PoolOptions = {
  * - operacje na danych;
  * */
 export const Queries: QueriesStructure = {
+    "raportsZsti": {
+        "absence": {
+            "type": ReportAbsenceDay.array(),
+            "get": `SELECT n.id AS "id", dzien_wypisania, imie, nazwisko, sk.nazwa AS "klasa" FROM nieobecnosci_zsti n JOIN osoby_zsti o_z ON o_z.id = n.osoby_zsti_id JOIN slownik_klasa sk on o_z.klasa = sk.id WHERE (:data_od IS NULL OR dzien_wypisania >= :data_od) AND (:data_do IS NULL OR dzien_wypisania <= :data_do) ORDER BY dzien_wypisania DESC`,
+        },
+        "checkedCard": {
+            "type": ReportCheckedCard.array(),
+            "get": `SELECT s.id AS "id", nazwisko, imie, czas FROM skany_zsti s JOIN karty_zsti k ON k.id = s.id_karty JOIN osoby_zsti o ON o.id = k.id_ucznia WHERE (:data_od IS NULL OR czas >= :data_od) AND (:data_do IS NULL OR czas <= :data_do) ORDER BY czas DESC;`,
+        },
+        "platnosci": {
+            "type": ReportPayment.array(),
+            "get": `SELECT p.id AS "id", nazwisko, imie, LPAD(miesiac, 2, '0') AS miesiac, rok, CONCAT(rok, '-', LPAD(miesiac, 2, '0')) AS rok_miesiac, platnosc, data_platnosci FROM platnosci_zsti p JOIN osoby_zsti o ON p.id_ucznia = o.id WHERE (:data_od IS NULL OR :data_od <= data_platnosci) AND (:data_do IS NULL OR :data_do >= data_platnosci) AND (:miesiac IS NULL OR :miesiac = CONCAT(rok, '-', LPAD(miesiac, 2, '0'))) ORDER BY miesiac DESC, rok DESC;`
+        }
+    },
     "global": {
         "success": {
             "type": SuccessResponse.array(),
@@ -156,7 +170,8 @@ export const Queries: QueriesStructure = {
             "get": `SELECT * FROM karty_zsti`,
             "getById": `SELECT * FROM karty_zsti WHERE id_ucznia = :id_ucznia`,
             "add": `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES (:id_ucznia, :key_card, :data_wydania, :ostatnie_uzycie)`,
-            "update": `UPDATE karty_zsti SET id_ucznia = :id_ucznia, key_card = :key_card, data_wydania = :data_wydania, ostatnie_uzycie = :ostatnie_uzycie WHERE id = :id`,
+            "update": `UPDATE karty_zsti SET key_card = :key_card WHERE id = :id`,
+            "updateWithData": `UPDATE karty_zsti SET key_card = :key_card, data_wydania = :data_wydania WHERE id_ucznia = :id_ucznia`,
             "delete": `DELETE FROM karty_zsti WHERE id = :id`,
             "getWithDetails": `SELECT k_z.id, k_z.id_ucznia, k_z.key_card, k_z.data_wydania, k_z.ostatnie_uzycie, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto FROM karty_zsti k_z LEFT JOIN osoby_zsti o_z ON o_z.id = k_z.id_ucznia ORDER BY o_z.nazwisko, o_z.imie;`
         },

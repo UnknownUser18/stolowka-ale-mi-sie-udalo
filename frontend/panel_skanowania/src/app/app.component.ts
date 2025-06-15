@@ -11,18 +11,7 @@ export interface affirmationInfo{
   isAbleToEnter: boolean;
 }
 
-export const animateElement = async(element: HTMLElement, remove: boolean = false): Promise<boolean> => {
-  return new Promise((resolve, reject): void => {
-    if (!element) {
-      reject('Element not found');
-      return;
-    }
-    element.classList.toggle('done', !remove);
-    element.addEventListener('transitionend', (): void => {
-      resolve(true);
-    });
-  });
-};
+
 
 @Component({
   selector: 'app-root',

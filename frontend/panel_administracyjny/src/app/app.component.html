@@ -60,8 +60,9 @@
         <div class="raporty all">
           <i class="fa-solid fa-right-to-bracket exit" (click)="navigate('','raporty')"></i>
           <ul>
-            <li routerLink="raporty/korekty"><i class="fa-solid fa-calendar-minus"></i>Korekty</li>
-            <li routerLink="raporty/obecnosci"><i class="fa-solid fa-check-to-slot"></i>Obecności</li>
+            <li routerLink="raporty/korekty" [class.active]="router.url.includes('korekty')" ><i class="fa-solid fa-calendar-minus"></i>Korekty</li>
+            <li routerLink="raporty/obecnosci" [class.active]="router.url.includes('obecnosci')"><i class="fa-solid fa-check-to-slot"></i>Obecności</li>
+            <li routerLink="raporty/platnosci" [class.active]="router.url.includes('platnosci')"><i class="fa-solid fa-money-bill"></i>Płatności</li>
           </ul>
         </div>
       } @else if(router.url.includes('/cennik')){

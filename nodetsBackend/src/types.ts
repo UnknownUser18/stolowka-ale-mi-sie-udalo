@@ -338,3 +338,28 @@ export interface EmailGuardianData {
     telefon: string;
     email: string;
 }
+
+export const ReportAbsenceDay = z.object({
+    id: z.number(),
+    dzien_wypisania: z.date(),
+    imie: z.string(),
+    nazwisko: z.string(),
+    klasa: z.string(),
+})
+
+export const ReportCheckedCard = z.object({
+    id: z.number(),
+    nazwisko: z.string(),
+    imie: z.string(),
+    czas: z.date(),
+});
+
+export const ReportPayment = z.object({
+    id: z.number(),
+    imie: z.string(),
+    nazwisko: z.string(),
+    miesiac: z.string(),
+    rok: z.number(),
+    platnosc: z.number(),
+    data_platnosci: z.date(),
+})

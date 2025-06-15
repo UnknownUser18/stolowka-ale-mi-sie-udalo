@@ -1,0 +1,47 @@
+@use 'index' as i;
+div {
+  @include i.flex-center(row, center, center);
+  background-color: var(--color-5);
+  li {
+
+  }
+}
+main {
+  @include i.flex-center(column, start, center);
+  width: 100%;
+
+  &:has(h1) {
+    justify-content: center;
+  }
+
+  &.table {
+    display: block;
+  }
+
+  & > div {
+    @include i.flex-center($justify: space-between, $align: center);
+    margin: 0 auto 20px auto;
+    width: 75%;
+  }
+
+  h1, p, h2 {
+    text-align: center;
+  }
+
+  h1, h2 {
+    margin-bottom: 5px;
+  }
+
+  h1 {
+    @include i.font(3em, 600, var(--color-13));
+  }
+
+  h2 {
+    @include i.font(2em, 500, var(--color-13));
+  }
+
+  p {
+    @include i.font(1.5em, 200);
+    font-family: 'Roboto', sans-serif;
+  }
+}

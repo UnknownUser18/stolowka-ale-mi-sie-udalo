@@ -1,10 +1,11 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
-import { DataService, Payment, WebSocketStatus } from '../../services/data.service';
+import { DataService, Payment } from '../../services/data.service';
 import { TransitionService } from '../../services/transition.service';
 import { Subject, takeUntil } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { wynikString } from '../zsti/zsti.component';
+import { VariablesService } from '../../services/variables.service';
 
 @Component({
   selector : 'app-platnosci',
@@ -37,13 +38,13 @@ export class PlatnosciComponent implements OnDestroy {
   @ViewChild('window') window! : ElementRef;
 
   constructor(
+    private variables : VariablesService,
     private database : DataService,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef,
     private zone : NgZone,
     protected infoService : GlobalInfoService) {
-    this.infoService.webSocketStatus.pipe(takeUntil(this.destroy$)).subscribe(status => {
-      if (status !== WebSocketStatus.OPEN) return;
+    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() : void => {
 
       this.infoService.activeUser.pipe(takeUntil(this.destroy$)).subscribe(user => {
         if (!user) return;

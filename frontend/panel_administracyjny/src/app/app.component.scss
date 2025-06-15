@@ -5,11 +5,10 @@ app-nav {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   width: 100%;
-  padding: 10px 0 0 0;
+  padding: 10px 0;
   background-color: var(--color-2);
   place-items: center;
 }
-
 nav {
   display: flex;
   flex-direction: column;
@@ -39,6 +38,9 @@ nav .osoby, nav .cennik, nav .nieczynne, nav .raporty {
     @extend %main-page-li;
     margin: 10% auto;
     background-color: var(--color-4);
+    &.active {
+      background-color: var(--color-6);
+    }
   }
 }
 

@@ -1,11 +1,11 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { Opiekun, Student, TypOsoby, WebSocketStatus } from '../../services/data.service';
+import { Opiekun, Student, TypOsoby } from '../../services/data.service';
 import { Router } from '@angular/router';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TransitionService } from '../../services/transition.service';
 import { VariablesService } from '../../services/variables.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 
 export function wynikString(number : number) : string {
   if (number < 0) console.warn('Number cannot be negative in wynikString function');
@@ -52,8 +52,7 @@ export class ZstiComponent implements OnDestroy {
     private transition : TransitionService,
     private cdr : ChangeDetectorRef) {
     this.infoService.setTitle('ZSTI - Osoby');
-    this.infoService.webSocketStatus.pipe(takeUntil(this.destroy$)).subscribe(status => {
-      if (status !== WebSocketStatus.OPEN) return;
+    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() : void => {
       if (this.persons_zsti) return;
 
       this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {

@@ -1,9 +1,11 @@
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, Renderer2, ViewChild} from '@angular/core';
 import {DateChangerComponent} from './date-changer/date-changer.component';
 import {GlobalInfoService, NotificationType} from '../../services/global-info.service';
-import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName, WebSocketStatus} from '../../services/data.service';
+import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName} from '../../services/data.service';
 import {Subject} from 'rxjs';
 import {TransitionService} from '../../services/transition.service';
+import { DatePipe } from '@angular/common';
+import { VariablesService } from '../../services/variables.service';
 
 enum AbsenceWindowStatus {
   CLOSED,
@@ -13,8 +15,9 @@ enum AbsenceWindowStatus {
 
 @Component({
   selector: 'app-kalendarz',
-  imports: [
-    DateChangerComponent
+  imports : [
+    DateChangerComponent,
+    DatePipe
   ],
   templateUrl: './kalendarz.component.html',
   styleUrl: './kalendarz.component.scss'
@@ -34,6 +37,7 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   @ViewChild('absencesMenu') absencesMenu!: ElementRef;
 
   constructor(
+    private variables: VariablesService,
     private database: DataService,
     private renderer: Renderer2,
     private zone: NgZone,
@@ -323,18 +327,10 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   /** @method formatDate
    * @description Formatuje datę do formatu YYYY-MM-DD.
    * @param date{Date} - Data do sformatowania.
-   * @param fancy{boolean} - Formatowanie daty w formacie DD miesiąc YYYY.
    * @returns {string} - Sformatowana data w formacie YYYY-MM-DD.
    * @memberof KalendarzComponent
    */
-  protected formatDate(date: Date, fancy: boolean = false): string {
-    if (fancy) {
-      return date.toLocaleDateString('pl-PL', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    }
+  protected formatDate(date: Date): string {
     return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${(date.getDate()).toString().padStart(2, '0')}`;
   }
 
@@ -369,8 +365,8 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit(): void {
-    this.infoService.webSocketStatus.subscribe(status => {
-      if (status !== WebSocketStatus.OPEN) return;
+    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+
       this.infoService.activeUser.subscribe((user: Student | undefined) => {
         if (!user) return;
         this.user = user;
