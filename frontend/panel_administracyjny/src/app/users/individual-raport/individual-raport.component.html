@@ -1,0 +1,20 @@
+<div>
+  <menu>
+    <li [class.active]="type === 'korekta'" (click)="type = 'korekta'">Korekty</li>
+    <li [class.active]="type === 'nieobecnosci'" (click)="type = 'nieobecnosci'">Nieobecności</li>
+  </menu>
+  <form>
+
+  </form>
+</div>
+<main>
+  @if (result && result.length > 0) {
+    dih
+  } @else if (result && result.length === 0) {
+    <h2>Brak wyników...</h2>
+    <p>Nie znaleziono żadnych danych dla wybranych kryteriów.</p>
+  } @else {
+    <h2>Nie wygenerowano jeszcze raportu...</h2>
+    <p>Wybierz opcje u góry aby wygenerować.</p>
+  }
+</main>
