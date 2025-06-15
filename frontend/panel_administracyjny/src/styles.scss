@@ -104,7 +104,7 @@ app-karty {
   padding: 30px 40px;
 }
 
-app-raports {
+app-raports, app-individual-raport {
   @include positional(95%, 95%);
   display: grid;
   grid-template-columns: 1fr;

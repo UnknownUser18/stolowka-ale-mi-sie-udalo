@@ -18,11 +18,18 @@ form {
     margin-bottom: 10px;
 
     input {
+      transition: i.transition(outline-color), i.transition(color);
       width: 30%;
       font-size: 0.9em;
       background-color: var(--color-2);
       padding: 10px 15px;
       border-radius: 10px;
+      outline: 2px solid transparent;
+
+      &:focus {
+        outline-color: var(--color-10);
+        color: var(--color-13);
+      }
     }
   }
 
@@ -40,6 +47,11 @@ form {
 
 .raports, main {
   @include i.flex-center(column, start, center);
+  width: 100%;
+
+  &:has(h1) {
+    justify-content: center;
+  }
 
   &.table {
     display: block;
@@ -74,19 +86,29 @@ form {
 }
 
 table {
-  @include i.table;
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(30%, 1fr));
-  max-height: 60vh;
-  overflow-y: auto;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
 
   tbody {
-    height: 100%;
-    overflow: auto;
+    display: block;
+    width: 100%;
+    max-height: 50dvh;
+    overflow-y: auto;
+    border-radius: 0 0 20px 20px;
   }
 
   tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+
     &:last-of-type td {
       border-bottom: none;
     }
@@ -96,7 +118,13 @@ table {
     }
 
     td, th {
+      text-align: center;
       padding: 10px 20px;
+      border-left: 2px solid var(--color-10);
+
+      &:first-child {
+        border-left: none;
+      }
     }
 
     th {

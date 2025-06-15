@@ -9,7 +9,6 @@ app-nav {
   background-color: var(--color-2);
   place-items: center;
 }
-
 nav {
   display: flex;
   flex-direction: column;
@@ -39,6 +38,9 @@ nav .osoby, nav .cennik, nav .nieczynne, nav .raporty {
     @extend %main-page-li;
     margin: 10% auto;
     background-color: var(--color-4);
+    &.active {
+      background-color: var(--color-6);
+    }
   }
 }
 

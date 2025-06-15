@@ -3,8 +3,8 @@ import { DataService, VariableName, WebSocketStatus } from '../services/data.ser
 import { GlobalInfoService, NotificationType } from '../services/global-info.service';
 import { Subject, takeUntil } from 'rxjs';
 import { NavigationEnd, NavigationSkipped, Router } from '@angular/router';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import * as xlsx from 'xlsx';
 import { wynikString } from '../users/zsti/zsti.component';
 
@@ -13,7 +13,8 @@ import { wynikString } from '../users/zsti/zsti.component';
   imports : [
     ReactiveFormsModule,
     DatePipe,
-    FormsModule
+    FormsModule,
+    CurrencyPipe
   ],
   templateUrl : './raports.component.html',
   styleUrl : './raports.component.scss',
@@ -28,15 +29,17 @@ export class RaportsComponent implements OnDestroy {
 
   @ViewChild('table') table! : ElementRef;
 
-  protected korektyForm = new FormGroup({
+  protected dataForm = new FormGroup({
     data_od : new FormControl(''),
     data_do : new FormControl(''),
   });
 
-  protected obecnosciForm = new FormGroup({
+  protected platnosciForm = new FormGroup({
     data_od : new FormControl(''),
     data_do : new FormControl(''),
+    miesiac : new FormControl('', Validators.pattern('^\\d{4}-(0[1-9]|1[0-2])$')),
   });
+
 
   constructor(
     private datePipe : DatePipe,
@@ -94,11 +97,50 @@ export class RaportsComponent implements OnDestroy {
   }
 
   protected generateObecnosciReport(ignore_notfication = false) : void {
-    this.generateReport(this.obecnosciForm, 'raportsZsti.checkedCard.get', 'scanList', ignore_notfication);
+    this.generateReport(this.dataForm, 'raportsZsti.checkedCard.get', 'scanList', ignore_notfication);
   }
 
   protected generateKorektyReport(ignore_notfication = false) : void {
-    this.generateReport(this.korektyForm, 'raportsZsti.absence.get', 'absenceDayList', ignore_notfication);
+    this.generateReport(this.dataForm, 'raportsZsti.absence.get', 'absenceDayList', ignore_notfication);
+  }
+
+  protected generatePlatnosciReport(ignore_notification = false) : void {
+    if (this.platnosciForm.invalid) {
+      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę naprawić błedy w formularzu.');
+      return;
+
+    } else if (this.platnosciForm.get('data_do')?.value && this.platnosciForm.get('data_od')?.value && this.platnosciForm.get('data_do')!.value! < this.platnosciForm.get('data_od')!.value!) {
+      this.infoService.generateNotification(NotificationType.ERROR, 'Data końcowa musi być późniejsza niż data początkowa.');
+      return;
+
+    } else if (this.platnosciForm.get('miesiac')?.value && !/^\d{4}-(0[1-9]|1[0-2])$/.test(this.platnosciForm.get('miesiac')?.value!)) {
+      this.infoService.generateNotification(NotificationType.ERROR, 'Miesiąc musi być w formacie YYYY-MM.');
+      return;
+    }
+    let data_od = this.platnosciForm.get('data_od')?.value;
+    let data_do = this.platnosciForm.get('data_do')?.value;
+    let miesiac = this.platnosciForm.get('miesiac')?.value;
+    if (data_od === '') data_od = null;
+    if (data_do === '') data_do = null;
+    if (miesiac === '') miesiac = null;
+    this.database.request('raportsZsti.platnosci.get', { data_od, data_do, miesiac }, 'paymentList').then((payload : any) => {
+      if (!payload) {
+        this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania danych.');
+        return;
+      } else if (payload.length === 0) {
+        this.infoService.generateNotification(NotificationType.WARNING, 'Brak danych do wyświetlenia.');
+      }
+
+      this.result = payload;
+      if (!ignore_notification && payload.length > 0) {
+        this.infoService.generateNotification(NotificationType.SUCCESS, `Raport został wygenerowany. Znaleziono ${ payload.length } ${ wynikString(payload.length) }.`);
+      }
+
+      if (!this.result || this.result.length === 0) return;
+      this.result.forEach((r : any) => {
+        r.czas = r.rok + '-' + r.miesiac.padStart(2, '0');
+      });
+    });
   }
 
   protected toggleCondensedMode() : void {

@@ -352,4 +352,14 @@ export const ReportCheckedCard = z.object({
     nazwisko: z.string(),
     imie: z.string(),
     czas: z.date(),
+});
+
+export const ReportPayment = z.object({
+    id: z.number(),
+    imie: z.string(),
+    nazwisko: z.string(),
+    miesiac: z.string(),
+    rok: z.number(),
+    platnosc: z.number(),
+    data_platnosci: z.date(),
 })

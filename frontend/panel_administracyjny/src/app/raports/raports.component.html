@@ -1,48 +1,61 @@
 @if (router.url.includes('/raporty/')) {
-  @switch (router.url) {
-    @case ('/raporty/korekty') {
-      <form [formGroup]="korektyForm">
-        <label>
-          <span>Data od:</span>
-          <input type="date" formControlName="data_od">
-        </label>
-        <label>
-          <span>Data do:</span>
-          <input type="date" formControlName="data_do">
-        </label>
-        <button type="submit" (click)="generateKorektyReport()">Generuj raport</button>
-      </form>
-    }
-    @case ('/raporty/obecnosci') {
-      <form [formGroup]="obecnosciForm">
-        <label>
-          <span>Data od:</span>
-          <input type="date" formControlName="data_od">
-        </label>
-        <label>
-          <span>Data do:</span>
-          <input type="date" formControlName="data_do">
-        </label>
-        <button type="submit" (click)="generateObecnosciReport()">Generuj raport</button>
-      </form>
-    }
+  @if (!router.url.includes('raporty/platnosci')) {
+    <form [formGroup]="dataForm">
+      <label>
+        <span>Data od:</span>
+        <input type="date" formControlName="data_od">
+      </label>
+      <label>
+        <span>Data do:</span>
+        <input type="date" formControlName="data_do">
+      </label>
+      @switch (router.url) {
+        @case ('/raporty/korekty') {
+          <button type="submit" (click)="generateKorektyReport()">Generuj raport</button>
+        }
+        @case ('/raporty/obecnosci') {
+          <button type="submit" (click)="generateObecnosciReport()">Generuj raport</button>
+        }
+        @default {
+          <button type="submit" disabled>Nieobsługiwany raport</button>
+        }
+      }
+    </form>
+  } @else {
+    <form [formGroup]="platnosciForm">
+      <label>
+        <span>Data od:</span>
+        <input type="date" formControlName="data_od">
+      </label>
+      <label>
+        <span>Data do:</span>
+        <input type="date" formControlName="data_do">
+      </label>
+      <label>
+        <span>Miesiąc opłacony</span>
+        <input type="month" formControlName="miesiac" placeholder="YYYY-MM">
+      </label>
+      <button type="submit" (click)="generatePlatnosciReport()">Generuj raport</button>
+    </form>
   }
   <main [class.table]="result && result.length > 0">
     @if (result && result.length > 0) {
-      <div>
-        <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="condensedMode" (change)="toggleCondensedMode()">
-          <div></div>
-          <span>Włącz tryb skondensowany</span>
-        </label>
-        <button (click)="exportRaport()">Pobierz raport</button>
-      </div>
+      @if (router.url !== '/raporty/platnosci') {
+        <div>
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="condensedMode" (change)="toggleCondensedMode()">
+            <div></div>
+            <span>Włącz tryb skondensowany</span>
+          </label>
+          <button (click)="exportRaport()">Pobierz raport</button>
+        </div>
+      }
       @if (router.url === '/raporty/korekty') {
         <table #table>
           <thead>
           <tr>
             <th>Nazwisko</th>
-            <th>Imię</th>
+            <th>Imie</th>
             <th>Data korekty</th>
           </tr>
           </thead>
@@ -77,28 +90,55 @@
           <thead>
           <tr>
             <th>Nazwisko</th>
-            <th>Imię</th>
+            <th>Imie</th>
             <th>Data skanu</th>
           </tr>
           </thead>
           <tbody>
-          @if (!condensedMode) {
-            @for (obecnosc of result; track obecnosc.id) {
+            @if (!condensedMode) {
+              @for (obecnosc of result; track obecnosc.id) {
+                <tr>
+                  <td>{{ obecnosc.nazwisko }}</td>
+                  <td>{{ obecnosc.imie }}</td>
+                  <td>{{ obecnosc.czas | date : 'medium' }}</td>
+                </tr>
+              }
+            } @else {
+              @for (obecnosc of result; track obecnosc.nazwisko + '-' + obecnosc.imie + '-' + obecnosc.czas) {
+                <tr>
+                  <td>{{ obecnosc.nazwisko }}</td>
+                  <td>{{ obecnosc.imie }}</td>
+                  <td>{{ formatDni(obecnosc.dni, 'short') }}
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      } @else if (router.url === '/raporty/platnosci') {
+        <div>
+          <div></div>
+          <button (click)="exportRaport()">Pobierz raport</button>
+        </div>
+        <table #table>
+          <thead>
+          <tr>
+            <th>Nazwisko</th>
+            <th>Imie</th>
+            <th>Data płatności</th>
+            <th>Miesiąc opłacony</th>
+            <th>Kwota</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (platnosc of result; track platnosc.id) {
               <tr>
-                <td>{{ obecnosc.nazwisko }}</td>
-                <td>{{ obecnosc.imie }}</td>
-                <td>{{ obecnosc.czas | date : 'medium' }}</td>
+                <td>{{ platnosc.nazwisko }}</td>
+                <td>{{ platnosc.imie }}</td>
+                <td>{{ platnosc.data_platnosci | date : 'shortDate' }}</td>
+                <td>{{ platnosc.czas | date : 'MMMM yyyy' }}</td>
+                <td>{{ platnosc.platnosc | currency : 'PLN' }}</td>
               </tr>
             }
-          } @else {
-            @for (obecnosc of result; track obecnosc.nazwisko + '-' + obecnosc.imie + '-' + obecnosc.czas) {
-              <tr>
-                <td>{{ obecnosc.nazwisko }}</td>
-                <td>{{ obecnosc.imie }}</td>
-                <td>{{ formatDni(obecnosc.dni, 'short') }}
-              </tr>
-            }
-          }
           </tbody>
         </table>
       }

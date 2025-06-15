@@ -12,7 +12,7 @@ import {
     Payment,
     Declaration,
     QueriesStructure,
-    SuccessResponse, Opiekun, Klasa, ReportAbsenceDay, ReportCheckedCard,
+    SuccessResponse, Opiekun, Klasa, ReportAbsenceDay, ReportCheckedCard, ReportPayment,
 } from "./types";
 import {PoolOptions} from "mysql2/promise";
 
@@ -108,6 +108,10 @@ export const Queries: QueriesStructure = {
         "checkedCard": {
             "type": ReportCheckedCard.array(),
             "get": `SELECT s.id AS "id", nazwisko, imie, czas FROM skany_zsti s JOIN karty_zsti k ON k.id = s.id_karty JOIN osoby_zsti o ON o.id = k.id_ucznia WHERE (:data_od IS NULL OR czas >= :data_od) AND (:data_do IS NULL OR czas <= :data_do) ORDER BY czas DESC;`,
+        },
+        "platnosci": {
+            "type": ReportPayment.array(),
+            "get": `SELECT p.id AS "id", nazwisko, imie, LPAD(miesiac, 2, '0') AS miesiac, rok, CONCAT(rok, '-', LPAD(miesiac, 2, '0')) AS rok_miesiac, platnosc, data_platnosci FROM platnosci_zsti p JOIN osoby_zsti o ON p.id_ucznia = o.id WHERE (:data_od IS NULL OR :data_od <= data_platnosci) AND (:data_do IS NULL OR :data_do >= data_platnosci) AND (:miesiac IS NULL OR :miesiac = CONCAT(rok, '-', LPAD(miesiac, 2, '0'))) ORDER BY miesiac DESC, rok DESC;`
         }
     },
     "global": {
