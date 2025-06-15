@@ -13,9 +13,22 @@
         <button type="submit" (click)="generateKorektyReport()">Generuj raport</button>
       </form>
     }
+    @case ('/raporty/obecnosci') {
+      <form [formGroup]="obecnosciForm">
+        <label>
+          <span>Data od:</span>
+          <input type="date" formControlName="data_od">
+        </label>
+        <label>
+          <span>Data do:</span>
+          <input type="date" formControlName="data_do">
+        </label>
+        <button type="submit" (click)="generateObecnosciReport()">Generuj raport</button>
+      </form>
+    }
   }
-  <main [class.table]="result">
-    @defer (when result) {
+  <main [class.table]="result && result.length > 0">
+    @if (result && result.length > 0) {
       <div>
         <label class="checkbox-label">
           <input type="checkbox" [(ngModel)]="condensedMode" (change)="toggleCondensedMode()">
@@ -49,7 +62,7 @@
                   <td>{{ korekta.imie }}</td>
                   <td>
                     @if (Array.isArray(korekta.dni)) {
-                      {{ formatDni(korekta.dni) }}
+                      {{ formatDni(korekta.dni, 'shortDate') }}
                     } @else {
                       {{ korekta.dni | date:'fullDate' }}
                     }
@@ -59,8 +72,40 @@
             }
           </tbody>
         </table>
+      } @else if (router.url === '/raporty/obecnosci') {
+        <table #table>
+          <thead>
+          <tr>
+            <th>Nazwisko</th>
+            <th>Imię</th>
+            <th>Data skanu</th>
+          </tr>
+          </thead>
+          <tbody>
+          @if (!condensedMode) {
+            @for (obecnosc of result; track obecnosc.id) {
+              <tr>
+                <td>{{ obecnosc.nazwisko }}</td>
+                <td>{{ obecnosc.imie }}</td>
+                <td>{{ obecnosc.czas | date : 'medium' }}</td>
+              </tr>
+            }
+          } @else {
+            @for (obecnosc of result; track obecnosc.nazwisko + '-' + obecnosc.imie + '-' + obecnosc.czas) {
+              <tr>
+                <td>{{ obecnosc.nazwisko }}</td>
+                <td>{{ obecnosc.imie }}</td>
+                <td>{{ formatDni(obecnosc.dni, 'short') }}
+              </tr>
+            }
+          }
+          </tbody>
+        </table>
       }
-    } @placeholder (minimum 500ms) {
+    } @else if (result && result.length === 0) {
+      <h2>Brak wyników...</h2>
+      <p>Nie znaleziono żadnych danych dla wybranych kryteriów.</p>
+    } @else {
       <h2>Nie wygenerowano jeszcze raportu...</h2>
       <p>Wybierz opcje u góry aby wygenerować.</p>
     }

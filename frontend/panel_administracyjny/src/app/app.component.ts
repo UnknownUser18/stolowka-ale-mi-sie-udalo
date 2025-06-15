@@ -87,7 +87,6 @@ export class AppComponent implements AfterViewInit {
       return;
     }
     if (url.startsWith('/raporty')) {
-      this.infoService.setTitle('Raporty');
       await this.animateElement('raporty');
       return;
     }

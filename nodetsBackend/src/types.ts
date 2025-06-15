@@ -346,3 +346,10 @@ export const ReportAbsenceDay = z.object({
     nazwisko: z.string(),
     klasa: z.string(),
 })
+
+export const ReportCheckedCard = z.object({
+    id: z.number(),
+    nazwisko: z.string(),
+    imie: z.string(),
+    czas: z.date(),
+})

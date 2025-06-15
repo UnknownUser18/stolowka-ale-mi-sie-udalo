@@ -39,7 +39,7 @@ form {
 }
 
 .raports, main {
-  @include i.flex-center(column, center, center);
+  @include i.flex-center(column, start, center);
 
   &.table {
     display: block;
