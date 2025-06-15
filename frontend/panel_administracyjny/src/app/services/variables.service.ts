@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { DataService, Opiekun, Student } from './data.service';
+import { DataService, Opiekun, Student, WebSocketStatus } from './data.service';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn : 'root'
@@ -18,16 +19,8 @@ export class VariablesService {
     this.persons_zsti = users;
   }
 
-  public getUsersZsti() : Student[] | undefined {
-    return this.persons_zsti;
-  }
-
   public setOpiekunZsti(opiekunowie : Opiekun[]) : void {
     this.opiekun_zsti = opiekunowie;
-  }
-
-  public getOpiekunZsti() : Opiekun[] | undefined {
-    return this.opiekun_zsti;
   }
 
   public async fetchUsersZsti() : Promise<boolean> {
@@ -70,6 +63,21 @@ export class VariablesService {
     return this.persons_zsti!.map((student) : Student & Opiekun => {
       const opiekun = this.opiekun_zsti!.find((opiekun) => opiekun.id_opiekun === student.opiekun_id);
       return { ...student, ...opiekun } as Student & Opiekun;
+    });
+  }
+
+  /**
+   * @method waitForWebSocket
+   * @description Czeka na otwarcie połączenia WebSocket. Używa `BehaviorSubject` do monitorowania statusu połączenia.
+   * @param webSocketStatus - BehaviorSubject z aktualnym statusem WebSocket.
+   * @returns Promise, która rozwiązuje się, gdy WebSocket jest otwarty.
+   */
+  public async waitForWebSocket(webSocketStatus: BehaviorSubject<WebSocketStatus>) : Promise<void> {
+    return new Promise((resolve) => {
+      webSocketStatus.subscribe(status => {
+        if (status !== WebSocketStatus.OPEN) return;
+        resolve();
+      })
     });
   }
 }

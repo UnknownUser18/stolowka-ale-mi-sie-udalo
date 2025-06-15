@@ -1,34 +1,39 @@
-import {ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {CanceledDay, DataService, Pricing, WebSocketStatus} from '../services/data.service';
-import {GlobalInfoService, NotificationType} from '../services/global-info.service';
-import {TransitionService} from '../services/transition.service';
+import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CanceledDay, DataService } from '../services/data.service';
+import { GlobalInfoService, NotificationType } from '../services/global-info.service';
+import { TransitionService } from '../services/transition.service';
+import { VariablesService } from '../services/variables.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-nieczynne',
-  imports: [
-    ReactiveFormsModule
+  selector : 'app-nieczynne',
+  imports : [
+    ReactiveFormsModule,
+    DatePipe
   ],
-  templateUrl: './nieczynne.component.html',
-  styleUrl: './nieczynne.component.scss'
+  templateUrl : './nieczynne.component.html',
+  styleUrl : './nieczynne.component.scss',
 })
 export class NieczynneComponent {
-  protected canceled_days_zsti: CanceledDay[] = [];
-  protected id: number = 0;
   private invalidDates : Date[] = [];
-  protected showWindow: "" | "add" | "delete" = "";
 
-  protected pricingForm: FormGroup = new FormGroup({
+  protected canceled_days_zsti : CanceledDay[] = [];
+  protected id : number = 0;
+  protected showWindow : "" | "add" | "delete" = "";
+
+  protected pricingForm : FormGroup = new FormGroup({
     dzien : new FormControl(this.dateInput(new Date()), Validators.required),
   });
 
-  protected addForm: FormGroup = new FormGroup({
+  protected addForm : FormGroup = new FormGroup({
     dzien : new FormControl(this.dateInput(new Date()), Validators.required),
   });
 
   @ViewChild('filter') filter! : ElementRef;
 
   constructor(
+    private variables : VariablesService,
     private infoService : GlobalInfoService,
     private database : DataService,
     private transition : TransitionService,
@@ -36,21 +41,13 @@ export class NieczynneComponent {
     private zone : NgZone
   ) {
     this.infoService.setTitle('ZSTI - Dni Nieczynne');
-    this.infoService.webSocketStatus.subscribe(status => {
-      if (status !== WebSocketStatus.OPEN) return;
-      this.database.request('global.canceledDay.get', {}, 'canceledDayList').then((payload: CanceledDay[]) => {
+    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+
+      this.database.request('global.canceledDay.get', {}, 'canceledDayList').then((payload : CanceledDay[]) => {
         this.canceled_days_zsti = payload;
       });
     })
 
-  }
-
-  protected formatDate(date : string) : string {
-    return new Date(date).toLocaleDateString('pl-PL', {
-      day : 'numeric',
-      month : 'long',
-      year : 'numeric',
-    });
   }
 
   protected dateInput(date : Date) : string {
@@ -61,22 +58,21 @@ export class NieczynneComponent {
   }
 
   protected selectPricing(canceled_day : CanceledDay) {
-    console.log(canceled_day);
     this.pricingForm.patchValue({
       dzien : this.dateInput(new Date(canceled_day.dzien)),
     })
     this.id = canceled_day.id;
   }
 
-  protected deletePricing(){
-    this.database.request('global.canceledDay.delete', {id: this.id}, 'canceledDayList').then(() => {
+  protected deletePricing() {
+    this.database.request('global.canceledDay.delete', { id : this.id }, 'canceledDayList').then(() => {
       this.id = 0;
       this.reloadPricing()
     })
   }
 
   private reloadPricing() {
-    this.database.request('global.canceledDay.get', { }, 'canceledDayList').then((payload: CanceledDay[]) => {
+    this.database.request('global.canceledDay.get', {}, 'canceledDayList').then((payload : CanceledDay[]) => {
       if (!payload) {
         this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
         return;

@@ -1,8 +1,9 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core';
-import { DataService, Declaration, Opiekun, Student, TypOsoby, WebSocketStatus } from '../../services/data.service';
+import { DataService, Declaration, Opiekun, Student, TypOsoby } from '../../services/data.service';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { Subject } from 'rxjs';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { VariablesService } from '../../services/variables.service';
 
 @Component({
   selector : 'app-dane',
@@ -32,7 +33,20 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
     uczeszcza : new FormControl(true, Validators.required),
   })
 
-  constructor(private database : DataService, private globalInfo : GlobalInfoService) {
+  constructor(private database : DataService, private globalInfo : GlobalInfoService, private variables : VariablesService) {
+  }
+
+  private setForm(user : Student & Opiekun) : void {
+    this.forms.setValue({
+      imie_nazwisko : user.imie + ' ' + user.nazwisko,
+      klasa : user.klasa?.toString() ?? '',
+      miasto : user.miasto,
+      typ_osoby : user.typ_osoby_id,
+      imie_nazwisko_opiekuna : user.imie_opiekuna + ' ' + user.nazwisko_opiekuna,
+      telefon : `+${ user.nr_kierunkowy } ${ user.telefon }`,
+      email : user.email,
+      uczeszcza : user.uczeszcza
+    });
   }
 
   protected async sendChanges() : Promise<void> {
@@ -104,19 +118,6 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
     this.globalInfo.generateNotification(NotificationType.SUCCESS, 'Dane użytkownika zostały zaktualizowane.');
   }
 
-  private setForm(user : Student & Opiekun) : void {
-    this.forms.setValue({
-      imie_nazwisko : user.imie + ' ' + user.nazwisko,
-      klasa : user.klasa?.toString() ?? '',
-      miasto : user.miasto,
-      typ_osoby : user.typ_osoby_id,
-      imie_nazwisko_opiekuna : user.imie_opiekuna + ' ' + user.nazwisko_opiekuna,
-      telefon : `+${ user.nr_kierunkowy } ${ user.telefon }`,
-      email : user.email,
-      uczeszcza : user.uczeszcza
-    });
-  }
-
   protected onTypOsobyChange() : void {
     const typOsoby = Number(this.forms.get('typ_osoby')?.value);
     const klasa = this.forms.get('klasa');
@@ -136,9 +137,10 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
 
     }
   }
+
   public ngAfterViewInit() : void {
-    this.globalInfo.webSocketStatus.subscribe((status) => {
-      if (status !== WebSocketStatus.OPEN) return;
+    this.variables.waitForWebSocket(this.globalInfo.webSocketStatus).then(() => {
+
       this.globalInfo.activeUser.subscribe((user : (Student & Opiekun) | undefined) => {
         if (!user) return;
         this.user = user;

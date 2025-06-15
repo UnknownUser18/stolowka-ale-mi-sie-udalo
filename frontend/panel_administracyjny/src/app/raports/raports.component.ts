@@ -1,12 +1,13 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { DataService, VariableName, WebSocketStatus } from '../services/data.service';
+import { DataService, VariableName } from '../services/data.service';
 import { GlobalInfoService, NotificationType } from '../services/global-info.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { NavigationEnd, NavigationSkipped, Router } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import * as xlsx from 'xlsx';
 import { wynikString } from '../users/zsti/zsti.component';
+import { VariablesService } from '../services/variables.service';
 
 @Component({
   selector : 'app-raports',
@@ -42,16 +43,17 @@ export class RaportsComponent implements OnDestroy {
 
 
   constructor(
+    private variables : VariablesService,
     private datePipe : DatePipe,
     private database : DataService,
     private infoService : GlobalInfoService,
     protected router : Router,
   ) {
-    this.infoService.webSocketStatus.pipe(takeUntil(this.destroy$)).subscribe(status => {
-      if (status !== WebSocketStatus.OPEN) return;
+    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+
       this.infoService.setTitle('Raporty');
       this.router.events.subscribe((event) => {
-        if (!(event instanceof NavigationEnd || event instanceof NavigationSkipped)) return;
+        if (!(event instanceof NavigationEnd || event instanceof NavigationSkipped) || !router.url.startsWith('raporty')) return;
         this.result = null;
         this.condensedMode = false;
         this.infoService.setTitle(`Raporty - ${ this.router.url.split('/')[2] ? this.router.url.split('/')[2].charAt(0).toUpperCase() + this.router.url.split('/')[2].slice(1) : 'ZSTI' }`);
@@ -200,6 +202,11 @@ export class RaportsComponent implements OnDestroy {
         if (cell && cell.toString().length > maxLen) {
           maxLen = cell.toString().length;
         }
+        // Ustawienie wyrównania do środka dla każdej komórki
+        const cellRef = xlsx.utils.encode_cell({ c : i, r : j });
+        if (!ws[cellRef]) continue;
+        ws[cellRef].s = ws[cellRef].s || {};
+        ws[cellRef].s.alignment = { ...ws[cellRef].s.alignment, horizontal : 'center' };
       }
       if (i === 0) {
         maxLen = Math.min(maxLen, 20);

@@ -170,7 +170,8 @@ export const Queries: QueriesStructure = {
             "get": `SELECT * FROM karty_zsti`,
             "getById": `SELECT * FROM karty_zsti WHERE id_ucznia = :id_ucznia`,
             "add": `INSERT INTO karty_zsti (id_ucznia, key_card, data_wydania, ostatnie_uzycie) VALUES (:id_ucznia, :key_card, :data_wydania, :ostatnie_uzycie)`,
-            "update": `UPDATE karty_zsti SET id_ucznia = :id_ucznia, key_card = :key_card, data_wydania = :data_wydania, ostatnie_uzycie = :ostatnie_uzycie WHERE id = :id`,
+            "update": `UPDATE karty_zsti SET key_card = :key_card WHERE id = :id`,
+            "updateWithData": `UPDATE karty_zsti SET key_card = :key_card, data_wydania = :data_wydania WHERE id_ucznia = :id_ucznia`,
             "delete": `DELETE FROM karty_zsti WHERE id = :id`,
             "getWithDetails": `SELECT k_z.id, k_z.id_ucznia, k_z.key_card, k_z.data_wydania, k_z.ostatnie_uzycie, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto FROM karty_zsti k_z LEFT JOIN osoby_zsti o_z ON o_z.id = k_z.id_ucznia ORDER BY o_z.nazwisko, o_z.imie;`
         },

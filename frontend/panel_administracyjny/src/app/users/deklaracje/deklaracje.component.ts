@@ -1,18 +1,22 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DataService, Declaration, WebSocketStatus } from '../../services/data.service';
+import { DataService, Declaration } from '../../services/data.service';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { TransitionService } from '../../services/transition.service';
 import { wynikString } from '../zsti/zsti.component';
 import { takeUntil, Subject } from 'rxjs';
+import { DatePipe } from '@angular/common';
+import { VariablesService } from '../../services/variables.service';
 
 @Component({
   selector : 'app-deklaracje',
   imports : [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    DatePipe
   ],
   templateUrl : './deklaracje.component.html',
-  styleUrl : './deklaracje.component.scss'
+  styleUrl : './deklaracje.component.scss',
+  providers : [DatePipe],
 })
 export class DeklaracjeComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
@@ -28,23 +32,9 @@ export class DeklaracjeComponent implements OnDestroy {
     { key : 'piatek', label : 'Piątek' },
   ];
 
-  protected deklaracjaForm = new FormGroup({
-    data_od : new FormControl(this.dateInput(new Date()), Validators.required),
-    data_do : new FormControl(this.dateInput(new Date()), Validators.required),
-    dni : this.createDniFormGroup(false)
-  });
-
-  protected filterForm = new FormGroup({
-    data_od : new FormControl(''),
-    data_do : new FormControl(''),
-    dni : this.createDniFormGroup(true)
-  });
-
-  protected addForm = new FormGroup({
-    data_od : new FormControl('', Validators.required),
-    data_do : new FormControl('', Validators.required),
-    dni : this.createDniFormGroup(true)
-  });
+  protected deklaracjaForm! : FormGroup;
+  protected filterForm! : FormGroup;
+  protected addForm! : FormGroup;
 
   protected declarations : Declaration[] = [];
   protected result : Declaration[] = [];
@@ -53,14 +43,31 @@ export class DeklaracjeComponent implements OnDestroy {
   @ViewChild('filter') filter! : ElementRef;
 
   constructor(
-    protected infoService : GlobalInfoService,
+    private variables : VariablesService,
     private database : DataService,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef,
-    private zone : NgZone
+    private zone : NgZone,
+    private datePipe : DatePipe,
+    protected infoService : GlobalInfoService
   ) {
-    this.infoService.webSocketStatus.pipe(takeUntil(this.destroy$)).subscribe(status => {
-      if (status !== WebSocketStatus.OPEN) return;
+    this.deklaracjaForm = new FormGroup({
+      data_od : new FormControl(this.dateInput(new Date()), Validators.required),
+      data_do : new FormControl(this.dateInput(new Date()), Validators.required),
+      dni : this.createDniFormGroup(false)
+    });
+    this.filterForm = new FormGroup({
+      data_od : new FormControl(''),
+      data_do : new FormControl(''),
+      dni : this.createDniFormGroup(true)
+    });
+    this.addForm = new FormGroup({
+      data_od : new FormControl('', Validators.required),
+      data_do : new FormControl('', Validators.required),
+      dni : this.createDniFormGroup(true)
+    });
+
+    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
 
       this.infoService.activeUser.pipe(takeUntil(this.destroy$)).subscribe(user => {
         if (!user) return;
@@ -72,6 +79,7 @@ export class DeklaracjeComponent implements OnDestroy {
       });
     });
   }
+
 
   private createDniFormGroup(checked : boolean) : FormGroup {
     return new FormGroup({
@@ -113,19 +121,8 @@ export class DeklaracjeComponent implements OnDestroy {
     return days[position] === '1';
   }
 
-  protected formatDate(date : string) : string {
-    return new Date(date).toLocaleDateString('pl-PL', {
-      day : 'numeric',
-      month : 'long',
-      year : 'numeric',
-    });
-  }
-
-  protected dateInput(date : Date) : string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${ year }-${ month }-${ day }`;
+  private dateInput(date : Date) : string {
+    return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
   }
 
   protected getDzienKey(key : string, type : 'deklaracjaForm' | 'filterForm' | 'addForm') : FormControl {

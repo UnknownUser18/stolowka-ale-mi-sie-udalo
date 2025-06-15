@@ -14,14 +14,9 @@
       @for (price of pricing_zsti; track price.id; let i = $index) {
         <tr>
           <td>{{ i + 1 }}</td>
-          <td>{{ formatPrice(price.cena) }}</td>
-          <td>{{ formatDate(price.data_od) }}</td>
-          @if(price.data_do)
-          {
-            <td>{{ formatDate(price.data_do)}}</td>
-          } @else{
-            <td>Brak daty końcowej</td>
-          }
+          <td>{{ price.cena | currency : 'PLN' }}</td>
+          <td>{{ price.data_od | date : 'longDate' }}</td>
+          <td>{{ price.data_do ? (price.data_do | date : 'longDate') : 'Brak daty końcowej' }}</td>
           <td>
             <button (click)="selectPricing(price)">Wybierz</button>
           </td>
@@ -48,8 +43,7 @@
       <span>Data Zakończenia : </span>
       <input type="date" formControlName="data_do">
     </label>
-    <button type="submit" (click)="updatePricing()">Prześlij dane
-    </button>
+    <button type="submit" (click)="updatePricing()">Prześlij dane</button>
     <button type="button" (click)="openWindow('delete')">Usuń deklaracje</button>
   }
 </form>

@@ -1,30 +1,36 @@
-import {ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild} from '@angular/core';
-import {GlobalInfoService, NotificationType} from '../services/global-info.service';
-import {DataService, CanceledDay, WebSocketStatus, Pricing} from '../services/data.service';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {TransitionService} from '../services/transition.service';
+import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { GlobalInfoService, NotificationType } from '../services/global-info.service';
+import { DataService, Pricing } from '../services/data.service';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TransitionService } from '../services/transition.service';
+import { VariablesService } from '../services/variables.service';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-cennik',
-  imports: [
-    ReactiveFormsModule
+  selector : 'app-cennik',
+  imports : [
+    ReactiveFormsModule,
+    DatePipe,
+    CurrencyPipe,
   ],
-  templateUrl: './cennik.component.html',
-  styleUrl: './cennik.component.scss'
+  templateUrl : './cennik.component.html',
+  styleUrl : './cennik.component.scss'
 })
-export class CennikComponent {  protected pricing_zsti: Pricing[] = [];
-  protected id: number = 0;
+export class CennikComponent {
+  protected pricing_zsti : Pricing[] = [];
   private invalidDates : Date[] = [];
-  protected showWindow: "" | "add" | "delete" = "";
 
-  protected pricingForm: FormGroup = new FormGroup({
-    cena : new FormControl(0, [Validators.required ,Validators.min(0), Validators.max(100)]),
+  protected id : number = 0;
+  protected showWindow : "" | "add" | "delete" = "";
+
+  protected pricingForm : FormGroup = new FormGroup({
+    cena : new FormControl(0, [Validators.required, Validators.min(0)]),
     data_od : new FormControl(this.dateInput(new Date()), Validators.required),
     data_do : new FormControl(this.dateInput(new Date())),
   });
 
-  protected addForm: FormGroup = new FormGroup({
-    cena : new FormControl(0, [Validators.required ,Validators.min(0), Validators.max(100)]),
+  protected addForm : FormGroup = new FormGroup({
+    cena : new FormControl(0, [Validators.required, Validators.min(0)]),
     data_od : new FormControl(this.dateInput(new Date()), Validators.required),
     data_do : new FormControl(this.dateInput(new Date())),
   });
@@ -32,6 +38,7 @@ export class CennikComponent {  protected pricing_zsti: Pricing[] = [];
   @ViewChild('filter') filter! : ElementRef;
 
   constructor(
+    private variables : VariablesService,
     private infoService : GlobalInfoService,
     private database : DataService,
     private transition : TransitionService,
@@ -39,9 +46,9 @@ export class CennikComponent {  protected pricing_zsti: Pricing[] = [];
     private zone : NgZone
   ) {
     this.infoService.setTitle('ZSTI - Cennik');
-    this.infoService.webSocketStatus.subscribe(status => {
-      if (status !== WebSocketStatus.OPEN) return;
-      this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload: Pricing[]) => {
+    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+
+      this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
         this.pricing_zsti = payload;
       });
     })
@@ -73,8 +80,8 @@ export class CennikComponent {  protected pricing_zsti: Pricing[] = [];
     this.id = pricing_zsti.id;
   }
 
-  protected deletePricing(){
-    this.database.request('zsti.pricing.delete', {id: this.id}, 'pricingList').then(() => {
+  protected deletePricing() {
+    this.database.request('zsti.pricing.delete', { id : this.id }, 'pricingList').then(() => {
       this.id = 0;
       this.reloadPricing()
     })
@@ -118,8 +125,9 @@ export class CennikComponent {  protected pricing_zsti: Pricing[] = [];
       this.reloadPricing();
     });
   }
+
   private reloadPricing() {
-    this.database.request('zsti.pricing.get', { }, 'pricingList').then((payload: Pricing[]) => {
+    this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
       if (!payload) {
         this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
         return;
@@ -137,12 +145,6 @@ export class CennikComponent {  protected pricing_zsti: Pricing[] = [];
         this.invalidDates.push(new Date(price.data_od), new Date(price.data_do));
       });
     });
-  }
-
-  protected formatPrice(price : number): string {
-    const data = price.toFixed(2).split('.');
-    console.log(data, price);
-    return `${data[0]}.${data[1].padEnd(2, '0')} zł`
   }
 
   protected closeWindow() : void {

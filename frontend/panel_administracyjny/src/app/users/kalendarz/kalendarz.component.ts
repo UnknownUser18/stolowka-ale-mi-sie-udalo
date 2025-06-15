@@ -1,10 +1,11 @@
 import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, Renderer2, ViewChild} from '@angular/core';
 import {DateChangerComponent} from './date-changer/date-changer.component';
 import {GlobalInfoService, NotificationType} from '../../services/global-info.service';
-import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName, WebSocketStatus} from '../../services/data.service';
+import {AbsenceDay, CanceledDay, DataService, Declaration, Student, VariableName} from '../../services/data.service';
 import {Subject} from 'rxjs';
 import {TransitionService} from '../../services/transition.service';
 import { DatePipe } from '@angular/common';
+import { VariablesService } from '../../services/variables.service';
 
 enum AbsenceWindowStatus {
   CLOSED,
@@ -36,6 +37,7 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   @ViewChild('absencesMenu') absencesMenu!: ElementRef;
 
   constructor(
+    private variables: VariablesService,
     private database: DataService,
     private renderer: Renderer2,
     private zone: NgZone,
@@ -363,8 +365,8 @@ export class KalendarzComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit(): void {
-    this.infoService.webSocketStatus.subscribe(status => {
-      if (status !== WebSocketStatus.OPEN) return;
+    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+
       this.infoService.activeUser.subscribe((user: Student | undefined) => {
         if (!user) return;
         this.user = user;

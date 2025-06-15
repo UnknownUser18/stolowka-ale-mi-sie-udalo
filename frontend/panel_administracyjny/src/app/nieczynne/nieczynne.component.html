@@ -12,7 +12,7 @@
       @for (canceledDay of canceled_days_zsti; track canceledDay.id; let i = $index) {
         <tr>
           <td>{{ i + 1 }}</td>
-          <td>{{ formatDate(canceledDay.dzien) }}</td>
+          <td>{{ canceledDay.dzien | date : 'longDate' }}</td>
           <td>
             <button (click)="selectPricing(canceledDay)">Wybierz</button>
           </td>
@@ -41,7 +41,7 @@
       <i class="fa-solid fa-xmark close" (click)="closeWindow()"></i>
       @if (showWindow === 'delete') {
         <h3>Ostrzeżenie</h3>
-        <p>Czy na pewno chcesz usunąć dzień nieczynny z dnia: <b>{{ formatDate(pricingForm.get('dzien')?.value!) }}</b> ?</p>
+        <p>Czy na pewno chcesz usunąć dzień nieczynny z dnia: <b>{{ pricingForm.get('dzien')?.value | date : 'longDate' }}</b> ?</p>
         <button type="button" (click)="deletePricing()">Usuń</button>
         <button type="button" (click)="closeWindow()">Anuluj</button>
       } @else if (showWindow === 'add') {

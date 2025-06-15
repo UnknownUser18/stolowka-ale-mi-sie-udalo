@@ -27,8 +27,7 @@ export type TabTypeKey = keyof typeof TabType;
 })
 export class GlobalInfoService {
   constructor(private variables : VariablesService, private router : Router) {
-    this.webSocketStatus.subscribe((status) => {
-      if (status !== WebSocketStatus.OPEN) return;
+    this.variables.waitForWebSocket(this.webSocketStatus).then(() => {
 
       const lastUser = localStorage.getItem('activeUser');
       if (!lastUser) return;
