@@ -103,11 +103,13 @@ export const Queries: QueriesStructure = {
     "raportsZsti": {
         "absence": {
             "type": ReportAbsenceDay.array(),
-            "get": `SELECT n.id AS "id", dzien_wypisania, imie, nazwisko, sk.nazwa AS "klasa" FROM nieobecnosci_zsti n JOIN osoby_zsti o_z ON o_z.id = n.osoby_zsti_id JOIN slownik_klasa sk on o_z.klasa = sk.id WHERE (:data_od IS NULL OR dzien_wypisania >= :data_od) AND (:data_do IS NULL OR dzien_wypisania <= :data_do) ORDER BY dzien_wypisania DESC`,
+            "get": `SELECT n.id AS "id", dzien_wypisania, imie, nazwisko, sk.nazwa AS "klasa" FROM nieobecnosci_zsti n JOIN osoby_zsti o_z ON o_z.id = n.osoby_zsti_id JOIN slownik_klasa sk on o_z.klasa = sk.id WHERE (:data_od IS NULL OR dzien_wypisania >= :data_od) AND (:data_do IS NULL OR dzien_wypisania <= :data_do) ORDER BY dzien_wypisania`,
+            "getForStudent": `SELECT id, dzien_wypisania FROM nieobecnosci_zsti WHERE osoby_zsti_id = :id AND (:data_od IS NULL OR dzien_wypisania >= :data_od) AND (:data_do IS NULL OR dzien_wypisania <= :data_do) ORDER BY dzien_wypisania;`
         },
         "checkedCard": {
             "type": ReportCheckedCard.array(),
-            "get": `SELECT s.id AS "id", nazwisko, imie, czas FROM skany_zsti s JOIN karty_zsti k ON k.id = s.id_karty JOIN osoby_zsti o ON o.id = k.id_ucznia WHERE (:data_od IS NULL OR czas >= :data_od) AND (:data_do IS NULL OR czas <= :data_do) ORDER BY czas DESC;`,
+            "get": `SELECT s.id AS "id", nazwisko, imie, czas FROM skany_zsti s JOIN karty_zsti k ON k.id = s.id_karty JOIN osoby_zsti o ON o.id = k.id_ucznia WHERE (:data_od IS NULL OR czas >= :data_od) AND (:data_do IS NULL OR czas <= :data_do) ORDER BY czas;`,
+            "getForStudent": `SELECT s.id AS "id", czas FROM skany_zsti s JOIN karty_zsti k ON k.id = s.id_karty JOIN osoby_zsti o ON o.id = k.id_ucznia WHERE o.id = :id AND (:data_od IS NULL OR czas >= :data_od) AND (:data_do IS NULL OR czas <= :data_do) ORDER BY czas;`
         },
         "platnosci": {
             "type": ReportPayment.array(),

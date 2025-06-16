@@ -342,15 +342,15 @@ export interface EmailGuardianData {
 export const ReportAbsenceDay = z.object({
     id: z.number(),
     dzien_wypisania: z.date(),
-    imie: z.string(),
-    nazwisko: z.string(),
-    klasa: z.string(),
+    imie: z.string().optional(),
+    nazwisko: z.string().optional(),
+    klasa: z.string().optional(),
 })
 
 export const ReportCheckedCard = z.object({
     id: z.number(),
-    nazwisko: z.string(),
-    imie: z.string(),
+    nazwisko: z.string().optional(),
+    imie: z.string().optional(),
     czas: z.date(),
 });
 

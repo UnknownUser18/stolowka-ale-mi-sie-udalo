@@ -1,15 +1,49 @@
 <div>
   <menu>
-    <li [class.active]="type === 'korekta'" (click)="type = 'korekta'">Korekty</li>
-    <li [class.active]="type === 'nieobecnosci'" (click)="type = 'nieobecnosci'">Nieobecności</li>
+    <li [class.active]="type.value === 'korekta'" (click)="type.next('korekta')"><i class="fa-solid fa-calendar-minus"></i>Korekty</li>
+    <li [class.active]="type.value === 'nieobecnosci'" (click)="type.next('nieobecnosci')"><i class="fa-solid fa-check-to-slot"></i>Nieobecności</li>
   </menu>
-  <form>
-
-  </form>
+  @if (type.value !== '') {
+    <form [formGroup]="dataForm">
+      <label>
+        <span>Data od:</span>
+        <input type="date" formControlName="data_od">
+      </label>
+      <label>
+        <span>Data do:</span>
+        <input type="date" formControlName="data_do">
+      </label>
+      <button type="submit" (click)="generateRaport()">Wygeneruj raport</button>
+      @if (result && result.length > 0) {
+        <button (click)="exportRaport()">Pobierz raport</button>
+      }
+    </form>
+  }
 </div>
 <main>
   @if (result && result.length > 0) {
-    dih
+    <table #table>
+      <thead>
+      <tr>
+        <th>Numer</th>
+        <th>Data {{ type.value === 'korekta' ? 'korekty' : 'skanu' }}</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (item of result; track item.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>
+              @if (type.value === 'korekta') {
+                {{ item.dzien_wypisania | date:'fullDate' }}
+              } @else {
+                {{ item.czas | date:'fullDate' }}
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   } @else if (result && result.length === 0) {
     <h2>Brak wyników...</h2>
     <p>Nie znaleziono żadnych danych dla wybranych kryteriów.</p>
