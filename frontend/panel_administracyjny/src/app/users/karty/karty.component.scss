@@ -1,4 +1,4 @@
-@use '../../../assets/styles/index' as i;
+@use 'index' as i;
 
 form {
   height: 100%;
@@ -90,18 +90,23 @@ section {
     line-height: 1.6;
   }
 }
+
 .addCard {
   @include i.flex-center(column, space-between, center);
+
   label {
     @include i.flex-center(column, flex-start, center);
   }
+
   input {
     transition: i.transition(outline-color);
     outline: 2px solid transparent;
+
     &:focus {
       outline-color: var(--color-10);
     }
   }
+
   button {
     align-self: center;
   }

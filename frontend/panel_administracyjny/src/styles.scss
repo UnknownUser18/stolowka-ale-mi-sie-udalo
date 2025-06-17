@@ -112,6 +112,10 @@ app-raports, app-individual-raport {
   background-color: var(--color-3);
 }
 
+app-administracja-osob {
+  @include positional(100%, 100%);
+}
+
 app-login {
 
 }
