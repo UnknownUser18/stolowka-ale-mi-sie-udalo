@@ -41,5 +41,19 @@
     </select>
   </label>
   <button type="submit" (click)="sendChanges()">Prześlij dane</button>
-  <button type="button">Zarchiwizuj osobę</button>
+  <button type="button" (click)="openWindow()">Zarchiwizuj osobę</button>
 </form>
+@if (showWindow) {
+  <section #window>
+    <div>
+      <i role="button" tabindex="0" class="fa-solid fa-xmark close" (click)="closeWindow()"></i>
+      <h3>Czy na pewno chcesz archiwizować?</h3>
+      <p>Dla osoby <b>{{ forms.get('imie_nazwisko')?.value!.split(' ')[0] }}</b> <b>{{ forms.get('imie_nazwisko')?.value!.split(' ')[1] }}</b>?</p>
+      <h4>Co to oznacza?</h4>
+      <p>Oznacza to, że ta osoba oficjalnie nie będzie chodzić na stołówkę i nie będzie mogła mieć przypisanej karty, deklaracji ani płatności.</p>
+      <p>Tą czynność można później cofnąć w <i>"Administracja Osób"</i>.</p>
+      <button type="button" (click)="closeWindow()">Anuluj</button>
+      <button type="button" (click)="archivePerson()">Archiwizuj</button>
+    </div>
+  </section>
+}

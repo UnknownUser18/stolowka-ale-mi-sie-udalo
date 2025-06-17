@@ -165,7 +165,8 @@ export const Queries: QueriesStructure = {
             "getById": `SELECT * FROM deklaracja_zywieniowa_zsti WHERE id_osoby = :id`,
             "add": `INSERT INTO deklaracja_zywieniowa_zsti (id_osoby, data_od, data_do, dni) VALUES(:id_osoby, :data_od, :data_do, :dni);`,
             "update": `UPDATE deklaracja_zywieniowa_zsti SET id_osoby = :id_osoby, data_od = :data_od, data_do = :data_do, dni = :dni WHERE id = :id;`,
-            "delete": `DELETE FROM deklaracja_zywieniowa_zsti WHERE id = :id`
+            "delete": `DELETE FROM deklaracja_zywieniowa_zsti WHERE id = :id`,
+            "deleteAll": `DELETE FROM deklaracja_zywieniowa_zsti WHERE id_osoby = :id_osoby`
         },
         "card": {
             "type": Card.array(),
@@ -175,6 +176,7 @@ export const Queries: QueriesStructure = {
             "update": `UPDATE karty_zsti SET key_card = :key_card WHERE id = :id`,
             "updateWithData": `UPDATE karty_zsti SET key_card = :key_card, data_wydania = :data_wydania WHERE id_ucznia = :id_ucznia`,
             "delete": `DELETE FROM karty_zsti WHERE id = :id`,
+            "deleteByStudentId": `DELETE FROM karty_zsti WHERE id_ucznia = :id_ucznia`,
             "getWithDetails": `SELECT k_z.id, k_z.id_ucznia, k_z.key_card, k_z.data_wydania, k_z.ostatnie_uzycie, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto FROM karty_zsti k_z LEFT JOIN osoby_zsti o_z ON o_z.id = k_z.id_ucznia ORDER BY o_z.nazwisko, o_z.imie;`
         },
         "absence": {
@@ -183,7 +185,8 @@ export const Queries: QueriesStructure = {
             "getById": `SELECT * FROM nieobecnosci_zsti WHERE osoby_zsti_id = :id`,
             "add": `INSERT INTO nieobecnosci_zsti (dzien_wypisania, osoby_zsti_id) VALUES (:dzien_wypisania, :osoby_zsti_id)`,
             "update": `UPDATE nieobecnosci_zsti SET dzien_wypisania = :dzien_wypisania, osoby_zsti_id = :osoby_zsti_id WHERE id = :id`,
-            "delete": `DELETE FROM nieobecnosci_zsti WHERE dzien_wypisania = :dzien_wypisania AND osoby_zsti_id = :osoby_zsti_id`
+            "delete": `DELETE FROM nieobecnosci_zsti WHERE dzien_wypisania = :dzien_wypisania AND osoby_zsti_id = :osoby_zsti_id`,
+            "deleteForStudent": `DELETE FROM nieobecnosci_zsti WHERE osoby_zsti_id = :id`
         },
         "payment": {
             "type": Payment.array(),
@@ -191,13 +194,15 @@ export const Queries: QueriesStructure = {
             "getById": `SELECT * FROM platnosci_zsti WHERE id_ucznia = :id_ucznia`,
             "add": `INSERT INTO platnosci_zsti (id_ucznia, platnosc, data_platnosci, miesiac, opis, rok) VALUES (:id_ucznia, :platnosc, :data_platnosci, :miesiac, :opis, :rok)`,
             "update": `UPDATE platnosci_zsti SET platnosc = :platnosc, data_platnosci = :data_platnosci, miesiac = :miesiac, opis = :opis, rok = :rok WHERE id = :id`,
-            "delete": `DELETE FROM platnosci_zsti WHERE id = :id`
+            "delete": `DELETE FROM platnosci_zsti WHERE id = :id`,
+            "deleteByStudentId": `DELETE FROM platnosci_zsti WHERE id_ucznia = :id_ucznia`
         },
         "scan": {
             "type": Scan.array(),
             "get": `SELECT * FROM skany_zsti`,
             "add": `INSERT INTO skany_zsti (id_karty, czas) values (:id_karty, :czas)`,
-            "delete": `DELETE FROM skany_zsti WHERE id = :id`
+            "delete": `DELETE FROM skany_zsti WHERE id = :id`,
+            "deleteForCard": `DELETE FROM skany_zsti WHERE id_karty = :id_karty`,
         }
     }
 }
