@@ -1,9 +1,11 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { DataService, Declaration, Opiekun, Student, TypOsoby } from '../../services/data.service';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { Subject } from 'rxjs';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { VariablesService } from '../../services/variables.service';
+import { TransitionService } from '../../services/transition.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector : 'app-dane',
@@ -18,6 +20,9 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private user : Student | undefined;
 
+  @ViewChild('window') window! : ElementRef;
+
+  protected showWindow : boolean = false;
   protected TypOsoby = TypOsoby;
   protected declaration : Declaration | undefined;
   protected readonly Number = Number;
@@ -33,7 +38,14 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
     uczeszcza : new FormControl(true, Validators.required),
   })
 
-  constructor(private database : DataService, private globalInfo : GlobalInfoService, private variables : VariablesService) {
+  constructor(
+    private database : DataService,
+    private globalInfo : GlobalInfoService,
+    private variables : VariablesService,
+    private transition : TransitionService,
+    private cdr : ChangeDetectorRef,
+    private zone : NgZone,
+    private router : Router) {
   }
 
   private setForm(user : Student & Opiekun) : void {
@@ -47,6 +59,8 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
       email : user.email,
       uczeszcza : user.uczeszcza
     });
+    this.forms.markAsPristine();
+    this.forms.markAsUntouched();
   }
 
   protected async sendChanges() : Promise<void> {
@@ -118,6 +132,43 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
     this.globalInfo.generateNotification(NotificationType.SUCCESS, 'Dane użytkownika zostały zaktualizowane.');
   }
 
+  protected openWindow() : void {
+    this.showWindow = true;
+    this.cdr.detectChanges()
+    this.transition.applyAnimation(this.window.nativeElement, true, this.zone).then();
+  }
+
+  protected closeWindow() : void {
+    this.transition.applyAnimation(this.window.nativeElement, false, this.zone).then(() => {
+      this.showWindow = false;
+    });
+  }
+
+  protected async archivePerson() : Promise<void> {
+    if (!this.user) return;
+    const cardId = await this.database.request('zsti.card.getById', { id : this.user.id }, 'dump');
+    if (!cardId[0]) {
+      this.globalInfo.generateNotification(NotificationType.WARNING, 'Nie udało się znaleźć karty osoby. Prawdopodobnie nie posiada karty.');
+    } else {
+      await this.database.request('zsti.scan.deleteForCard', { id_karty : cardId[0].id }, 'dump');
+      await this.database.request('zsti.card.deleteByStudentId', { id_ucznia : this.user.id }, 'dump');
+    }
+
+    await this.database.request('zsti.payment.deleteByStudentId', { id_ucznia : this.user.id }, 'dump');
+    await this.database.request('zsti.absence.deleteForStudent', { id : this.user.id }, 'dump');
+    await this.database.request('zsti.declaration.deleteAll', { id_osoby : this.user.id }, 'dump');
+
+    const resultStudent = await this.database.request('zsti.student.delete', { id : this.user.id }, 'dump');
+    if (!resultStudent[0]) {
+      this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się usunąć użytkownika.');
+      return;
+    }
+
+    this.globalInfo.generateNotification(NotificationType.SUCCESS, 'Użytkownik został zarchiwizowany.');
+    this.globalInfo.setActiveUser(undefined);
+    this.router.navigate(['osoby/zsti']).then();
+  }
+
   protected onTypOsobyChange() : void {
     const typOsoby = Number(this.forms.get('typ_osoby')?.value);
     const klasa = this.forms.get('klasa');
@@ -156,4 +207,5 @@ export class DaneComponent implements AfterViewInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
 }
