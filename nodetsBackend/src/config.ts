@@ -104,6 +104,7 @@ export const Queries: QueriesStructure = {
         "zsti": {
             "type": ArchivedUser.array(),
             "get": `SELECT o.id AS "id", typ_osoby_id, imie, nazwisko, nazwa AS "klasa", opiekun_id  FROM archive_osoby_zsti o LEFT JOIN slownik_klasa s ON o.klasa = s.id ORDER BY nazwisko, imie;`,
+            "delete": `DELETE FROM archive_osoby_zsti WHERE id = :id;`,
         }
     },
     "raportsZsti": {
@@ -141,6 +142,7 @@ export const Queries: QueriesStructure = {
             "getById": `SELECT * FROM opiekun_zsti WHERE opiekun_zsti.id_opiekun = :id`,
             "getByStudentId": `SELECT * FROM opiekun_zsti WHERE id_opiekun = (SELECT opiekun_id FROM osoby_zsti WHERE id = :id)`,
             "update": `UPDATE opiekun_zsti SET imie_opiekuna = :imie_opiekuna, nazwisko_opiekuna = :nazwisko_opiekuna, telefon = :telefon, nr_kierunkowy = :nr_kierunkowy, email = :email WHERE id_opiekun = :id;`,
+            "add": `INSERT INTO opiekun_zsti (imie_opiekuna, nazwisko_opiekuna, telefon, nr_kierunkowy, email) VALUES (:imie_opiekuna, :nazwisko_opiekuna, :telefon, :nr_kierunkowy, :email);`,
         },
         "klasa": {
             "type": Klasa.array(),
@@ -160,7 +162,7 @@ export const Queries: QueriesStructure = {
             "type": Person.array(),
             "get": `SELECT o.id as id, typ_osoby_id, imie, nazwisko, nazwa AS klasa, uczeszcza, miasto, opiekun_id FROM osoby_zsti o LEFT JOIN slownik_klasa s ON o.klasa = s.id ORDER BY nazwisko, imie;`,
             "getById": `SELECT * FROM osoby_zsti WHERE id = :id`,
-            "add": `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id) values(:imie, :nazwisko, :klasa, :uczeszcza, :typ_osoby_id);`,
+            "add": `INSERT INTO osoby_zsti (imie, nazwisko, klasa, uczeszcza, typ_osoby_id, miasto, opiekun_id) values(:imie, :nazwisko, :klasa, :uczeszcza, :typ_osoby_id, :miasto, :opiekun_id);`,
             "update": `UPDATE osoby_zsti SET imie = :imie, nazwisko = :nazwisko, klasa = :klasa, uczeszcza = :uczeszcza, typ_osoby_id = :typ_osoby_id WHERE id = :id;`,
             "delete": `DELETE FROM osoby_zsti WHERE id = :id`
         },

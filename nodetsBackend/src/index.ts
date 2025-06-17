@@ -80,7 +80,7 @@ export async function handleMethod(ws: WebSocket, params: RequestPayload): Promi
         {
             if (operation === 'update' || operation === 'delete' || operation === 'add') {
 
-                await sendResponse(ws, params.responseVar, [{ success: rawResult.affectedRows > 0 }]);
+                await sendResponse(ws, params.responseVar, rawResult);
             } else {
                 if(operation === 'get' && method.type)
                     await sendResponse(ws, params.responseVar, method.type.parse(rawResult));
