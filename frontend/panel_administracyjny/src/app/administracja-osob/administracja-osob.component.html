@@ -1,0 +1,11 @@
+@if (!router.url.includes('/administracja/')) {
+  <h1>Administracja Osób</h1>
+  <p>Wybierz opcję z panelu.</p>
+} @else {
+  <main>
+    @let url = router.url;
+    @if (url.includes('users')) {
+
+    }
+  </main>
+}

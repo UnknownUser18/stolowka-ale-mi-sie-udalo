@@ -12,7 +12,7 @@ import {
     Payment,
     Declaration,
     QueriesStructure,
-    SuccessResponse, Opiekun, Klasa, ReportAbsenceDay, ReportCheckedCard, ReportPayment,
+    SuccessResponse, Opiekun, Klasa, ReportAbsenceDay, ReportCheckedCard, ReportPayment, ArchivedUser,
 } from "./types";
 import {PoolOptions} from "mysql2/promise";
 
@@ -100,6 +100,12 @@ export const dbConfig: PoolOptions = {
  * - operacje na danych;
  * */
 export const Queries: QueriesStructure = {
+    "archived": {
+        "zsti": {
+            "type": ArchivedUser.array(),
+            "get": `SELECT o.id AS "id", typ_osoby_id, imie, nazwisko, nazwa AS "klasa", opiekun_id  FROM archive_osoby_zsti o LEFT JOIN slownik_klasa s ON o.klasa = s.id ORDER BY nazwisko, imie;`,
+        }
+    },
     "raportsZsti": {
         "absence": {
             "type": ReportAbsenceDay.array(),
