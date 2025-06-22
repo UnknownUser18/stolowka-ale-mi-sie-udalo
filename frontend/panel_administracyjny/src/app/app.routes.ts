@@ -12,6 +12,7 @@ import { KartyComponent } from './users/karty/karty.component';
 import { RaportsComponent } from './raports/raports.component';
 import { LoginComponent } from './login/login.component';
 import { IndividualRaportComponent } from './users/individual-raport/individual-raport.component';
+import { AdministracjaOsobComponent } from './administracja-osob/administracja-osob.component';
 
 export const routes : Routes = [
   { path : '', component : HomeComponent },
@@ -43,6 +44,15 @@ export const routes : Routes = [
     ]
   },
   { path : 'login', component : LoginComponent },
+  {
+    path : 'administracja', component : AdministracjaOsobComponent,
+    children : [
+      { path : 'users', component : AdministracjaOsobComponent },
+      { path : 'klasy', component : AdministracjaOsobComponent },
+      { path : 'dodaj-osobe', component : AdministracjaOsobComponent },
+    ]
+
+  },
   { path : '**', redirectTo : 'login' } // Redirect to log in for any unknown routes
 ];
 

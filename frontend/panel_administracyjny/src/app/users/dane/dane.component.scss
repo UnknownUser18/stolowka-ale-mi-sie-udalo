@@ -79,3 +79,57 @@ form {
     }
   }
 }
+
+section {
+  @include i.window;
+
+  div {
+    width: 40%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    & > *:not(button) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  h3 {
+    @include i.font-500(var(--color-13));
+    text-align: center;
+    margin: 0 0 20px 0;
+  }
+
+  b {
+    display: inline-block;
+
+    &:not(:first-of-type) {
+      margin-left: 5px;
+    }
+  }
+
+  h4 {
+    @include i.font-500(var(--color-13));
+    margin: 10px 0;
+  }
+
+  p {
+    @include i.font(1.2em, 400, var(--color-13));
+    line-height: 2;
+  }
+
+  button {
+    @include i.button(10px, $bg-color: var(--color-6), $h-bg-color: var(--color-9));
+    @include i.font(1.2em, 400, var(--color-13));
+    margin-top: 20px;
+    width: fit-content;
+    height: fit-content;
+
+    &:first-of-type {
+      place-self: center start;
+    }
+
+    &:last-of-type {
+      place-self: center end;
+    }
+  }
+}

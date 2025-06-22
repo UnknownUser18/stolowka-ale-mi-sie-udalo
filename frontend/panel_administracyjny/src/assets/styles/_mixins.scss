@@ -118,6 +118,7 @@
     }
   }
 }
+
 @mixin fieldset {
   fieldset {
     transition: f.transition(border-color, v.$medium);
@@ -183,6 +184,7 @@
     }
   }
 }
+
 @mixin checkbox {
   cursor: pointer;
   user-select: none;
@@ -211,5 +213,72 @@
     position: absolute;
     top: -2px;
     left: 2px;
+  }
+}
+
+@mixin table_normal($width: 100%) {
+  width: $width;
+  margin: 0 auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  tbody {
+    display: block;
+    width: 100%;
+    max-height: 50dvh;
+    overflow-y: auto;
+    border-radius: 0 0 20px 20px;
+  }
+
+  tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+
+    &:last-of-type td {
+      border-bottom: none;
+    }
+
+    &:nth-child(odd) td {
+      background-color: var(--color-6);
+    }
+
+    td, th {
+      text-align: center;
+      padding: 10px 20px;
+      border-left: 2px solid var(--color-10);
+
+      &:first-child {
+        border-left: none;
+      }
+    }
+
+    th {
+      @include font-500(var(--color-13));
+      position: sticky;
+      top: -2px;
+      background-color: var(--color-2);
+
+      &:first-of-type {
+        border-top-left-radius: 20px;
+      }
+
+      &:last-of-type {
+        border-top-right-radius: 20px;
+      }
+    }
+
+    td {
+      @include font($size: 1.2em, $color: var(--color-13));
+      background-color: var(--color-4);
+      border-bottom: 2px solid var(--color-10);
+      line-height: 2;
+    }
   }
 }

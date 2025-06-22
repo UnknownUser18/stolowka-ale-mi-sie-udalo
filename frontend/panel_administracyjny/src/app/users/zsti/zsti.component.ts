@@ -41,6 +41,7 @@ export class ZstiComponent implements OnDestroy {
     typ_osoby : new FormControl('3', Validators.required),
     uczeszcza : new FormControl('wszyscy', Validators.required),
   });
+
   @ViewChild('section_filter') sectionFilter : ElementRef | undefined;
 
 
@@ -53,9 +54,8 @@ export class ZstiComponent implements OnDestroy {
     private cdr : ChangeDetectorRef) {
     this.infoService.setTitle('ZSTI - Osoby');
     this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() : void => {
-      if (this.persons_zsti) return;
 
-      this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
+      this.variables.mapStudentsToOpiekun(true).then((persons : (Student & Opiekun)[]) => {
         this.result = this.persons_zsti = persons;
       });
     });

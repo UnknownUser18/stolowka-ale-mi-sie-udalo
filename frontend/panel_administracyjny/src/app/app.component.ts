@@ -8,7 +8,7 @@ import { DataService, Opiekun, Student, TypOsoby, WebSocketStatus } from './serv
 import { TransitionService } from './services/transition.service';
 import { VariablesService } from './services/variables.service';
 
-export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne' | 'raporty';
+export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne' | 'raporty' | 'administracja';
 
 @Component({
   selector : 'app-root',
@@ -87,6 +87,10 @@ export class AppComponent implements AfterViewInit {
     }
     if (url.startsWith('/raporty')) {
       await this.animateElement('raporty');
+      return;
+    }
+    if (url.startsWith('/administracja')) {
+      await this.animateElement('administracja');
       return;
     }
   }

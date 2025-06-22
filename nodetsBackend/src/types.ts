@@ -363,3 +363,12 @@ export const ReportPayment = z.object({
     platnosc: z.number(),
     data_platnosci: z.date(),
 })
+
+export const ArchivedUser = z.object({
+    id: z.number(),
+    typ_osoby_id: z.number(),
+    imie: z.string(),
+    nazwisko: z.string(),
+    klasa: z.number().or(z.string()).nullable(),
+    opiekun_id: z.number().nullable(),
+});

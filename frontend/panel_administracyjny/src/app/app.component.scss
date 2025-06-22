@@ -25,11 +25,11 @@ nav .all {
   }
 }
 
-nav .osoby, nav .cennik, nav .nieczynne, nav .raporty {
+nav .osoby, nav .cennik, nav .nieczynne, nav .raporty, nav .administracja {
   transform: translateX(30vw);
 }
 
-.raporty {
+.raporty, .administracja {
   &.done {
     transform: translateX(0);
   }

@@ -13,11 +13,11 @@
     <div class="scrollable" #scrollable>
       @if (router.url === '/') {
         <ul class="main-page all ignore">
-          <li (click)="navigate('osoby','main-page')"><i class="fa-regular fa-user"></i>Osoby</li>
-          <li (click)="navigate('raporty', 'main-page')"><i class="fa-solid fa-table-columns"></i>Raporty</li>
-          <li (click)="navigate('cennik','main-page')"><i class="fa-solid fa-money-bills"></i>Cennik</li>
-          <li (click)="navigate('nieczynne','main-page')"><i class="fa-regular fa-calendar"></i>Dni nieczynne</li>
-          <li><i class="fa-solid fa-lock"></i>Administracja osób</li>
+          <li role="option" tabindex="0" (click)="navigate('osoby','main-page')"><i class="fa-regular fa-user"></i>Osoby</li>
+          <li role="option" tabindex="0" (click)="navigate('raporty', 'main-page')"><i class="fa-solid fa-table-columns"></i>Raporty</li>
+          <li role="option" tabindex="0" (click)="navigate('cennik','main-page')"><i class="fa-solid fa-money-bills"></i>Cennik</li>
+          <li role="option" tabindex="0" (click)="navigate('nieczynne','main-page')"><i class="fa-regular fa-calendar"></i>Dni nieczynne</li>
+          <li role="option" tabindex="0" (click)="navigate('administracja', 'main-page')"><i class="fa-solid fa-lock"></i>Administracja osób</li>
           <li><i class="fa-solid fa-gear"></i>Ustawienia</li>
         </ul>
       } @else if (router.url.includes('/osoby') || router.url.includes('/osoba')) {
@@ -84,6 +84,20 @@
           <div class="table">
             <h1 tabindex="0" routerLink="nieczynne/internat"><i class="fa-solid fa-building"></i>Internat</h1>
           </div>
+        </div>
+      } @else if (router.url.includes('/administracja')) {
+        <div class="administracja all">
+          <i class="fa-solid fa-right-to-bracket exit" (click)="navigate('','administracja')"></i>
+          <ul>
+            <li role="option" tabindex="0" routerLink="administracja/users"><i class="fa-solid fa-user"></i> Osoby zarchiwizowane</li>
+            <li role="option" tabindex="0" routerLink="administracja/klasy"><i class="fa-solid fa-users"></i> Klasy</li>
+            <li role="option" tabindex="0" routerLink="administracja/dodaj-osobe"><i class="fa-solid fa-add"></i> Dodaj osobę</li>
+          </ul>
+        </div>
+      } @else {
+        <div class="all">
+          <h1>Panel administracyjny</h1>
+          <p>Wybierz opcję z menu po lewej stronie.</p>
         </div>
       }
     </div>
