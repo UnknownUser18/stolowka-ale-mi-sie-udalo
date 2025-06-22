@@ -3,7 +3,7 @@ import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {AsyncPipe} from '@angular/common';
 import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from '@angular/material/autocomplete';
 import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
-import {map, Observable, startWith} from 'rxjs';
+import {debounceTime, map, Observable, startWith} from 'rxjs';
 import {CardDetails, DataService} from '../data.service';
 
 @Component({
@@ -24,6 +24,8 @@ import {CardDetails, DataService} from '../data.service';
 })
 export class NfcScanComponent implements AfterViewInit, OnInit {
   @ViewChild('nfc_input') nfc_input: ElementRef | undefined;
+  @ViewChild(MatAutocompleteTrigger) autocompleteTrigger!: MatAutocompleteTrigger;
+
   @Output() nfcOutput: EventEmitter<string> = new EventEmitter();
   control = new FormControl('');
 
@@ -40,6 +42,18 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
       startWith(''),
       map(value => this._filter(value || '')),
     );
+
+    this.control.valueChanges
+      .pipe(debounceTime(30))
+      .subscribe(value => this.handleInput(value));
+  }
+
+  private handleInput(value: string | null) {
+    const hasLetter = /[a-zA-Z]/.test(value || '');
+
+    if (!value || (!hasLetter && this.autocompleteTrigger.panelOpen)) {
+      this.autocompleteTrigger.closePanel();
+    }
   }
 
   constructor(private dataService: DataService) {
@@ -75,6 +89,7 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
     const input: HTMLInputElement = (this.nfc_input?.nativeElement as HTMLInputElement)
     this.nfcOutput.emit(input.value)
     input.value = '';
+    this.autocompleteTrigger.closePanel();
   }
 
   focusInput(): void {
