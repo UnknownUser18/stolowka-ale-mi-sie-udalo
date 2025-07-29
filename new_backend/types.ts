@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import 'dotenv/config';
+import { logger } from "./config";
 
 type LogType = 'info' | 'warning' | 'error' | 'debug';
 
@@ -38,7 +39,8 @@ export function Info(message : string, ...data : any[]) : void {
     )
     , ...data,
     getTimestamp()
-  )
+  );
+  logger.info([message, ...data].join(' '));
 }
 
 /**
@@ -59,6 +61,7 @@ export function Warning(message : string, ...data : any[]) : void {
     , ...data,
     getTimestamp()
   )
+  logger.warn([message, ...data].join(' '));
 }
 
 
@@ -81,6 +84,7 @@ export function Errors(message : string, ...data : any[]) : void {
     , ...data,
     getTimestamp()
   )
+  logger.error([message, ...data].join(' '));
 }
 
 /**
@@ -101,6 +105,7 @@ export function Debug(message : string, ...data : any[]) : void {
     , ...data,
     getTimestamp()
   )
+  logger.debug([message, ...data].join(' '));
 }
 
 const env = process.env;

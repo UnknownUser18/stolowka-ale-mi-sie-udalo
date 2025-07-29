@@ -1,16 +1,24 @@
 import express from 'express';
 import 'dotenv/config';
 import * as dbConstructor from 'mysql2/promise';
-import { Errors, Info } from './types';
-import { configureApp } from './config';
+import { Errors, Info, Warning } from './types';
+import { configureRequestsDebug } from './config';
 import zstiRoutes from './zsti';
 
+const env = process.env;
+
+if (env.IGNORE_DEBUG === undefined) {
+  Warning('IGNORE_DEBUG is not set, defaulting to false');
+}
+
 const app = express();
-configureApp(app);
+
+if (env.IGNORE_DEBUG === 'false')
+  configureRequestsDebug(app);
+
 app.use(express.json());
 app.use('/api/zsti', zstiRoutes);
 
-const env = process.env;
 
 if (!env.DB_HOST || !env.DB_USER || env.DB_PASSWORD === undefined || !env.DB_NAME || !env.DB_PORT) {
   Errors('Database configuration is missing in environment variables');

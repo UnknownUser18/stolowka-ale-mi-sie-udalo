@@ -2,8 +2,10 @@ import morgan from "morgan";
 import chalk from "chalk";
 import { Debug } from "./types";
 import { Express } from "express";
+import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
-export function configureApp(app : Express) {
+export function configureRequestsDebug(app : Express) {
   morgan.token('method', (req) => {
     const types : Record<string, string> = {
       'GET' : chalk.green('GET'),
@@ -44,3 +46,22 @@ export function configureApp(app : Express) {
     }
   }));
 }
+
+export const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `${timestamp} ${level}: ${message}`;
+    })
+  ),
+  transports: [
+    new DailyRotateFile({
+      filename: 'logs/%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxSize: '20m',
+      maxFiles: '14d'
+    }),
+  ],
+});
