@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "panel_administracyjny_better": {
+    "panel_administracyjny": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -75,6 +75,9 @@
           "defaultConfiguration": "production"
         },
         "serve": {
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
