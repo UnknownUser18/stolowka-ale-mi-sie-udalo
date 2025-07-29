@@ -48,7 +48,12 @@ export function configureRequestsDebug(app : Express) {
 }
 
 export const logger = winston.createLogger({
-  level: 'info',
+  levels : {
+    error: 0,
+    warn: 1,
+    info: 2,
+    debug: 3,
+  },
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(({ timestamp, level, message }) => {

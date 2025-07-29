@@ -1,7 +1,7 @@
 import express from 'express';
 import 'dotenv/config';
 import * as dbConstructor from 'mysql2/promise';
-import { Errors, Info, Warning } from './types';
+import { Debug, Errors, getStatusCodeError, getStatusMessage, getStatusMessageError, HttpPacket, Info, statusCodes, Warning } from './types';
 import { configureRequestsDebug } from './config';
 import zstiRoutes from './zsti';
 
@@ -40,8 +40,9 @@ export const db = dbConstructor.createConnection({
   connectionLimit : 10,
   queueLimit : 0,
   namedPlaceholders : true,
-}).then(() => {
+}).then((connection) => {
   Info('Database connection established successfully');
+  return connection;
 }).catch((error) => {
   Errors('Failed to connect to the database', error);
   process.exit(1);
@@ -50,3 +51,26 @@ export const db = dbConstructor.createConnection({
 app.listen(env.PORT, () => {
   Info('Server is running on port', env.PORT);
 });
+
+
+export async function executeQuery(query : string, params? : any[]) {
+  try {
+    const connection = await db;
+    const result = await connection.query(query, params);
+    Debug('Query executed successfully', query, params);
+    return result[0]; // MySQL2 returns an array with results and fields
+  } catch (error) {
+    const mysqlError = error as dbConstructor.QueryError;
+    Errors('Error executing query', error);
+    return [getStatusCodeError(mysqlError.code), getStatusMessageError(mysqlError.code || 'UNKNOWN_ERROR')];
+  }
+}
+
+export function preparePacket(status : statusCodes, ...data : any[]) : HttpPacket {
+  return {
+    status : status,
+    statusMessage : getStatusMessage(status),
+    timestamp : new Date().toISOString(),
+    data : data
+  };
+}
