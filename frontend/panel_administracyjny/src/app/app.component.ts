@@ -30,6 +30,7 @@ export class AppComponent implements AfterViewInit {
     private transition : TransitionService,
     protected router : Router,
     protected infoService : GlobalInfoService) {
+    this.database.testHttpGet().subscribe()
     this.database.initializeWebSocket().then(status => {
       this.infoService.setWebSocketStatus(status);
     });

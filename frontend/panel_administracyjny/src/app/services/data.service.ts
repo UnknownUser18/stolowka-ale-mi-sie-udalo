@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Subject, timer } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 export enum WebSocketStatus {
   CLOSED,
@@ -135,7 +136,7 @@ export interface ServerData<T extends VariableName = VariableName> {
 export class DataService {
   public ws!: WebSocket;
   private readonly RECONNECT_INTERVAL = 2500;
-
+  private http = inject(HttpClient);
   public cachedData: Map<VariableName, any> = new Map<VariableName, any>();
   public dataChange: Subject<VariableName> = new Subject<VariableName>()
 
@@ -257,5 +258,10 @@ export class DataService {
         }
       })
     })
+  }
+
+  testHttpGet<T>() {
+    console.log('Testing HTTP GET request');
+    return this.http.get('/api/zsti/health', { responseType: 'text' })
   }
 }
