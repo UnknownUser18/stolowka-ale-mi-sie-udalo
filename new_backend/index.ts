@@ -1,9 +1,11 @@
 import express from 'express';
 import 'dotenv/config';
 import * as dbConstructor from 'mysql2/promise';
-import { Debug, Errors, getStatusCodeError, getStatusMessage, getStatusMessageError, HttpPacket, Info, statusCodes, Warning } from './types';
+import { Debug, Errors, getStatusCodeByCode, getStatusNameByCode, HttpPacket, Info, statusCodes, Warning } from './types';
 import { configureRequestsDebug } from './config';
 import zstiRoutes from './zsti';
+import { QueryResult } from "mysql2/promise";
+import { QueryError } from "mysql2";
 
 const env = process.env;
 
@@ -60,16 +62,27 @@ export async function executeQuery(query : string, params? : any[]) {
     Debug('Query executed successfully', query, params);
     return result[0]; // MySQL2 returns an array with results and fields
   } catch (error) {
-    const mysqlError = error as dbConstructor.QueryError;
     Errors('Error executing query', error);
-    return [getStatusCodeError(mysqlError.code), getStatusMessageError(mysqlError.code || 'UNKNOWN_ERROR')];
+    throw error;
+  }
+}
+
+export async function queryWithResponse(queryFn: () => Promise<any>, res: express.Response, successStatus: statusCodes) {
+  try {
+    const query = await queryFn();
+    return res.status(200).send(preparePacket(successStatus, query[0] as QueryResult));
+  } catch (error) {
+    const errorcode = (error as QueryError).errno ?? 500;
+    const packet = preparePacket(getStatusCodeByCode(errorcode));
+    Errors('Query execution failed', error);
+    return res.status(500).send(packet);
   }
 }
 
 export function preparePacket(status : statusCodes, ...data : any[]) : HttpPacket {
   return {
     status : status,
-    statusMessage : getStatusMessage(status),
+    statusMessage : getStatusNameByCode(status),
     timestamp : new Date().toISOString(),
     data : data
   };

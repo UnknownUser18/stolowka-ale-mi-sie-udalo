@@ -48,31 +48,6 @@ export const mysqlErrorMap = {
   'ECONNREFUSED' : 700
 };
 
-export function getStatusCodeError(error : number | string) : number {
-  const mapped = mysqlErrorMap[error as keyof typeof mysqlErrorMap];
-  if (mapped !== undefined) {
-    return mapped;
-  }
-  return statusCodes["Internal Server Error"];
-
-}
-
-export function getStatusMessageError(error : number | string) : string {
-  const mapped = mysqlErrorMap[error as keyof typeof mysqlErrorMap];
-  Debug('getStatusMessage', error, mapped);
-  if (mapped !== undefined) {
-    return Object.keys(statusCodes).find(key => statusCodes[key as keyof typeof statusCodes] === mapped) || 'Unknown Error';
-  }
-  return 'Internal Server Error';
-}
-
-export function getStatusMessage(status : statusCodes) : string {
-  return Object.keys(statusCodes).find(key => statusCodes[key as keyof typeof statusCodes] === status) || 'Unknown Status';
-}
-
-export function getStatusCode(status : statusCodes) : number {
-  return statusCodes[status as unknown as keyof typeof statusCodes];
-}
 
 function getTimestamp() : string {
   if (!showTimestamps) return '';
@@ -176,6 +151,40 @@ export function Debug(message : string | any[], ...data : any[]) : void {
     getTimestamp()
   )
   logger.debug([message, ...data].join(' '));
+}
+
+export function getStatusNameByCode(code : number) : string {
+  for (const [key, value] of Object.entries(statusCodes)) {
+    if (typeof value === 'number' && value === code) {
+      return key;
+    }
+  }
+  const mapped = (mysqlErrorMap as any)[code];
+  if (mapped) {
+    for (const [key, value] of Object.entries(statusCodes)) {
+      if (typeof value === 'number' && value === mapped) {
+        return key;
+      }
+    }
+  }
+  return 'Unknown Status Code';
+}
+
+export function getStatusCodeByCode(code : number) : number {
+  for (const [key, value] of Object.entries(statusCodes)) {
+    if (typeof value === 'number' && value === code) {
+      return value;
+    }
+  }
+  const mapped = (mysqlErrorMap as any)[code];
+  if (mapped) {
+    for (const [key, value] of Object.entries(statusCodes)) {
+      if (typeof value === 'number' && value === mapped) {
+        return value;
+      }
+    }
+  }
+  return 500;
 }
 
 const env = process.env;
