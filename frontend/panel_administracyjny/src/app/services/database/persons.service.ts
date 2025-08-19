@@ -25,7 +25,6 @@ export class PersonsService extends TypesService {
 
   public getZPersons() : ZPerson[] | null {
     try {
-      console.log("Fetching persons from API...");
       const res : any = this.http.get(`${ this.api }zsti/person`).subscribe();
       return res.status === 200 ? res.data as ZPerson[] : null;
     } catch (error) {

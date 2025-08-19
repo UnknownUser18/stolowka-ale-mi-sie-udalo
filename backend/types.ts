@@ -1,8 +1,6 @@
 import chalk from "chalk";
 import 'dotenv/config';
-import { configureRequestsDebug, logger } from "./config";
-import express from "express";
-import zstiRoutes from "./zsti";
+import { logger } from "./config";
 
 type LogType = 'info' | 'warning' | 'error' | 'debug';
 

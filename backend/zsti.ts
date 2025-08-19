@@ -9,7 +9,7 @@ const router = Router({
 });
 
 router.get('/person', async (_req, res) => {
-  const persons = await executeQuery('SELECT * FROM osoby_zsti');
+  const persons = await executeQuery('SELECT * FROM osobyZ');
   const packet = isQuerySuccesful(persons)
     ? new Packet(StatusCodes.OK, persons)
     : new ErrorPacket(getStatusCodeByCode(parseInt((persons as QueryError).code)));
