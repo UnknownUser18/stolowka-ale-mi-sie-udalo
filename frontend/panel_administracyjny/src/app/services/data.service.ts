@@ -260,8 +260,8 @@ export class DataService {
     })
   }
 
-  testHttpGet<T>() {
+  testHttpGet() {
     console.log('Testing HTTP GET request');
-    return this.http.get('/api/zsti/health', { responseType: 'text' })
+    return this.http.get('/api/zsti/users', { responseType: 'text' })
   }
 }

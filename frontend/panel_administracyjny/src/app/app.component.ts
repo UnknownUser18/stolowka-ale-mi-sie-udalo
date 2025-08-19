@@ -7,6 +7,7 @@ import { filter, take } from 'rxjs';
 import { DataService, Opiekun, Student, TypOsoby, WebSocketStatus } from './services/data.service';
 import { TransitionService } from './services/transition.service';
 import { VariablesService } from './services/variables.service';
+import { PersonsService } from './services/database/persons.service';
 
 export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne' | 'raporty' | 'administracja';
 
@@ -29,8 +30,9 @@ export class AppComponent implements AfterViewInit {
     private zone : NgZone,
     private transition : TransitionService,
     protected router : Router,
-    protected infoService : GlobalInfoService) {
-    this.database.testHttpGet().subscribe()
+    protected infoService : GlobalInfoService,
+    private personsS : PersonsService) {
+    this.personsS.getZPersons()
     this.database.initializeWebSocket().then(status => {
       this.infoService.setWebSocketStatus(status);
     });

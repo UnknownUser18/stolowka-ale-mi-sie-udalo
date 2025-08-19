@@ -1,11 +1,11 @@
 import express from 'express';
 import 'dotenv/config';
 import * as dbConstructor from 'mysql2/promise';
-import { Debug, Errors, getStatusCodeByCode, getStatusNameByCode, HttpPacket, Info, statusCodes, Warning } from './types';
+import { Debug, Errors, getStatusCodeByCode, Info, StatusCodes, Warning, Packet, ErrorPacket } from './types';
 import { configureRequestsDebug } from './config';
 import zstiRoutes from './zsti';
-import { QueryResult } from "mysql2/promise";
-import { QueryError } from "mysql2";
+import { QueryError, QueryResult } from "mysql2/promise";
+
 
 const env = process.env;
 
@@ -38,9 +38,6 @@ export const db = dbConstructor.createConnection({
   user : env.DB_USER,
   password : env.DB_PASSWORD,
   database : env.DB_NAME,
-  waitForConnections : true,
-  connectionLimit : 10,
-  queueLimit : 0,
   namedPlaceholders : true,
 }).then((connection) => {
   Info('Database connection established successfully');
@@ -54,8 +51,15 @@ app.listen(env.PORT, () => {
   Info('Server is running on port', env.PORT);
 });
 
-
-export async function executeQuery(query : string, params? : any[]) {
+/**
+ * @method executeQuery
+ * @param query{string} - SQL query to execute
+ * @param params{any[]} - Optional parameters for the query
+ * @returns {Promise<QueryResult>} - Promise resolving to the query result
+ * @description Executes a SQL query using the established database connection.
+ * @throws - Throws an error type QueryError if the query execution fails.
+ */
+export async function executeQuery(query : string, params? : any[]) : Promise<QueryResult | QueryError> {
   try {
     const connection = await db;
     const result = await connection.query(query, params);
@@ -63,27 +67,38 @@ export async function executeQuery(query : string, params? : any[]) {
     return result[0]; // MySQL2 returns an array with results and fields
   } catch (error) {
     Errors('Error executing query', error);
-    throw error;
+    return error as QueryError; // Return the error as QueryError type
   }
 }
 
-export async function queryWithResponse(queryFn: () => Promise<any>, res: express.Response, successStatus: statusCodes) {
-  try {
-    const query = await queryFn();
-    return res.status(200).send(preparePacket(successStatus, query[0] as QueryResult));
-  } catch (error) {
-    const errorcode = (error as QueryError).errno ?? 500;
-    const packet = preparePacket(getStatusCodeByCode(errorcode));
-    Errors('Query execution failed', error);
-    return res.status(500).send(packet);
-  }
+/**
+ * @function sendResponse
+ * @description Sends a standardized response to the client.
+ * It checks if the packet is an error and sets the appropriate HTTP status code.
+ * @param res{express.Response} - The Express response object to send the response.
+ * @param packet{Packet} - The packet containing the response data, status, and message.
+ * @returns {express.Response} - The Express response object with the status and data.
+ */
+export function sendResponse(res : express.Response, packet : Packet) {
+  const isError = packet instanceof ErrorPacket;
+  const responseStatus = new Map<number, number>([
+    [StatusCodes.OK, 200],
+    [StatusCodes.Inserted, 201],
+    [StatusCodes.Updated, 200],
+    [StatusCodes.Removed, 204],
+  ]);
+  const statusCode = getStatusCodeByCode(packet.status);
+
+  const httpStatusCode = !isError ? (responseStatus.get(statusCode) || 200) : 500; // Default to 500 for errors
+
+  return res.status(httpStatusCode).send({
+    status : statusCode,
+    statusMessage : packet.statusMessage,
+    timestamp : packet.timestamp,
+    data : !(packet.data) || packet.data[0] || null,
+  });
 }
 
-export function preparePacket(status : statusCodes, ...data : any[]) : HttpPacket {
-  return {
-    status : status,
-    statusMessage : getStatusNameByCode(status),
-    timestamp : new Date().toISOString(),
-    data : data
-  };
+export function isQuerySuccesful(result : QueryResult | QueryError) : boolean {
+  return !(result instanceof Error);
 }

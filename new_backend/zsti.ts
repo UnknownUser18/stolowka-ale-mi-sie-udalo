@@ -1,18 +1,19 @@
 import { Router } from 'express';
-import { executeQuery, queryWithResponse } from './index';
-import { statusCodes } from "./types";
+import { executeQuery, isQuerySuccesful, sendResponse } from './index';
+import { ErrorPacket, getStatusCodeByCode, Packet, StatusCodes } from "./types";
+import { QueryError } from "mysql2/promise";
 
 const router = Router({
   caseSensitive : true,
   strict : true,
 });
 
-router.get('/health', async (_req, res) => {
-  await queryWithResponse(() => executeQuery('SELECT 1'), res, statusCodes.OK);
-});
-
-router.get('/users', async (_req, res) => {
-  await queryWithResponse(() => executeQuery('SELECT * FROM osoby_zsti'), res, statusCodes.OK);
+router.get('/person', async (_req, res) => {
+  const persons = await executeQuery('SELECT * FROM osoby_zsti');
+  const packet = isQuerySuccesful(persons)
+    ? new Packet(StatusCodes.OK, persons)
+    : new ErrorPacket(getStatusCodeByCode(parseInt((persons as QueryError).code)));
+  return sendResponse(res, packet);
 })
 
 export default router;

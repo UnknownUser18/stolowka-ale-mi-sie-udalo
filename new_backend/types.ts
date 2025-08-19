@@ -1,18 +1,38 @@
 import chalk from "chalk";
 import 'dotenv/config';
-import { logger } from "./config";
+import { configureRequestsDebug, logger } from "./config";
+import express from "express";
+import zstiRoutes from "./zsti";
 
 type LogType = 'info' | 'warning' | 'error' | 'debug';
 
-export interface HttpPacket {
-  readonly status : number,
-  readonly statusMessage : string,
-  readonly timestamp : string,
-  data? : any[],
+
+export class Packet {
+  status : StatusCodes;
+  statusMessage : string;
+  timestamp : string;
+  data? : any[] | null;
+
+  constructor(status : StatusCodes, ...data : any[]) {
+    this.status = status;
+    this.statusMessage = getStatusNameByCode(status);
+    this.timestamp = new Date().toISOString();
+    this.data = data ?? [];
+  }
+}
+
+export class ErrorPacket extends Packet {
+  data : null;
+
+  constructor(status : StatusCodes) {
+    super(status);
+    this.data = null;
+  }
+
 }
 
 
-export enum statusCodes {
+export enum StatusCodes {
   'OK' = 200,
   'Inserted' = 201,
   'Updated' = 202,
@@ -154,35 +174,33 @@ export function Debug(message : string | any[], ...data : any[]) : void {
 }
 
 export function getStatusNameByCode(code : number) : string {
-  for (const [key, value] of Object.entries(statusCodes)) {
-    if (typeof value === 'number' && value === code) {
-      return key;
-    }
-  }
+  const entry = Object.entries(StatusCodes).find(
+    ([, value]) => typeof value === 'number' && value === code
+  );
+  if (entry) return entry[0];
+
   const mapped = (mysqlErrorMap as any)[code];
   if (mapped) {
-    for (const [key, value] of Object.entries(statusCodes)) {
-      if (typeof value === 'number' && value === mapped) {
-        return key;
-      }
-    }
+    const mappedEntry = Object.entries(StatusCodes).find(
+      ([, value]) => typeof value === 'number' && value === mapped
+    );
+    if (mappedEntry) return mappedEntry[0];
   }
   return 'Unknown Status Code';
 }
 
 export function getStatusCodeByCode(code : number) : number {
-  for (const [key, value] of Object.entries(statusCodes)) {
-    if (typeof value === 'number' && value === code) {
-      return value;
-    }
-  }
+  const entry = Object.entries(StatusCodes).find(
+    ([, value]) => typeof value === 'number' && value === code
+  );
+  if (entry) return entry[1] as number;
+
   const mapped = (mysqlErrorMap as any)[code];
   if (mapped) {
-    for (const [key, value] of Object.entries(statusCodes)) {
-      if (typeof value === 'number' && value === mapped) {
-        return value;
-      }
-    }
+    const mappedEntry = Object.entries(StatusCodes).find(
+      ([, value]) => typeof value === 'number' && value === mapped
+    );
+    if (mappedEntry) return mappedEntry[1] as number;
   }
   return 500;
 }
