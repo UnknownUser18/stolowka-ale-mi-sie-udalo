@@ -9,15 +9,36 @@ import { AdministracjaOsobComponent } from './administracja-osob/administracja-o
 import { CennikComponent } from './cennik/cennik.component';
 import { ZstiComponent } from './users/zsti/zsti.component';
 
+const componentImports: { [key: string]: () => Promise<any> } = {
+  kalendarz: () => import('./users/kalendarz/kalendarz.component').then(m => m.KalendarzComponent),
+  dane: () => import('./users/dane/dane.component').then(m => m.DaneComponent),
+  deklaracje: () => import('./users/deklaracje/deklaracje.component').then(m => m.DeklaracjeComponent),
+  platnosci: () => import('./users/platnosci/platnosci.component').then(m => m.PlatnosciComponent),
+};
+
 export const routes : Routes = [
   {
     path : '', component : HomeComponent,
     canActivateChild : [mainGuard],
     children : [
       {
+        path : '',
+        loadComponent : () => import('./nav-sidebar/home-nav/home-nav.component').then(m => m.HomeNavComponent),
+        outlet : 'sidebar'
+      },
+      {
         path : 'osoby',
-        loadComponent : () => import('./users/osoby/osoby.component').then(m => m.OsobyComponent),
         children : [
+          {
+            path : '',
+            loadComponent : () => import('./users/osoby/osoby.component').then(m => m.OsobyComponent),
+            outlet : 'primary'
+          },
+          {
+            path : '',
+            loadComponent : () => import('./nav-sidebar/osoby-nav/osoby-nav.component').then(m => m.OsobyNavComponent),
+            outlet : 'sidebar'
+          },
           { path : 'zsti', component : ZstiComponent, },
           {
             path : 'internat' // TODO: Add internat component
@@ -31,9 +52,9 @@ export const routes : Routes = [
             path : 'zsti/:id',
             children : [
               { path : '', redirectTo : 'kalendarz', pathMatch : 'full' },
-              ...['kalendarz', 'dane', 'deklaracje', 'platnosci', 'karta', 'raport'].map(childPath => ({
+              ...['kalendarz', 'dane', 'deklaracje', 'platnosci'].map(childPath => ({
                 path : childPath,
-                loadComponent : () => import(`./users/${ childPath }/${ childPath }.component`).then(m => m[`${ childPath.charAt(0).toUpperCase() + childPath.slice(1) }Component`])
+                loadComponent : componentImports[childPath]
               }))
             ]
           },
@@ -41,9 +62,9 @@ export const routes : Routes = [
             path : 'internat/:id', // TODO: Add internat component
             children : [
               { path : '', redirectTo : 'kalendarz', pathMatch : 'full' },
-              ...['kalendarz', 'dane', 'deklaracje', 'platnosci', 'karta', 'raport'].map(childPath => ({
+              ...['kalendarz', 'dane', 'deklaracje', 'platnosci'].map(childPath => ({
                 path : childPath,
-                loadComponent : () => import(`./users/${ childPath }/${ childPath }.component`).then(m => m[`${ childPath.charAt(0).toUpperCase() + childPath.slice(1) }Component`])
+                loadComponent : componentImports[childPath]
               }))
             ]
           }

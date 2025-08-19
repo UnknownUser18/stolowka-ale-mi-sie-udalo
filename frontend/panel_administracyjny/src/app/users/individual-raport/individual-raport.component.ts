@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { DataService } from '../../services/data.service';
+// import { DataService } from '../../services/data.service';
 import { VariablesService } from '../../services/variables.service';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -34,16 +34,15 @@ export class IndividualRaportComponent implements OnDestroy {
   constructor(
     private datePipe : DatePipe,
     private variables : VariablesService,
-    private database : DataService,
     private infoService : GlobalInfoService
   ) {
-    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
-      this.infoService.activeUser.subscribe(user => {
-        if (!user) return;
-        this.infoService.setActiveTab('RAPORT');
-        this.infoService.setTitle(`${ user.imie } ${ user.nazwisko } - Raport`);
-      });
-    });
+    // this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+    //   this.infoService.activeUser.subscribe(user => {
+    //     if (!user) return;
+    //     this.infoService.setActiveTab('RAPORT');
+    //     this.infoService.setTitle(`${ user.imie } ${ user.nazwisko } - Raport`);
+    //   });
+    // });
   }
 
   protected generateRaport() : void {
@@ -67,10 +66,10 @@ export class IndividualRaportComponent implements OnDestroy {
         this.infoService.generateNotification(NotificationType.ERROR, 'Proszę wybrać typ raportu.');
         return;
     }
-    this.database.request(path, { data_od : data_od, data_do : data_do, id : this.infoService.activeUser.value!.id }, 'dump').then((payload) => {
-      this.result = payload;
-      this.infoService.generateNotification(NotificationType.SUCCESS, `Raport został wygenerowany. Znaleziono ${ payload.length } ${ wynikString(payload.length) }.`)
-    });
+    // this.database.request(path, { data_od : data_od, data_do : data_do, id : this.infoService.activeUser.value!.id }, 'dump').then((payload) => {
+    //   this.result = payload;
+    //   this.infoService.generateNotification(NotificationType.SUCCESS, `Raport został wygenerowany. Znaleziono ${ payload.length } ${ wynikString(payload.length) }.`)
+    // });
   }
 
   protected exportRaport() : void {
@@ -104,7 +103,7 @@ export class IndividualRaportComponent implements OnDestroy {
     ws['!cols'] = wscols;
     xlsx.utils.book_append_sheet(wb, ws, `${ raportName[0].toUpperCase() }${ raportName.slice(1) } - ZSTI`);
 
-    xlsx.writeFile(wb, `${ raportName[0].toUpperCase() }${ raportName.slice(1) } - ${ this.infoService.activeUser.value?.imie } ${ this.infoService.activeUser.value?.nazwisko } ${ new Date().toISOString().slice(0, 10) }.xlsx`);
+    // xlsx.writeFile(wb, `${ raportName[0].toUpperCase() }${ raportName.slice(1) } - ${ this.infoService.activeUser.value?.imie } ${ this.infoService.activeUser.value?.nazwisko } ${ new Date().toISOString().slice(0, 10) }.xlsx`);
     this.infoService.generateNotification(NotificationType.SUCCESS, 'Raport został wyeksportowany.');
   }
 

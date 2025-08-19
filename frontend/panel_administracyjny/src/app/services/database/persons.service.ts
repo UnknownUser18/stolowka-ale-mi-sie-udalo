@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { TypesService,  } from './types.service';
 
-enum TypOsoby {
+export enum TypOsoby {
   UCZEN = 1,
   NAUCZYCIEL = 2,
 }
 
-interface ZPerson {
+export interface ZPerson {
   id : number,
   typ_osoby_id : TypOsoby,
   imie : string,

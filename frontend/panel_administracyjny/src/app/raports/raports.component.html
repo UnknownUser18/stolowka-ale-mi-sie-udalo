@@ -11,10 +11,10 @@
       </label>
       @switch (router.url) {
         @case ('/raporty/korekty') {
-          <button type="submit" (click)="generateKorektyReport()">Generuj raport</button>
+<!--          <button type="submit" (click)="generateKorektyReport()">Generuj raport</button>-->
         }
         @case ('/raporty/obecnosci') {
-          <button type="submit" (click)="generateObecnosciReport()">Generuj raport</button>
+<!--          <button type="submit" (click)="generateObecnosciReport()">Generuj raport</button>-->
         }
         @default {
           <button type="submit" disabled>Nieobsługiwany raport</button>
@@ -43,7 +43,7 @@
       @if (router.url !== '/raporty/platnosci') {
         <div>
           <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="condensedMode" (change)="toggleCondensedMode()">
+<!--            <input type="checkbox" [(ngModel)]="condensedMode" (change)="toggleCondensedMode()">-->
             <div></div>
             <span>Włącz tryb skondensowany</span>
           </label>
