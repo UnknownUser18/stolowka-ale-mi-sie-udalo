@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { DataService, Student, TypOsoby } from '../services/data.service';
 import { VariablesService } from '../services/variables.service';
 import { NavigationEnd, NavigationSkipped, Router } from '@angular/router';
 import { GlobalInfoService, NotificationType } from '../services/global-info.service';

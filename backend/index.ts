@@ -3,15 +3,14 @@ import 'dotenv/config';
 import * as dbConstructor from 'mysql2/promise';
 import { Debug, Errors, getStatusCodeByCode, Info, StatusCodes, Warning, Packet, ErrorPacket } from './types';
 import { configureRequestsDebug } from './config';
-import zstiRoutes from './zsti';
 import { QueryError, QueryResult } from "mysql2/promise";
+import zstiRoutes from './zsti';
 
 
 const env = process.env;
 
-if (env.IGNORE_DEBUG === undefined) {
+if (env.IGNORE_DEBUG === undefined)
   Warning('IGNORE_DEBUG is not set, defaulting to false');
-}
 
 const app = express();
 
