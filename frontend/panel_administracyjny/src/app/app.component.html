@@ -1,7 +1,8 @@
+<router-outlet name="sidebar"></router-outlet>
 @if (router.url !== '/login') {
   <nav #nav>
     @defer {
-      <img ngSrc="assets/hella_chopped.jpg" alt="Logo" class="logo" height="4000" width="3000" (click)="navigate('', 'all', false)">
+      <img ngSrc="assets/hella_chopped.jpg" alt="Logo" class="logo" height="40" width="30" (click)="navigate('', 'all', false)">
     } @placeholder (minimum 1000ms) {
       <span class="round placeholder" (click)="navigate('', 'all')"></span>
     } @error {
@@ -26,23 +27,23 @@
           <div class="table">
             <h1 tabindex="0" routerLink="osoby/zsti"><i class="fa-solid fa-graduation-cap"></i>ZSTI</h1>
             <ol>
-              @if (router.url.includes('/osoba') && persons_zsti) {
-                <li class="selected">{{ infoService.activeUser.value?.nazwisko }} {{ infoService.activeUser.value?.imie![0] }}. <i>({{infoService.activeUser.value?.typ_osoby_id! === TypOsoby.NAUCZYCIEL ? 'n.' : infoService.activeUser.value?.klasa }})</i></li>
-              }
-              @defer (when persons_zsti) {
-                @for (person of persons_zsti; track person.id) {
-                  <li (click)="selectPerson(person)">{{ person.nazwisko }} {{ person.imie[0] }}.
-                    <i>({{ person.typ_osoby_id === TypOsoby.NAUCZYCIEL ? 'n.' : person.klasa }})</i></li>
-                } @empty {
-                  <li><h3>Brak osób w bazie danych.</h3></li>
-                }
-              } @placeholder (minimum 500ms) {
-                @for (i of [0, 1, 2, 3, 4] ; track i) {
-                  <li class="placeholder"></li>
-                }
-              } @error {
-                <li><h3>Wystąpił błąd podczas ładowania danych.</h3></li>
-              }
+<!--              @if (router.url.includes('/osoba') && persons_zsti) {-->
+<!--                <li class="selected">{{ infoService.activeUser.value?.nazwisko }} {{ infoService.activeUser.value?.imie![0] }}. <i>({{infoService.activeUser.value?.typ_osoby_id! === TypOsoby.NAUCZYCIEL ? 'n.' : infoService.activeUser.value?.klasa }})</i></li>-->
+<!--              }-->
+<!--              @defer (when persons_zsti) {-->
+<!--                @for (person of persons_zsti; track person.id) {-->
+<!--                  <li (click)="selectPerson(person)">{{ person.nazwisko }} {{ person.imie[0] }}.-->
+<!--                    <i>({{ person.typ_osoby_id === TypOsoby.NAUCZYCIEL ? 'n.' : person.klasa }})</i></li>-->
+<!--                } @empty {-->
+<!--                  <li><h3>Brak osób w bazie danych.</h3></li>-->
+<!--                }-->
+<!--              } @placeholder (minimum 500ms) {-->
+<!--                @for (i of [0, 1, 2, 3, 4] ; track i) {-->
+<!--                  <li class="placeholder"></li>-->
+<!--                }-->
+<!--              } @error {-->
+<!--                <li><h3>Wystąpił błąd podczas ładowania danych.</h3></li>-->
+<!--              }-->
             </ol>
           </div>
           <div class="table">
@@ -52,7 +53,6 @@
               <li>Dawid C. <i>(LO3)</i></li>
               <li>Jan B. <i>(Koszykarze)</i></li>
               <li>Pyndzel <i>(w.)</i></li>
-              <!-- czy wychowawca to też jakaś grupa? -->
             </ol>
           </div>
         </div>

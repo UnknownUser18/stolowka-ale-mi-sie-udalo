@@ -1,6 +1,5 @@
 @use 'assets/font/inter.css';
 @use 'assets/styles/index' as i;
-@import '@fortawesome/fontawesome-free/css/all.css';
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 @mixin positional($width, $height, $b-radius: 25px) {

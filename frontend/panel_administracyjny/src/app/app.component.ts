@@ -4,7 +4,6 @@ import { NgOptimizedImage } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { GlobalInfoService, NotificationType } from './services/global-info.service';
 import { filter, take } from 'rxjs';
-import { DataService, Opiekun, Student, TypOsoby, WebSocketStatus } from './services/data.service';
 import { TransitionService } from './services/transition.service';
 import { VariablesService } from './services/variables.service';
 import { PersonsService } from './services/database/persons.service';
@@ -18,27 +17,26 @@ export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne' 
   styleUrl : './app.component.scss'
 })
 export class AppComponent implements AfterViewInit {
-  protected persons_zsti : (Student & Opiekun)[] | undefined
-  protected readonly TypOsoby = TypOsoby;
+  // protected persons_zsti : (Student & Opiekun)[] | undefined
+  // protected readonly TypOsoby = TypOsoby;
 
   @ViewChild('nav') nav! : ElementRef;
   @ViewChild('scrollable') scrollable! : ElementRef;
 
   constructor(
     private variables : VariablesService,
-    private database : DataService,
     private zone : NgZone,
     private transition : TransitionService,
     protected router : Router,
     protected infoService : GlobalInfoService,
     private personsS : PersonsService) {
     this.personsS.getZPersons()
-    this.database.initializeWebSocket().then(status => {
-      this.infoService.setWebSocketStatus(status);
-    });
-    this.infoService.webSocketStatus.subscribe(status => {
-      if (status === WebSocketStatus.ERROR) this.infoService.generateNotification(NotificationType.ERROR, 'Bład podczas łączenia się z bazą danych.')
-    })
+    // this.database.initializeWebSocket().then(status => {
+    //   this.infoService.setWebSocketStatus(status);
+    // });
+    // this.infoService.webSocketStatus.subscribe(status => {
+    //   if (status === WebSocketStatus.ERROR) this.infoService.generateNotification(NotificationType.ERROR, 'Bład podczas łączenia się z bazą danych.')
+    // })
   }
 
   private async animateElement(class_name : classNames, remove : boolean = false) : Promise<boolean> {
@@ -69,12 +67,12 @@ export class AppComponent implements AfterViewInit {
         this.infoService.setTitle('Osoby');
 
       this.animateElement('osoby').then(() : void => {
-        if (this.persons_zsti) return;
+        // if (this.persons_zsti) return;
 
-        this.infoService.webSocketStatus.subscribe(async (status) => {
-          if (status !== WebSocketStatus.OPEN) return;
-          this.persons_zsti = await this.variables.mapStudentsToOpiekun();
-        });
+        // this.infoService.webSocketStatus.subscribe(async (status) => {
+        //   if (status !== WebSocketStatus.OPEN) return;
+        //   this.persons_zsti = await this.variables.mapStudentsToOpiekun();
+        // });
       });
       return;
     }
@@ -108,11 +106,11 @@ export class AppComponent implements AfterViewInit {
     });
   }
 
-  protected selectPerson(student : Student & Opiekun) : void {
-    this.router.navigate(['osoba/zsti', student.id, 'kalendarz']).then(() : void => {
-      this.infoService.setActiveUser(student);
-    });
-  }
+  // protected selectPerson(student : Student & Opiekun) : void {
+  //   this.router.navigate(['osoba/zsti', student.id, 'kalendarz']).then(() : void => {
+  //     this.infoService.setActiveUser(student);
+  //   });
+  // }
 
 
   public ngAfterViewInit() : void {

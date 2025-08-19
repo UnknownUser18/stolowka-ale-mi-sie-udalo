@@ -4,6 +4,7 @@ import { NavigationEnd, NavigationSkipped, Router } from '@angular/router';
 import { GlobalInfoService, NotificationType } from '../services/global-info.service';
 import { TransitionService } from '../services/transition.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PersonsService, TypOsoby, ZPerson } from '../services/database/persons.service';
 
 @Component({
   selector : 'app-administracja-osob',
@@ -15,11 +16,10 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 })
 export class AdministracjaOsobComponent {
   protected showWindow : '' | 'restore' | 'add' | 'delete' = '';
-  protected archived_users : Student[] | undefined;
+  protected archived_users : ZPerson[] | undefined;
 
-  protected readonly TypOsoby = TypOsoby;
   protected readonly Number = Number;
-  protected selectedUser : Student | undefined;
+  protected selectedUser : ZPerson | undefined;
 
   protected osobaForm = new FormGroup({
     imie_nazwisko : new FormControl('', [
@@ -39,8 +39,8 @@ export class AdministracjaOsobComponent {
   @ViewChild('window') window_element! : ElementRef;
 
   constructor(
+    private personS : PersonsService,
     private variables : VariablesService,
-    private database : DataService,
     private infoService : GlobalInfoService,
     private transition : TransitionService,
     private zone : NgZone,
@@ -48,17 +48,18 @@ export class AdministracjaOsobComponent {
     protected router : Router
   ) {
     this.infoService.setTitle('Administracja');
-    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() : void => {
-      this.database.request('archived.zsti.get', {}, 'student').then((payload) => {
-        if (!payload) {
-          this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać użytkowników z archiwum.');
-          return;
-        } else if (payload.length === 0) {
-          this.infoService.generateNotification(NotificationType.WARNING, 'Brak użytkowników w archiwum.');
-        }
-        this.archived_users = payload;
-      });
-    });
+    // this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() : void => {
+      // TODO: Uncomment when backend is ready and implement the archived users request
+      // this.database.request('archived.zsti.get', {}, 'student').then((payload) => {
+      //   if (!payload) {
+      //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać użytkowników z archiwum.');
+      //     return;
+      //   } else if (payload.length === 0) {
+      //     this.infoService.generateNotification(NotificationType.WARNING, 'Brak użytkowników w archiwum.');
+      //   }
+      //   this.archived_users = payload;
+      // });
+    // });
 
     this.router.events.subscribe((event : any) => {
       if (!(event instanceof NavigationEnd || event instanceof NavigationSkipped)) return;
@@ -90,15 +91,16 @@ export class AdministracjaOsobComponent {
   }
 
   protected restoreUser() : void {
-    this.database.request('archived.zsti.delete', { id : this.selectedUser?.id }, 'student').then((payload) => {
-      if (!payload) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się przywrócić użytkownika.');
-        return;
-      }
-      this.infoService.generateNotification(NotificationType.SUCCESS, 'Użytkownik został przywrócony.');
-      this.archived_users = this.archived_users?.filter((user) => user.id !== this.selectedUser?.id);
-      this.closeWindow();
-    });
+    // TODO: Uncomment when backend is ready and implement the restore user request
+    // this.database.request('archived.zsti.delete', { id : this.selectedUser?.id }, 'student').then((payload) => {
+    //   if (!payload) {
+    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się przywrócić użytkownika.');
+    //     return;
+    //   }
+    //   this.infoService.generateNotification(NotificationType.SUCCESS, 'Użytkownik został przywrócony.');
+    //   this.archived_users = this.archived_users?.filter((user) => user.id !== this.selectedUser?.id);
+    //   this.closeWindow();
+    // });
   }
 
   protected openUser(id : number) {
@@ -152,38 +154,40 @@ export class AdministracjaOsobComponent {
       opiekun_id : id,
     };
     if (Number(formValue.typ_osoby) === TypOsoby.UCZEN) {
-      this.database.request('zsti.guardian.add', { ...opiekunData }, 'dump').then((payload) => {
-        if (!payload) {
-          this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać opiekuna.');
-          return;
-        }
-        id = (payload as any).insertId
-        data.opiekun_id = id;
-
-        this.database.request('zsti.klasa.getId', { nazwa : data.klasa }, 'dump').then((klasaId) => {
-          if (!klasaId) {
-            this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać ID klasy.');
-            return;
-          }
-          data.klasa = klasaId[0].id as string;
-
-          this.database.request('zsti.student.add', { ...data }, 'dump').then((payload) => {
-            if (!payload) {
-              this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się doda�� ucznia.');
-              return;
-            }
-            this.infoService.generateNotification(NotificationType.SUCCESS, 'Użytkownik został dodany.');
-          });
-        });
-      });
+      // TODO: Uncomment when backend is ready and implement the add guardian request
+      // this.database.request('zsti.guardian.add', { ...opiekunData }, 'dump').then((payload) => {
+      //   if (!payload) {
+      //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać opiekuna.');
+      //     return;
+      //   }
+      //   id = (payload as any).insertId
+      //   data.opiekun_id = id;
+      //
+      //   this.database.request('zsti.klasa.getId', { nazwa : data.klasa }, 'dump').then((klasaId) => {
+      //     if (!klasaId) {
+      //       this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać ID klasy.');
+      //       return;
+      //     }
+      //     data.klasa = klasaId[0].id as string;
+      //
+      //     this.database.request('zsti.student.add', { ...data }, 'dump').then((payload) => {
+      //       if (!payload) {
+      //         this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się doda�� ucznia.');
+      //         return;
+      //       }
+      //       this.infoService.generateNotification(NotificationType.SUCCESS, 'Użytkownik został dodany.');
+      //     });
+      //   });
+      // });
     } else {
-      this.database.request('zsti.student.add', { ...data }, 'dump').then((payload) => {
-        if (!payload) {
-          this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać użytkownika.');
-          return;
-        }
-        this.infoService.generateNotification(NotificationType.SUCCESS, 'Użytkownik został dodany.');
-      });
+      // TODO: Uncomment when backend is ready and implement the add student request
+      // this.database.request('zsti.student.add', { ...data }, 'dump').then((payload) => {
+      //   if (!payload) {
+      //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać użytkownika.');
+      //     return;
+      //   }
+      //   this.infoService.generateNotification(NotificationType.SUCCESS, 'Użytkownik został dodany.');
+      // });
     }
   }
 }

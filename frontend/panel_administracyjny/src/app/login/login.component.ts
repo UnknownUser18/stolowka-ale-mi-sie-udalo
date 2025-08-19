@@ -1,6 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
-import { DataService } from '../services/data.service';
 import { Router } from '@angular/router';
 import { GlobalInfoService } from '../services/global-info.service';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -23,7 +22,6 @@ export class LoginComponent implements OnDestroy {
   });
 
   constructor(
-    private database : DataService,
     private router : Router,
     private infoService : GlobalInfoService
   ) {

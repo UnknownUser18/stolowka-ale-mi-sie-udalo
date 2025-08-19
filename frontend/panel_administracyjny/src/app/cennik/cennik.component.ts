@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { GlobalInfoService, NotificationType } from '../services/global-info.service';
-import { DataService, Pricing } from '../services/data.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TransitionService } from '../services/transition.service';
 import { VariablesService } from '../services/variables.service';
@@ -17,7 +16,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
   styleUrl : './cennik.component.scss'
 })
 export class CennikComponent {
-  protected pricing_zsti : Pricing[] = [];
+  protected pricing_zsti : any[] = []; // TODO: Define proper type for cennik_zsti
   private invalidDates : Date[] = [];
 
   protected id : number = 0;
@@ -40,18 +39,17 @@ export class CennikComponent {
   constructor(
     private variables : VariablesService,
     private infoService : GlobalInfoService,
-    private database : DataService,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef,
     private zone : NgZone
   ) {
     this.infoService.setTitle('ZSTI - Cennik');
-    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
-
-      this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
-        this.pricing_zsti = payload;
-      });
-    })
+    // this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+      // TODO: Uncomment when backend is ready and when api request is implemented
+      // this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
+      //   this.pricing_zsti = payload;
+      // });
+    // })
 
   }
 
@@ -70,7 +68,7 @@ export class CennikComponent {
     return `${ year }-${ month }-${ day }`;
   }
 
-  protected selectPricing(pricing_zsti : Pricing) {
+  protected selectPricing(pricing_zsti : any) { // TODO: Define proper type for cennik_zsti
     console.log(pricing_zsti);
     this.pricingForm.patchValue({
       cena : pricing_zsti.cena,
@@ -81,10 +79,11 @@ export class CennikComponent {
   }
 
   protected deletePricing() {
-    this.database.request('zsti.pricing.delete', { id : this.id }, 'pricingList').then(() => {
-      this.id = 0;
-      this.reloadPricing()
-    })
+    // TODO: Uncomment when backend is ready and when api request is implemented
+    // this.database.request('zsti.pricing.delete', { id : this.id }, 'pricingList').then(() => {
+    //   this.id = 0;
+    //   this.reloadPricing()
+    // })
   }
 
   protected updatePricing() : void {
@@ -93,7 +92,7 @@ export class CennikComponent {
       return;
     }
     const formValue = this.pricingForm.value;
-    const pricing : Pricing = {
+    const pricing : any = { // TODO: Define proper type for pricing
       id : this.id,
       data_od : formValue.data_od!,
       cena : formValue.cena!,
@@ -114,37 +113,39 @@ export class CennikComponent {
     }
     console.log(pricing)
     const method = pricing.data_do ? `zsti.pricing.update` : `zsti.pricing.updateWOdatado`;
-    this.database.request(method, pricing, 'dump').then((payload) => {
-      if (!payload || payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować cennika.');
-        return;
-      }
-
-      this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został zaktualizowany.');
-
-      this.reloadPricing();
-    });
+    // TODO: Uncomment when backend is ready and when api request is implemented
+    // this.database.request(method, pricing, 'dump').then((payload) => {
+    //   if (!payload || payload.length === 0) {
+    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować cennika.');
+    //     return;
+    //   }
+    //
+    //   this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został zaktualizowany.');
+    //
+    //   this.reloadPricing();
+    // });
   }
 
   private reloadPricing() {
-    this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
-      if (!payload) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
-        return;
-      } else if (payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.WARNING, 'Brak deklaracji dla tej osoby.');
-        this.pricing_zsti = [];
-        this.invalidDates = [];
-        return;
-      }
-      this.pricing_zsti = payload;
-      this.invalidDates = [];
-
-      this.pricing_zsti.forEach((price) => {
-        if (!(price.data_od && price.data_do)) return;
-        this.invalidDates.push(new Date(price.data_od), new Date(price.data_do));
-      });
-    });
+    // TODO: Uncomment when backend is ready and when api request is implemented
+    // this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
+    //   if (!payload) {
+    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
+    //     return;
+    //   } else if (payload.length === 0) {
+    //     this.infoService.generateNotification(NotificationType.WARNING, 'Brak deklaracji dla tej osoby.');
+    //     this.pricing_zsti = [];
+    //     this.invalidDates = [];
+    //     return;
+    //   }
+    //   this.pricing_zsti = payload;
+    //   this.invalidDates = [];
+    //
+    //   this.pricing_zsti.forEach((price) => {
+    //     if (!(price.data_od && price.data_do)) return;
+    //     this.invalidDates.push(new Date(price.data_od), new Date(price.data_do));
+    //   });
+    // });
   }
 
   protected closeWindow() : void {
@@ -165,7 +166,7 @@ export class CennikComponent {
       return;
     }
     const formValue = this.addForm.value;
-    const pricing : Pricing = {
+    const pricing : any = { // TODO: Define proper type for pricing
       cena : formValue.cena!,
       data_od : formValue.data_od!,
       data_do : formValue.data_do ?? null,
@@ -175,14 +176,15 @@ export class CennikComponent {
       return;
     }
     const method = pricing.data_do ? `zsti.pricing.add` : `zsti.pricing.addWOdatado`;
-    this.database.request(method, pricing, 'dump').then((payload) => {
-      if (!payload || payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać cennika.');
-        return;
-      }
-
-      this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został dodany.');
-      this.reloadPricing();
-    });
+    // TODO: Uncomment when backend is ready and when api request is implemented
+    // this.database.request(method, pricing, 'dump').then((payload) => {
+    //   if (!payload || payload.length === 0) {
+    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać cennika.');
+    //     return;
+    //   }
+    //
+    //   this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został dodany.');
+    //   this.reloadPricing();
+    // });
   }
 }
