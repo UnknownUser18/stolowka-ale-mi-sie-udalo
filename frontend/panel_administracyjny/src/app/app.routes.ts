@@ -15,6 +15,7 @@ import { IndividualRaportComponent } from './users/individual-raport/individual-
 import { AdministracjaOsobComponent } from './administracja-osob/administracja-osob.component';
 
 export const routes : Routes = [
+  { path : 'api', redirectTo : '', pathMatch : 'full' },
   { path : '', component : HomeComponent },
   {
     path : 'osoby',
