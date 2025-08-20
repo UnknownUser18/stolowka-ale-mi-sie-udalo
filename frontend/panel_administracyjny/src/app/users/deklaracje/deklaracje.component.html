@@ -12,20 +12,20 @@
     </tr>
     </thead>
     <tbody>
-      @for (declaration of result; track declaration.id; let i = $index) {
-        <tr>
-          <td>{{ i + 1 }}</td>
-          <td>{{ declaration.data_od | date : 'longDate' }}</td>
-          <td>{{ declaration.data_do | date : 'longDate' }}</td>
-          <td>
-            <button (click)="selectDeclaration(declaration)">Wybierz</button>
-          </td>
-        </tr>
-      } @empty {
-        <tr>
-          <td class="empty">Brak dostępnych deklaracji...</td>
-        </tr>
-      }
+<!--      @for (declaration of result; track declaration.id; let i = $index) {-->
+<!--        <tr>-->
+<!--          <td>{{ i + 1 }}</td>-->
+<!--          <td>{{ declaration.data_od | date : 'longDate' }}</td>-->
+<!--          <td>{{ declaration.data_do | date : 'longDate' }}</td>-->
+<!--          <td>-->
+<!--            <button (click)="selectDeclaration(declaration)">Wybierz</button>-->
+<!--          </td>-->
+<!--        </tr>-->
+<!--      } @empty {-->
+<!--        <tr>-->
+<!--          <td class="empty">Brak dostępnych deklaracji...</td>-->
+<!--        </tr>-->
+<!--      }-->
     </tbody>
   </table>
 </section>
@@ -86,7 +86,7 @@
       } @else if (showWindow === 'delete') {
         <h3>Ostrzeżenie</h3>
         <p>Czy na pewno chcesz usunąć deklarację z dnia <b>{{ deklaracjaForm.get('data_od')?.value | date : 'longDate' }}</b> do dnia <b>{{ deklaracjaForm.get('data_do')?.value! | date : 'longDate' }}</b>?</p>
-        <p>Dla osoby <b>{{ infoService.activeUser.value?.imie }}</b> <b>{{ infoService.activeUser.value?.nazwisko }}</b>?</p>
+<!--        <p>Dla osoby <b>{{ infoService.activeUser.value?.imie }}</b> <b>{{ infoService.activeUser.value?.nazwisko }}</b>?</p>-->
         <button type="button" (click)="deleteDeclaration()">Usuń</button>
         <button type="button" (click)="closeWindow()">Anuluj</button>
       } @else if (showWindow === 'add') {

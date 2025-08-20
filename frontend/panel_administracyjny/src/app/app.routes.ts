@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { mainGuard } from './guards/main.guard';
 import { NieczynneComponent } from './nieczynne/nieczynne.component';
@@ -9,18 +8,23 @@ import { AdministracjaOsobComponent } from './administracja-osob/administracja-o
 import { CennikComponent } from './cennik/cennik.component';
 import { ZstiComponent } from './users/zsti/zsti.component';
 
-const componentImports: { [key: string]: () => Promise<any> } = {
-  kalendarz: () => import('./users/kalendarz/kalendarz.component').then(m => m.KalendarzComponent),
-  dane: () => import('./users/dane/dane.component').then(m => m.DaneComponent),
-  deklaracje: () => import('./users/deklaracje/deklaracje.component').then(m => m.DeklaracjeComponent),
-  platnosci: () => import('./users/platnosci/platnosci.component').then(m => m.PlatnosciComponent),
+const componentImports : { [key : string] : () => Promise<any> } = {
+  kalendarz : () => import('./users/kalendarz/kalendarz.component').then(m => m.KalendarzComponent),
+  dane : () => import('./users/dane/dane.component').then(m => m.DaneComponent),
+  deklaracje : () => import('./users/deklaracje/deklaracje.component').then(m => m.DeklaracjeComponent),
+  platnosci : () => import('./users/platnosci/platnosci.component').then(m => m.PlatnosciComponent),
 };
 
 export const routes : Routes = [
   {
-    path : '', component : HomeComponent,
+    path : '',
     canActivateChild : [mainGuard],
     children : [
+      {
+        path : '',
+        loadComponent : () => import('./home/home.component').then(m => m.HomeComponent),
+        outlet : 'primary'
+      },
       {
         path : '',
         loadComponent : () => import('./nav-sidebar/home-nav/home-nav.component').then(m => m.HomeNavComponent),
@@ -41,7 +45,7 @@ export const routes : Routes = [
           },
           { path : 'zsti', component : ZstiComponent, },
           {
-            path : 'internat' // TODO: Add internat component
+            path : 'internat', component : ZstiComponent // TODO: Add internat component, defaulting to ZstiComponent for now
           }
         ],
       },

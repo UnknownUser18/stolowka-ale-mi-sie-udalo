@@ -4,7 +4,11 @@ import { Component } from '@angular/core';
   selector: 'app-osoby-nav',
   imports: [],
   templateUrl: './osoby-nav.component.html',
-  styleUrl: './osoby-nav.component.scss'
+  styleUrl: './osoby-nav.component.scss',
+  host : {
+    'aria-label': 'Nawigacja - Osoby',
+    'role': 'navigation',
+  }
 })
 export class OsobyNavComponent {
 

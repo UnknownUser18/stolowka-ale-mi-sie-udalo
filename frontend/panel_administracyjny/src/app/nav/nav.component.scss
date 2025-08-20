@@ -1,4 +1,9 @@
 @use 'index' as i;
+:host {
+  background-color: var(--bg-dark);
+  border-bottom: 1px solid var(--border);
+}
+
 
 h2 {
   @include i.flex-center;

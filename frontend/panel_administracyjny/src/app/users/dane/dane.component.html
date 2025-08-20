@@ -5,11 +5,11 @@
   </label>
   <label for="imie_nazwisko_opiekuna">
     <span>Imię i nazwisko opiekuna:</span>
-    <input type="text" formControlName="imie_nazwisko_opiekuna" [placeholder]="Number(forms.get('typ_osoby')?.value) === TypOsoby.NAUCZYCIEL ? 'Nauczyciel...' : 'Imie i nazwisko opiekuna...'" name="imie_nazwisko_opiekuna" id="imie_nazwisko_opiekuna">
+<!--    <input type="text" formControlName="imie_nazwisko_opiekuna" [placeholder]="Number(forms.get('typ_osoby')?.value) === TypOsoby.NAUCZYCIEL ? 'Nauczyciel...' : 'Imie i nazwisko opiekuna...'" name="imie_nazwisko_opiekuna" id="imie_nazwisko_opiekuna">-->
   </label>
   <label for="klasa">
     <span>Klasa:</span>
-    <input type="text" formControlName="klasa" [placeholder]="Number(forms.get('typ_osoby')?.value) === TypOsoby.NAUCZYCIEL ? 'Nauczyciel...' : 'Klasa...'" name="klasa" id="klasa">
+<!--    <input type="text" formControlName="klasa" [placeholder]="Number(forms.get('typ_osoby')?.value) === TypOsoby.NAUCZYCIEL ? 'Nauczyciel...' : 'Klasa...'" name="klasa" id="klasa">-->
   </label>
   <label for="telefon">
     <span>Telefon:</span>
@@ -29,8 +29,8 @@
   <label for="typ_osoby">
     <span>Typ osoby:</span>
     <select name="typ_osoby" id="typ_osoby" formControlName="typ_osoby" (change)="onTypOsobyChange()">
-      <option [value]="TypOsoby.UCZEN">Uczeń</option>
-      <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
+<!--      <option [value]="TypOsoby.UCZEN">Uczeń</option>-->
+<!--      <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>-->
     </select>
   </label>
   <label for="uczeszcza">
