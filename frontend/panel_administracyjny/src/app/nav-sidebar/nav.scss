@@ -1,0 +1,32 @@
+@use 'index' as i;
+
+ul {
+  display: flex;
+  gap: i.$margin-xl;
+  flex-direction: column;
+}
+
+li {
+  padding: i.$padding-2xs i.$padding-xs;
+  display: flex;
+  gap: i.$margin-2xs;
+  align-items: center;
+  cursor: pointer;
+  font-size: i.$font-size-md;
+  font-weight: 500;
+  border: 1px solid var(--border-muted);
+  border-radius: i.$border-radius-md;
+  background-color: var(--bg);
+  color: var(--text-muted);
+  transition: i.transition(background-color, i.$duration-sm), i.transition(color, i.$duration-sm), i.transition(border-color, i.$duration-sm);
+
+  &:hover {
+    background-color: var(--bg-light);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  fa-icon {
+    font-size: 1.25em;
+  }
+}

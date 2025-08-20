@@ -7,16 +7,17 @@ import { filter, take } from 'rxjs';
 import { TransitionService } from './services/transition.service';
 import { VariablesService } from './services/variables.service';
 import { PersonsService } from './services/database/persons.service';
+import { LayoutComponent } from './layout/layout.component';
 
 export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne' | 'raporty' | 'administracja';
 
 @Component({
   selector : 'app-root',
-  imports : [NavComponent, NgOptimizedImage, RouterLink, RouterOutlet],
+  imports : [NavComponent, NgOptimizedImage, RouterLink, RouterOutlet, LayoutComponent],
   templateUrl : './app.component.html',
   styleUrl : './app.component.scss'
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent {
   // protected persons_zsti : (Student & Opiekun)[] | undefined
   // protected readonly TypOsoby = TypOsoby;
 
@@ -113,17 +114,17 @@ export class AppComponent implements AfterViewInit {
   // }
 
 
-  public ngAfterViewInit() : void {
-    const mainPage : HTMLElement = this.scrollable.nativeElement.querySelector('.main-page')!;
-    mainPage.classList.add('done');
-    this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe(() => {
-        this.zone.onStable.pipe(take(1)).subscribe(() => {
-          requestAnimationFrame(() => {
-            this.startPageLogic().then();
-          });
-        });
-      });
-  }
+  // public ngAfterViewInit() : void {
+  //   const mainPage : HTMLElement = this.scrollable.nativeElement.querySelector('.main-page')!;
+  //   mainPage.classList.add('done');
+  //   this.router.events
+  //     .pipe(filter(e => e instanceof NavigationEnd))
+  //     .subscribe(() => {
+  //       this.zone.onStable.pipe(take(1)).subscribe(() => {
+  //         requestAnimationFrame(() => {
+  //           this.startPageLogic().then();
+  //         });
+  //       });
+  //     });
+  // }
 }

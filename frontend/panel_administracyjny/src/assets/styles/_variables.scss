@@ -1,21 +1,116 @@
+// Margins
+$margin-3xs: 0.25rem;
+$margin-2xs: 0.5rem;
+$margin-xs: 0.75rem;
+$margin-sm: 1rem;
+$margin-md: 1.25rem;
+$margin-lg: 1.75rem;
+$margin-xl: 2.5rem;
+$margin-2xl: 3.75rem;
+$margin-3xl: 6.25rem;
+$margin-10xl: 10rem;
+$margin-15xl: 15rem;
+
+// Paddings
+$padding-3xs: 0.25rem;
+$padding-2xs: 0.5rem;
+$padding-xs: 0.75rem;
+$padding-sm: 1rem;
+$padding-md: 1.25rem;
+$padding-lg: 1.75rem;
+$padding-xl: 2.5rem;
+
+// Font sizes
+$font-size-3xs: 0.625rem; // 10px
+$font-size-2xs: 0.75rem; // 12px
+$font-size-xs: 0.875rem; // 14px
+$font-size-sm: 1rem; // 16px
+$font-size-md: 1.125rem; // 18px
+$font-size-lg: 1.25rem; // 20px
+$font-size-xl: 1.5rem; // 24px
+$font-size-2xl: 1.75rem; // 28px
+$font-size-3xl: 2rem; // 32px
+$font-size-5xl: 2.5rem; // 40px
+$font-size-8xl: 4rem; // 64px
+
+// Border radius
+$border-radius-xs: 0.125rem; // 2px
+$border-radius-sm: 0.25rem; // 4px
+$border-radius-md: 0.375rem; // 6px
+$border-radius-lg: 0.5rem; // 8px
+$border-radius-xl: 0.75rem; // 12px
+$border-radius-2xl: 1rem; // 16px
+$border-radius-3xl: 1.5rem; // 24px
+$border-radius-full: 9999px; // Full border radius for circular elements
+
+
+// Colors
 :root {
-  --color-1: #00111C;
-  --color-2: #001523;
-  --color-3: #001A2C;
-  --color-4: #002137;
-  --color-5: #00253E;
-  --color-6: #002945;
-  --color-7: #002E4E;
-  --color-8: #003356;
-  --color-9: #003A61;
-  --color-10: #00406C;
-  --color-11: #5E7889;
-  --color-12: #A4C1D5;
-  --color-13: #EFEFEF;
+  --bg-dark: oklch(0.1 0.01 282);
+  --bg: oklch(0.15 0.01 282);
+  --bg-light: oklch(0.2 0.01 282);
+  --text: oklch(0.96 0.02 282);
+  --text-muted: oklch(0.76 0.02 282);
+  --highlight: oklch(0.5 0.02 282);
+  --border: oklch(0.4 0.02 282);
+  --border-muted: oklch(0.3 0.02 282);
+  --primary: oklch(0.76 0.1 282);
+  --secondary: oklch(0.76 0.1 102);
+  --danger: oklch(0.7 0.1 30);
+  --warning: oklch(0.7 0.05 100);
+  --success: oklch(0.7 0.05 160);
+  --info: oklch(0.699 0.05 261.286);
 }
-$box-shadow: 15px 9px 48px 6px rgba(0, 0, 0, 0.44);
+
+// Breakpoints
+$breakpoint-xs: 320px; // Extra small devices (phones)
+$breakpoint-sm: 576px; // Small devices (tablets)
+$breakpoint-md: 768px; // Medium devices (desktops)
+$breakpoint-lg: 992px; // Large devices (large desktops)
+$breakpoint-xl: 1200px; // Extra large devices (large desktops)
+
+// Shadow
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.1);
+$shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 8px rgba(0, 0, 0, 0.2);
+$shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+$shadow-xl: 0 16px 32px rgba(35, 35, 35, 0.3);
+
+// Font family
+$font-base: sans-serif, ui-sans-serif, system-ui;
+$font-mono: 'JetBrains Mono', monospace, ui-monospace;
+$font-interface: 'Manrope', $font-base;
+$font-text: 'Inter', $font-base;
+
+$base-border: 1px solid;
+
+// Timing functions
+$cubic-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+$circ-in-out: cubic-bezier(0.85, 0, 0.15, 1);
+
+// Transition durations
+$duration-xs: 100ms;
+$duration-sm: 200ms;
+$duration-md: 400ms;
+$duration-lg: 500ms;
+$duration-xl: 750ms;
+
+$font-line-heights: (
+  $font-size-3xs: 3,
+  $font-size-2xs: 2.5,
+  $font-size-xs: 2,
+  $font-size-sm: 1.75,
+  $font-size-md: 1.5,
+  $font-size-lg: 1.4,
+  $font-size-xl: 1.3,
+  $font-size-2xl: 1.2,
+  $font-size-3xl: 1.1
+);
+
+// TODO: Remove when migration to new variables is complete
 $short: 200ms;
 $medium: 300ms;
 $long: 500ms;
 $xlong: 750ms;
-$cubic-bezier: cubic-bezier(0.25, 0.1, 0.25, 1);
+$box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+$cubic-bezier: cubic-bezier(0.4, 0, 0.2, 1);

@@ -12,17 +12,17 @@
     </tr>
     </thead>
     <tbody>
-      @for (platnosc of result; track platnosc.id; let i = $index) {
-        <tr>
-          <td>{{ i + 1 }}</td>
-          <td>{{ formatMonth(platnosc.miesiac) }} {{ platnosc.rok }}</td>
-          <td>{{ platnosc.platnosc }} zł</td>
-          <td>
-            <button (click)="selectPayment(platnosc)">Wybierz</button>
-          </td>
-          } @empty {
-        <td class="empty">Brak dostępnych płatności...</td>
-      }
+<!--      @for (platnosc of result; track platnosc.id; let i = $index) {-->
+<!--        <tr>-->
+<!--          <td>{{ i + 1 }}</td>-->
+<!--          <td>{{ formatMonth(platnosc.miesiac) }} {{ platnosc.rok }}</td>-->
+<!--          <td>{{ platnosc.platnosc }} zł</td>-->
+<!--          <td>-->
+<!--            <button (click)="selectPayment(platnosc)">Wybierz</button>-->
+<!--          </td>-->
+<!--          } @empty {-->
+<!--        <td class="empty">Brak dostępnych płatności...</td>-->
+<!--      }-->
     </tbody>
   </table>
 </section>
@@ -57,7 +57,7 @@
         <h3>Ostrzeżenie</h3>
         <p>Czy na pewno chcesz usunąć płatność, która obejmuję <b>{{ formatDate(platnosciForm.get('miesiac_rok')?.value!) }}</b>?</p>
         <p>Wpisana dnia <b>{{ formatDate(platnosciForm.get('dataZaplaty')?.value!) }}</b>.</p>
-        <p>Dla osoby <b>{{ infoService.activeUser.value?.imie }}</b> <b>{{ infoService.activeUser.value?.nazwisko }}</b>?</p>
+<!--        <p>Dla osoby <b>{{ infoService.activeUser.value?.imie }}</b> <b>{{ infoService.activeUser.value?.nazwisko }}</b>?</p>-->
         <button type="button" (click)="deletePayment()">Usuń</button>
         <button type="button" (click)="closeWindow()">Anuluj</button>
       } @else if (showWindow === 'add') {

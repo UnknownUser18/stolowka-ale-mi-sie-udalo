@@ -1,6 +1,6 @@
-@use 'assets/font/inter.css';
+@use 'assets/font/inter/inter.css';
+@use 'assets/font/manrope/manrope.css';
 @use 'assets/styles/index' as i;
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
 @mixin positional($width, $height, $b-radius: 25px) {
   width: $width;
@@ -17,8 +17,10 @@
   box-sizing: border-box;
 }
 
+
 ::selection {
-  background-color: var(--color-11);
+  background-color: var(--highlight);
+  color: var(--text);
 }
 
 .placeholder {
@@ -42,82 +44,23 @@ abbr {
 }
 
 body {
-  font-family: 'Inter', 'Roboto', sans-serif;
-  background-color: var(--color-1);
-  color: var(--color-12);
-  overflow-x: hidden;
-}
-
-app-root {
+  font-family: 'Manrope Regular', 'Inter', sans-serif;
+  background-color: var(--bg);
   height: 100vh;
-  display: grid;
-  grid-template-columns: 0.2fr 1fr;
-  grid-template-rows: 0.08fr 1fr;
+  color: var(--text);
+  overflow-x: hidden;
 }
 
 ol, ul, menu {
   list-style: none;
 }
 
-app-zsti {
-  @include positional(90%, 90%, 50px);
-  grid-template-rows: auto 1fr;
-  flex-direction: column;
-  background-color: var(--color-3);
-  max-height: 80vh;
-  margin: auto;
+app-root {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-app-dane {
-  @include positional(80%, 80%);
-  background-color: var(--color-3);
-}
-
-app-kalendarz {
-  @include positional(95%, 95%, null);
-  row-gap: 25px;
-  display: grid;
-  grid-template-rows: 0.08fr 1fr;
-}
-
-app-deklaracje, app-platnosci, app-cennik, app-nieczynne {
-  @include positional(80%, 90%);
-  background-color: var(--color-3);
-  display: grid;
-  grid-template-columns: 1fr 0.5fr;
-  grid-template-rows: auto 0.1fr;
-  column-gap: 20px;
-  row-gap: 10px;
-  justify-content: space-between;
-  padding: 30px 40px;
-
-  & > button {
-    place-self: center start;
-  }
-}
-
-app-karty {
-  @include positional(50%, 50%);
-  @include i.flex-center($direction: column, $justify: space-between);
-  background-color: var(--color-3);
-  padding: 30px 40px;
-}
-
-app-raports, app-individual-raport {
-  @include positional(95%, 95%);
-  display: grid;
-  grid-template-columns: 1fr;
-  row-gap: 20px;
-  background-color: var(--color-3);
-}
-
-app-administracja-osob {
-  @include positional(100%, 100%);
-}
-
-app-login {
-
-}
 
 .notification {
   @include i.flex-center(column, start, start);
@@ -159,14 +102,5 @@ app-login {
 
   p {
     font-size: 1em;
-  }
-}
-
-@keyframes light {
-  0% {
-    background-color: var(--color-11);
-  }
-  100% {
-    background-color: var(--color-12);
   }
 }

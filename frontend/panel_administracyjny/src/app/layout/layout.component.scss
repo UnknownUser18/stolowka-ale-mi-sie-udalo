@@ -1,0 +1,41 @@
+@use 'index' as i;
+
+:host {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 15% 1fr;
+  grid-template-rows: 7.5% 1fr;
+}
+
+router-outlet {
+  display: none;
+}
+
+nav {
+  padding: i.$padding-xs i.$padding-sm;
+  display: flex;
+  gap: i.$margin-2xl;
+  flex-direction: column;
+  grid-row: 1 / -1;
+  background-color: var(--bg-dark);
+  border-right: 1px solid var(--border);
+
+}
+div {
+  height: 100%;
+  overflow-y: auto;
+}
+
+img {
+  cursor: pointer;
+  border-radius: i.$border-radius-full;
+}
+
+
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-column: 2 / -1;
+  grid-row: 2 / -1
+}
