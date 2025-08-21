@@ -6,7 +6,7 @@ import { NieczynneComponent } from './nieczynne/nieczynne.component';
 import { RaportsComponent } from './raports/raports.component';
 import { AdministracjaOsobComponent } from './administracja-osob/administracja-osob.component';
 import { CennikComponent } from './cennik/cennik.component';
-import { ZstiComponent } from './users/zsti/zsti.component';
+import { LayoutComponent } from './layout/layout.component';
 
 const componentImports : { [key : string] : () => Promise<any> } = {
   kalendarz : () => import('./users/kalendarz/kalendarz.component').then(m => m.KalendarzComponent),
@@ -19,35 +19,28 @@ export const routes : Routes = [
   {
     path : '',
     canActivateChild : [mainGuard],
+    component : LayoutComponent,
+    data : { sidebar : 'home-nav'},
     children : [
       {
         path : '',
         loadComponent : () => import('./home/home.component').then(m => m.HomeComponent),
-        outlet : 'primary'
-      },
-      {
-        path : '',
-        loadComponent : () => import('./nav-sidebar/home-nav/home-nav.component').then(m => m.HomeNavComponent),
-        outlet : 'sidebar'
+        title : 'Panel Administracyjny',
       },
       {
         path : 'osoby',
+        loadComponent : () => import('./users/osoby/osoby.component').then(m => m.OsobyComponent),
+        data : { sidebar : 'osoby-nav' },
         children : [
           {
-            path : '',
-            loadComponent : () => import('./users/osoby/osoby.component').then(m => m.OsobyComponent),
-            outlet : 'primary'
+            path : 'zsti',
+            loadComponent : () => import('./users/zsti/zsti.component').then(m => m.ZstiComponent),
           },
           {
-            path : '',
-            loadComponent : () => import('./nav-sidebar/osoby-nav/osoby-nav.component').then(m => m.OsobyNavComponent),
-            outlet : 'sidebar'
-          },
-          { path : 'zsti', component : ZstiComponent, },
-          {
-            path : 'internat', component : ZstiComponent // TODO: Add internat component, defaulting to ZstiComponent for now
+            path : 'internat',
+            loadComponent : () => import('./users/zsti/zsti.component').then(m => m.ZstiComponent) // TODO: Add internat component, defaulting to ZstiComponent for now
           }
-        ],
+        ]
       },
       {
         path : 'osoba',

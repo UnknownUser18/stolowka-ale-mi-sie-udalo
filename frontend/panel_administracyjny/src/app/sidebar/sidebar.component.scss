@@ -1,0 +1,48 @@
+@use 'index' as i;
+
+:host {
+  padding: i.$padding-xs i.$padding-sm;
+  display: flex;
+  gap: i.$margin-2xl;
+  flex-direction: column;
+  grid-row: 1 / -1;
+  background-color: var(--bg-dark);
+  border-right: 1px solid var(--border);
+}
+
+div {
+  height: 100%;
+  overflow-y: auto;
+}
+
+img, .placeholder {
+  cursor: pointer;
+  border-radius: i.$border-radius-full;
+}
+
+.placeholder {
+  width: 50px;
+  min-height: 50px;
+  background-color: var(--highlight);
+  animation: pulse 1s infinite alternate i.$cubic-in-out;
+}
+
+.return {
+  width: fit-content;
+  cursor: pointer;
+  transition: i.transition(color);
+  color: var(--text-muted);
+
+  &:hover, &:focus {
+    color: var(--text);
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}

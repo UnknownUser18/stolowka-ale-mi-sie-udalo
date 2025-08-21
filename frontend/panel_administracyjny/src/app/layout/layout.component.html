@@ -1,21 +1,5 @@
-<nav [attr.aria-label]="nav_label()">
-  @defer (on immediate; prefetch on idle) {
-    @if (!imageError()) {
-      <img ngSrc="assets/hella_chopped.jpg" alt="Logo" height="50" width="50" (error)="imageError.set(true)" aria-label="Powrót do strony głównej" role="button" tabindex="0" />
-    } @else {
-      <fa-icon [icon]="faWarning" />
-    }
-  } @placeholder (minimum 1000ms) {
-    <span class="round placeholder"></span>
-  }
-  @if (isNotInRoot()) {
-    <fa-icon [icon]="faArrowLeft" />
-  }
-  <div>
-    <router-outlet name="sidebar" />
-  </div>
-</nav>
-<app-nav></app-nav>
+<app-sidebar />
+<app-nav />
 <main>
   <router-outlet />
 </main>

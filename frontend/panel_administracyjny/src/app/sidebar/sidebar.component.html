@@ -1,0 +1,22 @@
+@defer (on immediate; prefetch on idle) {
+  @if (!imageError()) {
+    <img ngSrc="assets/hella_chopped.jpg" alt="Logo" height="50" width="50" (error)="imageError.set(true)" aria-label="Powrót do strony głównej" role="button" tabindex="0" routerLink="" />
+  } @else {
+    <fa-icon [icon]="faWarning" />
+  }
+} @placeholder (minimum 1000ms) {
+  <span class="placeholder" aria-label="Powrót do strony głównej" role="button" tabindex="0" routerLink=""></span>
+}
+@if (isNotInRoot()) {
+  <fa-icon [icon]="faArrowLeft" class="return" size="2x" [routerLink]="previousUrl()" aria-label="Powrót" />
+}
+<div>
+  @switch (sidebarLoaded()) {
+    @case ('home-nav') {
+      <app-home-nav />
+    }
+    @case ('osoby-nav') {
+      <app-osoby-nav />
+    }
+  }
+</div>
