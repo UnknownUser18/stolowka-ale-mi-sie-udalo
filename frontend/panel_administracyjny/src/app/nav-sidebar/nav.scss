@@ -16,12 +16,13 @@ li {
   font-weight: 500;
   border: 1px solid var(--border-muted);
   border-radius: i.$border-radius-md;
-  background-color: var(--bg);
+  background: linear-gradient(45deg, var(--bg), var(--bg-light) 50%, var(--bg-light) 90%, color-mix(in oklch, var(--bg-light) 80%, var(--highlight) 20%) 100%);
+  background-size: 400% 400%;
   color: var(--text-muted);
-  transition: i.transition(background-color, i.$duration-sm), i.transition(color, i.$duration-sm), i.transition(border-color, i.$duration-sm);
+  transition: i.transition(background-position), i.transition(color, i.$duration-sm), i.transition(border-color, i.$duration-sm);
 
   &:hover {
-    background-color: var(--bg-light);
+    background-position: 100% 0;
     color: var(--text);
     border-color: var(--border);
   }
