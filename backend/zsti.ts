@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { executeQuery, isQuerySuccesful, sendResponse } from './index';
-import { ErrorPacket, getStatusCodeByCode, Packet, StatusCodes } from "./types";
-import { QueryError } from "mysql2/promise";
+import { createPacket, executeQuery, sendResponse } from './index';
+import { ErrorPacket, StatusCodes } from "./types";
 
 const router = Router({
   caseSensitive : true,
@@ -10,9 +9,20 @@ const router = Router({
 
 router.get('/person', async (_req, res) => {
   const persons = await executeQuery('SELECT * FROM osobyZ');
-  const packet = isQuerySuccesful(persons)
-    ? new Packet(StatusCodes.OK, persons)
-    : new ErrorPacket(getStatusCodeByCode(parseInt((persons as QueryError).code)));
+
+  const packet = createPacket(persons, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.get('/person/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id) || id < 1) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const person = await executeQuery('SELECT * FROM osobyZ WHERE id = :id', { id });
+  const packet = createPacket(person, StatusCodes.OK);
   return sendResponse(res, packet);
 })
 

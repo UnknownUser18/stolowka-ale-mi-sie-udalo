@@ -9,12 +9,12 @@ import zstiRoutes from './zsti';
 
 const env = process.env;
 
-if (env.IGNORE_DEBUG === undefined)
-  Warning('IGNORE_DEBUG is not set, defaulting to false');
+if (env.DEBUG_MODE === undefined)
+  Warning('DEBUG_MODE is not set, defaulting to false');
 
 const app = express();
 
-if (env.IGNORE_DEBUG === 'false')
+if (env.DEBUG_MODE === 'false')
   configureRequestsDebug(app);
 
 app.use(express.json());
@@ -31,19 +31,34 @@ if (!env.PORT || isNaN(parseInt(env.PORT, 10))) {
   process.exit(1);
 }
 
-export const db = dbConstructor.createConnection({
+const connection = {
   host : env.DB_HOST,
   port : parseInt(env.DB_PORT, 10),
   user : env.DB_USER,
   password : env.DB_PASSWORD,
   database : env.DB_NAME,
   namedPlaceholders : true,
-}).then((connection) => {
+}
+
+export const db = dbConstructor.createConnection(connection).then((connection) => {
   Info('Database connection established successfully');
   return connection;
 }).catch((error) => {
   Errors('Failed to connect to the database', error);
-  process.exit(1);
+  if (env.DEBUG_MODE === 'true')
+    process.exit(1);
+  else {
+    setInterval(() => {
+      Info('Attempting to reconnect to the database...');
+      dbConstructor.createConnection(connection).then((connection) => {
+        Info('Database reconnection successful');
+        return connection;
+      }).catch((err) => {
+        Errors('Reconnection attempt failed', err);
+      });
+    }, 60000); // Retry every 60 seconds
+    return null;
+  }
 });
 
 app.listen(env.PORT, () => {
@@ -58,9 +73,13 @@ app.listen(env.PORT, () => {
  * @description Executes a SQL query using the established database connection.
  * @throws - Throws an error type QueryError if the query execution fails.
  */
-export async function executeQuery(query : string, params? : any[]) : Promise<QueryResult | QueryError> {
+export async function executeQuery(query : string, params? : {}) : Promise<QueryResult | QueryError | null> {
   try {
     const connection = await db;
+    if (!connection) {
+      Errors('No database connection available');
+      return null;
+    }
     const result = await connection.query(query, params);
     Debug('Query executed successfully', query, params);
     return result[0]; // MySQL2 returns an array with results and fields
@@ -98,6 +117,19 @@ export function sendResponse(res : express.Response, packet : Packet) {
   });
 }
 
-export function isQuerySuccesful(result : QueryResult | QueryError) : boolean {
-  return !(result instanceof Error);
+function isQuerySuccesful(result : QueryResult | QueryError | null) : boolean {
+  return !(result instanceof Error || result === null);
+}
+
+export function createPacket(data : QueryResult | QueryError | null, succesfulStatusCode : StatusCodes) : Packet | ErrorPacket {
+  let packet : Packet | ErrorPacket;
+
+  if (isQuerySuccesful(data))
+    packet = new Packet(succesfulStatusCode, data);
+  else if (data === null)
+    packet = new ErrorPacket(StatusCodes["Internal Server Error"]);
+  else
+    packet = new ErrorPacket(getStatusCodeByCode(parseInt((data as QueryError).code)));
+
+  return packet;
 }
