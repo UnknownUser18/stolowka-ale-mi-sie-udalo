@@ -5,7 +5,9 @@
 <!--    <li [class]="(infoService.activeTab | async) === 'DEKLARACJE' ? 'active' : ''" [routerLink]="['osoba', 'zsti', infoService.activeUser.value?.id, 'deklaracje']">Deklaracje</li>-->
 <!--  </menu>-->
 <!--}-->
-Blah
+@if (title()) {
+  <h2>{{ title() }}</h2>
+}
 <!--<h2 [class]="!router.url.includes('osoba') ? 'center' : ''"> {{ infoService.title | async }} </h2>-->
 <!--@if (router.url.includes('osoba')) {-->
 <!--  <menu>-->

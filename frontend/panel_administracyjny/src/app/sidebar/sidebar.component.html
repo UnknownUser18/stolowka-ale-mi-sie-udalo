@@ -1,16 +1,22 @@
-@defer (on immediate; prefetch on idle) {
-  @if (!imageError()) {
-    <img ngSrc="assets/hella_chopped.jpg" alt="Logo" height="50" width="50" (error)="imageError.set(true)" aria-label="Powrót do strony głównej" role="button" tabindex="0" routerLink="" />
-  } @else {
-    <fa-icon [icon]="faWarning" />
+@let logo_title = 'Powrót do strony głównej';
+@let return_title = 'Powrót do poprzedniej strony';
+<a routerLink="" [title]="logo_title" [attr.aria-label]="logo_title" class="logo">
+  @defer (on immediate; prefetch on idle) {
+    @if (!imageError()) {
+      <img ngSrc="assets/hella_chopped.jpg" alt="Logo" height="50" width="50" (error)="imageError.set(true)" priority />
+    } @else {
+      <fa-icon [icon]="faWarning" />
+    }
+  } @placeholder (minimum 1000ms) {
+    <span class="placeholder"></span>
   }
-} @placeholder (minimum 1000ms) {
-  <span class="placeholder" aria-label="Powrót do strony głównej" role="button" tabindex="0" routerLink=""></span>
-}
+</a>
 @if (isNotInRoot()) {
-  <fa-icon [icon]="faArrowLeft" class="return" size="2x" [routerLink]="previousUrl()" aria-label="Powrót" />
+  <a [routerLink]="previousUrl()" [title]="return_title" [attr.aria-label]="return_title" class="return">
+    <fa-icon [icon]="faArrowLeft" size="2x" />
+  </a>
 }
-<div>
+<div class="change-sidebar">
   @switch (sidebarLoaded()) {
     @case ('home-nav') {
       <app-home-nav />

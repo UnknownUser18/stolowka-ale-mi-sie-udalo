@@ -1,2 +1,10 @@
-<p>osoby works!</p>
+@let isAtZsti = router.url === '/osoby/zsti';
+<h1>Osoby
+  @if (isAtZsti) {
+    - ZSTI
+  }
+</h1>
+@if (!isAtZsti) {
+  <p>Wybierz osobę.</p>
+}
 <router-outlet />

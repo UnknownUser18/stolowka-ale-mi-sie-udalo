@@ -1,49 +1,48 @@
 @use 'index' as i;
+
 :host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-color: var(--bg-dark);
   border-bottom: 1px solid var(--border);
 }
 
-
 h2 {
-  @include i.flex-center;
-  @include i.font(1.6em, 500, var(--color-12));
-  text-align: center;
-  background-color: var(--color-3);
-  padding: 5px 20px;
-  border-radius: 20px;
-
-  &.center {
-    grid-column: 2 / span 1;
-  }
+  padding: i.$padding-xs i.$padding-sm;
+  border-radius: i.$border-radius-2xl;
+  font-size: i.$font-size-lg;
+  font-weight: 500;
+  background: linear-gradient( 45deg, var(--bg), var(--bg-light) 50%, var(--bg-light) 90%, color-mix(in oklch, var(--bg-light) 80%, var(--highlight) 20%) 100%);
+  color: var(--text-muted);
 }
 
 menu {
-  place-self: end center;
-  background-color: var(--color-3);
-  border-radius: 10px 10px 0 0;
-  display: flex;
-  justify-content: space-around;
   padding: 5px 10px;
+  display: flex;
   gap: 30px;
+  justify-content: space-around;
+  border-radius: 10px 10px 0 0;
+  background-color: var(--color-3);
+  place-self: end center;
 
   li {
     @include i.font-500(var(--color-12));
-    transition: i.transition(background-color), i.transition(color);
     min-width: 50px;
-    user-select: none;
-    cursor: pointer;
-    background-color: transparent;
-    border-radius: 5px;
     padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: transparent;
+    transition: i.transition(background-color), i.transition(color);
+    user-select: none;
 
     &:hover {
       background-color: var(--color-4);
     }
 
     &.active {
-      color: var(--color-13);
       background-color: var(--color-6);
+      color: var(--color-13);
     }
   }
 }

@@ -1,19 +1,15 @@
-import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { NavComponent } from './nav/nav.component';
-import { NgOptimizedImage } from '@angular/common';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { GlobalInfoService, NotificationType } from './services/global-info.service';
-import { filter, take } from 'rxjs';
+import { Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { GlobalInfoService } from './services/global-info.service';
 import { TransitionService } from './services/transition.service';
 import { VariablesService } from './services/variables.service';
 import { PersonsService } from './services/database/persons.service';
-import { LayoutComponent } from './layout/layout.component';
 
 export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne' | 'raporty' | 'administracja';
 
 @Component({
   selector : 'app-root',
-  imports : [NavComponent, NgOptimizedImage, RouterLink, RouterOutlet, LayoutComponent],
+  imports : [RouterOutlet],
   templateUrl : './app.component.html',
   styleUrl : './app.component.scss'
 })
@@ -31,7 +27,7 @@ export class AppComponent {
     protected router : Router,
     protected infoService : GlobalInfoService,
     private personsS : PersonsService) {
-    this.personsS.getZPersons()
+    this.personsS.getZPersons().subscribe()
     // this.database.initializeWebSocket().then(status => {
     //   this.infoService.setWebSocketStatus(status);
     // });
