@@ -46,6 +46,6 @@ export class ErrorPacket extends Packet {
   providedIn : 'root'
 })
 export abstract class TypesService {
-  protected http = inject(HttpClient);
-  protected readonly api = '/api/';
+  public http = inject(HttpClient);
+  public readonly api = '/api/';
 }

@@ -1,0 +1,17 @@
+@use 'variables' as v;
+
+h1, p {
+  text-align: center;
+}
+
+h1 {
+  font-family: 'Manrope', v.$font-base;
+  font-size: v.$font-size-6xl;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+p {
+  font-size: v.$font-size-lg;
+  color: var(--text-muted);
+}

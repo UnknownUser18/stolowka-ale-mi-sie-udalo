@@ -20,21 +20,21 @@ export const routes : Routes = [
     path : '',
     canActivateChild : [mainGuard],
     component : LayoutComponent,
-    data : { sidebar : 'home-nav'},
     children : [
       {
         path : '',
         loadComponent : () => import('./home/home.component').then(m => m.HomeComponent),
-        title : 'Panel Administracyjny',
+        data : { sidebar : 'home-nav', title : 'Panel Administracyjny' },
       },
       {
         path : 'osoby',
         loadComponent : () => import('./users/osoby/osoby.component').then(m => m.OsobyComponent),
-        data : { sidebar : 'osoby-nav' },
+        data : { sidebar : 'osoby-nav', title : 'Osoby' },
         children : [
           {
             path : 'zsti',
             loadComponent : () => import('./users/zsti/zsti.component').then(m => m.ZstiComponent),
+            data : { title : 'Osoby - ZSTI' }
           },
           {
             path : 'internat',

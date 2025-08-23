@@ -26,7 +26,6 @@ type SidebarData = 'home-nav' | 'osoby-nav' | '';
   }
 })
 export class SidebarComponent {
-  private currentUrl : string | null = null;
 
   protected readonly nav_label = signal('Nawigacja');
   protected readonly imageError = signal(false);
@@ -53,18 +52,18 @@ export class SidebarComponent {
       const sidebarData = route.snapshot.data["sidebar"] as SidebarData;
       if (sidebarData)
         this.sidebarLoaded.set(sidebarData);
-      if (!urlSegments[0]) {
+      if (urlSegments.length === 0) {
+        this.previousUrl.set('/');
         this.isNotInRoot.set(false);
         this.nav_label.set('Nawigacja');
         return;
       }
+      const previousPath = urlSegments.length > 1
+        ? '/' + urlSegments.slice(0, -1).join('/')
+        : '/';
+      this.previousUrl.set(previousPath);
       this.isNotInRoot.set(true);
       this.nav_label.set(`Nawigacja - ${ mapRoutes.get(urlSegments[0]) }` || 'Nawigacja');
-    });
-
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe((event) => {
-      this.previousUrl.set(this.currentUrl);
-      this.currentUrl = event.urlAfterRedirects;
     });
   }
 }

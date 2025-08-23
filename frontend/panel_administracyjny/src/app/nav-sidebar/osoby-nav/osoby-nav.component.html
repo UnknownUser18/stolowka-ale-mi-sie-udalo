@@ -1,1 +1,47 @@
-<p>osoby-nav works!</p>
+@if (selectedZPerson() !== null) {
+  <section class="selected-person">
+    @let nazwisko_imie = selectedZPerson()?.nazwisko + ' ' + selectedZPerson()?.imie;
+    @let deselect_title = `Odznacz osobę ${nazwisko_imie}`;
+    <h3>Wybrana osoba ZSTI:</h3>
+    <p>{{ nazwisko_imie }} <i>({{ isTeacher(selectedZPerson()!) ? 'n.' : selectedZPerson()?.klasa }})</i></p>
+    <button (click)="deselectPerson()" [title]="deselect_title" [attr.aria-label]="deselect_title">
+      <fa-icon [icon]="faTimes" />
+      Odznacz
+    </button>
+  </section>
+}
+
+<section [class.focused]="ZheaderFocused()">
+  <div (mouseenter)="ZheaderFocused.set(true)" (mouseleave)="ZheaderFocused.set(false)">
+    <h2>
+      @let zsti_title = "Przejdź do listy osób ZSTI";
+      <a routerLink="osoby/zsti" (focus)="ZheaderFocused.set(true)" (blur)="ZheaderFocused.set(false)" [title]="zsti_title" [attr.aria-label]="zsti_title">
+        <fa-icon [icon]="faGraduationCap" />
+        ZSTI
+      </a>
+    </h2>
+    @let refresh_title = "Odśwież listę osób ZSTI";
+    <button (click)="requestPersonsZ()" [class.spin]="loadingPersonsZ()" [title]="refresh_title" [attr.aria-label]="refresh_title">
+      <fa-icon [icon]="faRefresh" [size]="'lg'" />
+    </button>
+  </div>
+  <ol>
+    @defer (when personsZ !== undefined) {
+      @for (person of personsZ; track person.id) {
+        @let select_title = `Wybierz osobę ${person.nazwisko} ${person.imie}`;
+        <li>
+          <button (click)="selectPerson(person.id)" [title]="select_title" [attr.aria-label]="select_title">
+            {{ person.nazwisko }} {{ person.imie[0] }}.
+            <i>({{ isTeacher(person) ? 'n.' : person.klasa }})</i>
+          </button>
+        </li>
+      } @empty {
+        <li><h3>Brak osób w bazie danych.</h3></li>
+      }
+    } @placeholder (minimum 500ms) {
+      @for (i of [0, 1, 2, 3, 4]; track i) {
+        <li class="placeholder"></li>
+      }
+    }
+  </ol>
+</section>

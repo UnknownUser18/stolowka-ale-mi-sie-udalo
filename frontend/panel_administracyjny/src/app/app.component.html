@@ -1,46 +1,4 @@
 <router-outlet />
-<!--@if (router.url !== '/login') {-->
-<!--  <nav #nav>-->
-<!--    <div class="scrollable" #scrollable>-->
-<!--      @if (router.url === '/') {-->
-<!--        <ul class="main-page all ignore">-->
-
-<!--        </ul>-->
-<!--      } @else if (router.url.includes('/osoby') || router.url.includes('/osoba')) {-->
-<!--        <div class="osoby all">-->
-<!--          <i class="fa-solid fa-right-to-bracket exit" (click)="navigate('','osoby')"></i>-->
-<!--          <div class="table">-->
-<!--            <h1 tabindex="0" routerLink="osoby/zsti"><i class="fa-solid fa-graduation-cap"></i>ZSTI</h1>-->
-<!--            <ol>-->
-<!--&lt;!&ndash;              @if (router.url.includes('/osoba') && persons_zsti) {&ndash;&gt;-->
-<!--&lt;!&ndash;                <li class="selected">{{ infoService.activeUser.value?.nazwisko }} {{ infoService.activeUser.value?.imie![0] }}. <i>({{infoService.activeUser.value?.typ_osoby_id! === TypOsoby.NAUCZYCIEL ? 'n.' : infoService.activeUser.value?.klasa }})</i></li>&ndash;&gt;-->
-<!--&lt;!&ndash;              }&ndash;&gt;-->
-<!--&lt;!&ndash;              @defer (when persons_zsti) {&ndash;&gt;-->
-<!--&lt;!&ndash;                @for (person of persons_zsti; track person.id) {&ndash;&gt;-->
-<!--&lt;!&ndash;                  <li (click)="selectPerson(person)">{{ person.nazwisko }} {{ person.imie[0] }}.&ndash;&gt;-->
-<!--&lt;!&ndash;                    <i>({{ person.typ_osoby_id === TypOsoby.NAUCZYCIEL ? 'n.' : person.klasa }})</i></li>&ndash;&gt;-->
-<!--&lt;!&ndash;                } @empty {&ndash;&gt;-->
-<!--&lt;!&ndash;                  <li><h3>Brak osób w bazie danych.</h3></li>&ndash;&gt;-->
-<!--&lt;!&ndash;                }&ndash;&gt;-->
-<!--&lt;!&ndash;              } @placeholder (minimum 500ms) {&ndash;&gt;-->
-<!--&lt;!&ndash;                @for (i of [0, 1, 2, 3, 4] ; track i) {&ndash;&gt;-->
-<!--&lt;!&ndash;                  <li class="placeholder"></li>&ndash;&gt;-->
-<!--&lt;!&ndash;                }&ndash;&gt;-->
-<!--&lt;!&ndash;              } @error {&ndash;&gt;-->
-<!--&lt;!&ndash;                <li><h3>Wystąpił błąd podczas ładowania danych.</h3></li>&ndash;&gt;-->
-<!--&lt;!&ndash;              }&ndash;&gt;-->
-<!--            </ol>-->
-<!--          </div>-->
-<!--          <div class="table">-->
-<!--            <h1><i class="fa-solid fa-building"></i>Internat</h1>-->
-<!--            <ol>-->
-<!--              <li>Julka W. <i>(LO1)</i></li>-->
-<!--              <li>Dawid C. <i>(LO3)</i></li>-->
-<!--              <li>Jan B. <i>(Koszykarze)</i></li>-->
-<!--              <li>Pyndzel <i>(w.)</i></li>-->
-<!--            </ol>-->
-<!--          </div>-->
-<!--        </div>-->
 <!--      } @else if (router.url.includes('/raporty')) {-->
 <!--        <div class="raporty all">-->
 <!--          <i class="fa-solid fa-right-to-bracket exit" (click)="navigate('','raporty')"></i>-->
@@ -79,22 +37,8 @@
 <!--            <li role="option" tabindex="0" routerLink="administracja/dodaj-osobe"><i class="fa-solid fa-add"></i> Dodaj osobę</li>-->
 <!--          </ul>-->
 <!--        </div>-->
-<!--      } @else {-->
-<!--        <div class="all">-->
-<!--          <h1>Panel administracyjny</h1>-->
-<!--          <p>Wybierz opcję z menu po lewej stronie.</p>-->
-<!--        </div>-->
-<!--      }-->
-<!--    </div>-->
-<!--  </nav>-->
-<!--  <app-nav></app-nav>-->
 <!--}-->
 <!--<main>-->
-<!--  @if (router.url === '/osoby') {-->
-<!--    <div class="osoby">-->
-<!--      <h1>Osoby</h1>-->
-<!--      <p>Wybierz osobę.</p>-->
-<!--    </div>-->
 <!--  } @else if (router.url === '/cennik'){-->
 <!--    <div class="cennik">-->
 <!--      <h1>Cennik</h1>-->

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-osoby',
@@ -7,8 +7,14 @@ import { RouterOutlet } from '@angular/router';
     RouterOutlet
   ],
   templateUrl: './osoby.component.html',
-  styleUrl: './osoby.component.scss'
+  styleUrl: './osoby.component.scss',
+  host : {
+    "[class.top]": "router.url === '/osoby/zsti'"
+  }
 })
 export class OsobyComponent {
+
+  constructor(protected router : Router) {
+  }
 
 }

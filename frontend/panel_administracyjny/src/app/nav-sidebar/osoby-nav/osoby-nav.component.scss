@@ -1,0 +1,155 @@
+@use 'index' as i;
+
+:host {
+  display: flex;
+  gap: i.$padding-lg;
+  flex-direction: column;
+}
+
+.selected-person {
+  padding: i.$padding-xs;
+
+  h3, p {
+    text-align: center;
+  }
+
+  p {
+    font-size: i.$font-size-md;
+    color: var(--text-muted);
+  }
+
+  i {
+    font-size: 0.85em;
+  }
+
+  h3 {
+    font-size: i.$font-size-lg;
+    font-weight: 600;
+  }
+
+  button {
+    width: fit-content;
+    align-self: center;
+    font-size: i.$font-size-xs;
+    color: var(--text-muted);
+    transition: i.transition(color, i.$duration-sm);
+
+    &:hover, &:focus {
+      color: var(--text);
+    }
+  }
+}
+
+section {
+  display: flex;
+  gap: i.$padding-md;
+  flex-direction: column;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-lg;
+  background-color: var(--bg);
+  transition: i.transition(background-color, i.$duration-sm), i.transition(border-color, i.$duration-sm);
+
+  &.focused {
+    background-color: var(--bg-light);
+    border-color: var(--border);
+  }
+}
+
+div {
+  padding: i.$padding-3xs i.$padding-2xs i.$padding-3xs i.$padding-3xs;
+  display: flex;
+  align-items: center;
+  transition: i.transition(border-bottom-color, i.$duration-sm);
+  border-bottom: i.$base-border var(--border-muted);
+
+  &:hover {
+    border-bottom-color: var(--border);
+  }
+
+  & > :first-child {
+    margin-left: auto;
+  }
+
+  & > :last-child {
+    margin-left: auto;
+  }
+}
+
+h2 {
+  text-align: center;
+}
+
+ol {
+  padding: i.$padding-2xs;
+  display: flex;
+  gap: i.$padding-sm;
+  flex-direction: column;
+  list-style-type: decimal;
+}
+
+li {
+  padding: i.$padding-3xs i.$padding-2xs;
+  cursor: pointer;
+  font-size: i.$font-size-sm;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+  background-color: var(--bg-light);
+  transition: i.transition(border-color, i.$duration-sm), i.transition(background-color, i.$duration-sm);
+  list-style-position: inside;
+
+  &:hover, &:focus-within {
+    background-color: color-mix(in oklch, var(--bg-light) 60%, var(--highlight) 40%);
+    border-color: var(--border);
+  }
+
+  &:focus-within {
+    outline: i.$base-border var(--highlight);
+  }
+
+  &::marker {
+    color: var(--text-muted);
+  }
+
+  i {
+    font-size: 0.85em;
+  }
+
+  button {
+    width: calc(100% - 2em);
+    text-align: left;
+    margin-left: i.$padding-2xs;
+    font-size: 1.1em;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  h3 {
+    font-size: i.$font-size-md;
+    font-weight: 500;
+  }
+}
+
+.spin {
+  animation: spin 2s linear infinite;
+}
+
+a {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+fa-icon {
+  font-size: 1.1em;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

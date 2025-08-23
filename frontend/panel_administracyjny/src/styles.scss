@@ -17,6 +17,10 @@
   box-sizing: border-box;
 }
 
+:focus-visible {
+  outline: 2px solid var(--highlight);
+  border-radius: i.$border-radius-sm;
+}
 
 ::selection {
   background-color: var(--highlight);
@@ -35,6 +39,55 @@ input, select, option, button {
   outline: none;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@keyframes out {
+  to {
+    margin-left: 50%;
+    opacity: 0;
+  }
+}
+
+@keyframes in {
+  from {
+    margin-left: -50%;
+    opacity: 0;
+  }
+  to {
+    margin-left: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.placeholder {
+  background-color: var(--highlight);
+  animation: pulse i.$duration-xl infinite alternate i.$cubic-in-out;
+}
+
+::view-transition-old(page) {
+  animation: out i.$duration-lg i.$cubic-in-out forwards;
+}
+
+::view-transition-new(page) {
+  animation: in i.$duration-lg i.$cubic-in-out forwards;
+}
+
+.change-sidebar {
+  view-transition-name: sidebar;
+}
+
 button {
   cursor: pointer;
 }
@@ -44,11 +97,16 @@ abbr {
 }
 
 body {
-  font-family: 'Manrope Regular', 'Inter', sans-serif;
+  font-family: 'Inter', i.$font-base;
   background-color: var(--bg);
   height: 100vh;
   color: var(--text);
   overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Manrope', i.$font-base;
+  color: var(--text);
 }
 
 ol, ul, menu {
