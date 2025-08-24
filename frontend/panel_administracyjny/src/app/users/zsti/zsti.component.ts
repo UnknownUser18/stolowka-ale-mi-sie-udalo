@@ -1,10 +1,12 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TransitionService } from '../../services/transition.service';
-import { VariablesService } from '../../services/variables.service';
 import { Subject } from 'rxjs';
+import { PersonsService, ZPerson } from '../../services/database/persons.service';
+import { FormCreatorService } from '../../services/form-creator.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faFilter, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 export function wynikString(number : number) : string {
   if (number < 0) console.warn('Number cannot be negative in wynikString function');
@@ -19,6 +21,7 @@ export function wynikString(number : number) : string {
   imports : [
     FormsModule,
     ReactiveFormsModule,
+    FaIconComponent,
   ],
   templateUrl : './zsti.component.html',
   styleUrl : './zsti.component.scss'
@@ -26,11 +29,12 @@ export function wynikString(number : number) : string {
 export class ZstiComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
 
-  protected readonly wynikString = wynikString;
-  // protected readonly TypOsoby = TypOsoby;
+  protected readonly faMagnifyingGlass = faMagnifyingGlass;
+  protected readonly faFilter  = faFilter;
+  protected search = '';
+  protected ZPersons : ZPerson[] | undefined;
+
   protected searchTerm : string | undefined;
-  // protected persons_zsti : (Student & Opiekun)[] | undefined;
-  // protected result : (Student & Opiekun)[] | undefined;
   protected showFilter : boolean = false;
   protected filter = new FormGroup({
     imie : new FormControl('', Validators.pattern('[a-zA-ZżźćńśłóęąŻŹĆŃŚŁÓĘĄ]')),
@@ -45,19 +49,15 @@ export class ZstiComponent implements OnDestroy {
 
 
   constructor(
-    private variables : VariablesService,
+    private personS : PersonsService,
+    private formS : FormCreatorService,
     private infoService : GlobalInfoService,
-    private router : Router,
     private zone : NgZone,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef) {
-    this.infoService.setTitle('ZSTI - Osoby');
-    // this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() : void => {
-    //
-    //   this.variables.mapStudentsToOpiekun(true).then((persons : (Student & Opiekun)[]) => {
-    //     this.result = this.persons_zsti = persons;
-    //   });
-    // });
+    this.personS.getZPersons().subscribe((persons : ZPerson[] | null) => {
+      this.ZPersons = persons ?? [];
+    });
   }
 
   // private applyFilterLogic(use_filter : boolean = false) : void {
@@ -180,4 +180,6 @@ export class ZstiComponent implements OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+
 }

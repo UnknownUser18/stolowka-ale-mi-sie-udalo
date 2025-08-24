@@ -1,4 +1,14 @@
 <router-outlet />
+
+
+@if (notifications.length > 0) {
+  <div class="notifications">
+    @for (notification of notifications; track notification.id) {
+      <app-notification [notification]="notification" (dismiss)="dismissNotification(notification.id)" (animationend)="notificationAnimationEnd($event, notification.id)" />
+    }
+  </div>
+}
+
 <!--      } @else if (router.url.includes('/raporty')) {-->
 <!--        <div class="raporty all">-->
 <!--          <i class="fa-solid fa-right-to-bracket exit" (click)="navigate('','raporty')"></i>-->
