@@ -19,7 +19,7 @@ import { isPlatformBrowser } from '@angular/common';
   }
 })
 export class OsobyNavComponent {
-  protected personsZ : ZPerson[] | undefined;
+  protected personsZ : ZPerson[] | null | undefined;
 
   protected readonly selectedZPerson = signal<ZPerson | null>(null);
   protected readonly loadingPersonsZ = signal(false);
@@ -60,7 +60,7 @@ export class OsobyNavComponent {
     this.loadingPersonsZ.set(true);
     this.userS.getZPersons().subscribe((persons : ZPerson[] | null) => {
       this.loadingPersonsZ.set(false);
-      this.personsZ = persons ?? [];
+      this.personsZ = persons;
       if (isPlatformBrowser(this.platform) && persons)
         sessionStorage.setItem('persons', JSON.stringify(persons));
     });

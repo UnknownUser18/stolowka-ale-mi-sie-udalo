@@ -53,6 +53,22 @@ section {
     background-color: var(--bg-light);
     border-color: var(--border);
   }
+
+  &.error {
+    border-color: var(--danger);
+
+    div:hover, div:focus-within {
+      border-bottom-color: var(--danger);
+    }
+  }
+
+  &.warning {
+    border-color: var(--warning);
+
+    div:hover, div:focus-within {
+      border-bottom-color: var(--warning);
+    }
+  }
 }
 
 div {
@@ -62,7 +78,7 @@ div {
   transition: i.transition(border-bottom-color, i.$duration-sm);
   border-bottom: i.$base-border var(--border-muted);
 
-  &:hover {
+  &:hover, &:focus-within {
     border-bottom-color: var(--border);
   }
 
@@ -110,15 +126,27 @@ li {
     color: var(--text-muted);
   }
 
+  &.error {
+    cursor: auto;
+    list-style-type: none;
+    text-align: center;
+    border-color: transparent;
+
+    &:hover, &:focus-within {
+      background-color: var(--bg-light);
+      border-color: transparent;
+    }
+  }
+
   i {
     font-size: 0.85em;
   }
 
   button {
-    width: calc(100% - 2em);
-    text-align: left;
     margin-left: i.$padding-2xs;
+    width: calc(100% - 2em);
     font-size: 1.1em;
+    text-align: left;
 
     &:focus {
       outline: none;
@@ -126,7 +154,7 @@ li {
   }
 
   h3 {
-    font-size: i.$font-size-md;
+    font-size: i.$font-size-sm;
     font-weight: 500;
   }
 }

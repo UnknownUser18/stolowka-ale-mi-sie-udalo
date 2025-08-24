@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { VariablesService } from './variables.service';
-import { Router } from '@angular/router';
 
 export enum TabType {
   KALENDARZ = 'kalendarz',
@@ -25,20 +23,7 @@ export type TabTypeKey = keyof typeof TabType;
   providedIn : 'root'
 })
 export class GlobalInfoService {
-  constructor(private variables : VariablesService, private router : Router) {
-    // TODO: Remove when backend is implemented
-    // this.variables.waitForWebSocket(this.webSocketStatus).then(() => {
-    //
-    //   const lastUser = localStorage.getItem('activeUser');
-    //   if (!lastUser) return;
-    //   this.variables.mapStudentsToOpiekun().then((persons : (Student & Opiekun)[]) => {
-    //     const user = persons.find((p) => p.id === parseInt(lastUser));
-    //     if (!user) return;
-    //     this.setActiveUser(user);
-    //     const url = this.router.url;
-    //     this.router.navigate([url]).then();
-    //   });
-    // });
+  constructor() {
   }
 
   private numberOfNotifications : number = 0;
@@ -46,8 +31,6 @@ export class GlobalInfoService {
 
   private pendingNotifications : Array<{ type : NotificationType, message : string }> = [];
   public title : BehaviorSubject<string> = new BehaviorSubject<string>('Strona Główna');
-  // public webSocketStatus : BehaviorSubject<WebSocketStatus> = new BehaviorSubject<WebSocketStatus>(WebSocketStatus.CLOSED); // TODO: Remove when backend is implemented
-  // public activeUser : BehaviorSubject<(Student & Opiekun) | undefined> = new BehaviorSubject<(Student & Opiekun) | undefined>(undefined); // TODO: Redefine when backend is implemented
   public activeTab : BehaviorSubject<TabTypeKey | undefined> = new BehaviorSubject<TabTypeKey | undefined>(undefined);
   public activeMonth : BehaviorSubject<Date | undefined> = new BehaviorSubject<Date | undefined>(undefined);
   public selectedDays = {
@@ -115,23 +98,8 @@ export class GlobalInfoService {
     this.title.next(title);
   }
 
-  // public setActiveUser(student : Student & Opiekun | undefined) : void {
-  //   if (student)
-  //     localStorage.setItem('activeUser', student.id.toString());
-  //   this.activeUser.next(student);
-  // }
-
-  public setActiveTab(type : TabTypeKey) : void {
-    this.activeTab.next(type);
-  }
-
   public setActiveMonth(date : Date) : void {
     this.activeMonth.next(date);
   }
-
-  // TODO: Remove when backend is implemented
-  // public setWebSocketStatus(status : WebSocketStatus) : void {
-  //   this.webSocketStatus.next(status);
-  // }
 
 }

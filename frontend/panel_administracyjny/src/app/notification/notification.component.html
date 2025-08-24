@@ -1,0 +1,36 @@
+<div class="type">
+  @switch (notification()?.type) {
+    @case ('info') {
+      <fa-icon [icon]="faInfo" /> Informacja
+    }
+    @case ('success') {
+      <fa-icon [icon]="faCheck" /> Sukces
+    }
+    @case ('warning') {
+      <fa-icon [icon]="faWarning" /> Ostrzeżenie
+    }
+    @case ('error') {
+      <fa-icon [icon]="faXmark" /> Błąd
+    }
+  }
+</div>
+<p>{{ notification()?.message }}</p>
+@let dismiss_title = 'Zamknij powiadomienie';
+<button (click)="isClosing.set(true);" [title]="dismiss_title" [attr.aria-label]="dismiss_title">
+  <fa-icon [icon]="faXmark" />
+  Zamknij
+</button>
+
+@let timestamp_title = `Data i godzina utworzenia: ${ notification() ? (notification()?.timestamp | date: 'yyyy-MM-dd HH:mm:ss') : '' }`;
+<time class="timestamp" [title]="timestamp_title" [attr.aria-label]="timestamp_title">
+  {{ notification()?.timestamp | date: 'HH:mm:ss' }}
+</time>
+@let timeleft_title = timeLeft() === Infinity ? 'Nie wygasa' : `Czas do wygaśnięcia: ${ formatDate(timeLeft()) }`;
+
+<time class="timeleft" [title]="timeleft_title" [attr.aria-label]="timeleft_title">
+  @if (timeLeft() === Infinity) {
+    <fa-icon [icon]="faInfinity" />
+  } @else {
+    {{ formatDate(timeLeft()) }}
+  }
+</time>

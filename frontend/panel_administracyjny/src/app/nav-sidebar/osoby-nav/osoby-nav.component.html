@@ -11,7 +11,12 @@
   </section>
 }
 
-<section [class.focused]="ZheaderFocused()">
+
+<section [class]="{
+  'focused': ZheaderFocused(),
+  'error': personsZ === null,
+  'warning': personsZ !== null && personsZ?.length === 0
+}">
   <div (mouseenter)="ZheaderFocused.set(true)" (mouseleave)="ZheaderFocused.set(false)">
     <h2>
       @let zsti_title = "Przejdź do listy osób ZSTI";
@@ -27,16 +32,20 @@
   </div>
   <ol>
     @defer (when personsZ !== undefined) {
-      @for (person of personsZ; track person.id) {
-        @let select_title = `Wybierz osobę ${person.nazwisko} ${person.imie}`;
-        <li>
-          <button (click)="selectPerson(person.id)" [title]="select_title" [attr.aria-label]="select_title">
-            {{ person.nazwisko }} {{ person.imie[0] }}.
-            <i>({{ isTeacher(person) ? 'n.' : person.klasa }})</i>
-          </button>
-        </li>
-      } @empty {
-        <li><h3>Brak osób w bazie danych.</h3></li>
+      @if (personsZ === null) {
+        <li class="error"><h3>Brak połączenia z serwerem. Spróbuj ponownie.</h3></li>
+      } @else {
+        @for (person of personsZ; track person.id) {
+          @let select_title = `Wybierz osobę ${person.nazwisko} ${person.imie}`;
+          <li>
+            <button (click)="selectPerson(person.id)" [title]="select_title" [attr.aria-label]="select_title">
+              {{ person.nazwisko }} {{ person.imie[0] }}.
+              <i>({{ isTeacher(person) ? 'n.' : person.klasa }})</i>
+            </button>
+          </li>
+        } @empty {
+          <li class="warning"><h3>Brak osób w bazie danych.</h3></li>
+        }
       }
     } @placeholder (minimum 500ms) {
       @for (i of [0, 1, 2, 3, 4]; track i) {

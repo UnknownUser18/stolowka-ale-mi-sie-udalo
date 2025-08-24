@@ -1,17 +1,17 @@
-<header>
-  <label>
-<!--    <input type="text" name="szukanie osoby" placeholder="Wyszukaj osobę z ZSTI..." [(ngModel)]="searchTerm" (blur)="filterPersons($event)" (keydown)="filterPersons($event)">-->
-    <i class="fa-solid fa-filter" (click)="openFilterMenu()"></i>
-<!--    <i class="fa-solid fa-magnifying-glass" (click)="filterPersons($event)"></i>-->
-  </label>
-  @if (checkIfFilterUsed()) {
-    <div>
-      <span>Filtry są w użyciu.</span>
-      <abbr title="Zresetuj Filtry"><i class="fa-solid fa-xmark" (click)="resetFilter()"></i></abbr>
-    </div>
-  }
-<!--  <span>Znaleziono {{ result?.length === 0 ? '0 wyników' : (result?.length ? `${result?.length} ${wynikString(result?.length!)}` : '... wyników') }}.</span>-->
-</header>
+<section>
+  <search>
+    <input type="search" name="searchSimple" placeholder="Wyszukaj osobę z ZSTI..." [(ngModel)]="search">
+    <button>
+      @let filter_title = 'Otwórz menu filtrów';
+      <fa-icon [icon]="faFilter" [title]="filter_title" [attr.aria-label]="filter_title" />
+    </button>
+    <button>
+      @let search_title = 'Wyszukaj osobę';
+      <fa-icon [icon]="faMagnifyingGlass" [title]="search_title" [attr.aria-label]="search_title" />
+    </button>
+  </search>
+  <p>Znaleziono ... osób</p>
+</section>
 <table>
   <thead>
     <tr>
