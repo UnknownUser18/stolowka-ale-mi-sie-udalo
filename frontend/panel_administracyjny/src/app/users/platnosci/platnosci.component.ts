@@ -1,9 +1,8 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { TransitionService } from '../../services/transition.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { wynikString } from '../zsti/zsti.component';
 import { VariablesService } from '../../services/variables.service';
 
 @Component({
@@ -96,9 +95,6 @@ export class PlatnosciComponent implements OnDestroy {
       this.filterForm.value.opis);
   }
 
-  protected formatMonth(month : number) : string {
-    return new Date(0, month - 1).toLocaleString('pl-PL', { month : 'long' });
-  }
 
   protected formatDate(date : string) : string {
     if (/^\d{2}-\d{4}$/.test(date)) {

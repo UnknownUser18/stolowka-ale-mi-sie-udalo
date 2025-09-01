@@ -10,14 +10,14 @@ export class CNotification { // CNotification to avoid name conflict with HTML N
   public message : string;
   public type : NotificationType;
   public duration : number;
-  public timestamp : Date;
+  public timestamp : Date | null;
 
   constructor(message : string, type : NotificationType, duration? : number) {
     this.id = uuidv4();
     this.message = message;
     this.type = type;
     this.duration = duration ?? 5000; // default duration 5 seconds
-    this.timestamp = new Date();
+    this.timestamp = null;
   }
 }
 
@@ -27,6 +27,7 @@ export class CNotification { // CNotification to avoid name conflict with HTML N
 export class NotificationsService {
 
   private queue : CNotification[] = [];
+  private queueSubject = new BehaviorSubject<CNotification[]>([]);
   private visible : CNotification[] = [];
   private visibleSubject = new BehaviorSubject<CNotification[]>([]);
   private maxVisible = 3;
@@ -38,14 +39,18 @@ export class NotificationsService {
     while (this.visible.length < this.maxVisible && this.queue.length > 0) {
       const notification = this.queue.shift();
       if (!notification) continue;
+      notification.timestamp = new Date();
       this.visible.push(notification);
       this.visibleSubject.next([...this.visible]);
+      this.queueSubject.next([...this.queue]);
+      console.log(this.queue);
     }
   }
 
   private createNotification(message : string, type : NotificationType, duration? : number) : void {
-    const notification = new CNotification(message, type, duration);
+    const notification = new CNotification(message, type, duration !== undefined ? duration * 1000 : undefined);
     this.queue.push(notification);
+    this.queueSubject.next([...this.queue]);
     this.showNext();
   }
 
@@ -65,8 +70,12 @@ export class NotificationsService {
     this.createNotification(message, 'warning', duration);
   }
 
-  public getNotifications() : Observable<CNotification[]> {
+  get getVisibleNotifications() : Observable<CNotification[]> {
     return this.visibleSubject.asObservable();
+  }
+
+  get getQueueNotifications() : Observable<CNotification[]> {
+    return this.queueSubject.asObservable();
   }
 
   public dismissNotification(id : string) : void {

@@ -2,8 +2,7 @@ import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild 
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { TransitionService } from '../../services/transition.service';
-import { wynikString } from '../zsti/zsti.component';
-import { takeUntil, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { VariablesService } from '../../services/variables.service';
 

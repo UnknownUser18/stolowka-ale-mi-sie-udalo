@@ -1,11 +1,10 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { GlobalInfoService, NotificationType } from '../services/global-info.service';
 import { Subject } from 'rxjs';
-import { NavigationEnd, NavigationSkipped, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import * as xlsx from 'xlsx';
-import { wynikString } from '../users/zsti/zsti.component';
 import { VariablesService } from '../services/variables.service';
 
 @Component({
@@ -59,16 +58,16 @@ export class RaportsComponent implements OnDestroy {
     // });
   }
 
-  /**
-   * @method generateReport
-   * @description Generuje raport na podstawie formularza i endpointu.
-   * @param form - FormGroup zawierający dane do raportu.
-   * @param endpoint{string} - Endpoint, do którego wysyłane jest żądanie.
-   * @param paramName{VariableName} - Nazwa parametru, który będzie używany w żądaniu.
-   * @param ignore_notification{boolean} - Flaga określająca, czy ignorować powiadomienia o błędach i sukcesach.
-   * @returns {void}
-   * @memberOf RaportsComponent
-   */
+  // /**
+  //  * @method generateReport
+  //  * @description Generuje raport na podstawie formularza i endpointu.
+  //  * @param form - FormGroup zawierający dane do raportu.
+  //  * @param endpoint{string} - Endpoint, do którego wysyłane jest żądanie.
+  //  * @param paramName{VariableName} - Nazwa parametru, który będzie używany w żądaniu.
+  //  * @param ignore_notification{boolean} - Flaga określająca, czy ignorować powiadomienia o błędach i sukcesach.
+  //  * @returns {void}
+  //  * @memberOf RaportsComponent
+  //  */
   // TODO: Reimplement this function when backend is ready and API is defined
   // private generateReport(form : any, endpoint : string, paramName : VariableName, ignore_notification : boolean = false) : void {
   //   if (form.invalid) {

@@ -12,7 +12,7 @@
   background-color: var(--bg);
 
   &.fade-out {
-    animation: out i.$duration-md i.$cubic-bezier forwards;
+    animation: out i.$duration-lg i.$cubic-bezier forwards;
   }
 
   &.fade-in {
@@ -82,7 +82,7 @@ p {
 
 @keyframes out {
   to {
-    margin-left: 50%;
+    transform: translateX(100%);
     opacity: 0;
   }
 }

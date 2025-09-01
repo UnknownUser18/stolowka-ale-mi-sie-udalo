@@ -27,10 +27,6 @@
   color: var(--text);
 }
 
-.placeholder {
-  animation: light 1.5s i.$cubic-bezier infinite alternate;
-}
-
 input, select, option, button {
   font-family: inherit;
   color: inherit;
@@ -160,5 +156,14 @@ app-root {
 
   p {
     font-size: 1em;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
