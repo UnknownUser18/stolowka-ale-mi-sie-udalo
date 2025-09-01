@@ -1,10 +1,31 @@
 <router-outlet />
-
-
 @if (notifications.length > 0) {
   <div class="notifications">
     @for (notification of notifications; track notification.id) {
-      <app-notification [notification]="notification" (dismiss)="dismissNotification(notification.id)" (animationend)="notificationAnimationEnd($event, notification.id)" />
+      <app-notification [notification]="notification" (dismiss)="dismissNotification(notification.id)" />
+    }
+    @if (notificationsQueueLength > 0) {
+      <div class="queue-info">
+        <fa-icon [icon]="faEllipsis" />
+        <span>+{{ notificationsQueueLength }}
+          @switch (notificationsQueueLength) {
+            @case (1) {
+              powiadomienie
+            }
+            @case (2) {
+              powiadomienia
+            }
+            @case (3) {
+              powiadomienia
+            }
+            @case (4) {
+              powiadomienia
+            }
+            @default {
+              powiadomień
+            }
+          } w kolejce</span>
+      </div>
     }
   </div>
 }

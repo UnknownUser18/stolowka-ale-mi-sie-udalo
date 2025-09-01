@@ -19,7 +19,8 @@ import { DatePipe } from '@angular/common';
     "[class.error]" : "notification()?.type === 'error'",
     "[class.warning]" : "notification()?.type === 'warning'",
     "[class.fade-out]" : "isClosing()",
-    "[class.fade-in]" : "isOpening()"
+    "[class.fade-in]" : "isOpening()",
+    '(animationend)' : "animationEnd($event)"
   }
 })
 export class NotificationComponent implements OnInit {
@@ -45,6 +46,7 @@ export class NotificationComponent implements OnInit {
   }
 
   protected formatDate(date : number) {
+    if (date < 0) return "0.0s"
     if (date > 3600000)
       return "> 1h";
     else if (date > 60000) {
@@ -62,7 +64,7 @@ export class NotificationComponent implements OnInit {
     this.isOpening.set(true);
 
     setInterval(() => {
-      this.timeLeft.set(this.notification()?.duration! - (Date.now() - this.notification()?.timestamp.getTime()!));
+      this.timeLeft.set(this.notification()?.duration! - (Date.now() - this.notification()?.timestamp!.getTime()!));
     }, 100)
 
     if (this.notification()?.duration === Infinity)
@@ -73,4 +75,10 @@ export class NotificationComponent implements OnInit {
     }, this.notification()?.duration)
   }
 
+  protected animationEnd(animation : AnimationEvent) {
+    if (animation.animationName.endsWith('out'))
+      this.dismiss.emit();
+    else if (animation.animationName.endsWith('in'))
+      this.isOpening.set(false);
+  }
 }

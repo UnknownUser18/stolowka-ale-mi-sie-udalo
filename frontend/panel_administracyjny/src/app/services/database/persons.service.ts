@@ -3,6 +3,7 @@ import { Packet, TypesService } from './types.service';
 import { map, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { isPlatformServer } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
 
 export enum TypOsoby {
   UCZEN = 1,
@@ -30,12 +31,35 @@ export class PersonsService extends TypesService {
     super();
   }
 
-  public getZPersons() : Observable<ZPerson[] | null> {
-    return this.http.get<Packet>(`${ this.api }zsti/person`).pipe(
+  private requestPersons(limit? : number) : Observable<Packet | null> {
+    if (limit && (!Number.isInteger(limit) || limit < 1))
+      throw new Error('Limit musi być liczbą całkowitą dodatnią.');
+
+    let params = new HttpParams();
+    if (limit)
+      params = params.set('limit', limit.toString());
+
+    return this.http.get<Packet>(`${ this.api }zsti/person`, { params }).pipe(
       map((res) => {
-        return res.status === 200 ? res.data as ZPerson[] : null;
+        return res.status === 200 ? res : null;
       }),
       catchError(() => of(null))
+    );
+  }
+
+  public getZPersonsLimit(limit : number) : Observable<ZPerson[] | null> {
+    return this.requestPersons(limit).pipe(
+      map((res) => {
+        return res ? res.data as ZPerson[] : null;
+      })
+    );
+  }
+
+  public getZPersons() : Observable<ZPerson[] | null> {
+    return this.requestPersons().pipe(
+      map((res) => {
+        return res ? res.data as ZPerson[] : null;
+      })
     );
   }
 
@@ -65,5 +89,9 @@ export class PersonsService extends TypesService {
     if (isPlatformServer(this.platform))
       throw new Error('Nie można nawigować na serwerze.');
     sessionStorage.removeItem('selectedZPerson');
+  }
+
+  public isTeacher(person : ZPerson) : boolean {
+    return person.typ_osoby_id === TypOsoby.NAUCZYCIEL;
   }
 }

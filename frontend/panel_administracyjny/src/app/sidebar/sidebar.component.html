@@ -26,3 +26,9 @@
     }
   }
 </div>
+@if (infoS.status() !== undefined && !infoS.status()) {
+  <button class="retry-button" (click)="getHealth()">
+    <fa-icon [icon]="faArrowRotateRight" />
+    Ponów próbę połączenia
+  </button>
+}

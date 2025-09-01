@@ -5,7 +5,7 @@ import { Debug, Errors, getStatusCodeByCode, Info, StatusCodes, Warning, Packet,
 import { configureRequestsDebug } from './config';
 import { QueryError, QueryResult } from "mysql2/promise";
 import zstiRoutes from './zsti';
-
+import infoRoutes from './info';
 
 const env = process.env;
 
@@ -19,6 +19,7 @@ if (env.DEBUG_MODE === 'false')
 
 app.use(express.json());
 app.use('/api/zsti', zstiRoutes);
+app.use('/api/info', infoRoutes)
 
 
 if (!env.DB_HOST || !env.DB_USER || env.DB_PASSWORD === undefined || !env.DB_NAME || !env.DB_PORT) {
@@ -97,7 +98,7 @@ export async function executeQuery(query : string, params? : {}) : Promise<Query
  * @param packet{Packet} - The packet containing the response data, status, and message.
  * @returns {express.Response} - The Express response object with the status and data.
  */
-export function sendResponse(res : express.Response, packet : Packet) {
+export function sendResponse(res : express.Response, packet : Packet) : express.Response {
   const isError = packet instanceof ErrorPacket;
   const responseStatus = new Map<number, number>([
     [StatusCodes.OK, 200],

@@ -126,7 +126,8 @@ li {
     color: var(--text-muted);
   }
 
-  &.error {
+
+  &.warning, &.error {
     cursor: auto;
     list-style-type: none;
     text-align: center;
@@ -144,7 +145,6 @@ li {
 
   button {
     margin-left: i.$padding-2xs;
-    width: calc(100% - 2em);
     font-size: 1.1em;
     text-align: left;
 
@@ -173,11 +173,3 @@ fa-icon {
   font-size: 1.1em;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}

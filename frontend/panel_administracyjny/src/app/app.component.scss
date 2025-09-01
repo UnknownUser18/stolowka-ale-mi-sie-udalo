@@ -10,3 +10,16 @@
   left: 50%;
   z-index: 1;
 }
+
+.queue-info {
+  background-color: var(--bg);
+  border-radius: i.$border-radius-full;
+  border: i.$base-border var(--border-muted);
+  padding: i.$padding-2xs i.$padding-xs;
+  font-size: i.$font-size-sm;
+  display: flex;
+  align-items: center;
+  gap: i.$padding-xs;
+  color: var(--text-muted);
+  z-index: 2;
+}

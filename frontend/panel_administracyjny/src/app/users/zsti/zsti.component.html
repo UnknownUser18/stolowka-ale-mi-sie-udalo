@@ -1,100 +1,99 @@
 <section>
   <search>
-    <input type="search" name="searchSimple" placeholder="Wyszukaj osobę z ZSTI..." [(ngModel)]="search">
-    <button>
-      @let filter_title = 'Otwórz menu filtrów';
-      <fa-icon [icon]="faFilter" [title]="filter_title" [attr.aria-label]="filter_title" />
-    </button>
-    <button>
+    @let searchInput_title = 'Wyszukaj osobę z ZSTI...';
+    <input type="search" name="searchSimple" [placeholder]="searchInput_title" [(ngModel)]="search" [title]="searchInput_title" [attr.aria-label]="searchInput_title" (keydown.enter)="filterZPersons()" />
+    <button (click)="filterZPersons()">
       @let search_title = 'Wyszukaj osobę';
       <fa-icon [icon]="faMagnifyingGlass" [title]="search_title" [attr.aria-label]="search_title" />
     </button>
   </search>
-  <p>Znaleziono ... osób</p>
+
+  <button class="filter-button">
+    Filtruj
+    @let filter_title = 'Otwórz menu filtrów';
+    <fa-icon [icon]="faFilter" [title]="filter_title" [attr.aria-label]="filter_title" />
+  </button>
+
+  @if (shownZPersons === undefined) {
+    <p>Ładowanie osób...</p>
+  } @else if (shownZPersons === null) {
+    <p><fa-icon [icon]="faWarning" /> Wystąpił błąd podczas ładowania.</p>
+  } @else {
+    <p>Znaleziono {{ shownZPersons.length }} {{ osobString(shownZPersons.length) }}</p>
+  }
+
+  <button class="sort-button">
+    Sortuj
+    @let sort_title = 'Sortuj osoby';
+    <fa-icon [icon]="faArrowUpWideShort" [title]="sort_title" [attr.aria-label]="sort_title" />
+  </button>
+
+  <button class="refresh-button" (click)="requestPersons()">
+    Odśwież
+    @let refresh_title = 'Odśwież listę osób';
+    <fa-icon [icon]="faArrowsRotate" [title]="refresh_title" [attr.aria-label]="refresh_title" [class.spin]="isRefreshing()" />
+  </button>
+
+  <button class="add-button">
+    Dodaj osobę
+    @let add_title = 'Dodaj nową osobę do stołówki';
+    <fa-icon [icon]="faPlus" [title]="add_title" [attr.aria-label]="add_title" />
+    <!-- This will redirect to another route (DO NOT MAKE A VIEW ON THIS COMPONENT)   -->
+  </button>
 </section>
 <table>
   <thead>
-    <tr>
-      <th>Numer</th>
-      <th>Imię i nazwisko</th>
-      <th>Klasa</th>
-      <th></th>
-    </tr>
+  <tr>
+    <th>#</th>
+    <th>Nazwisko & imię</th>
+    <th>Klasa</th>
+    <th>Może uczęszczać</th>
+    <th>Opłacany przez miasto</th>
+  </tr>
   </thead>
-  <tbody>
-<!--    @defer (when result) {-->
-<!--      @for (person of result; track person.id; let index = $index) {-->
-<!--        <tr>-->
-<!--          <td>{{ index+1 }}</td>-->
-<!--          <td>{{ person.imie }} {{ person.nazwisko }}</td>-->
-<!--          <td>{{ person.klasa ? person.klasa : 'Nauczyciel' }}</td>-->
-<!--          <td>-->
-<!--            <button (click)="selectPerson(person)">Wybierz</button>-->
-<!--          </td>-->
-<!--        </tr>-->
-<!--      }-->
-<!--    } @placeholder (minimum 1000ms) {-->
-<!--      @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {-->
-<!--        <tr class="placeholder">-->
-<!--          @for (j of [1,2,3,4]; track j) {-->
-<!--            <td></td>-->
-<!--          }-->
-<!--        </tr>-->
-<!--      }-->
-<!--    }-->
-  </tbody>
+  <div class="table-body-scroll">
+    <tbody>
+      @defer (when shownZPersons !== undefined && shownZPersons !== null) {
+        @for (person of shownZPersons; track person.id; let index = $index) {
+          <tr>
+            <td>{{ index + 1 }}</td>
+            @let full_name = `${ person.nazwisko } ${ person.imie }`;
+            @let button_title = `Wybierz osobę ${ full_name }`;
+            <td>
+              <button [title]="button_title" [attr.aria-label]="button_title">{{ full_name }}</button>
+            </td>
+            <td>{{ isTeacher(person) ? 'Nauczyciel' : person.klasa }}</td>
+            <td>
+              <span [class]="{ 'yes': person.uczeszcza, 'no': !person.uczeszcza }">
+              <fa-icon [icon]="faCircle" [size]="'2xs'" />
+                {{ person.uczeszcza ? 'Tak' : 'Nie' }}
+              </span>
+            </td>
+            <td>
+              <span [class]="{ 'yes': person.miasto, 'no': !person.miasto }">
+              <fa-icon [icon]="faCircle" [size]="'2xs'" />
+                {{ person.miasto ? 'Tak' : 'Nie' }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5">Brak osób do wyświetlenia</td>
+          </tr>
+        }
+      } @placeholder (minimum 1000ms) {
+        @for (i of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track i) {
+          <tr class="placeholder-row">
+            @for (j of [1, 2, 3, 4, 5]; track j) {
+              <td></td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </div>
 </table>
-@if (showFilter) {
-  <section #section_filter>
-    <div>
-      <h3>Filtry dla osób ZSTI</h3>
-      <i class="fa-solid fa-xmark close" (click)="closeFilterMenu()"></i>
-      <form [formGroup]="filter">
-        <fieldset>
-          <legend><i class="fa-solid fa-user"></i>Dane osobowe</legend>
-          <label>
-            <span>Imię :</span>
-            <input type="text" placeholder="Imię" formControlName="imie"  name="imie">
-          </label>
-          <label>
-            <span>Nazwisko :</span>
-            <input type="text" placeholder="Nazwisko" formControlName="nazwisko" name="nazwisko">
-          </label>
-          <label>
-            <span>Opłacany przez miasto :</span>
-            <select formControlName="miasto" name="miasto">
-              <option value="wszyscy">Wszyscy</option>
-              <option value="true">Tak</option>
-              <option value="false">Nie</option>
-            </select>
-          </label>
-        </fieldset>
-        <fieldset>
-          <legend><i class="fa-solid fa-graduation-cap"></i>Dane szkolne</legend>
-          <label>
-            <span>Klasa :</span>
-<!--            <input type="text" [placeholder]="filter.get('typ_osoby')?.value == (TypOsoby.NAUCZYCIEL + '') ? 'Wybrano nauczyciela...' : 'Klasa'" formControlName="klasa" name="klasa">-->
-          </label>
-          <label>
-            <span>Typ osoby :</span>
-<!--            <select formControlName="typ_osoby" name="typ_osoby" (change)="onTypOsobyChange()">-->
-<!--              <option [value]="3">Wszyscy</option>-->
-<!--              <option [value]="TypOsoby.UCZEN">Uczeń</option>-->
-<!--              <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>-->
-<!--            </select>-->
-          </label>
-          <label>
-            <span>Uczęszcza :</span>
-            <select formControlName="uczeszcza" name="uczeszcza">
-              <option [value]="'wszyscy'">Wszyscy</option>
-              <option [value]="true">Tak</option>
-              <option [value]="false">Nie</option>
-            </select>
-          </label>
-        </fieldset>
-<!--        <button (click)="applyFilter()">Zastosuj</button>-->
-      </form>
-    </div>
-  </section>
-}
 
+<dialog autofocus #filterDialog>
+  blah
+</dialog>

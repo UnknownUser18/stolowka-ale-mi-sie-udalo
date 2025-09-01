@@ -1,6 +1,45 @@
 @use 'variables' as v;
 @use 'functions' as f;
 
+@mixin sidebar-item-layout {
+  padding: v.$padding-2xs v.$padding-xs;
+  display: flex;
+  gap: v.$margin-2xs;
+  align-items: center;
+  font-size: v.$font-size-md;
+  font-weight: 500;
+  border-radius: v.$border-radius-md;
+  color: var(--text-muted);
+  transition: f.transition(color, v.$duration-sm);
+
+  &:hover, &:focus {
+    color: var(--text);
+  }
+
+  &:focus {
+    outline-offset: -2px;
+  }
+
+  fa-icon {
+    font-size: 1.25em;
+  }
+}
+
+@mixin sidebar-item {
+  font-family: 'Inter', v.$font-base;
+  border: 1px solid var(--border-muted);
+  border-radius: v.$border-radius-md;
+  background: linear-gradient(45deg, var(--bg), var(--bg-light) 50%, var(--bg-light) 90%, color-mix(in oklch, var(--bg-light) 80%, var(--highlight) 20%) 100%);
+  transition: f.transition(background-position), f.transition(border-color, v.$duration-sm);
+  background-size: 400% 400%;
+
+  &:hover, &:focus-within {
+    background-position: 100% 0;
+    border-color: var(--border);
+  }
+}
+
+
 @mixin flex-center($direction: row, $justify: center, $align: center) {
   display: flex;
   justify-content: $justify;
