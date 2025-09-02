@@ -8,14 +8,16 @@ type NotificationType = 'success' | 'error' | 'info' | 'warning';
 export class CNotification { // CNotification to avoid name conflict with HTML Notification
   public id : string;
   public message : string;
+  public detailedMessage : string;
   public type : NotificationType;
   public duration : number;
   public timestamp : Date | null;
 
-  constructor(message : string, type : NotificationType, duration? : number) {
+  constructor(message : string, type : NotificationType, detailedMessage? : string, duration? : number) {
     this.id = uuidv4();
     this.message = message;
     this.type = type;
+    this.detailedMessage = detailedMessage ?? message;
     this.duration = duration ?? 5000; // default duration 5 seconds
     this.timestamp = null;
   }
@@ -43,31 +45,30 @@ export class NotificationsService {
       this.visible.push(notification);
       this.visibleSubject.next([...this.visible]);
       this.queueSubject.next([...this.queue]);
-      console.log(this.queue);
     }
   }
 
-  private createNotification(message : string, type : NotificationType, duration? : number) : void {
-    const notification = new CNotification(message, type, duration !== undefined ? duration * 1000 : undefined);
+  private createNotification(message : string, type : NotificationType, detailedMessage? : string, duration? : number) : void {
+    const notification = new CNotification(message, type, detailedMessage, duration !== undefined ? duration * 1000 : undefined);
     this.queue.push(notification);
     this.queueSubject.next([...this.queue]);
     this.showNext();
   }
 
-  public createInfoNotification(message : string, duration? : number) : void {
-    this.createNotification(message, 'info', duration);
+  public createInfoNotification(message : string, duration? : number, detailedMessage? : string) : void {
+    this.createNotification(message, 'info', detailedMessage, duration);
   }
 
-  public createSuccessNotification(message : string, duration? : number) : void {
-    this.createNotification(message, 'success', duration);
+  public createSuccessNotification(message : string, duration? : number, detailedMessage? : string) : void {
+    this.createNotification(message, 'success', detailedMessage, duration);
   }
 
-  public createErrorNotification(message : string, duration? : number) : void {
-    this.createNotification(message, 'error', duration);
+  public createErrorNotification(message : string, duration? : number, detailedMessage? : string) : void {
+    this.createNotification(message, 'error', detailedMessage, duration);
   }
 
-  public createWarningNotification(message : string, duration? : number) : void {
-    this.createNotification(message, 'warning', duration);
+  public createWarningNotification(message : string, duration? : number, detailedMessage? : string) : void {
+    this.createNotification(message, 'warning', detailedMessage, duration);
   }
 
   get getVisibleNotifications() : Observable<CNotification[]> {
@@ -82,5 +83,12 @@ export class NotificationsService {
     this.visible = this.visible.filter(n => n.id !== id);
     this.visibleSubject.next([...this.visible]);
     this.showNext();
+  }
+
+  public clearNotifications() {
+    this.queue = [];
+    this.queueSubject.next([...this.queue]);
+    this.visible = [];
+    this.visibleSubject.next([...this.visible]);
   }
 }

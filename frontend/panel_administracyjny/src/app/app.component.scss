@@ -12,14 +12,24 @@
 }
 
 .queue-info {
-  background-color: var(--bg);
-  border-radius: i.$border-radius-full;
-  border: i.$base-border var(--border-muted);
   padding: i.$padding-2xs i.$padding-xs;
-  font-size: i.$font-size-sm;
   display: flex;
-  align-items: center;
   gap: i.$padding-xs;
+  align-items: center;
+  font-size: i.$font-size-sm;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-full;
+  background-color: var(--bg);
   color: var(--text-muted);
   z-index: 2;
+
+  button {
+    margin-left: auto;
+    font-size: 1em;
+    transition: i.transition(color, i.$duration-sm);
+
+    &:hover, &:focus {
+      color: var(--text);
+    }
+  }
 }

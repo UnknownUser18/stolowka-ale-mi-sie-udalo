@@ -27,8 +27,9 @@
   }
 </div>
 @if (infoS.status() !== undefined && !infoS.status()) {
-  <button class="retry-button" (click)="getHealth()">
-    <fa-icon [icon]="faArrowRotateRight" />
+  @let retry_title = 'Ponów próbę połączenia z serwerem';
+  <button class="retry-button" (click)="getHealth()" [title]="retry_title" [attr.aria-label]="retry_title">
+    <fa-icon [icon]="faArrowRotateRight" [class.spin]="isLoading()" />
     Ponów próbę połączenia
   </button>
 }

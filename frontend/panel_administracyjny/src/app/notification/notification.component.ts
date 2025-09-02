@@ -3,12 +3,16 @@ import { CNotification } from '../services/notifications.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCheck, faInfinity, faInfo, faWarning, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { DatePipe } from '@angular/common';
+import { TooltipComponent } from '../tooltip-service/tooltip/tooltip.component';
+import { TooltipTriggerDirective } from '../tooltip-service/tooltip-trigger.directive';
 
 @Component({
   selector : 'app-notification',
   imports : [
     FaIconComponent,
-    DatePipe
+    DatePipe,
+    TooltipComponent,
+    TooltipTriggerDirective
   ],
   templateUrl : './notification.component.html',
   styleUrl : './notification.component.scss',
