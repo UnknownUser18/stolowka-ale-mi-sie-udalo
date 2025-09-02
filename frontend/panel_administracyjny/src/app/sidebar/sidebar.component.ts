@@ -29,6 +29,7 @@ type SidebarData = 'home-nav' | 'osoby-nav' | '';
 })
 export class SidebarComponent {
 
+  protected readonly isLoading = signal(false);
   protected readonly nav_label = signal('Nawigacja');
   protected readonly imageError = signal(false);
   protected readonly isNotInRoot = signal(false);
@@ -79,11 +80,14 @@ export class SidebarComponent {
 
 
   protected getHealth() {
+    this.isLoading.set(true);
     this.infoS.getHealth().subscribe(health => {
+      this.isLoading.set(false);
       if (health !== 'OK')
         this.notificationsS.createErrorNotification('Błąd połączenia z serwerem. Większość funkcji może być niedostępna.', Infinity);
       else
         this.notificationsS.createSuccessNotification('Pomyślnie połączono z serwerem.', 3);
     });
   }
+
 }

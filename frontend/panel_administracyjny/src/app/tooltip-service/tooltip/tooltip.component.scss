@@ -1,0 +1,23 @@
+@use 'index' as i;
+
+.tooltip-panel {
+  max-width: 25vw;
+  padding: i.$padding-2xs i.$padding-xs;
+  font-size: i.$font-size-sm;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+  background-color: var(--bg-light);
+  color: var(--text);
+  box-shadow: i.$shadow-md;
+  opacity: 0;
+  transition: i.transition(opacity, i.$duration-sm), i.transition(transform, i.$duration-sm);
+  transform: translateY(-4px);
+  pointer-events: none;
+
+  &.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+
+  }
+}

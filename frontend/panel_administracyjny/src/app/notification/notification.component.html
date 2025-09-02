@@ -14,7 +14,7 @@
     }
   }
 </div>
-<p>{{ notification()?.message }}</p>
+<p [tooltipTrigger]="tooltip">{{ notification()?.message }}</p>
 @let dismiss_title = 'Zamknij powiadomienie';
 <button (click)="isClosing.set(true);" [title]="dismiss_title" [attr.aria-label]="dismiss_title">
   <fa-icon [icon]="faXmark" />
@@ -34,3 +34,7 @@
     {{ formatDate(timeLeft()) }}
   }
 </time>
+
+<app-tooltip #tooltip>
+  {{ notification()?.detailedMessage }}
+</app-tooltip>

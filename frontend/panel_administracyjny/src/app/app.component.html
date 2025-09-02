@@ -25,6 +25,10 @@
               powiadomień
             }
           } w kolejce</span>
+        @let clear_title = 'Wyczyść powiadomienia z kolejki';
+        <button (click)="clearNotifications()" [title]="clear_title" [attr.aria-label]="clear_title">
+          <fa-icon [icon]="faTrash" />
+        </button>
       </div>
     }
   </div>

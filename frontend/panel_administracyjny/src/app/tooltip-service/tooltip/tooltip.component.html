@@ -1,0 +1,5 @@
+<ng-template #tooltip>
+  <div class="tooltip-panel" (mouseenter)="clearHideTimeout()" (mouseleave)="hide()" [class.visible]="isVisible()">
+    <ng-content />
+  </div>
+</ng-template>
