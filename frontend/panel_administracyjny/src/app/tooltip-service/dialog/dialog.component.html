@@ -1,0 +1,9 @@
+<ng-template #dialog>
+  <div class="dialog-panel" [class.visible]="isVisible()">
+    @let close_title = 'Zamknij menu filtrów';
+    <button (click)="hide()" class="close-button" [title]="close_title" [attr.aria-label]="close_title">
+      <fa-icon [icon]="faXmark" size="2x" />
+    </button>
+    <ng-content />
+  </div>
+</ng-template>

@@ -2,22 +2,15 @@ import { Directive, input } from '@angular/core';
 import { TooltipComponent } from './tooltip/tooltip.component';
 
 @Directive({
-  selector: '[tooltipTrigger]',
+  selector: '[tooltip]',
   host: {
-    '(mouseenter)': 'onEnter($event)',
+    '(mouseenter)': 'tooltip()?.createInfoTooltip($event)',
     '(mouseleave)': 'tooltip()?.hide()'
   }
 })
 export class TooltipTriggerDirective {
-  public tooltip = input.required<TooltipComponent>({ alias : 'tooltipTrigger' });
+  public tooltip = input.required<TooltipComponent>({ alias : 'tooltip' });
 
   constructor() { }
 
-  onEnter(event: MouseEvent) {
-    this.tooltip()?.showAt(event);
-  }
-
-  onMove(event: MouseEvent) {
-    this.tooltip()?.updatePosition(event);
-  }
 }
