@@ -67,6 +67,16 @@ a {
   }
 }
 
+.dialog-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: i.transition(backdrop-filter);
+  backdrop-filter: none;
+
+  &.visible {
+    backdrop-filter: blur(5px);
+  }
+}
+
 .placeholder {
   background-color: var(--highlight);
   animation: pulse i.$duration-xl infinite alternate i.$cubic-in-out;

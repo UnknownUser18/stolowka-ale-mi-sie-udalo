@@ -122,7 +122,6 @@ table {
   overflow-y: auto;
 }
 
-
 tr {
   width: 100%;
   display: table;
@@ -179,6 +178,193 @@ td {
 .placeholder-row td {
   padding: i.$padding-md;
   animation: pulse 2s infinite;
+}
+
+h2 {
+  text-align: center;
+}
+
+fieldset {
+  padding: i.$padding-sm i.$padding-md;
+  display: flex;
+  gap: i.$padding-md;
+  flex-direction: column;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+}
+
+select {
+  padding: i.$padding-2xs i.$padding-xs;
+  cursor: pointer;
+  font-size: i.$font-size-xs;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+  background-color: var(--bg);
+  color: var(--text-muted);
+  transition: i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm);
+
+  &:hover, &:focus {
+    color: var(--text);
+    border-color: var(--border);
+  }
+}
+
+.filter-form {
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+
+  button {
+    width: fit-content;
+    padding: i.$padding-2xs i.$padding-xs;
+    border: i.$base-border;
+    border-radius: i.$border-radius-md;
+    transition: i.transition(background-color, i.$duration-sm), i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm);
+
+    &[type="reset"] {
+      background-color: color-mix(in oklch, var(--danger) 20%, var(--bg) 80%);
+      color: var(--danger);
+      border-color: color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
+
+      &:hover, &:focus {
+        background-color: var(--danger);
+        color: var(--bg);
+        border-color: var(--danger);
+      }
+    }
+
+    &[type="submit"] {
+      justify-self: end;
+      background-color: color-mix(in oklch, var(--success) 20%, var(--bg) 80%);
+      color: var(--success);
+      border-color: color-mix(in oklch, var(--success) 80%, var(--bg) 20%);
+
+      &:hover, &:focus {
+        background-color: var(--success);
+        color: var(--bg);
+        border-color: var(--success);
+      }
+    }
+  }
+
+  div {
+    display: grid;
+    gap: i.$padding-2xs;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+
+    &:not(.one-line):focus-within span {
+      border-color: var(--border);
+    }
+
+    &.one-line {
+      display: flex;
+      gap: i.$padding-sm;
+      align-items: center;
+
+      span {
+        border-bottom: none;
+      }
+    }
+  }
+
+  span {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    transition: i.transition(border-color, i.$duration-sm);
+    padding-bottom: i.$padding-3xs;
+    border-bottom: i.$base-border var(--border-muted);
+  }
+
+  label:first-of-type {
+    grid-column: 1;
+  }
+
+  label:nth-of-type(2) {
+    grid-column: 2 / span 2;
+  }
+
+  input {
+    padding: i.$padding-2xs i.$padding-xs;
+    font-size: i.$font-size-sm;
+    border: i.$base-border var(--border-muted);
+    border-radius: i.$border-radius-md;
+    background-color: var(--bg-light);
+    color: var(--text-muted);
+    transition: i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm);
+
+    &:hover, &:focus {
+      color: var(--text);
+      border-color: var(--border);
+      outline: none;
+    }
+  }
+}
+
+.sort-options {
+  div {
+    max-height: 60vh;
+    display: flex;
+    gap: i.$padding-md;
+    align-items: center;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  p {
+    margin-bottom: i.$padding-sm;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  button {
+    padding: i.$padding-2xs i.$padding-xs;
+    border-radius: i.$border-radius-md;
+    color: var(--text-muted);
+    transition: i.transition(border-color, i.$duration-sm), i.transition(background-color, i.$duration-sm), i.transition(color, i.$duration-sm);
+
+    &:hover, &:focus {
+      background-color: color-mix(in oklch, var(--highlight) 10%, var(--bg-light) 90%);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    &.selected {
+      background-color: var(--highlight);
+      color: var(--bg);
+      border-color: var(--border);
+
+      &:hover, &:focus {
+        background-color: var(--secondary);
+        border-color: var(--border);
+      }
+    }
+  }
+}
+
+option {
+  color: var(--text-muted);
+
+  &:hover, &:focus {
+    color: var(--text);
+  }
+}
+
+.ul-bullets {
+  display: flex;
+  gap: i.$padding-2xs;
+  flex-direction: column;
+  list-style: disc inside;
+  line-height: i.$padding-lg;
+
+  &::marker, li {
+    color: var(--text-muted);
+  }
+
+  strong {
+    color: var(--text);
+  }
 }
 
 @keyframes pulse {

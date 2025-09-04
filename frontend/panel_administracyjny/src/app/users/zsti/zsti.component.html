@@ -2,13 +2,13 @@
   <search>
     @let searchInput_title = 'Wyszukaj osobę z ZSTI...';
     <input type="search" name="searchSimple" [placeholder]="searchInput_title" [(ngModel)]="search" [title]="searchInput_title" [attr.aria-label]="searchInput_title" (keydown.enter)="filterZPersons()" />
-    <button (click)="filterZPersons()">
+    <button (click)="filterZPersons()" [disabled]="shownZPersons === null || shownZPersons === undefined || shownZPersons.length === 0">
       @let search_title = 'Wyszukaj osobę';
       <fa-icon [icon]="faMagnifyingGlass" [title]="search_title" [attr.aria-label]="search_title" />
     </button>
   </search>
 
-  <button class="filter-button">
+  <button class="filter-button" [dialog]="filterDialog">
     Filtruj
     @let filter_title = 'Otwórz menu filtrów';
     <fa-icon [icon]="faFilter" [title]="filter_title" [attr.aria-label]="filter_title" />
@@ -17,12 +17,15 @@
   @if (shownZPersons === undefined) {
     <p>Ładowanie osób...</p>
   } @else if (shownZPersons === null) {
-    <p><fa-icon [icon]="faWarning" /> Wystąpił błąd podczas ładowania.</p>
+    <p>
+      <fa-icon [icon]="faWarning" />
+      Wystąpił błąd podczas ładowania.
+    </p>
   } @else {
     <p>Znaleziono {{ shownZPersons.length }} {{ osobString(shownZPersons.length) }}</p>
   }
 
-  <button class="sort-button">
+  <button class="sort-button" [clickT]="sortTooltip" [underCursor]="true" [disabled]="shownZPersons === null || shownZPersons === undefined || shownZPersons.length === 0">
     Sortuj
     @let sort_title = 'Sortuj osoby';
     <fa-icon [icon]="faArrowUpWideShort" [title]="sort_title" [attr.aria-label]="sort_title" />
@@ -94,6 +97,101 @@
   </div>
 </table>
 
-<dialog autofocus #filterDialog>
-  blah
-</dialog>
+<app-dialog #filterDialog [label]="'Filtry'">
+  <h2>Filtry</h2>
+  <form [formGroup]="filterForm" class="filter-form">
+    <fieldset>
+      <legend>
+        <fa-icon [icon]="faUser" />
+        Dane osobowe
+      </legend>
+      <div>
+        <span>Imię:</span>
+        <label>
+          <select formControlName="imie_filter" aria-label="Filtr imienia" [delayT]="filterTooltip" [delay]="1000">
+            @for (option of filteringOptions; track option[0]) {
+              <option [value]="option[0]">{{ option[1] }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <input type="text" formControlName="imie" aria-label="Imię" placeholder="Imię..." />
+        </label>
+      </div>
+      <div>
+        <span>Nazwisko:</span>
+        <label>
+          <select formControlName="nazwisko_filter" aria-label="Filtr nazwiska" [delayT]="filterTooltip" [delay]="1000">
+            @for (option of filteringOptions; track option[0]) {
+              <option [value]="option[0]">{{ option[1] }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <input type="text" formControlName="nazwisko" aria-label="Nazwisko" placeholder="Nazwisko..." />
+        </label>
+      </div>
+      <div>
+        <span>Klasa:</span>
+        <label>
+          <input type="text" formControlName="klasa" aria-label="Klasa" placeholder="Klasa..." [delayT]="klasaTooltip" />
+        </label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>
+        <fa-icon [icon]="faSchool" />
+        Dane szkolne
+      </legend>
+      <div class="one-line">
+        <span>Może uczęszczać:</span>
+        <app-switch formControlName="uczeszcza" [label]="'Może uczęszczać'" />
+      </div>
+      <div class="one-line">
+        <span>Opłacany przez miasto:</span>
+        <app-switch formControlName="miasto" [label]="'Może opłacany przez miasto'" />
+      </div>
+      <div class="one-line">
+        <span>Typ osoby:</span>
+        <select formControlName="typ_osoby">
+          <option [value]="TypOsoby.UCZEN">Uczeń</option>
+          <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
+          <option [value]="'all'">Wszyscy</option>
+        </select>
+      </div>
+    </fieldset>
+    <button type="reset">
+      Resetuj
+    </button>
+    <button type="submit" (click)="applyFilters()">
+      Zastosuj
+    </button>
+  </form>
+</app-dialog>
+
+<app-tooltip #sortTooltip>
+  <div class="sort-options">
+    <p>Sortuj według:</p>
+    <div>
+      @for (option of sortOptions; track option[0]) {
+        <button (click)="sortPersons(option[0])" [class.selected]="usedSortOption() === option[0]">{{ option[1] }}</button>
+      }
+    </div>
+  </div>
+</app-tooltip>
+
+<app-tooltip #klasaTooltip>
+  Można wpisać więcej niż jedną klasę, oddzielając je przecinkami. Przykład: <code>1P, 3P, 5EI</code>.
+</app-tooltip>
+
+<app-tooltip #filterTooltip>
+  <p>Dostępne są pięć opcji filtrowania:</p>
+  <p><strong>Każda z nich nie uwzględnia wielkości liter.</strong></p>
+  <ul class="ul-bullets">
+    <li><strong>Dokładne dopasowanie</strong> - wartość musi być dokładnie taka sama jak wpisana.</li>
+    <li><strong>Zaczyna się od</strong> - wartość musi zaczynać się od wpisanego ciągu znaków.</li>
+    <li><strong>Kończy się na</strong> - wartość musi kończyć się na wpisany ciąg znaków.</li>
+    <li><strong>Zawiera</strong> - wartość musi zawierać wpisany ciąg znaków.</li>
+    <li><strong>Nie zawiera</strong> - wartość nie może zawierać wpisanego ciągu znaków.</li>
+  </ul>
+</app-tooltip>

@@ -104,8 +104,8 @@ ol {
 }
 
 li {
-  padding: i.$padding-3xs i.$padding-2xs;
   cursor: pointer;
+  padding-left: i.$padding-xs;
   font-size: i.$font-size-sm;
   border: i.$base-border var(--border-muted);
   border-radius: i.$border-radius-md;
@@ -144,6 +144,8 @@ li {
   }
 
   button {
+    width: 80%;
+    padding: i.$padding-2xs i.$padding-xs i.$padding-2xs 0;
     margin-left: i.$padding-2xs;
     font-size: 1.1em;
     text-align: left;

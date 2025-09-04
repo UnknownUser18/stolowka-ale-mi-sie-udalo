@@ -1,11 +1,24 @@
-import { Component, signal } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { PersonsService, ZPerson } from '../../services/database/persons.service';
-import { FormCreatorService } from '../../services/form-creator.service';
+import { Component, signal, viewChild } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { PersonsService, ZPerson, TypOsoby } from '../../services/database/persons.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faArrowsRotate, faArrowUpWideShort, faCircle, faFilter, faMagnifyingGlass, faPlus, faWarning } from '@fortawesome/free-solid-svg-icons';
+import { faArrowsRotate, faArrowUpWideShort, faCircle, faFilter, faMagnifyingGlass, faPlus, faSchool, faUser, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { NotificationsService } from '../../services/notifications.service';
+import { DialogComponent } from '../../tooltip-service/dialog/dialog.component';
+import { DialogTriggerDirective } from '../../tooltip-service/dialog-trigger.directive';
+import { TooltipComponent } from '../../tooltip-service/tooltip/tooltip.component';
+import { TooltipDelayTriggerDirective } from '../../tooltip-service/tooltip-delay-trigger.directive';
+import { SwitchComponent, State } from '../../switch/switch.component';
+import { TooltipClickTriggerDirective } from '../../tooltip-service/tooltip-click-trigger.directive';
 
+type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
+type SortOption = 'surnameAsc' | 'surnameDesc' |
+  'nameAsc' | 'nameDesc' |
+  'classAsc' | 'classDesc' |
+  'typeAsc' | 'typeDesc' |
+  'attendanceAsc' | 'attendanceDesc' |
+  'cityAsc' | 'cityDesc' |
+  'idAsc' | 'idDesc';
 
 @Component({
   selector : 'app-zsti',
@@ -13,13 +26,45 @@ import { NotificationsService } from '../../services/notifications.service';
     FormsModule,
     ReactiveFormsModule,
     FaIconComponent,
+    DialogComponent,
+    DialogTriggerDirective,
+    TooltipComponent,
+    TooltipDelayTriggerDirective,
+    SwitchComponent,
+    TooltipClickTriggerDirective,
   ],
   templateUrl : './zsti.component.html',
   styleUrl : './zsti.component.scss'
 })
 export class ZstiComponent {
 
+  protected dialog = viewChild.required<DialogComponent>('filterDialog');
   protected readonly isRefreshing = signal(false);
+  protected readonly usedSortOption = signal<SortOption>('idAsc');
+
+  protected readonly filteringOptions : Map<FilteringOption, string> = new Map([
+    ['match', 'Dokładne dopasowanie'],
+    ['startsWith', 'Zaczyna się od'],
+    ['endsWith', 'Kończy się na'],
+    ['contains', 'Zawiera'],
+    ['excludes', 'Nie zawiera'],
+  ]);
+  protected readonly sortOptions : Map<SortOption, string> = new Map([
+    ['nameAsc', 'Imię rosnąco'],
+    ['nameDesc', 'Imię malejąco'],
+    ['surnameAsc', 'Nazwisko rosnąco'],
+    ['surnameDesc', 'Nazwisko malejąco'],
+    ['classAsc', 'Klasa rosnąco'],
+    ['classDesc', 'Klasa malejąco'],
+    ['typeAsc', 'Typ osoby rosnąco'],
+    ['typeDesc', 'Typ osoby malejąco'],
+    ['attendanceAsc', 'Uczęszcza rosnąco'],
+    ['attendanceDesc', 'Uczęszcza malejąco'],
+    ['cityAsc', 'Miasto rosnąco'],
+    ['cityDesc', 'Miasto malejąco'],
+    ['idAsc', 'ID rosnąco'],
+    ['idDesc', 'ID malejąco'],
+  ]);
 
   protected readonly faMagnifyingGlass = faMagnifyingGlass;
   protected readonly faFilter = faFilter;
@@ -28,24 +73,51 @@ export class ZstiComponent {
   protected readonly faArrowsRotate = faArrowsRotate;
   protected readonly faCircle = faCircle;
   protected readonly faWarning = faWarning;
+  protected readonly faUser = faUser;
+  protected readonly faSchool = faSchool;
+  protected readonly TypOsoby = TypOsoby;
 
   protected search = '';
   protected shownZPersons : ZPerson[] | null | undefined;
   private ZPersons : ZPerson[] | null = [];
 
-  protected formGroup : FormGroup = new FormGroup({});
+  protected filterForm : FormGroup = new FormGroup({
+    imie : new FormControl(''),
+    imie_filter : new FormControl<FilteringOption>('contains'),
+    nazwisko : new FormControl(''),
+    nazwisko_filter : new FormControl<FilteringOption>('contains'),
+    klasa : new FormControl(''),
+    uczeszcza : new FormControl<State>('all'),
+    miasto : new FormControl<State>('all'),
+    typ_osoby : new FormControl<TypOsoby | 'all'>('all')
+  });
 
 
   constructor(
     private personS : PersonsService,
-    private formS : FormCreatorService,
-    private notificatiosnS : NotificationsService) {
+    private notificationsS : NotificationsService) {
     this.requestPersons();
-
-    this.formGroup = new FormGroup({
-    });
   }
 
+  private filterByOption(input : string, object : string, option : FilteringOption,) : boolean {
+    const filterQuery = input.toLowerCase();
+
+
+    switch (option) {
+      case 'match':
+        return object.toLowerCase() === filterQuery;
+      case 'startsWith':
+        return object.toLowerCase().startsWith(filterQuery);
+      case 'endsWith':
+        return object.toLowerCase().endsWith(filterQuery);
+      case 'contains':
+        return object.toLowerCase().includes(filterQuery);
+      case 'excludes':
+        return !object.toLowerCase().includes(filterQuery);
+      default:
+        return false;
+    }
+  }
 
   protected isTeacher(person : ZPerson) : boolean {
     return this.personS.isTeacher(person);
@@ -62,11 +134,13 @@ export class ZstiComponent {
       this.isRefreshing.set(false);
 
       if (!persons)
-        this.notificatiosnS.createErrorNotification('Nie udało się pobrać listy osób.', 10);
+        this.notificationsS.createErrorNotification('Nie udało się pobrać listy osób.', 10);
       else if (persons.length === 0)
-        this.notificatiosnS.createWarningNotification('Brak osób w bazie danych.', 10);
-      else
-        this.notificatiosnS.createSuccessNotification('Pobrano listę osób z serwera.', 2);
+        this.notificationsS.createWarningNotification('Brak osób w bazie danych.', 10);
+      else {
+        this.notificationsS.createSuccessNotification('Pobrano listę osób z serwera.', 2);
+        this.sortPersons(this.usedSortOption());
+      }
     });
   }
 
@@ -102,4 +176,101 @@ export class ZstiComponent {
     })
   }
 
+  protected applyFilters() {
+    if (!this.ZPersons) return;
+
+
+    const { imie, imie_filter, nazwisko, nazwisko_filter, klasa, uczeszcza, miasto, typ_osoby } = this.filterForm.value;
+
+    if (imie.trim() === '' && nazwisko.trim() === '' && klasa.trim() === '' && uczeszcza === 'all' && miasto === 'all' && typ_osoby === 'all') {
+      this.shownZPersons = this.ZPersons;
+      this.dialog().hide();
+      return;
+    }
+
+    this.shownZPersons = this.ZPersons.filter((person) => {
+      let matches = true;
+      if (imie && imie.trim() !== '')
+        matches = matches && this.filterByOption(imie, person.imie, imie_filter);
+
+      if (nazwisko && nazwisko.trim() !== '')
+        matches = matches && this.filterByOption(nazwisko, person.nazwisko, nazwisko_filter);
+
+      if (klasa && klasa.trim() !== '') {
+        if (klasa.includes(',')) {
+          const classes = klasa.split(',').map((c : string) => c.trim().toLowerCase());
+          matches = matches && person.klasa ? classes.includes(person.klasa.toLowerCase()) : false;
+        } else
+          matches = matches && person.klasa ? person.klasa.toLowerCase() === klasa.trim().toLowerCase() : false;
+      }
+
+      if (uczeszcza !== 'all')
+        matches = matches && ((uczeszcza === 'on') ? person.uczeszcza : !person.uczeszcza)!;
+
+      if (miasto !== 'all')
+        matches = matches && ((miasto === 'on') ? person.miasto : !person.miasto)!;
+
+      if (typ_osoby !== 'all')
+        matches = matches && person.typ_osoby_id === typ_osoby;
+
+      return matches ? person : null;
+    });
+
+    this.search = (imie.trim() + ' ' + nazwisko.trim()).trim();
+
+    this.dialog().hide();
+  }
+
+  protected sortPersons(option : SortOption) {
+    if (!this.shownZPersons) return;
+
+    this.usedSortOption.set(option);
+
+    this.shownZPersons = [...this.shownZPersons].sort((a, b) => {
+      switch (option) {
+        case 'surnameAsc':
+          return a.nazwisko.localeCompare(b.nazwisko) || a.imie.localeCompare(b.imie);
+        case 'surnameDesc':
+          return b.nazwisko.localeCompare(a.nazwisko) || b.imie.localeCompare(a.imie);
+        case 'nameAsc':
+          return a.imie.localeCompare(b.imie) || a.nazwisko.localeCompare(b.nazwisko);
+        case 'nameDesc':
+          return b.imie.localeCompare(a.imie) || b.nazwisko.localeCompare(a.nazwisko);
+        case 'classAsc':
+          return (a.klasa ?? '').localeCompare(b.klasa ?? '') || a.nazwisko.localeCompare(b.nazwisko) || a.imie.localeCompare(b.imie);
+        case 'classDesc':
+          return (b.klasa ?? '').localeCompare(a.klasa ?? '') || b.nazwisko.localeCompare(a.nazwisko) || b.imie.localeCompare(a.imie);
+        case 'typeAsc':
+          return (a.typ_osoby_id?.toString() ?? '').localeCompare(b.typ_osoby_id?.toString() ?? '') ||
+            a.nazwisko.localeCompare(b.nazwisko) ||
+            a.imie.localeCompare(b.imie);
+        case 'typeDesc':
+          return (b.typ_osoby_id?.toString() ?? '').localeCompare(a.typ_osoby_id?.toString() ?? '') ||
+            b.nazwisko.localeCompare(a.nazwisko) ||
+            b.imie.localeCompare(a.imie);
+        case 'attendanceAsc':
+          return (a.uczeszcza === b.uczeszcza) ? 0 : a.uczeszcza ? -1 : 1 ||
+            a.nazwisko.localeCompare(b.nazwisko) ||
+            a.imie.localeCompare(b.imie);
+        case 'attendanceDesc':
+          return (a.uczeszcza === b.uczeszcza) ? 0 : a.uczeszcza ? 1 : -1 ||
+            b.nazwisko.localeCompare(a.nazwisko) ||
+            b.imie.localeCompare(a.imie);
+        case 'cityAsc':
+          return (a.miasto === b.miasto) ? 0 : a.miasto ? -1 : 1 ||
+            a.nazwisko.localeCompare(b.nazwisko) ||
+            a.imie.localeCompare(b.imie);
+        case 'cityDesc':
+          return (a.miasto === b.miasto) ? 0 : a.miasto ? 1 : -1 ||
+            b.nazwisko.localeCompare(a.nazwisko) ||
+            b.imie.localeCompare(a.imie);
+        case 'idAsc':
+          return (a.id ?? 0) - (b.id ?? 0);
+        case 'idDesc':
+          return (b.id ?? 0) - (a.id ?? 0);
+        default:
+          return 0;
+      }
+    });
+  }
 }
