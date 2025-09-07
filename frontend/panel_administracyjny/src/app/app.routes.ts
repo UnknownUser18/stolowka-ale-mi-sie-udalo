@@ -44,6 +44,8 @@ export const routes : Routes = [
       },
       {
         path : 'osoba',
+        loadComponent : () => import('./users/osoba/osoba.component').then(m => m.OsobaComponent),
+        data : { sidebar : 'osoby-nav', title : 'Osoba' },
         children : [
           {
             path : 'zsti/:id',
@@ -51,7 +53,8 @@ export const routes : Routes = [
               { path : '', redirectTo : 'kalendarz', pathMatch : 'full' },
               ...['kalendarz', 'dane', 'deklaracje', 'platnosci'].map(childPath => ({
                 path : childPath,
-                loadComponent : componentImports[childPath]
+                loadComponent : componentImports[childPath],
+                data : { title : `${childPath.charAt(0).toUpperCase() + childPath.slice(1)} - ZSTI` }
               }))
             ]
           },

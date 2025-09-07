@@ -1,9 +1,10 @@
-@if (selectedZPerson() !== null) {
+@if (userS.personZ() !== null) {
+  @let person = userS.personZ()!;
   <section class="selected-person">
-    @let nazwisko_imie = selectedZPerson()?.nazwisko + ' ' + selectedZPerson()?.imie;
+    @let nazwisko_imie = person?.nazwisko + ' ' + person?.imie;
     @let deselect_title = `Odznacz osobę ${nazwisko_imie}`;
     <h3>Wybrana osoba ZSTI:</h3>
-    <p>{{ nazwisko_imie }} <i>({{ isTeacher(selectedZPerson()!) ? 'n.' : selectedZPerson()?.klasa }})</i></p>
+    <p>{{ nazwisko_imie }} <i>({{ isTeacher(person) ? 'n.' : person?.klasa }})</i></p>
     <button (click)="deselectPerson()" [title]="deselect_title" [attr.aria-label]="deselect_title">
       <fa-icon [icon]="faTimes" />
       Odznacz
@@ -38,7 +39,7 @@
         @for (person of personsZ; track person.id) {
           @let select_title = `Wybierz osobę ${person.nazwisko} ${person.imie}`;
           <li>
-            <button (click)="selectPerson(person.id)" [title]="select_title" [attr.aria-label]="select_title">
+            <button (click)="selectPerson(person)" [title]="select_title" [attr.aria-label]="select_title">
               {{ person.nazwisko }} {{ person.imie[0] }}.
               <i>({{ isTeacher(person) ? 'n.' : person.klasa }})</i>
             </button>

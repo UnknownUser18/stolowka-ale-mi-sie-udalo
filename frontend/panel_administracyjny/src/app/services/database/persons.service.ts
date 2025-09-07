@@ -1,8 +1,7 @@
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { Packet, TypesService } from './types.service';
 import { map, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { isPlatformServer } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 
 export enum TypOsoby {
@@ -30,6 +29,8 @@ export class PersonsService extends TypesService {
   constructor(@Inject(PLATFORM_ID) private platform : object) {
     super();
   }
+
+  public personZ = signal<ZPerson | null>(null);
 
   private requestPersons(limit? : number) : Observable<Packet | null> {
     if (limit && (!Number.isInteger(limit) || limit < 1))
@@ -72,23 +73,12 @@ export class PersonsService extends TypesService {
 
   }
 
-  public selectPerson(id : number) : void {
-    if (!Number.isInteger(id) || id < 1)
-      throw new Error('ID osoby musi być liczbą całkowitą dodatnią.');
-    if (isPlatformServer(this.platform))
-      throw new Error('Nie można nawigować na serwerze.');
-
-    this.getZPerson(id).subscribe((person : ZPerson | null) => {
-      if (!person)
-        throw new Error('Nie znaleziono osoby o podanym ID.');
-      sessionStorage.setItem('selectedZPerson', JSON.stringify(person));
-    });
+  public selectZPerson(person : ZPerson) : void {
+    this.personZ.set(person);
   }
 
   public deselectPerson() : void {
-    if (isPlatformServer(this.platform))
-      throw new Error('Nie można nawigować na serwerze.');
-    sessionStorage.removeItem('selectedZPerson');
+    this.personZ.set(null);
   }
 
   public isTeacher(person : ZPerson) : boolean {

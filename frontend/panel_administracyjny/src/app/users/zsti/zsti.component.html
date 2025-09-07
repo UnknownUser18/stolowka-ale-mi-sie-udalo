@@ -25,13 +25,13 @@
     <p>Znaleziono {{ shownZPersons.length }} {{ osobString(shownZPersons.length) }}</p>
   }
 
-  <button class="sort-button" [clickT]="sortTooltip" [underCursor]="true" [disabled]="shownZPersons === null || shownZPersons === undefined || shownZPersons.length === 0">
+  <button class="sort-button" [tooltip]="usedSortTooltip" [clickT]="sortTooltip" [underCursor]="true" [disabled]="shownZPersons === null || shownZPersons === undefined || shownZPersons.length === 0">
     Sortuj
     @let sort_title = 'Sortuj osoby';
     <fa-icon [icon]="faArrowUpWideShort" [title]="sort_title" [attr.aria-label]="sort_title" />
   </button>
 
-  <button class="refresh-button" (click)="requestPersons()">
+  <button class="refresh-button" (click)="requestPersons()" [disabled]="isRefreshing()">
     Odśwież
     @let refresh_title = 'Odśwież listę osób';
     <fa-icon [icon]="faArrowsRotate" [title]="refresh_title" [attr.aria-label]="refresh_title" [class.spin]="isRefreshing()" />
@@ -63,7 +63,7 @@
             @let full_name = `${ person.nazwisko } ${ person.imie }`;
             @let button_title = `Wybierz osobę ${ full_name }`;
             <td>
-              <button [title]="button_title" [attr.aria-label]="button_title">{{ full_name }}</button>
+              <button (click)="selectPerson(person)" [title]="button_title" [attr.aria-label]="button_title">{{ full_name }}</button>
             </td>
             <td>{{ isTeacher(person) ? 'Nauczyciel' : person.klasa }}</td>
             <td>
@@ -181,7 +181,7 @@
 </app-tooltip>
 
 <app-tooltip #klasaTooltip>
-  Można wpisać więcej niż jedną klasę, oddzielając je przecinkami. Przykład: <code>1P, 3P, 5EI</code>.
+  <p>Można wpisać więcej niż jedną klasę, oddzielając je przecinkami. Przykład: <code>1P, 3P, 5EI</code>.</p>
 </app-tooltip>
 
 <app-tooltip #filterTooltip>
@@ -194,4 +194,10 @@
     <li><strong>Zawiera</strong> - wartość musi zawierać wpisany ciąg znaków.</li>
     <li><strong>Nie zawiera</strong> - wartość nie może zawierać wpisanego ciągu znaków.</li>
   </ul>
+</app-tooltip>
+
+<app-tooltip #usedSortTooltip>
+  <div class="used-sort-tooltip">
+    <p>Aktualnie wybrane kryterium sortowania: <span>{{ sortOptions.get(usedSortOption()) }}</span>.</p>
+  </div>
 </app-tooltip>
