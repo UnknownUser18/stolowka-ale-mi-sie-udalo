@@ -10,6 +10,8 @@ import { TooltipComponent } from '../../tooltip-service/tooltip/tooltip.componen
 import { TooltipDelayTriggerDirective } from '../../tooltip-service/tooltip-delay-trigger.directive';
 import { SwitchComponent, State } from '../../switch/switch.component';
 import { TooltipClickTriggerDirective } from '../../tooltip-service/tooltip-click-trigger.directive';
+import { TooltipTriggerDirective } from '../../tooltip-service/tooltip-trigger.directive';
+import { Router } from '@angular/router';
 
 type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
 type SortOption = 'surnameAsc' | 'surnameDesc' |
@@ -32,6 +34,7 @@ type SortOption = 'surnameAsc' | 'surnameDesc' |
     TooltipDelayTriggerDirective,
     SwitchComponent,
     TooltipClickTriggerDirective,
+    TooltipTriggerDirective,
   ],
   templateUrl : './zsti.component.html',
   styleUrl : './zsti.component.scss'
@@ -95,7 +98,8 @@ export class ZstiComponent {
 
   constructor(
     private personS : PersonsService,
-    private notificationsS : NotificationsService) {
+    private notificationsS : NotificationsService,
+    private router : Router) {
     this.requestPersons();
   }
 
@@ -272,5 +276,10 @@ export class ZstiComponent {
           return 0;
       }
     });
+  }
+
+  protected selectPerson(person : ZPerson) {
+    this.personS.selectZPerson(person);
+    this.router.navigate(['/osoby/zsti', person.id, 'kalendarz']).then();
   }
 }

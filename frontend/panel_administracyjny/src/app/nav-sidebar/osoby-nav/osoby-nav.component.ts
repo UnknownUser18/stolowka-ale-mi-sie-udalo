@@ -21,7 +21,6 @@ import { NotificationsService } from '../../services/notifications.service';
 })
 export class OsobyNavComponent {
   protected personsZ : ZPerson[] | null | undefined;
-  protected readonly selectedZPerson = signal<ZPerson | null>(null);
   protected readonly loadingPersonsZ = signal(false);
   protected readonly ZheaderFocused = signal(false);
 
@@ -30,10 +29,10 @@ export class OsobyNavComponent {
   protected readonly faRefresh = faRefresh;
 
   constructor(
-    private userS : PersonsService,
     @Inject(PLATFORM_ID) private platform : object,
     private notificationsS : NotificationsService,
-    private router : Router) {
+    private router : Router,
+    protected userS : PersonsService) {
 
     if (isPlatformBrowser(this.platform)) {
       const sessionPersons = sessionStorage.getItem('persons');
@@ -46,15 +45,9 @@ export class OsobyNavComponent {
     this.requestPersonsZ();
   }
 
-  protected selectPerson(id : number) : void {
-    try {
-      this.userS.selectPerson(id);
-    } catch (error) {
-      console.error(error);
-      return;
-    }
-    this.selectedZPerson.set(this.personsZ?.find(p => p.id === id) ?? null);
-    // this.router.navigate(['/osoby', id]).then();
+  protected selectPerson(person : ZPerson) : void {
+    this.userS.selectZPerson(person);
+    this.router.navigate(['/osoba/zsti', person.id]).then();
   }
 
 
@@ -84,7 +77,6 @@ export class OsobyNavComponent {
 
   protected deselectPerson() {
     this.userS.deselectPerson();
-    this.selectedZPerson.set(null);
     if (this.router.url !== '/osoby')
       this.router.navigate(['/osoby']).then();
   }

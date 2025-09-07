@@ -1,7 +1,8 @@
-import { Component, input, InputSignal, Signal, signal, TemplateRef, viewChild, ViewContainerRef, WritableSignal } from '@angular/core';
+import { Component, inject, input, InputSignal, Signal, signal, TemplateRef, viewChild, ViewContainerRef, WritableSignal } from '@angular/core';
 import { ConnectedPosition, FlexibleConnectedPositionStrategy, Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { NgTemplateOutlet } from '@angular/common';
+import { TooltipRegistryService } from '../tooltip-registry.service';
 
 
 @Component({
@@ -14,6 +15,8 @@ import { NgTemplateOutlet } from '@angular/common';
   host : {}
 })
 export class TooltipComponent {
+  private tooltipRegistry = inject(TooltipRegistryService)
+
   /**
    * @description Positions for the tooltip overlay.
    * @private
@@ -74,7 +77,7 @@ export class TooltipComponent {
 
   constructor(
     private overlay : Overlay,
-    private vcr : ViewContainerRef
+    private vcr : ViewContainerRef,
   ) {
   }
 
@@ -131,6 +134,7 @@ export class TooltipComponent {
    * @notes - This method is typically called from a directive that handles mouse events.
    */
   public createInfoTooltip(event : MouseEvent) {
+    this.tooltipRegistry.register(this);
     const positionStrategy = this.overlay
       .position()
       .flexibleConnectedTo({ x : event.clientX, y : event.clientY })
@@ -170,8 +174,18 @@ export class TooltipComponent {
       setTimeout(() => {
         this.overlayRef?.detach();
         this.destroy();
+        this.tooltipRegistry.unregister(this);
       }, 200)
     }, 150);
   }
-}
 
+  public hideImmediate() {
+    this.clearHideTimeout();
+    this.isVisible.set(false);
+    setTimeout(() => {
+      this.overlayRef?.detach();
+      this.destroy();
+      this.tooltipRegistry.unregister(this);
+    }, 0);
+  }
+}
