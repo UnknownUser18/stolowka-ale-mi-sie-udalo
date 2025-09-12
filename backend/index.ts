@@ -2,7 +2,7 @@ import express from 'express';
 import 'dotenv/config';
 import * as dbConstructor from 'mysql2/promise';
 import { Debug, Errors, getStatusCodeByCode, Info, StatusCodes, Warning, Packet, ErrorPacket } from './types';
-import { configureRequestsDebug } from './config';
+import { configureConsoleOutput } from './config';
 import { QueryError, QueryResult } from "mysql2/promise";
 import zstiRoutes from './zsti';
 import infoRoutes from './info';
@@ -15,7 +15,7 @@ if (env.DEBUG_MODE === undefined)
 const app = express();
 
 if (env.DEBUG_MODE === 'false')
-  configureRequestsDebug(app);
+  configureConsoleOutput(app);
 
 app.use(express.json());
 app.use('/api/zsti', zstiRoutes);
@@ -104,7 +104,6 @@ export function sendResponse(res : express.Response, packet : Packet) : express.
     [StatusCodes.OK, 200],
     [StatusCodes.Inserted, 201],
     [StatusCodes.Updated, 200],
-    [StatusCodes.Removed, 204],
   ]);
   const statusCode = getStatusCodeByCode(packet.status);
 
