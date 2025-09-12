@@ -1,8 +1,8 @@
 import { Component, forwardRef, input, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { TooltipComponent } from '../tooltip-service/tooltip/tooltip.component';
-import { TooltipDelayTriggerDirective } from '../tooltip-service/tooltip-delay-trigger.directive';
-import { TooltipAuxClickTriggerDirective } from '../tooltip-service/tooltip-aux-click-trigger.directive';
+import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
+import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.directive';
+import { TooltipAuxClickTriggerDirective } from '@tooltips/tooltip-aux-click-trigger.directive';
 import { faArrowsRotate, faCheck, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 

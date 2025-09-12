@@ -1,10 +1,10 @@
 import { Component, input, OnInit, output, signal } from '@angular/core';
-import { CNotification } from '../services/notifications.service';
+import { CNotification } from '@services/notifications.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCheck, faInfinity, faInfo, faWarning, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { DatePipe } from '@angular/common';
-import { TooltipComponent } from '../tooltip-service/tooltip/tooltip.component';
-import { TooltipTriggerDirective } from '../tooltip-service/tooltip-trigger.directive';
+import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
+import { TooltipTriggerDirective } from '@tooltips/tooltip-trigger.directive';
 
 @Component({
   selector : 'app-notification',

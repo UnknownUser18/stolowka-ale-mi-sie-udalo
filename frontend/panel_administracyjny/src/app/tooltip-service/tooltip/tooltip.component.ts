@@ -134,6 +134,7 @@ export class TooltipComponent {
    * @notes - This method is typically called from a directive that handles mouse events.
    */
   public createInfoTooltip(event : MouseEvent) {
+    if (this.isVisible()) return;
     this.tooltipRegistry.register(this);
     const positionStrategy = this.overlay
       .position()
@@ -170,7 +171,6 @@ export class TooltipComponent {
     this.clearHideTimeout();
     this.hideTimeout = setTimeout(() => {
       this.isVisible.set(false);
-
       setTimeout(() => {
         this.overlayRef?.detach();
         this.destroy();

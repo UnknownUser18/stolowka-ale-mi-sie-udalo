@@ -1,26 +1,86 @@
-@use '../../../../assets/styles/index' as i;
+@use 'index' as i;
 
-span {
-  @include i.font-500;
-  transition: i.transition(color);
-  cursor: pointer;
-  user-select: none;
+:host {
+  width: 100%;
+  padding: i.$padding-2xs i.$padding-xl;
+  display: flex;
+  justify-content: space-around;
+  background-color: var(--bg-light);
+  border-bottom: i.$base-border var(--border-muted);
+}
 
-  &:first-child {
-    place-self: center start;
+button {
+  color: var(--text-muted);
+  transition: i.transition(color, i.$duration-sm);
+
+  &:nth-of-type(2) {
+    color: var(--text);
   }
 
-  &:nth-child(2) {
-    place-self: center;
-    cursor: default;
-    color: var(--color-13);
+  &:hover, &:focus {
+    color: var(--text);
+  }
+}
+
+button {
+  min-width: 30%;
+  font-size: i.$font-size-lg;
+}
+
+form {
+  display: grid;
+  gap: i.$padding-sm;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+
+  label {
+    width: 300px;
+    grid-column: 1 / -1;
   }
 
-  &:last-child {
-    place-self: center end;
+  input {
+    width: 100%;
+    padding: i.$padding-3xs i.$padding-xs;
+    font-size: i.$font-size-sm;
+    border: i.$base-border var(--border-muted);
+    border-radius: i.$border-radius-sm;
+    transition: i.transition(border-color, i.$duration-sm);
+
+    &:focus {
+      border-color: var(--border);
+      outline: none;
+    }
+
+    &.invalid {
+      border-color: var(--danger);
+    }
   }
 
-  &:hover:not(:nth-child(2)) {
-    color: var(--color-13);
+  span {
+    margin-top: i.$padding-2xs;
+    display: inline-block;
+    text-align: left;
+    font-size: i.$font-size-xs;
+    color: var(--danger);
   }
+
+  button {
+    font-size: i.$font-size-xs;
+
+    &:disabled {
+      cursor: not-allowed;
+
+      &[type="submit"] {
+        background-color: color-mix(in oklch, var(--success) 10%, var(--bg) 90%);
+        color: var(--text-muted);
+
+        &:hover, &:focus {
+          background-color: color-mix(in oklch, var(--success) 10%, var(--bg) 90%);
+          color: var(--text-muted);
+        }
+      }
+    }
+  }
+
+  @include i.form-buttons;
 }

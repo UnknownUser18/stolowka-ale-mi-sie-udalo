@@ -1,6 +1,6 @@
 @use 'assets/font/inter/inter.css';
 @use 'assets/font/manrope/manrope.css';
-@use 'assets/styles/index' as i;
+@use 'index' as i;
 
 @mixin positional($width, $height, $b-radius: 25px) {
   width: $width;

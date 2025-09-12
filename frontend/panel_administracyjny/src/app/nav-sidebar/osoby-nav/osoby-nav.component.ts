@@ -2,9 +2,9 @@ import { Component, Inject, PLATFORM_ID, signal } from '@angular/core';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faGraduationCap, faRefresh, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Router, RouterLink } from '@angular/router';
-import { PersonsService, ZPerson } from '../../services/database/persons.service';
+import { PersonsService, ZPerson } from '@database/persons.service';
 import { isPlatformBrowser } from '@angular/common';
-import { NotificationsService } from '../../services/notifications.service';
+import { NotificationsService } from '@services/notifications.service';
 
 @Component({
   selector : 'app-osoby-nav',
@@ -76,8 +76,8 @@ export class OsobyNavComponent {
 
 
   protected deselectPerson() {
-    this.userS.deselectPerson();
-    if (this.router.url !== '/osoby')
-      this.router.navigate(['/osoby']).then();
+    this.router.navigate(['/osoby']).then(() => {
+      this.userS.deselectPerson();
+    });
   }
 }

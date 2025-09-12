@@ -1,11 +1,9 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-// import { DataService } from '../../services/data.service';
 import { VariablesService } from '../../services/variables.service';
 import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { wynikString } from '../zsti/zsti.component';
 import * as xlsx from 'xlsx';
 
 @Component({

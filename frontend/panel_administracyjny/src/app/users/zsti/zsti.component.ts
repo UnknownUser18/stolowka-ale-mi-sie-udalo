@@ -1,16 +1,16 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { PersonsService, ZPerson, TypOsoby } from '../../services/database/persons.service';
+import { PersonsService, ZPerson, TypOsoby } from '@database/persons.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faArrowsRotate, faArrowUpWideShort, faCircle, faFilter, faMagnifyingGlass, faPlus, faSchool, faUser, faWarning } from '@fortawesome/free-solid-svg-icons';
-import { NotificationsService } from '../../services/notifications.service';
-import { DialogComponent } from '../../tooltip-service/dialog/dialog.component';
-import { DialogTriggerDirective } from '../../tooltip-service/dialog-trigger.directive';
-import { TooltipComponent } from '../../tooltip-service/tooltip/tooltip.component';
-import { TooltipDelayTriggerDirective } from '../../tooltip-service/tooltip-delay-trigger.directive';
-import { SwitchComponent, State } from '../../switch/switch.component';
-import { TooltipClickTriggerDirective } from '../../tooltip-service/tooltip-click-trigger.directive';
-import { TooltipTriggerDirective } from '../../tooltip-service/tooltip-trigger.directive';
+import { NotificationsService } from '@services/notifications.service';
+import { DialogComponent } from '@tooltips/dialog/dialog.component';
+import { DialogTriggerDirective } from '@tooltips/dialog-trigger.directive';
+import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
+import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.directive';
+import { SwitchComponent, State } from '@switch';
+import { TooltipClickTriggerDirective } from '@tooltips/tooltip-click-trigger.directive';
+import { TooltipTriggerDirective } from '@tooltips/tooltip-trigger.directive';
 import { Router } from '@angular/router';
 
 type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
@@ -171,8 +171,7 @@ export class ZstiComponent {
       nazwisko = split[0]
       imie = split[1];
     } else {
-      imie = search;
-      nazwisko = search;
+      imie = nazwisko = search;
     }
     this.shownZPersons = this.ZPersons.filter(person => {
       const { imie : imieP, nazwisko : nazwiskoP } = person;
@@ -182,7 +181,6 @@ export class ZstiComponent {
 
   protected applyFilters() {
     if (!this.ZPersons) return;
-
 
     const { imie, imie_filter, nazwisko, nazwisko_filter, klasa, uczeszcza, miasto, typ_osoby } = this.filterForm.value;
 
@@ -280,6 +278,6 @@ export class ZstiComponent {
 
   protected selectPerson(person : ZPerson) {
     this.personS.selectZPerson(person);
-    this.router.navigate(['/osoby/zsti', person.id, 'kalendarz']).then();
+    this.router.navigate(['/osoba/zsti', person.id]).then();
   }
 }

@@ -39,6 +39,42 @@
   }
 }
 
+@mixin form-buttons {
+  button {
+    width: fit-content;
+    padding: v.$padding-2xs v.$padding-xs;
+    border: v.$base-border;
+    border-radius: v.$border-radius-md;
+    transition: f.transition(background-color, v.$duration-sm), f.transition(border-color, v.$duration-sm), f.transition(color, v.$duration-sm);
+
+    &[type="reset"] {
+      background-color: color-mix(in oklch, var(--danger) 20%, var(--bg) 80%);
+      color: var(--danger);
+      border-color: color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
+
+      &:hover, &:focus {
+        background-color: var(--danger);
+        color: var(--bg);
+        border-color: var(--danger);
+      }
+    }
+
+    &[type="submit"] {
+      justify-self: end;
+      background-color: color-mix(in oklch, var(--success) 20%, var(--bg) 80%);
+      color: var(--success);
+      border-color: color-mix(in oklch, var(--success) 80%, var(--bg) 20%);
+
+      &:hover, &:focus {
+        background-color: var(--success);
+        color: var(--bg);
+        border-color: var(--success);
+      }
+    }
+  }
+}
+
+
 
 @mixin flex-center($direction: row, $justify: center, $align: center) {
   display: flex;
@@ -64,9 +100,6 @@
   }
 }
 
-@mixin background-hover($bg-color: inherit, $h-bg-color) {
-  @include hover-logic(background-color, $bg-color, $h-bg-color);
-}
 
 @mixin clickable-hover($color : inherit, $h-color) {
   @include hover-logic(color, $color, $h_color);
@@ -192,7 +225,7 @@
     flex-direction: column;
     margin: 10px 0;
 
-    span {
+    button {
       @include font-500(var(--color-13));
       margin-bottom: 15px;
     }

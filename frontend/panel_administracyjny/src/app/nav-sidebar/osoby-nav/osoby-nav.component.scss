@@ -31,11 +31,11 @@
     width: fit-content;
     align-self: center;
     font-size: i.$font-size-xs;
-    color: var(--text-muted);
+    color: color-mix(in oklch, var(--danger) 100%, rgb(0, 0, 0) 15%);
     transition: i.transition(color, i.$duration-sm);
 
     &:hover, &:focus {
-      color: var(--text);
+      color: var(--danger);
     }
   }
 }
@@ -105,12 +105,12 @@ ol {
 
 li {
   cursor: pointer;
-  padding-left: i.$padding-xs;
   font-size: i.$font-size-sm;
   border: i.$base-border var(--border-muted);
   border-radius: i.$border-radius-md;
   background-color: var(--bg-light);
   transition: i.transition(border-color, i.$duration-sm), i.transition(background-color, i.$duration-sm);
+  padding-left: i.$padding-xs;
   list-style-position: inside;
 
   &:hover, &:focus-within {
@@ -144,9 +144,9 @@ li {
   }
 
   button {
+    margin-left: i.$padding-2xs;
     width: 80%;
     padding: i.$padding-2xs i.$padding-xs i.$padding-2xs 0;
-    margin-left: i.$padding-2xs;
     font-size: 1.1em;
     text-align: left;
 
