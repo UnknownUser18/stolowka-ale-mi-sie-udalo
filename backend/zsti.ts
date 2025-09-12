@@ -1,11 +1,15 @@
-import { Router } from 'express';
+import { Router, Response } from 'express';
 import { createPacket, executeQuery, sendResponse } from './index';
-import { ErrorPacket, StatusCodes } from "./types";
+import { Debug, ErrorPacket, StatusCodes } from "./types";
 
 const router = Router({
   caseSensitive : true,
   strict : true,
 });
+
+function isID(id : any) : boolean {
+  return !(!Number.isInteger(id) || id < 1);
+}
 
 const baseGetPersonsQuery = `
     SELECT osobyZ.id AS id,
@@ -27,7 +31,7 @@ router.get('/person', async (req, res) => {
 
   if (typeof limitParam === 'string') {
     const parsedLimit = parseInt(limitParam, 10);
-    if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+    if (!isID(parsedLimit)) {
       const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
       return sendResponse(res, packet);
     }
@@ -47,7 +51,7 @@ router.get('/person', async (req, res) => {
 
 router.get('/person/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  if (!Number.isInteger(id) || id < 1) {
+  if (isID(id)) {
     const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
     return sendResponse(res, packet);
   }
@@ -56,5 +60,73 @@ router.get('/person/:id', async (req, res) => {
   const packet = createPacket(person, StatusCodes.OK);
   return sendResponse(res, packet);
 })
+
+router.get('/declaration/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const declaration = await executeQuery(`
+      SELECT id,
+             id_osoby,
+             data_od,
+             data_do,
+             dni
+      FROM deklaracjaZ
+      WHERE id_osoby = :id`, { id });
+  const packet = createPacket(declaration, StatusCodes.OK);
+
+  return sendResponse(res, packet);
+});
+
+router.get('/absence/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const absenceDays = await executeQuery(`
+      SELECT id,
+             zsti_id,
+             dzien_wypisania
+      FROM nieobecnosciZ
+      WHERE zsti_id = :id`, { id });
+  const packet = createPacket(absenceDays, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
+router.post('/absence/add/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { dzien_wypisania } = req.body;
+
+  if (!isID(id) || typeof dzien_wypisania !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dzien_wypisania)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`INSERT INTO nieobecnosciZ (zsti_id, dzien_wypisania) VALUES (:id, :dzien_wypisania)`, { id, dzien_wypisania });
+
+  const packet = createPacket(result, StatusCodes.Inserted);
+  return sendResponse(res, packet);
+});
+
+router.delete('/absence/delete/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { dzien_wypisania } = req.body;
+
+  if (!isID(id) || typeof dzien_wypisania !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dzien_wypisania)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`DELETE FROM nieobecnosciZ WHERE zsti_id = :id AND dzien_wypisania = :dzien_wypisania`, { id, dzien_wypisania });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  Debug('Delete absence result:', result);
+  return sendResponse(res, packet);
+});
 
 export default router;

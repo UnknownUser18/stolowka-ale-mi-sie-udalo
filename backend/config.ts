@@ -5,7 +5,7 @@ import { Express } from "express";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
-export function configureRequestsDebug(app : Express) {
+export function configureConsoleOutput(app : Express) {
   morgan.token('method', (req) => {
     const types : Record<string, string> = {
       'GET' : chalk.green('GET'),

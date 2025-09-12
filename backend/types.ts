@@ -55,7 +55,6 @@ export enum StatusCodes {
   'OK' = 200,
   'Inserted' = 201,
   'Updated' = 202,
-  'Removed' = 203,
   'Internal Server Error' = 500,
   'Database Connection Error' = 700,
   'Duplicate Entry' = 701,
