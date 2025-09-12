@@ -215,38 +215,7 @@ select {
   grid-template-columns: auto auto;
   grid-template-rows: auto auto;
 
-  button {
-    width: fit-content;
-    padding: i.$padding-2xs i.$padding-xs;
-    border: i.$base-border;
-    border-radius: i.$border-radius-md;
-    transition: i.transition(background-color, i.$duration-sm), i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm);
-
-    &[type="reset"] {
-      background-color: color-mix(in oklch, var(--danger) 20%, var(--bg) 80%);
-      color: var(--danger);
-      border-color: color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
-
-      &:hover, &:focus {
-        background-color: var(--danger);
-        color: var(--bg);
-        border-color: var(--danger);
-      }
-    }
-
-    &[type="submit"] {
-      justify-self: end;
-      background-color: color-mix(in oklch, var(--success) 20%, var(--bg) 80%);
-      color: var(--success);
-      border-color: color-mix(in oklch, var(--success) 80%, var(--bg) 20%);
-
-      &:hover, &:focus {
-        background-color: var(--success);
-        color: var(--bg);
-        border-color: var(--success);
-      }
-    }
-  }
+  @include i.form-buttons;
 
   div {
     display: grid;
@@ -254,7 +223,7 @@ select {
     grid-template-columns: auto auto auto;
     align-items: center;
 
-    &:not(.one-line):focus-within span {
+    &:not(.one-line):focus-within button {
       border-color: var(--border);
     }
 

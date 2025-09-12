@@ -1,4 +1,4 @@
-import { Component, signal, WritableSignal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -10,7 +10,7 @@ import { filter } from 'rxjs';
   styleUrl : './nav.component.scss',
 })
 export class NavComponent {
-  protected title : WritableSignal<string | null> = signal(null);
+  protected title = signal<string | null>(null);
 
   constructor(
     private router : Router,

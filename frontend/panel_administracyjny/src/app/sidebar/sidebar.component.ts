@@ -6,8 +6,8 @@ import { faArrowLeft, faArrowRotateRight, faWarning } from '@fortawesome/free-so
 import { filter, map } from 'rxjs';
 import { HomeNavComponent } from '../nav-sidebar/home-nav/home-nav.component';
 import { OsobyNavComponent } from '../nav-sidebar/osoby-nav/osoby-nav.component';
-import { InfoService } from '../services/info.service';
-import { NotificationsService } from '../services/notifications.service';
+import { InfoService } from '@services/info.service';
+import { NotificationsService } from '@services/notifications.service';
 
 type SidebarData = 'home-nav' | 'osoby-nav' | '';
 
@@ -45,9 +45,10 @@ export class SidebarComponent {
               private activatedRoute : ActivatedRoute,
               private notificationsS : NotificationsService,
               protected infoS : InfoService) {
-    const mapRoutes = new Map([
-      ['osoby', 'Osób'],
-      ['osoby/zsti', 'Osób ZSTI'],
+    const mapRoutes = new Map<RegExp, string>([
+      [/^osoby(\/.*)?$/, 'Osoby'],
+      [/^osoba(\/.*)?$/, 'Osoby'],
+      [/^$/, 'Strona główna']
     ]);
 
     this.router.events.pipe(
@@ -74,14 +75,16 @@ export class SidebarComponent {
         : '/';
       this.previousUrl.set(previousPath);
       this.isNotInRoot.set(true);
-      this.nav_label.set(`Nawigacja - ${ mapRoutes.get(urlSegments[0]) }` || 'Nawigacja');
+      const matchedRoute = Array.from(mapRoutes.entries()).find(([regex]) => regex.test(urlSegments[0]));
+      const routeSelect = matchedRoute ? matchedRoute[1] : urlSegments[0];
+      this.nav_label.set(`Nawigacja - ${ routeSelect }` || 'Nawigacja');
     });
   }
 
 
   protected getHealth() {
     this.isLoading.set(true);
-    this.infoS.getHealth().subscribe(health => {
+    this.infoS.getHealth.subscribe(health => {
       this.isLoading.set(false);
       if (health !== 'OK')
         this.notificationsS.createErrorNotification('Błąd połączenia z serwerem. Większość funkcji może być niedostępna.', Infinity);

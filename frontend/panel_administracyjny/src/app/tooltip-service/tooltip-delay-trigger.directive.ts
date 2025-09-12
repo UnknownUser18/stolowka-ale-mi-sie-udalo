@@ -5,7 +5,7 @@ import { TooltipComponent } from './tooltip/tooltip.component';
   selector : '[delayT]',
   host : {
     '(mouseenter)' : 'onEnter($event)',
-    '(mouseleave)' : 'tooltip()?.hide()'
+    '(mouseleave)' : 'onLeave()'
   }
 })
 
@@ -22,12 +22,27 @@ export class TooltipDelayTriggerDirective {
    */
   public delay = input<number | null>(null);
 
+  private showTimeout: any = null;
+
   constructor() {
   }
+  private cancelShowTimeout() {
+    if (this.showTimeout) {
+      clearTimeout(this.showTimeout);
+      this.showTimeout = null;
+    }
+  }
 
-  onEnter(event : MouseEvent) {
-    setTimeout(() => {
+  public onEnter(event : MouseEvent) {
+    this.cancelShowTimeout();
+    this.showTimeout = setTimeout(() => {
       this.tooltip()?.createInfoTooltip(event);
+      this.showTimeout = null;
     }, this.delay() ?? 300);
+  }
+
+  public onLeave() {
+    this.cancelShowTimeout();
+    this.tooltip()?.hide();
   }
 }

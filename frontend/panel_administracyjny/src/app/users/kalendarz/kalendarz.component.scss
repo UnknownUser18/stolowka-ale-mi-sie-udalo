@@ -1,227 +1,289 @@
-@use '../../../assets/styles/index' as i;
+@use 'index' as i;
 
-app-date-changer {
-  display: grid;
-  background-color: var(--color-6);
-  padding: 5px 1%;
-  grid-template-columns: repeat(3, 1fr);
-  align-items: center;
-  border-radius: 20px;
-  min-height: 60px;
-  height: 100%;
+:host {
+  width: 100%;
+  height: 95%;
+  display: block;
 }
 
-section:first-of-type {
+section {
+  width: 100%;
+  height: 100%;
   display: grid;
-  grid-template-columns: 0.2fr 1fr;
+  grid-template-columns: 0.3fr 1fr;
   grid-template-rows: 1fr 0.5fr;
-  border-radius: 25px;
-  background-color: var(--color-3);
-  padding: 10px;
+  background-color: var(--bg-dark);
+  row-gap: i.$padding-md;
+}
 
-  & > div:nth-of-type(2) {
-    display: grid;
-    place-items: end center;
+.day-name {
+  font-family: i.$font-interface;
+  font-size: i.$font-size-lg;
+  color: var(--text-muted);
+  transition: i.transition(color, i.$duration-sm);
+  place-self: center;
 
-    button {
-      @include i.button($padding: 10px, $bg-color: var(--color-6), $h-bg-color: var(--color-9));
-      @include i.font-500(var(--color-13));
-    }
+  &.first {
+    grid-column: 4;
   }
+
+  &:hover, &:focus {
+    color: var(--text);
+  }
+}
+
+.calendar-view {
+  display: grid;
+  gap: i.$padding-sm;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.day-static {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: inherit;
+  border: i.$base-border transparent;
+  border-radius: i.$border-radius-md;
+  background-color: var(--bg);
+}
+
+.weekend-day {
+  cursor: default;
+
+  &:hover, &:focus {
+    color: var(--text-muted);
+  }
+}
+
+.weekend, .no-declaration, .not-in-month, .closed-day {
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+
+.day {
+  transition: i.transition(border-color, i.$duration-sm), i.transition(background-color, i.$duration-sm), i.transition(color, i.$duration-sm);
+  border-color: var(--border-muted);
+
+  &.selected {
+    background-color: var(--highlight);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  &:hover {
+    background-color: color-mix(in oklch, var(--highlight) 40%, var(--bg-light) 60%);
+    border-color: var(--border);
+  }
+}
+
+.week {
+  display: grid;
+  gap: i.$padding-sm;
+  grid-template-columns: repeat(7, 1fr);
+  grid-column: 4 / -1;
 }
 
 .select-buttons {
   display: grid;
-  margin-top: 45px;
-  grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
   place-items: center;
+  grid-template-rows: repeat(auto-fit, minmax(50px, 1fr));
+  grid-column: 1 / span 3;
+  grid-row: 2 / -1;
 
-  button {
-    width: 70px;
-    height: 70px;
-    border-radius: 10px;
+}
 
-    &:not(:disabled) {
-      @include i.background-hover(var(--color-8), var(--color-9));
-      cursor: pointer;
+.select-button {
+  padding: i.$padding-md;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-column: 2;
+  grid-row: 2;
+  font-size: inherit;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+  background-color: var(--bg);
+  color: var(--text);
+  transition: i.transition(border-color, i.$duration-sm), i.transition(background-color, i.$duration-sm), i.transition(color, i.$duration-sm);
+
+  @for $i from 1 to 6 {
+    &:nth-of-type(#{$i}) {
+      grid-row: $i+1;
     }
+  }
 
-    &:disabled {
-      background-color: var(--color-5);
-      cursor: not-allowed;
-      color: var(--color-11);
-    }
-
-    i {
-      font-size: 35px;
-    }
+  &:hover {
+    background-color: color-mix(in oklch, var(--highlight) 40%, var(--bg-light) 60%);
+    color: var(--text);
+    border-color: var(--border);
   }
 }
 
-main {
-  display: grid;
-  grid-template-rows: 0.2fr auto;
-  row-gap: 5px;
-  padding: 5px;
-  & > * {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    place-items: center;
+.action-buttons {
+  margin-bottom: i.$padding-xs;
+  display: flex;
+  gap: i.$padding-md;
+  justify-content: center;
+  align-items: end;
+
+  button {
+    padding: i.$padding-xs i.$padding-md;
+    font-size: i.$font-size-md;
+    border-radius: i.$border-radius-md;
   }
+}
 
-  .weekdays {
-    font-size: 1.5em;
-    font-weight: 500;
-    height: 45px;
+.refresh-data {
+  border: i.$base-border var(--border-muted);
+  background-color: var(--bg-light);
+  color: var(--text-muted);
+  transition: i.transition(background-color, i.$duration-sm), i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm);
+
+  &:hover, &:focus {
+    background-color: color-mix(in oklch, var(--highlight) 40%, var(--bg-light) 60%);
+    color: var(--text);
+    border-color: var(--border);
   }
+}
 
-  .day {
-    @include i.font-500;
-    @include i.flex-center;
-    transition: i.transition(background-color), i.transition(color);
-    border-radius: 10px;
-    width: 70px;
-    height: 70px;
-    font-family: 'Roboto', sans-serif;
-    background-color: var(--color-6);
+.send-absence {
+  background-color: var(--primary);
+  color: var(--bg);
+  transition: i.transition(background-color, i.$duration-sm);
 
-    &:hover {
-      color: var(--color-13);
-      background-color: var(--color-7);
-    }
-
-    &:disabled, &.no-declaration, &.canceled {
-      color: var(--color-11);
-      cursor: not-allowed;
-
-      &:not(.no-declaration) {
-        background-color: var(--color-2);
-      }
-    }
-
-    &:not(.no-declaration, :disabled) {
-      cursor: pointer;
-    }
-
-    &.selected {
-      background-color: var(--color-10);
-      color: var(--color-13);
-    }
-
-    &.no-declaration {
-      background-color: var(--color-4);
-    }
+  &:hover, &:focus {
+    background-color: var(--secondary);
   }
 }
 
 .diff {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-
-  h3 {
-    @include i.font-500(var(--color-13));
-  }
-
-  div {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+  display: flex;
+  gap: i.$padding-md;
+  justify-content: space-evenly;
+  align-items: center;
 
   table {
-    border-radius: 5px;
-    height: 200px;
-    overflow: hidden;
-    width: 75%;
-    display: grid;
-    grid-template-rows: repeat(auto-fit, minmax(40px, 50px));
-    background-color: var(--color-5);
+    width: 100%;
+    height: 90%;
+    border: i.$base-border var(--border-muted);
+    border-radius: i.$border-radius-md;
+    background-color: var(--bg);
+    text-align: center;
+    table-layout: fixed;
+  }
 
-    &:has(> .empty) {
-      place-items: center;
-      grid-template-rows: 1fr;
+  tr:nth-of-type(even) {
+    background-color: var(--bg-light);
+  }
+
+  td {
+    padding: i.$padding-xs;
+    font-size: i.$font-size-md;
+    border-top: i.$base-border var(--border-muted);
+
+    &.more-info {
+      padding: i.$padding-2xs;
+      font-size: i.$font-size-sm;
+      color: var(--text-muted);
+    }
+  }
+
+  thead tr {
+    position: relative;
+  }
+
+  button {
+    position: absolute;
+    color: var(--text-muted);
+    transition: i.transition(color, i.$duration-sm);
+    top: i.$padding-3xs;
+    right: i.$padding-3xs;
+
+    &:hover, &:focus {
+      color: var(--text);
     }
 
-    tr {
-      @include i.font-500(var(--color-13));
-      display: grid;
-      width: 100%;
-      height: 50px;
-      padding: 10px;
-
-      &.empty {
-        color: var(--color-12);
-      }
-
-      &:last-of-type:not(.empty) {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      &:nth-child(even) {
-        background-color: var(--color-7);
-      }
-
-      &:not(.empty) > td:first-child {
-        margin-left: 70px;
-      }
-
-      &.empty {
-        place-items: center;
-      }
-
-      td:nth-child(2) {
-        place-self: center end;
-      }
-
-      i {
-        color: var(--color-13);
-        cursor: pointer;
-      }
+    fa-icon {
+      font-size: i.$font-size-lg;
     }
+  }
+
+  th {
+    font-family: i.$font-interface;
+    font-size: i.$font-size-lg;
+    font-weight: 500;
   }
 }
 
-.absenceWindow {
-  @include i.window;
+.dialog {
+  width: 100%;
+  max-width: 30vw;
+  padding: i.$padding-sm i.$padding-md;
+  display: flex;
+  gap: i.$padding-md;
+  flex-direction: column;
 
-  h3 {
-    @include i.font(2em, 500, var(--color-13));
+  h2 {
     text-align: center;
-    margin-bottom: 20px;
+  }
+
+  .table-wrapper {
+    max-height: 50vh;
+    overflow-y: auto;
   }
 
   table {
-    @include i.table;
-    max-height: 400px;
-    position: relative;
-    overflow-y: auto;
-    display: grid;
-    background-color: var(--color-4);
-    grid-template-columns: repeat(3, 1fr);
+    border: i.$base-border var(--border-muted);
+    border-radius: i.$border-radius-md;
+    background-color: var(--bg);
+    text-align: center;
+    table-layout: fixed;
+    border-spacing: 0;
+
+
+    th {
+      padding: i.$padding-3xs;
+      font-family: i.$font-interface;
+      font-size: i.$font-size-lg;
+      font-weight: 500;
+    }
 
     tr {
-      &:first-child th {
-        @include i.font-500(var(--color-13));
-        position: sticky;
-        top: 0;
-        padding: 10px 5px;
-        background-color: var(--color-2);
-      }
-
-      &.empty td {
-        grid-column: 1 / -1;
-      }
+      width: 100%;
+      display: table;
+      table-layout: fixed;
     }
 
     td {
-      @include i.font(1.5em, 400, var(--color-13));
-      font-family: 'Roboto', sans-serif;
-      padding: 15px 0;
+      padding: i.$padding-xs;
+      font-size: i.$font-size-md;
+      border-top: i.$base-border var(--border-muted);
     }
 
     button {
-      @include i.button($padding: 10px, $color: var(--color-13), $bg-color: var(--color-6), $h-bg-color: var(--color-9));
+      color: var(--text-muted);
+      transition: i.transition(color, i.$duration-sm);
+
+      &:hover, &:focus {
+        color: var(--text);
+      }
+
+      fa-icon {
+        font-size: i.$font-size-lg;
+      }
+    }
+
+    tr:nth-of-type(even) {
+      background-color: var(--bg-light);
     }
   }
 }
 
+.spin {
+  display: inline-block;
+  animation: spin 2s linear infinite;
+}

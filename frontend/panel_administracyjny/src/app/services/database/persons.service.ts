@@ -1,8 +1,9 @@
-import { Inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { Packet, TypesService } from './types.service';
 import { map, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
+import { LocalAbsenceChanges } from './declarations.service';
 
 export enum TypOsoby {
   UCZEN = 1,
@@ -26,11 +27,12 @@ export interface ZPerson {
 })
 export class PersonsService extends TypesService {
 
-  constructor(@Inject(PLATFORM_ID) private platform : object) {
+  constructor() {
     super();
   }
 
   public personZ = signal<ZPerson | null>(null);
+  public localAbsenceChanges = signal(new LocalAbsenceChanges());
 
   private requestPersons(limit? : number) : Observable<Packet | null> {
     if (limit && (!Number.isInteger(limit) || limit < 1))
@@ -70,15 +72,16 @@ export class PersonsService extends TypesService {
         return res.status === 200 ? res.data![0] as ZPerson : null;
       }),
       catchError(() => of(null)))
-
   }
 
   public selectZPerson(person : ZPerson) : void {
     this.personZ.set(person);
+    this.localAbsenceChanges.set(new LocalAbsenceChanges());
   }
 
   public deselectPerson() : void {
     this.personZ.set(null);
+    this.localAbsenceChanges.set(new LocalAbsenceChanges());
   }
 
   public isTeacher(person : ZPerson) : boolean {

@@ -5,7 +5,6 @@ export enum StatusCodes {
   'OK' = 200,
   'Inserted' = 201,
   'Updated' = 202,
-  'Removed' = 203,
   'Internal Server Error' = 500,
   'Database Connection Error' = 700,
   'Duplicate Entry' = 701,
@@ -46,6 +45,17 @@ export class ErrorPacket extends Packet {
   providedIn : 'root'
 })
 export abstract class TypesService {
-  public http = inject(HttpClient);
-  public readonly api = '/api/';
+  protected http = inject(HttpClient);
+  protected readonly api = '/api/';
+
+  protected isArray(res : Packet) : boolean {
+    return res.status === StatusCodes.OK && Array.isArray(res.data);
+  }
+
+  protected convertToDBDate(date : Date) : string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${ year }-${ month }-${ day }`;
+  }
 }
