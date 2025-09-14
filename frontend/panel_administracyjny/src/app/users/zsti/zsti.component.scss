@@ -194,19 +194,7 @@ fieldset {
 }
 
 select {
-  padding: i.$padding-2xs i.$padding-xs;
-  cursor: pointer;
-  font-size: i.$font-size-xs;
-  border: i.$base-border var(--border-muted);
-  border-radius: i.$border-radius-md;
-  background-color: var(--bg);
-  color: var(--text-muted);
-  transition: i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm);
-
-  &:hover, &:focus {
-    color: var(--text);
-    border-color: var(--border);
-  }
+  @include i.select;
 }
 
 .filter-form {
@@ -223,7 +211,7 @@ select {
     grid-template-columns: auto auto auto;
     align-items: center;
 
-    &:not(.one-line):focus-within button {
+    &:not(.one-line):focus-within span {
       border-color: var(--border);
     }
 
@@ -255,19 +243,7 @@ select {
   }
 
   input {
-    padding: i.$padding-2xs i.$padding-xs;
-    font-size: i.$font-size-sm;
-    border: i.$base-border var(--border-muted);
-    border-radius: i.$border-radius-md;
-    background-color: var(--bg-light);
-    color: var(--text-muted);
-    transition: i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm);
-
-    &:hover, &:focus {
-      color: var(--text);
-      border-color: var(--border);
-      outline: none;
-    }
+    @include i.input;
   }
 }
 

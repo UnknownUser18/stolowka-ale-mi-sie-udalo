@@ -74,6 +74,38 @@ export class PersonsService extends TypesService {
       catchError(() => of(null)))
   }
 
+  public updateZPersonKlasa(id_person : ZPerson["id"], klasa_name : string | null) : Observable<boolean> {
+    if (id_person <= 0)
+      throw new Error('Niepoprawne ID osoby.');
+
+    return this.http.put<Packet>(`${ this.api }zsti/person/${ id_person }/class`, { klasa : klasa_name }).pipe(
+      map((res) => {
+        return res.status === 202;
+      }),
+      catchError(() => of(false))
+    );
+  }
+
+  public updateZPerson(person : ZPerson) : Observable<boolean> {
+    return this.http.put<Packet>(`${ this.api }zsti/person/${ person.id }`, person).pipe(
+      map((res) => {
+        return res.status === 202;
+      }),
+      catchError(() => of(false))
+    );
+  }
+
+  public getKlasaID(klasa_name : string) : Observable<string | null> {
+    const body = { klasa : klasa_name };
+
+    return this.http.post<Packet>(`${ this.api }zsti/class/get-id`, body).pipe(
+      map((res) => {
+        return res.status === 200 ? res.data![0].id as string : null;
+      }),
+      catchError(() => of(null))
+    );
+  }
+
   public selectZPerson(person : ZPerson) : void {
     this.personZ.set(person);
     this.localAbsenceChanges.set(new LocalAbsenceChanges());
@@ -87,4 +119,5 @@ export class PersonsService extends TypesService {
   public isTeacher(person : ZPerson) : boolean {
     return person.typ_osoby_id === TypOsoby.NAUCZYCIEL;
   }
+
 }

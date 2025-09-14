@@ -31,6 +31,7 @@ export type SwitchType = '2-way' | '3-way';
     '[class.on]' : "value === 'on'",
     '[class.off]' : "value === 'off'",
     '[class.all]' : "value === 'all'",
+    '[class.twoWay]' : "type() === '2-way'",
   }
 })
 export class SwitchComponent implements ControlValueAccessor {

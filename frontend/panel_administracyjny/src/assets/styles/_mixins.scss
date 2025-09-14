@@ -41,6 +41,8 @@
 
 @mixin form-buttons {
   button {
+    display: flex;
+    gap: v.$padding-2xs;
     width: fit-content;
     padding: v.$padding-2xs v.$padding-xs;
     border: v.$base-border;
@@ -74,7 +76,37 @@
   }
 }
 
+@mixin select {
+  padding: v.$padding-2xs v.$padding-xs;
+  cursor: pointer;
+  font-size: v.$font-size-xs;
+  border: v.$base-border var(--border-muted);
+  border-radius: v.$border-radius-md;
+  background-color: var(--bg);
+  color: var(--text-muted);
+  transition: f.transition(border-color, v.$duration-sm), f.transition(color, v.$duration-sm);
 
+  &:hover, &:focus {
+    color: var(--text);
+    border-color: var(--border);
+  }
+}
+
+@mixin input {
+  padding: v.$padding-2xs v.$padding-xs;
+  font-size: v.$font-size-sm;
+  border: v.$base-border var(--border-muted);
+  border-radius: v.$border-radius-md;
+  background-color: var(--bg-light);
+  color: var(--text-muted);
+  transition: f.transition(border-color, v.$duration-sm), f.transition(color, v.$duration-sm);
+
+  &:hover, &:focus {
+    color: var(--text);
+    border-color: var(--border);
+    outline: none;
+  }
+}
 
 @mixin flex-center($direction: row, $justify: center, $align: center) {
   display: flex;
