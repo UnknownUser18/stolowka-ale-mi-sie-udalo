@@ -8,6 +8,8 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 
 export type State = 'on' | 'off' | 'all';
 
+export type SwitchType = '2-way' | '3-way';
+
 @Component({
   selector : 'app-switch',
   imports : [
@@ -40,7 +42,8 @@ export class SwitchComponent implements ControlValueAccessor {
   protected readonly faCheck = faCheck;
   protected readonly faArrowsRotate = faArrowsRotate;
 
-  public label = input.required<string>()
+  public label = input.required<string>();
+  public type = input<SwitchType>('2-way');
 
   constructor() {
   }
@@ -53,7 +56,7 @@ export class SwitchComponent implements ControlValueAccessor {
   };
 
   protected changeStep(number : number) {
-    const states : State[] = ['off', 'on', 'all'];
+    const states : State[] = this.type() === '2-way' ? ['off', 'on'] : ['off', 'on', 'all'];
     let index = states.indexOf(this.value);
     index = (index + number + states.length) % states.length;
     this.value = states[index];
@@ -63,12 +66,8 @@ export class SwitchComponent implements ControlValueAccessor {
   }
 
   protected setValueAndClose(value : State) {
-    this.value = value;
+  this.value = value;
     this.tooltipChange().hide();
-  }
-
-  protected setValue(value : State) {
-    this.value = value;
   }
 
   public writeValue(value : State) : void {
