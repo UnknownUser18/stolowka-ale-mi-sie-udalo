@@ -12,11 +12,19 @@
     outline-offset: 1px;
   }
 
+  &.twoWay {
+    width: 40px;
+  }
+
   &.on .slider {
     background-color: var(--primary);
 
     &:before {
       transform: translateX(20px);
+
+      &.twoWay {
+        transform: translateX(40px);
+      }
     }
   }
 

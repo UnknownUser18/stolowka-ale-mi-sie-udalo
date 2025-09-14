@@ -40,8 +40,9 @@ type SortOption = 'surnameAsc' | 'surnameDesc' |
   styleUrl : './zsti.component.scss'
 })
 export class ZstiComponent {
+  private ZPersons : ZPerson[] | null = [];
 
-  protected dialog = viewChild.required<DialogComponent>('filterDialog');
+  protected readonly dialog = viewChild.required<DialogComponent>('filterDialog');
   protected readonly isRefreshing = signal(false);
   protected readonly usedSortOption = signal<SortOption>('idAsc');
 
@@ -84,7 +85,6 @@ export class ZstiComponent {
 
   protected search = '';
   protected shownZPersons : ZPerson[] | null | undefined;
-  private ZPersons : ZPerson[] | null = [];
 
   protected filterForm : FormGroup = new FormGroup({
     imie : new FormControl(''),
