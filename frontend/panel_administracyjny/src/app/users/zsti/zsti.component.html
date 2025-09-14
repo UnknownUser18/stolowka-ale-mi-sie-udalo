@@ -149,7 +149,7 @@
       </div>
       <div class="one-line">
         <span>Opłacany przez miasto:</span>
-        <app-switch formControlName="miasto" [label]="'Może opłacany przez miasto'" [type]="'3-way'" />
+        <app-switch formControlName="miasto" [label]="'Opłacany przez miasto'" [type]="'3-way'" />
       </div>
       <div class="one-line">
         <span>Typ osoby:</span>
@@ -161,8 +161,8 @@
       </div>
     </fieldset>
     <button type="reset">
-      Resetuj
       <fa-icon [icon]="faRotateLeft" />
+      Resetuj
     </button>
     <button type="submit" (click)="applyFilters()">
       Zastosuj

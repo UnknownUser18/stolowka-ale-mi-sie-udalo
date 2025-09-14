@@ -24,6 +24,20 @@ const baseGetPersonsQuery = `
              LEFT JOIN klasy ON osobyZ.klasa = klasy.id
              LEFT JOIN opiekunZ ON osobyZ.opiekun_id = opiekunZ.id_opiekun`;
 
+
+router.post('/klasa/get-id', async (req, res) => {
+  const { nazwa } = req.body;
+
+  if (typeof nazwa !== 'string' || nazwa.length > 10) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const classId = await executeQuery(`SELECT id FROM klasy WHERE nazwa = :nazwa`, { nazwa });
+  const packet = createPacket(classId, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
 router.get('/person', async (req, res) => {
   let limit : number | undefined;
 
@@ -59,7 +73,35 @@ router.get('/person/:id', async (req, res) => {
   const person = await executeQuery(`${ baseGetPersonsQuery } WHERE osobyZ.id = ?`, { id });
   const packet = createPacket(person, StatusCodes.OK);
   return sendResponse(res, packet);
-})
+});
+
+router.put('/person/:id', async (req, res) => {
+  Debug(`PUT /zsti/person/${ req.params.id }`, req.body);
+  const id = parseInt(req.params.id, 10);
+  const { imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id } = req.body;
+
+  if (!isID(id) || typeof imie !== 'string' || typeof nazwisko !== 'string' ||
+    (klasa !== null && (typeof klasa !== 'string' || klasa.length > 10)) ||
+    (typeof uczeszcza !== 'boolean') ||
+    (typeof miasto !== 'boolean') ||
+    (opiekun_id !== null && !isID(opiekun_id))) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`
+      UPDATE osobyZ
+      SET imie       = :imie,
+          nazwisko   = :nazwisko,
+          klasa      = (SELECT id FROM klasy WHERE nazwa = :klasa),
+          uczeszcza  = :uczeszcza,
+          miasto     = :miasto,
+          opiekun_id = :opiekun_id
+      WHERE id = :id`, { id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id });
+
+  const packet = createPacket(result, StatusCodes.Updated);
+  return sendResponse(res, packet);
+});
 
 router.get('/declaration/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
@@ -125,7 +167,72 @@ router.delete('/absence/delete/:id', async (req, res) => {
   const result = await executeQuery(`DELETE FROM nieobecnosciZ WHERE zsti_id = :id AND dzien_wypisania = :dzien_wypisania`, { id, dzien_wypisania });
 
   const packet = createPacket(result, StatusCodes.OK);
-  Debug('Delete absence result:', result);
+  return sendResponse(res, packet);
+});
+
+
+// get guardian by person id
+router.get('/guardian/:id_person', async (req, res) => {
+  const id_person = parseInt(req.params.id_person, 10);
+
+  if (!isID(id_person)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const guardian = await executeQuery(`
+      SELECT id_opiekun, imie_opiekuna, nazwisko_opiekuna, telefon, email, nr_kierunkowy
+      FROM opiekunZ oz
+               LEFT JOIN osobyZ o ON o.opiekun_id = oz.id_opiekun
+      WHERE o.id = :id_person`, { id_person });
+  const packet = createPacket(guardian, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
+router.put('/guardian/:id_person', async (req, res) => {
+  const id_person = parseInt(req.params.id_person, 10);
+  const { imie_opiekuna, nazwisko_opiekuna, nr_kierunkowy, telefon, email } = req.body;
+
+  if (!isID(id_person) || typeof imie_opiekuna !== 'string' || typeof nazwisko_opiekuna !== 'string' ||
+    !isID(nr_kierunkowy) || !isID(telefon) ||
+    (typeof email !== 'string' || email.length > 100)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`
+      UPDATE opiekunZ
+      SET imie_opiekuna     = :imie_opiekuna,
+          nazwisko_opiekuna = :nazwisko_opiekuna,
+          nr_kierunkowy     = :nr_kierunkowy,
+          telefon           = :telefon,
+          email             = :email
+      WHERE id_opiekun = (SELECT opiekun_id FROM osobyZ WHERE id = :id_person)`, { id_person, imie_opiekuna, nazwisko_opiekuna, nr_kierunkowy, telefon, email });
+
+  const packet = createPacket(result, StatusCodes.Updated);
+  return sendResponse(res, packet);
+});
+
+router.post('/guardian/get-id', async (req, res) => {
+  const { imie_opiekuna, nazwisko_opiekuna, email, nr_kierunkowy, telefon } = req.body;
+
+  if (typeof imie_opiekuna !== 'string' || typeof nazwisko_opiekuna !== 'string' ||
+    !isID(nr_kierunkowy) || !isID(telefon) ||
+    (typeof email !== 'string' || email.length > 100)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const guardian = await executeQuery(`
+      SELECT id_opiekun
+      FROM opiekunZ
+      WHERE imie_opiekuna = :imie_opiekuna
+        AND nazwisko_opiekuna = :nazwisko_opiekuna
+        AND email = :email
+        AND nr_kierunkowy = :nr_kierunkowy
+        AND telefon = :telefon`, { imie_opiekuna, nazwisko_opiekuna, email, nr_kierunkowy, telefon });
+
+  const packet = createPacket(guardian, StatusCodes.OK);
   return sendResponse(res, packet);
 });
 
