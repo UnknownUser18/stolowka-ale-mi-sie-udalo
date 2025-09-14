@@ -2,7 +2,7 @@ import { Component, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PersonsService, ZPerson, TypOsoby } from '@database/persons.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faArrowsRotate, faArrowUpWideShort, faCircle, faFilter, faMagnifyingGlass, faPlus, faSchool, faUser, faWarning } from '@fortawesome/free-solid-svg-icons';
+import { faArrowsRotate, faArrowUpWideShort, faCheck, faCircle, faFilter, faMagnifyingGlass, faPlus, faRotateLeft, faSchool, faUser, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { NotificationsService } from '@services/notifications.service';
 import { DialogComponent } from '@tooltips/dialog/dialog.component';
 import { DialogTriggerDirective } from '@tooltips/dialog-trigger.directive';
@@ -40,8 +40,9 @@ type SortOption = 'surnameAsc' | 'surnameDesc' |
   styleUrl : './zsti.component.scss'
 })
 export class ZstiComponent {
+  private ZPersons : ZPerson[] | null = [];
 
-  protected dialog = viewChild.required<DialogComponent>('filterDialog');
+  protected readonly dialog = viewChild.required<DialogComponent>('filterDialog');
   protected readonly isRefreshing = signal(false);
   protected readonly usedSortOption = signal<SortOption>('idAsc');
 
@@ -78,11 +79,12 @@ export class ZstiComponent {
   protected readonly faWarning = faWarning;
   protected readonly faUser = faUser;
   protected readonly faSchool = faSchool;
+  protected readonly faCheck = faCheck;
+  protected readonly faRotateLeft = faRotateLeft;
   protected readonly TypOsoby = TypOsoby;
 
   protected search = '';
   protected shownZPersons : ZPerson[] | null | undefined;
-  private ZPersons : ZPerson[] | null = [];
 
   protected filterForm : FormGroup = new FormGroup({
     imie : new FormControl(''),
