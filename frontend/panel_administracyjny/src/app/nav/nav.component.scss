@@ -46,3 +46,33 @@ li {
     color: var(--primary);
   }
 }
+
+//menu {
+//  padding: 5px 10px;
+//  display: flex;
+//  gap: 30px;
+//  justify-content: space-around;
+//  border-radius: 10px 10px 0 0;
+//  background-color: var(--color-3);
+//  place-self: end center;
+//
+//  li {
+//    @include i.font-500(var(--color-12));
+//    min-width: 50px;
+//    padding: 5px;
+//    cursor: pointer;
+//    border-radius: 5px;
+//    background-color: transparent;
+//    transition: i.transition(background-color), i.transition(color);
+//    user-select: none;
+//
+//    &:hover {
+//      background-color: var(--color-4);
+//    }
+//
+//    &.active {
+//      background-color: var(--color-6);
+//      color: var(--color-13);
+//    }
+//  }
+//}
