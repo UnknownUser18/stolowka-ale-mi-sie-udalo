@@ -31,17 +31,19 @@
 <app-tooltip #tooltipChange>
   <div class="tooltip-change">
     <span>Przełącz na:</span>
-    <button (click)="setValueAndClose('off')">
+    <button class="off" (click)="setValueAndClose('off')">
       <fa-icon [icon]="faXmark" />
       Nie
     </button>
-    <button (click)="setValueAndClose('on')">
+    <button class="on" (click)="setValueAndClose('on')">
       <fa-icon [icon]="faCheck" />
       Tak
     </button>
-    <button (click)="setValueAndClose('all')">
-      <fa-icon [icon]="faArrowsRotate" />
-      Wszyscy
-    </button>
+    @if (type() === '3-way') {
+      <button class="all" (click)="setValueAndClose('all')">
+        <fa-icon [icon]="faArrowsRotate" />
+        Wszyscy
+      </button>
+    }
   </div>
 </app-tooltip>
