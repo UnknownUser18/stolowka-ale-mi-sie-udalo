@@ -12,6 +12,7 @@ const componentImports : { [key : string] : () => Promise<any> } = {
   kalendarz : () => import('./users/kalendarz/kalendarz.component').then(m => m.KalendarzComponent),
   dane : () => import('./users/dane/dane.component').then(m => m.DaneComponent),
   deklaracje : () => import('./users/deklaracje/deklaracje.component').then(m => m.DeklaracjeComponent),
+  karta : () => import('./users/karty/karty.component').then(m => m.KartyComponent),
   platnosci : () => import('./users/platnosci/platnosci.component').then(m => m.PlatnosciComponent),
 };
 
@@ -51,7 +52,7 @@ export const routes : Routes = [
             path : 'zsti/:id',
             children : [
               { path : '', redirectTo : 'kalendarz', pathMatch : 'full' },
-              ...['kalendarz', 'dane', 'deklaracje', 'platnosci'].map(childPath => ({
+              ...['kalendarz', 'dane', 'deklaracje', 'platnosci', 'karta'].map(childPath => ({
                 path : childPath,
                 loadComponent : componentImports[childPath],
                 data : { title : `${childPath.charAt(0).toUpperCase() + childPath.slice(1)} - ZSTI` }

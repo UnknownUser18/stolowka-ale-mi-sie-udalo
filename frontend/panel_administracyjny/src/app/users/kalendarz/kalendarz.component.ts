@@ -247,6 +247,9 @@ export class KalendarzComponent {
   protected toggleSelect(day : Date) {
     const localAdded = this.personS.localAbsenceChanges();
     const isAbsence = !!this.absenceDays?.some(d => d.dzien_wypisania.toDateString() === day.toDateString());
+    const isClosed = !!this.closedDays?.some(d => d.dzien.toDateString() === day.toDateString());
+    if (!this.isDayInDeclaration(day) || isClosed) return;
+
     if (!isAbsence) {
       const isDay = localAdded.findAdded(day);
       isDay ? localAdded.removeAdded(day) : localAdded.pushAdded(day);
@@ -256,6 +259,13 @@ export class KalendarzComponent {
     }
 
     this.personS.localAbsenceChanges.set(Object.assign(new LocalAbsenceChanges(), localAdded));
+
+    // Update the week's days array to trigger change detection
+    const week = this.weeks.find(week =>
+      week.days.some(d => d && day && d.toDateString() === day.toDateString())
+    );
+    if (week)
+      week.days = [...week.days];
   }
 
   protected selectColumn(dayOfWeek : number) {
