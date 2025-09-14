@@ -4,45 +4,45 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: i.$padding-sm i.$padding-md;
   background-color: var(--bg-dark);
-  border-bottom: 1px solid var(--border);
+  border-bottom: i.$base-border var(--border);
+
+  &.person-selected {
+    justify-content: space-between;
+  }
 }
 
 h2 {
   padding: i.$padding-xs i.$padding-sm;
-  border-radius: i.$border-radius-2xl;
   font-size: i.$font-size-lg;
   font-weight: 500;
-  background: linear-gradient( 45deg, var(--bg), var(--bg-light) 50%, var(--bg-light) 90%, color-mix(in oklch, var(--bg-light) 80%, var(--highlight) 20%) 100%);
+  border-radius: i.$border-radius-2xl;
+  background: linear-gradient(45deg, var(--bg), var(--bg-light) 50%, var(--bg-light) 90%, color-mix(in oklch, var(--bg-light) 80%, var(--highlight) 20%) 100%);
   color: var(--text-muted);
 }
 
 menu {
-  padding: 5px 10px;
   display: flex;
-  gap: 30px;
-  justify-content: space-around;
-  border-radius: 10px 10px 0 0;
-  background-color: var(--color-3);
-  place-self: end center;
+  justify-content: center;
+  gap: i.$padding-md;
+  padding: i.$padding-xs i.$padding-sm;
+  border-radius: i.$border-radius-xl;
+  background-color: var(--bg-light);
+  border: i.$base-border var(--border-muted);
+}
 
-  li {
-    @include i.font-500(var(--color-12));
-    min-width: 50px;
-    padding: 5px;
-    cursor: pointer;
-    border-radius: 5px;
-    background-color: transparent;
-    transition: i.transition(background-color), i.transition(color);
-    user-select: none;
+li {
+  transition: i.transition(color, i.$duration-sm);
+  font-size: i.$font-size-md;
+  color: var(--text-muted);
 
-    &:hover {
-      background-color: var(--color-4);
-    }
 
-    &.active {
-      background-color: var(--color-6);
-      color: var(--color-13);
-    }
+  &:hover, &:focus-within {
+    color: var(--text);
+  }
+
+  a.active {
+    color: var(--primary);
   }
 }

@@ -19,17 +19,14 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons';
   }
 })
 export class DialogComponent {
-
   private overlayRef! : OverlayRef;
-
   private dialog = viewChild.required<TemplateRef<any>>('dialog');
 
   protected isVisible = signal(false);
 
-  public label = input<string>();
-
   protected readonly faXmark = faXmark;
 
+  public label = input<string>();
 
   constructor(
     private overlay : Overlay,
@@ -43,7 +40,6 @@ export class DialogComponent {
   }
 
   public show() {
-
     const positionStrategy = this.overlay
       .position()
       .global()

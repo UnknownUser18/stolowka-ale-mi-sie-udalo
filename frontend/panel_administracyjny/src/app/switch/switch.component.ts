@@ -35,11 +35,12 @@ export class SwitchComponent implements ControlValueAccessor {
 
   protected tooltipChange = viewChild.required<TooltipComponent>('tooltipChange');
   protected labels = input({ off : 'Off', on : 'On', all : 'All' });
-  label = input.required<string>()
 
   protected readonly faXmark = faXmark;
   protected readonly faCheck = faCheck;
   protected readonly faArrowsRotate = faArrowsRotate;
+
+  public label = input.required<string>()
 
   constructor() {
   }

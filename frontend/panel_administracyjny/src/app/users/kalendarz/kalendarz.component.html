@@ -7,7 +7,7 @@
       @for (_ of weeks; track $index; let i = $index) {
         @let select_row_title = 'Zaznacz/odznacz cały tydzień';
         <button class="select-button" (click)="selectRow(i)" (auxclick)="forceSelectRow(i)" (contextmenu)="$event.preventDefault()" [title]="select_row_title" [attr.aria-label]="select_row_title" [delayT]="selectTooltip" [delay]="1500">
-          <fa-icon [icon]="(weeks[i].days | isEntireRowSelected:absenceDays:declarationZ) ? faCheck : faXmark" [size]="'lg'" />
+          <fa-icon [icon]="(weeks[i].days | isEntireRowSelected:absenceDays:declarationZ:closedDays) ? faCheck : faXmark" [size]="'lg'" />
         </button>
       }
       @for (i of ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie']; track i; let index = $index) {

@@ -4,9 +4,8 @@ import { Packet } from '@database/types.service';
 import { catchError } from 'rxjs/operators';
 import { map, of } from 'rxjs';
 
-
 @Injectable({
-  providedIn: 'root'
+  providedIn : 'root'
 })
 export class InfoService {
   private http = inject(HttpClient);
@@ -14,7 +13,7 @@ export class InfoService {
   public readonly status = signal<boolean | undefined>(undefined);
   public readonly currentDate = signal<Date>(new Date());
 
-  get getHealth() {
+  public get getHealth() {
     return this.http.get<Packet>('/api/info/health').pipe(
       map((res) => {
         this.status.set(res.status === 200);
@@ -27,7 +26,7 @@ export class InfoService {
     );
   }
 
-  public setDate(date: Date): void {
+  public setDate(date : Date) : void {
     this.currentDate.set(date);
   }
 }
