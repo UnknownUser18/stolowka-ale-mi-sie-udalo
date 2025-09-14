@@ -1,5 +1,5 @@
 import { inject, Pipe, PipeTransform } from '@angular/core';
-import { ZAbsenceDay, ZDeclaration } from '@database/declarations.service';
+import { ClosedDay, ZAbsenceDay, ZDeclaration } from '@database/declarations.service';
 import { PersonsService } from '@database/persons.service';
 
 @Pipe({
@@ -9,7 +9,7 @@ export class IsEntireRowSelectedPipe implements PipeTransform {
   private personS = inject(PersonsService);
 
 
-  transform(days : (Date | null)[], absenceDays? : ZAbsenceDay[] | null, declaration? : ZDeclaration[] | null) : any {
+  transform(days : (Date | null)[], absenceDays? : ZAbsenceDay[] | null, declaration? : ZDeclaration[] | null, closedDays? : ClosedDay[] | null) : boolean {
     let selectedDays = 0;
 
     const isDayInDeclaration = (day : Date) => {
@@ -24,6 +24,10 @@ export class IsEntireRowSelectedPipe implements PipeTransform {
       });
     }
 
+    const isClosed = (date: Date) : boolean => {
+      return !!closedDays?.some(d => d.dzien.toDateString() === date.toDateString());
+    }
+
     const isDaySelected = (date : Date) : boolean => {
       const isLocallyAdded = this.personS.localAbsenceChanges().findAdded(date)
       const isInDatabase = !!absenceDays?.some(d => d.dzien_wypisania.toDateString() === date.toDateString());
@@ -32,12 +36,12 @@ export class IsEntireRowSelectedPipe implements PipeTransform {
     }
 
     for (const day of days) {
-      if (!day || !isDayInDeclaration(day)) continue;
+      if (!day || !isDayInDeclaration(day) || isClosed(day)) continue;
       if (!isDaySelected(day)) return false;
       selectedDays++;
     }
 
-    return selectedDays !== 0; // true only if at least one day is selected and can be selected
+    return selectedDays !== 0; // true only if at least one selectable day is selected
   }
 
 }
