@@ -1,8 +1,8 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {catchError, map, Observable, of} from 'rxjs';
 import {environment} from '../environments/environment';
-import {ZPayment} from './data.service';
+import {Card, CardDetails, ZPayment} from './data.service';
 
 export enum StatusCodes {
   'OK' = 200,
@@ -115,6 +115,8 @@ export class DbService {
   private http = inject(HttpClient);
   protected readonly api = environment.apiUrl;
 
+  public ZCardsWDetails = signal<CardDetails[] | null>(null)
+
   constructor() { }
 
   private requestZPersons() : Observable<Packet | null> {
@@ -157,7 +159,7 @@ export class DbService {
   }
 
   public getZDeclarationsPersonInDate(id_person : number, date: Date) : Observable<ZDeclaration[] | null> {
-    return this.http.get<Packet>(`${ this.api }zsti/declaration/${ id_person }?date=${this.convertToDBDate(date)}`).pipe(
+    return this.http.get<Packet>(`${ this.api }zsti/declaration/${ id_person }/in_date?date=${this.convertToDBDate(date)}`, {}).pipe(
       map((res : Packet) => {
         if (!this.isArray(res)) return null;
         return (res.data as ZDeclarationDB[]).map((declarationDB : ZDeclarationDB) => ({
@@ -222,6 +224,34 @@ export class DbService {
     )
   }
 
+  public addZScansPerson(id_person: number, date: string): Observable<Boolean | null> {
+    const url =`${this.api}zsti/scan/add/${id_person}`;
+
+    console.log('Calling:', url);
+
+    return this.http.post<Packet>(url, {date}).pipe(
+      map((res) => res.status === 201),
+      catchError((error) => {
+        console.error('Error adding scan:', error);
+        return of(false);
+      })
+    );
+  }
+
+  public getZCardsWithDetails(): Observable<CardDetails[] | null> {
+    return this.http.get<Packet>(`${ this.api }zsti/card/withDetails`).pipe(
+      map((res : Packet): CardDetails[] | null => {
+        if (!this.isArray(res)) return null;
+        this.ZCardsWDetails.set((res.data as CardDetails[]).map((scan : CardDetails) => ({
+          ...scan,
+          data_wydania: new Date(scan.data_wydania),
+          ostatnie_uzycie: new Date(scan.ostatnie_uzycie)
+        })));
+        return this.ZCardsWDetails();
+      }),
+      catchError(() => of(null))
+    )
+  }
 
   protected isArray(res : Packet) : boolean {
     return res.status === StatusCodes.OK && Array.isArray(res.data);

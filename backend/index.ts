@@ -6,6 +6,7 @@ import { configureConsoleOutput } from './config';
 import { QueryError, QueryResult } from "mysql2/promise";
 import zstiRoutes from './zsti';
 import infoRoutes from './info';
+import cors from 'cors';
 
 const env = process.env;
 
@@ -16,7 +17,7 @@ const app = express();
 
 if (env.DEBUG_MODE === 'false')
   configureConsoleOutput(app);
-
+app.use(cors())
 app.use(express.json());
 app.use('/api/zsti', zstiRoutes);
 app.use('/api/info', infoRoutes)

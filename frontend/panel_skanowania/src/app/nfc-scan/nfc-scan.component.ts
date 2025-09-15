@@ -1,10 +1,11 @@
-import {AfterViewInit, Component, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, effect, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {AsyncPipe} from '@angular/common';
 import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from '@angular/material/autocomplete';
 import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
-import {debounceTime, map, Observable, startWith} from 'rxjs';
+import {firstValueFrom, map, Observable, startWith} from 'rxjs';
 import {CardDetails, DataService} from '../data.service';
+import {DbService} from '../db.service';
 
 @Component({
   selector: 'app-nfc-scan',
@@ -24,8 +25,6 @@ import {CardDetails, DataService} from '../data.service';
 })
 export class NfcScanComponent implements AfterViewInit, OnInit {
   @ViewChild('nfc_input') nfc_input: ElementRef | undefined;
-  @ViewChild(MatAutocompleteTrigger) autocompleteTrigger!: MatAutocompleteTrigger;
-
   @Output() nfcOutput: EventEmitter<string> = new EventEmitter();
   control = new FormControl('');
 
@@ -34,6 +33,7 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
 
   ngAfterViewInit() {
     console.log(this.nfc_input?.nativeElement);
+    setInterval(() => this.focusInput(), 1000)
     this.focusInput()
   }
 
@@ -42,32 +42,23 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
       startWith(''),
       map(value => this._filter(value || '')),
     );
-
-    this.control.valueChanges
-      .pipe(debounceTime(30))
-      .subscribe(value => this.handleInput(value));
   }
 
-  private handleInput(value: string | null) {
-    const hasLetter = /[a-zA-Z]/.test(value || '');
-
-    if (!value || (!hasLetter && this.autocompleteTrigger.panelOpen)) {
-      this.autocompleteTrigger.closePanel();
-    }
+  constructor(private dataService: DataService, private database: DbService) {
+    // this.database.ZCardsWDetails
+    // this.dataService.dataChange.subscribe(key => {
+    //   if(key === 'cardDetailsList')
+    //     this.updateOptions()
+    // })
+    firstValueFrom(this.database.getZCardsWithDetails()).then(val => console.table(val))
+    effect(() => {
+      this.database.ZCardsWDetails()
+      this.updateOptions().then()
+    });
   }
 
-  constructor(private dataService: DataService) {
-    this.dataService.dataChange.subscribe(key => {
-      if(key === 'cardDetailsList')
-        this.updateOptions()
-    })
-  }
-
-  private updateOptions() {
-    this.options = [];
-    this.dataService.get('cardDetailsList')?.forEach(value => {
-      this.options.push(value)
-    })
+  private async updateOptions() {
+    this.options = this.database.ZCardsWDetails() ?? []
     this.filteredOptions = this.control.valueChanges.pipe(
       startWith(''),
       map(value => this._filter(value || '')),
@@ -79,9 +70,20 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
   }
 
   private _filter(value: string): CardDetails[] {
-    const filterValue = value.toLowerCase();
+    const filterValue = value.toString().toLowerCase();
 
-    return this.options.filter(option => this.formatOption(option).toLowerCase().includes(filterValue));
+    if (filterValue.length > 0 && /^\d/.test(filterValue)) {
+      return [];
+    }
+
+    return this.options.filter(option => {
+      const optionText = this.formatOption(option).toLowerCase();
+
+      const nameMatch = `${option.imie} ${option.nazwisko}`.toLowerCase().includes(filterValue);
+      const fullMatch = optionText.includes(filterValue);
+
+      return nameMatch || fullMatch;
+    });
   }
 
   submitInput(event: Event){
@@ -89,7 +91,6 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
     const input: HTMLInputElement = (this.nfc_input?.nativeElement as HTMLInputElement)
     this.nfcOutput.emit(input.value)
     input.value = '';
-    this.autocompleteTrigger.closePanel();
   }
 
   focusInput(): void {

@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { createPacket, executeQuery, sendResponse } from './index';
-import { Debug, ErrorPacket, StatusCodes } from "./types";
+import {Debug, ErrorPacket, Info, StatusCodes} from "./types";
 
 const router = Router({
   caseSensitive : true,
@@ -123,6 +123,28 @@ router.get('/declaration/:id', async (req, res) => {
   return sendResponse(res, packet);
 });
 
+router.get('/declaration/:id/in_date', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const date = String(req.query.date)
+  if (!isID(id) || !date) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const declaration = await executeQuery(`
+      SELECT id,
+             id_osoby,
+             data_od,
+             data_do,
+             dni
+      FROM deklaracjaZ
+      WHERE id_osoby = :id AND
+            :date between data_od and data_do`, { id, date});
+  const packet = createPacket(declaration, StatusCodes.OK);
+
+  return sendResponse(res, packet);
+});
+
 router.get('/absence/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {
@@ -236,4 +258,127 @@ router.post('/guardian/get-id', async (req, res) => {
   return sendResponse(res, packet);
 });
 
+router.get('/payment/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`SELECT * from platnosciZ pZ where pZ.id_ucznia = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.get('/scan/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`SELECT * from skanyZ sZ where sZ.id_karty = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.post('/scan/add/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { date } = req.body;
+
+  Info(`Scanning of card id: ${id}, at date: ${date}`);
+
+  if (!isID(id) || !date || isNaN(Date.parse(String(date)))) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"]);
+    return sendResponse(res, packet);
+  }
+
+  try {
+    const result = await executeQuery(
+        `INSERT INTO skanyZ (id_karty, czas) VALUES (:id, :date)`,
+        { id, date }
+    );
+
+    const packet = createPacket(result, StatusCodes.Inserted);
+    return sendResponse(res, packet);
+  } catch (error) {
+    console.error('Database error:', error);
+    const packet = new ErrorPacket(StatusCodes["Internal Server Error"]);
+    return sendResponse(res, packet);
+  }
+})
+
+router.get('/card/withDetails', async (req, res) => {
+  const result = await executeQuery(`SELECT k_z.*, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto FROM kartyZ k_z LEFT JOIN osobyZ o_z ON o_z.id = k_z.id_ucznia ORDER BY o_z.nazwisko, o_z.imie;`)
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.get('/pricing', async (req, res) => {
+  const result = await executeQuery(`SELECT * from cennikZ order by data_od;`)
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.post('/pricing/add', async (req, res) => {
+  const { date_start, date_end, price } = req.body;
+
+  if(!date_start || !price) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"]);
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`INSERT INTO cennikZ (data_od, data_do, cena) VALUES (:data_od, :data_do, :cena)`, { data_od: date_start, data_do: date_end, cena: price });
+
+  const packet = createPacket(result, StatusCodes.Inserted);
+  return sendResponse(res, packet);
+})
+
+router.delete('/pricing/delete/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`DELETE FROM cennikZ WHERE id = :id`, {id});
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.put('/pricing/update/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const {date_start, date_end, price} = req.body;
+  Debug('pricing update dataq: ', {id, date_start, date_end, price});
+  if (!isID(id) || !date_start || !date_end || !price) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`UPDATE cennikZ SET data_od = :data_od, data_do = :data_do, cena = :cena WHERE id = :id`, {id, data_od: date_start, data_do: date_end, cena: price});
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.get('/pricing/not-in-dates/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const {date_start, date_end} = req.query;
+  if (!isID(id) || !date_start || !date_end) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`SELECT COUNT(*) as cnt FROM cennikZ c WHERE id != :id AND ((:data_od BETWEEN c.data_od AND c.data_do) OR (:data_do BETWEEN c.data_od AND c.data_do) OR ((:data_od < c.data_od) AND (c.data_do < :data_do)))`, {id, data_od: date_start, data_do: date_end});
+
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
 export default router;
