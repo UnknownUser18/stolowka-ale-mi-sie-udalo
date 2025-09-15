@@ -4,23 +4,31 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { TransitionService } from '../services/transition.service';
 import { VariablesService } from '../services/variables.service';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import {faArrowsRotate, faPlus, faXmark} from '@fortawesome/free-solid-svg-icons';
+import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import {firstValueFrom} from 'rxjs';
+import {DeclarationsService, ZPricing} from '@database/declarations.service';
+import {NotificationsService} from '@services/notifications.service';
 
 @Component({
   selector : 'app-cennik',
-  imports : [
+  imports: [
     ReactiveFormsModule,
     DatePipe,
     CurrencyPipe,
+    FaIconComponent,
   ],
   templateUrl : './cennik.component.html',
   styleUrl : './cennik.component.scss'
 })
 export class CennikComponent {
-  protected pricing_zsti : any[] = []; // TODO: Define proper type for cennik_zsti
+  protected pricing_zsti : ZPricing[] | null = null; // TODO: Define proper type for cennik_zsti
   private invalidDates : Date[] = [];
 
   protected id : number = 0;
   protected showWindow : "" | "add" | "delete" = "";
+
+  protected readonly xmarkClose= faXmark
 
   protected pricingForm : FormGroup = new FormGroup({
     cena : new FormControl(0, [Validators.required, Validators.min(0)]),
@@ -41,7 +49,9 @@ export class CennikComponent {
     private infoService : GlobalInfoService,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef,
-    private zone : NgZone
+    private zone : NgZone,
+    private declarationS: DeclarationsService,
+    private notificationS: NotificationsService
   ) {
     this.infoService.setTitle('ZSTI - Cennik');
     // this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
@@ -50,7 +60,9 @@ export class CennikComponent {
       //   this.pricing_zsti = payload;
       // });
     // })
-
+    firstValueFrom(this.declarationS.getPricing()).then(pricing => {
+      this.pricing_zsti = pricing;
+    })
   }
 
   protected formatDate(date : string) : string {
@@ -62,31 +74,36 @@ export class CennikComponent {
   }
 
   protected dateInput(date : Date) : string {
+    date = new Date(date);
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
+    console.log(date, `${ year }-${ month }-${ day }`)
     return `${ year }-${ month }-${ day }`;
   }
 
-  protected selectPricing(pricing_zsti : any) { // TODO: Define proper type for cennik_zsti
+  protected selectPricing(pricing_zsti : ZPricing) {
     console.log(pricing_zsti);
     this.pricingForm.patchValue({
       cena : pricing_zsti.cena,
       data_od : this.dateInput(new Date(pricing_zsti.data_od)),
-      date_do : pricing_zsti.data_do ? this.dateInput(new Date(pricing_zsti.data_do)) : null,
+      date_do : this.dateInput(new Date(pricing_zsti.data_do)),
     })
+    console.log(this.pricingForm, pricing_zsti)
     this.id = pricing_zsti.id;
   }
 
-  protected deletePricing() {
-    // TODO: Uncomment when backend is ready and when api request is implemented
-    // this.database.request('zsti.pricing.delete', { id : this.id }, 'pricingList').then(() => {
-    //   this.id = 0;
-    //   this.reloadPricing()
-    // })
+  protected  deletePricing() {
+    firstValueFrom(this.declarationS.deletePricing(this.id)).then(() => {
+      this.id = 0;
+      this.closeWindow()
+      this.reloadPricing()
+    });
   }
 
-  protected updatePricing() : void {
+  protected async updatePricing() {
+    if(!this.pricing_zsti)
+      return;
     if (this.pricingForm.invalid) {
       this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
@@ -104,14 +121,36 @@ export class CennikComponent {
       (!original.data_do || this.dateInput(new Date(original.data_do)) !== pricing.data_do)
     );
     if (!(datesChanged) && (original?.cena === pricing.cena)) {
-      this.infoService.generateNotification(NotificationType.WARNING, 'Cennik nie został zmieniony.');
+      this.notificationS.createWarningNotification('Cennik nie został zmieniony.', 2.5)
+      // this.infoService.generateNotification(NotificationType.WARNING, 'Cennik nie został zmieniony.');
       return;
     }
     if (pricing.data_do && pricing.data_od > pricing.data_do) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
+      this.notificationS.createErrorNotification('Data "od" nie może być późniejsza niż data "do".', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
       return;
     }
     console.log(pricing)
+    const numOfErrDates = await firstValueFrom(this.declarationS.checkPricing(pricing.id, pricing.data_od, pricing.data_do))
+    console.log(numOfErrDates)
+    if(numOfErrDates === null || numOfErrDates > 0 ) {
+      this.notificationS.createErrorNotification('Daty nie mogą nachodzić na te z innych cenników', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Daty nie mogą nachodzić na te z innych cenników');
+      return;
+    }
+    console.log(numOfErrDates)
+    firstValueFrom(this.declarationS.updatePricing(pricing.id, pricing.data_od, pricing.data_do, pricing.cena)).then((payload) => {
+      if (!payload) {
+        this.notificationS.createErrorNotification('Nie udało się zaktualizować cennika.')
+        // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować cennika.');
+        return;
+      }
+
+      this.notificationS.createSuccessNotification('Cennik został zaktualizowany.')
+      // this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został zaktualizowany.');
+
+      this.reloadPricing();
+    })
     const method = pricing.data_do ? `zsti.pricing.update` : `zsti.pricing.updateWOdatado`;
     // TODO: Uncomment when backend is ready and when api request is implemented
     // this.database.request(method, pricing, 'dump').then((payload) => {
@@ -126,26 +165,27 @@ export class CennikComponent {
     // });
   }
 
-  private reloadPricing() {
-    // TODO: Uncomment when backend is ready and when api request is implemented
-    // this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
-    //   if (!payload) {
-    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
-    //     return;
-    //   } else if (payload.length === 0) {
-    //     this.infoService.generateNotification(NotificationType.WARNING, 'Brak deklaracji dla tej osoby.');
-    //     this.pricing_zsti = [];
-    //     this.invalidDates = [];
-    //     return;
-    //   }
-    //   this.pricing_zsti = payload;
-    //   this.invalidDates = [];
-    //
-    //   this.pricing_zsti.forEach((price) => {
-    //     if (!(price.data_od && price.data_do)) return;
-    //     this.invalidDates.push(new Date(price.data_od), new Date(price.data_do));
-    //   });
-    // });
+  protected reloadPricing() {
+    firstValueFrom(this.declarationS.getPricing()).then(pricings => {
+      if (!pricings) {
+        this.notificationS.createErrorNotification('Nie udało się pobrać cenników.', 3)
+        // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
+        return;
+      } else if (pricings.length === 0) {
+        this.notificationS.createErrorNotification('Brak deklaracji dla tej osoby.', 2)
+        // this.infoService.generateNotification(NotificationType.WARNING, 'Brak deklaracji dla tej osoby.');
+        this.pricing_zsti = [];
+        this.invalidDates = [];
+        return;
+      }
+      this.pricing_zsti = pricings;
+      this.invalidDates = [];
+
+      this.pricing_zsti.forEach((price) => {
+        if (!(price.data_od && price.data_do)) return;
+        this.invalidDates.push(new Date(price.data_od), new Date(price.data_do));
+      });
+    })
   }
 
   protected closeWindow() : void {
@@ -162,20 +202,35 @@ export class CennikComponent {
 
   protected addPricing() : void {
     if (this.addForm.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.notificationS.createErrorNotification('Proszę poprawić błędy w formularzu.', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
     }
     const formValue = this.addForm.value;
-    const pricing : any = { // TODO: Define proper type for pricing
+    const pricing : ZPricing = {
       cena : formValue.cena!,
       data_od : formValue.data_od!,
-      data_do : formValue.data_do ?? null,
-    } as any
+      data_do : formValue.data_do!,
+    } as any;
+
     if (pricing.data_do && pricing.data_od > pricing.data_do) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
+      this.notificationS.createErrorNotification('Data "od" nie może być późniejsza niż data "do".', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
       return;
     }
-    const method = pricing.data_do ? `zsti.pricing.add` : `zsti.pricing.addWOdatado`;
+    // const method = pricing.data_do ? `zsti.pricing.add` : `zsti.pricing.addWOdatado`;
+    firstValueFrom(this.declarationS.addPricing(pricing.data_od, pricing.data_do, pricing.cena)).then(payload => {
+      this.closeWindow()
+      if (!payload) {
+        this.notificationS.createErrorNotification('Nie udało się dodać cennika.', 3)
+        // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać cennika.');
+        return;
+      }
+
+      this.notificationS.createSuccessNotification('Cennik został dodany.', 2)
+      this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został dodany.');
+      this.reloadPricing();
+    })
     // TODO: Uncomment when backend is ready and when api request is implemented
     // this.database.request(method, pricing, 'dump').then((payload) => {
     //   if (!payload || payload.length === 0) {
@@ -187,4 +242,7 @@ export class CennikComponent {
     //   this.reloadPricing();
     // });
   }
+
+  protected readonly faArrowsRotate = faArrowsRotate;
+  protected readonly faPlus = faPlus;
 }

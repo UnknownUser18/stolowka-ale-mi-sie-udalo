@@ -64,8 +64,8 @@ export interface CardDetails {
   id: number;
   id_ucznia: number;
   key_card: number;
-  data_wydania: string;
-  ostatnie_uzycie: string;
+  data_wydania: Date;
+  ostatnie_uzycie: Date;
   typ_osoby_id: number;
   imie: string;
   nazwisko: string;
