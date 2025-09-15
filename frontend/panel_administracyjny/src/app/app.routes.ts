@@ -74,15 +74,17 @@ export const routes : Routes = [
       {
         path : 'cennik',
         loadComponent : () => import('./cennik/cennik.component').then(m => m.CennikComponent),
+        data: {title: 'Cennik'},
         children : [
-          { path : 'zsti', component : CennikComponent },
+          { path : 'zsti', component : CennikComponent, data: {title : 'Cennik - ZSTI' } },
         ]
       },
       {
         path : 'nieczynne',
         loadComponent : () => import('./nieczynne/nieczynne.component').then(m => m.NieczynneComponent),
+        data: {title : 'Dni Nieczynne' },
         children : [
-          { path : 'zsti', component : NieczynneComponent },
+          { path : 'zsti', component : NieczynneComponent, data: { title : 'Dni Nieczynne - ZSTI' } },
         ]
       },
       {

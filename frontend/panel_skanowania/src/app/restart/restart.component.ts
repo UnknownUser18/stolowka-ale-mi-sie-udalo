@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
+import {DbService} from '../db.service';
 
 @Component({
   selector: 'app-restart',
@@ -15,7 +16,11 @@ export class RestartComponent {
   @Input() isDisabled: boolean = false;
   @Output() restart: EventEmitter<void> = new EventEmitter();
 
+  constructor(private database: DbService) {
+  }
+
   initRestart(): void {
     this.restart.emit()
+    this.database.getZCardsWithDetails()
   }
 }

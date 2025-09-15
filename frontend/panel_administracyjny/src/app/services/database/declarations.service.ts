@@ -44,6 +44,20 @@ interface ClosedDayDB {
   dzien : string;
 }
 
+export interface ZPricingDB {
+  id  : number;
+  data_od : string;
+  data_do : string;
+  cena: number;
+}
+
+export interface ZPricing{
+  id : number;
+  data_od : Date;
+  data_do : Date;
+  cena : number;
+}
+
 export class LocalAbsenceChanges {
   public added : Date[];
   public removed : Date[];
@@ -166,5 +180,102 @@ export class DeclarationsService extends TypesService {
       }),
       catchError(() => of(null))
     );
+  }
+
+  public deleteClosedDay(id: number) : Observable<boolean | null> {
+    return this.http.delete<Packet>(`${ this.api }info/closed-days/delete/${id}`).pipe(
+      map((res) => {
+        if (res.status !== 200) {
+          console.error(`Error removing closed day: ${ res.statusMessage }`);
+          return false;
+        }
+        return true;
+      }),
+      catchError(() => of(false))
+    )
+  }
+
+  public addClosedDay(date: Date): Observable<boolean | null> {
+    console.log(`${ this.api }info/closed-days/add`, this.convertToDBDate(date), date)
+    return this.http.post<Packet>(`${ this.api }info/closed-days/add?date=${this.convertToDBDate(date)}`, {date: this.convertToDBDate(date)}).pipe(
+      map((res) => {
+        if (res.status !== 201) {
+          console.error(`Error adding closed day: ${ res.statusMessage }`);
+          return false;
+        }
+        return true;
+      }),
+      catchError(() => of(false))
+    )
+
+  }
+
+  public getPricing(): Observable<ZPricing[] | null> {
+    return this.http.get<Packet>(`${ this.api }zsti/pricing`).pipe(
+      map((res : Packet) => {
+        if (!this.isArray(res)) return null;
+        return (res.data as ZPricingDB[]).map((pricingDB : ZPricingDB): ZPricing => ({
+          ...pricingDB,
+          data_od : new Date(pricingDB.data_od),
+          data_do : new Date(pricingDB.data_do)
+        }));
+      }),
+      catchError(() => of(null))
+    )
+  }
+
+  public addPricing(date_start : Date, date_end : Date, price: number) : Observable<boolean | null> {
+    return this.http.post<Packet>(`${ this.api }zsti/pricing/add`, {date_start: this.convertToDBDate(date_start), date_end: this.convertToDBDate(date_end), price}).pipe(
+      map((res) => {
+        if (res.status !== 201) {
+          console.error(`Error adding pricing: ${ res.statusMessage }`);
+          return false;
+        }
+        return true;
+      }),
+      catchError(() => of(false))
+    )
+
+  }
+
+  public deletePricing(id: number) : Observable<boolean | null> {
+    return this.http.delete<Packet>(`${ this.api }zsti/pricing/delete/${id}`).pipe(
+      map((res) => {
+        if (res.status !== 200) {
+          console.error(`Error removing pricing: ${ res.statusMessage }`);
+          return false;
+        }
+        return true;
+      }),
+      catchError(() => of(false))
+    )
+  }
+
+  public updatePricing(id: number, date_start: Date, date_end: Date, price: number) : Observable<boolean | null> {
+    console.log(`${ this.api }zsti/pricing/update/${id}`, {body: {date_start: this.convertToDBDate(date_start), date_end: this.convertToDBDate(date_end), price}})
+    return this.http.put<Packet>(`${ this.api }zsti/pricing/update/${id}`, {date_start: this.convertToDBDate(date_start), date_end: this.convertToDBDate(date_end), price}).pipe(
+      map((res) => {
+        if (res.status !== 200) {
+          console.error(`Error updating pricing: ${ res.statusMessage }`);
+          return false;
+        }
+        return true;
+      }),
+      catchError(() => of(false))
+    )
+  }
+
+  public checkPricing(id:number, date_start: Date, date_end: Date) : Observable<number | null> {
+    return this.http.get<Packet>(`${ this.api }zsti/pricing/not-in-dates/${id}?date_start=${this.convertToDBDate(date_start)}&date_end=${this.convertToDBDate(date_end)}`).pipe(
+      map((res) => {
+        if (res.status !== 200) {
+          console.error(`Error adding closed day: ${ res.statusMessage }`);
+          return null;
+        }
+        console.log((res.data as any[])[0].cnt as number)
+        return ((res.data as any[])[0].cnt as number);
+      }),
+      catchError(() => of(null))
+    )
   }
 }

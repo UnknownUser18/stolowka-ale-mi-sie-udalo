@@ -46,13 +46,14 @@ export class ErrorPacket extends Packet {
 })
 export abstract class TypesService {
   protected http = inject(HttpClient);
-  protected readonly api = '/api/';
+  protected readonly api = 'http://localhost:9000/api/';
 
   protected isArray(res : Packet) : boolean {
     return res.status === StatusCodes.OK && Array.isArray(res.data);
   }
 
   protected convertToDBDate(date : Date) : string {
+    date = new Date(date);
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
