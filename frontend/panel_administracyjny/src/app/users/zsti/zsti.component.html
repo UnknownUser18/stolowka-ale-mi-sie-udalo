@@ -37,11 +37,10 @@
     <fa-icon [icon]="faArrowsRotate" [title]="refresh_title" [attr.aria-label]="refresh_title" [class.spin]="isRefreshing()" />
   </button>
 
-  <button class="add-button">
+  <button class="add-button" [dialog]="addPersonDialog">
     Dodaj osobę
     @let add_title = 'Dodaj nową osobę do stołówki';
     <fa-icon [icon]="faPlus" [title]="add_title" [attr.aria-label]="add_title" />
-    <!-- This will redirect to another route (DO NOT MAKE A VIEW ON THIS COMPONENT)   -->
   </button>
 </section>
 <table>
@@ -203,3 +202,95 @@
     <p>Aktualnie wybrane kryterium sortowania: <span>{{ sortOptions.get(usedSortOption()) }}</span>.</p>
   </div>
 </app-tooltip>
+
+<app-dialog #addPersonDialog>
+  <div class="add-person">
+    <h2>Dodaj osobę</h2>
+    <form [formGroup]="addPersonForm">
+      @let typOsoby = Number(addPersonForm.get('typ_osoby')?.value);
+      <fieldset>
+        <legend>
+          <fa-icon [icon]="faUserPlus" />
+          Dane osobowe
+        </legend>
+        <label>
+          <span>Imię:</span>
+          <input type="text" formControlName="imie" aria-label="Imię" placeholder="Imię..." />
+        </label>
+        <label>
+          <span>Nazwisko:</span>
+          <input type="text" formControlName="nazwisko" aria-label="Nazwisko" placeholder="Nazwisko..." />
+        </label>
+        <label>
+          <span>Typ osoby:</span>
+          <select formControlName="typ_osoby" aria-label="Typ osoby" (change)="updateValidators()">
+            <option [value]="TypOsoby.UCZEN">Uczeń</option>
+            <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
+          </select>
+        </label>
+        <label>
+          <span>Klasa:</span>
+          @if (typOsoby === TypOsoby.NAUCZYCIEL) {
+            <input type="text" formControlName="klasa" aria-label="Klasa" placeholder="Nauczyciel..." [attr.disabled]="true" />
+          } @else {
+            <input type="text" formControlName="klasa" aria-label="Klasa" placeholder="Klasa..." />
+          }
+        </label>
+        <label>
+          <span>Może uczęszczać:</span>
+          <app-switch formControlName="uczeszcza" [label]="'Może uczęszczać'" [type]="'2-way'" />
+        </label>
+        <label>
+          <span>Opłacany przez miasto:</span>
+          <app-switch formControlName="miasto" [label]="'Opłacany przez miasto'" [type]="'2-way'" />
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>
+          <fa-icon [icon]="faUserShield" />
+          Dane opiekuna
+        </legend>
+        <label>
+          <span>Imię opiekuna:</span>
+          @if (typOsoby === TypOsoby.NAUCZYCIEL) {
+            <input type="text" formControlName="imie_opiekuna" aria-label="Imię opiekuna" placeholder="Nauczyciel..." [attr.disabled]="true" />
+          } @else {
+            <input type="text" formControlName="imie_opiekuna" aria-label="Imię opiekuna" placeholder="Imię opiekuna..." />
+          }
+        </label>
+        <label>
+          <span>Nazwisko opiekuna:</span>
+          @if (typOsoby === TypOsoby.NAUCZYCIEL) {
+            <input type="text" formControlName="nazwisko_opiekuna" aria-label="Nazwisko opiekuna" placeholder="Nauczyciel..." [attr.disabled]="true" />
+          } @else {
+            <input type="text" formControlName="nazwisko_opiekuna" aria-label="Nazwisko opiekuna" placeholder="Nazwisko opiekuna..." />
+          }
+        </label>
+        <label>
+          <span>Telefon:</span>
+          @if (typOsoby === TypOsoby.NAUCZYCIEL) {
+            <input type="text" formControlName="telefon" aria-label="Telefon" placeholder="Nauczyciel..." [attr.disabled]="true" />
+          } @else {
+            <input type="text" formControlName="telefon" aria-label="Telefon" placeholder="+48 123456789" />
+          }
+        </label>
+        <label>
+          <span>Email:</span>
+          @if (typOsoby === TypOsoby.NAUCZYCIEL) {
+            <input type="email" formControlName="email" aria-label="Email" placeholder="Nauczyciel..." [attr.disabled]="true" />
+          } @else {
+            <input type="email" formControlName="email" aria-label="Email" placeholder="Email..." />
+          }
+        </label>
+      </fieldset>
+      <button type="reset" (click)="addPersonForm.reset()">
+        <fa-icon [icon]="faRotateLeft" />
+        Resetuj
+      </button>
+      <button type="submit" (click)="addPerson()" [disabled]="addPersonForm.invalid || isAddingPerson()">
+        <fa-icon [icon]="faCheck" />
+        Dodaj
+      </button>
+    </form>
+  </div>
+</app-dialog>

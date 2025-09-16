@@ -127,8 +127,6 @@ export class DaneComponent {
     }
   }
 
-
-  //! This function is not finished.
   protected sendChanges() {
     const user = this.personsS.personZ();
     if (!user) return;

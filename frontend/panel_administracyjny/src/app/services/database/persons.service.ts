@@ -4,6 +4,7 @@ import { map, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
 import { LocalAbsenceChanges } from './declarations.service';
+import { ZGuardian } from '@database/guardians.service';
 
 export enum TypOsoby {
   UCZEN = 1,
@@ -77,6 +78,15 @@ export class PersonsService extends TypesService {
     return this.http.put<Packet>(`${ this.api }zsti/person/${ person.id }/update`, person).pipe(
       map((res) => {
         return res.status === 202;
+      }),
+      catchError(() => of(false))
+    );
+  }
+
+  public addZPerson(person : Omit<ZPerson, 'id' | 'opiekun_id'>, guardian : Omit<ZGuardian, 'id_opiekun'> | null) : Observable<boolean> {
+    return this.http.post<Packet>(`${ this.api }zsti/person/add`, { person, guardian }).pipe(
+      map((res) => {
+        return res.status === 201;
       }),
       catchError(() => of(false))
     );
