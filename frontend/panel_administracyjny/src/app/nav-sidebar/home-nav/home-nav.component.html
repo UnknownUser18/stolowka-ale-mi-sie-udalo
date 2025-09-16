@@ -9,24 +9,32 @@
     <fa-icon [icon]="faUser" />
     Osoby
   </a></li>
-  <li><a routerLink="raporty" [attr.aria-label]="raporty_title" [title]="raporty_title">
+  <li><a routerLink="" [dialog]="inProgressDialog" [attr.aria-label]="raporty_title" [title]="raporty_title">
     <fa-icon [icon]="faTableColumns" />
     Raporty
   </a></li>
-  <li><a routerLink="cennik" [attr.aria-label]="cennik_title" [title]="cennik_title">
+  <li><a routerLink="" [dialog]="inProgressDialog" [attr.aria-label]="cennik_title" [title]="cennik_title">
     <fa-icon [icon]="faMoneyBills" />
     Cennik
   </a></li>
-  <li><a routerLink="nieczynne" [attr.aria-label]="nieczynne_title" [title]="nieczynne_title">
+  <li><a routerLink="" [dialog]="inProgressDialog" [attr.aria-label]="nieczynne_title" [title]="nieczynne_title">
     <fa-icon [icon]="faCalendar" />
     Dni nieczynne
   </a></li>
-  <li><a routerLink="administracja" [attr.aria-label]="administracja_title" [title]="administracja_title">
+  <li><a routerLink="" [dialog]="inProgressDialog" [attr.aria-label]="administracja_title" [title]="administracja_title">
     <fa-icon [icon]="faLock" />
     Administracja osób
   </a></li>
-  <li><a routerLink="ustawienia" [attr.aria-label]="ustawienia_title" [title]="ustawienia_title">
+  <li><a routerLink="" [dialog]="inProgressDialog" [attr.aria-label]="ustawienia_title" [title]="ustawienia_title">
     <fa-icon [icon]="faGear" />
     Ustawienia
   </a></li>
 </ul>
+
+<app-dialog #inProgressDialog>
+  <h2 class="in-progress-title">
+    <fa-icon [icon]="faCircleInfo" />
+    W trakcie realizacji
+  </h2>
+  <p>Ta opcja jest jeszcze niedostępna, przepraszamy!</p>
+</app-dialog>

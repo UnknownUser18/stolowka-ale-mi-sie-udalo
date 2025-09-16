@@ -1,0 +1,6 @@
+@use 'index' as i;
+
+.in-progress-title {
+  text-align: center;
+  margin-bottom: i.$padding-md;
+}
