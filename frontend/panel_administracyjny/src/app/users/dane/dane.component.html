@@ -8,14 +8,17 @@
     <label>
       <span>Imię i nazwisko:</span>
       <input type="text" formControlName="imie_nazwisko" placeholder="Imię i nazwisko..." name="imie_nazwisko" aria-label="Imię i nazwisko" [pattern]="namePattern" required [attr.aria-errormessage]="forms.get('imie_nazwisko')?.invalid ? 'name-error' : null">
-
       @if (forms.get('imie_nazwisko')?.invalid) {
         <span class="error" id="name-error">Niepoprawne dane wpisano. Proszę wpisać w formacie <code>[imie] [nazwisko]</code>.</span>
       }
     </label>
     <label>
       <span>Klasa:</span>
-      <input type="text" formControlName="klasa" placeholder="Klasa..." name="klasa" aria-label="Klasa" [disabled]="typOsoby === TypOsoby.NAUCZYCIEL" [required]="typOsoby === TypOsoby.UCZEN">
+      @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
+        <input type="text" formControlName="klasa" placeholder="Nauczyciel..." name="klasa" aria-label="Nauczyciel" [delayT]="disabledTooltip" [delay]="500" />
+      } @else {
+        <input type="text" formControlName="klasa" placeholder="Klasa..." name="klasa" aria-label="Klasa" [attr.required]="typOsoby === TypOsoby.UCZEN">
+      }
     </label>
     <label class="one-line">
       <span>Typ osoby:</span>
@@ -40,9 +43,13 @@
     </legend>
     <label>
       <span>Imię i nazwisko opiekuna:</span>
-      <input type="text" formControlName="imie_nazwisko_opiekuna" placeholder="Imię i nazwisko opiekuna..." name="imie_nazwisko_opiekuna" aria-label="Imię i nazwisko opiekuna" [pattern]="namePattern" [disabled]="typOsoby === TypOsoby.NAUCZYCIEL" [required]="typOsoby === TypOsoby.UCZEN" [attr.aria-errormessage]="forms.get('imie_nazwisko_opiekuna')?.invalid ? 'opiekun-error' : null">
-      @if (forms.get('imie_nazwisko_opiekuna')?.invalid) {
-        <span class="error" id="imie_nazwisko_opiekuna">Niepoprawne dane wpisano. Proszę wpisać w formacie <code>[imie] [nazwisko]</code>.</span>
+      @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
+        <input type="text" formControlName="imie_nazwisko_opiekuna" placeholder="Nauczyciel..." name="imie_nazwisko_opiekuna" aria-label="Nauczyciel" [delayT]="disabledTooltip" [delay]="500" />
+      } @else {
+        <input type="text" formControlName="imie_nazwisko_opiekuna" placeholder="Imię i nazwisko opiekuna..." name="imie_nazwisko_opiekuna" aria-label="Imię i nazwisko opiekuna" [pattern]="namePattern" [attr.required]="typOsoby === TypOsoby.UCZEN" [attr.aria-errormessage]="forms.get('imie_nazwisko_opiekuna')?.invalid ? 'opiekun-error' : null">
+        @if (forms.get('imie_nazwisko_opiekuna')?.invalid) {
+          <span class="error" id="imie_nazwisko_opiekuna">Niepoprawne dane wpisano. Proszę wpisać w formacie <code>[imie] [nazwisko]</code>.</span>
+        }
       }
     </label>
     <label>
@@ -98,3 +105,8 @@
     </div>
   </section>
 }
+
+<app-tooltip #disabledTooltip [horizontal]="true">
+  <fa-icon [icon]="faCircleInfo" />
+  <p>Nie można edytować tego pola, ponieważ jest osoba jest zaznaczona jako <b>nauczyciel</b>.</p>
+</app-tooltip>

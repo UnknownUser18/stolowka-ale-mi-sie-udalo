@@ -1,11 +1,11 @@
 import morgan from "morgan";
 import chalk from "chalk";
-import { Debug } from "./types";
+import { Debug, Errors } from "./types";
 import { Express } from "express";
 import winston from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
-export function configureConsoleOutput(app : Express) {
+export function configureConsoleOutput(app : Express, debugMode : boolean) {
   morgan.token('method', (req) => {
     const types : Record<string, string> = {
       'GET' : chalk.green('GET'),
@@ -38,35 +38,45 @@ export function configureConsoleOutput(app : Express) {
     return chalk.white(status);
   })
 
-  app.use(morgan(':method :url :status :response-time ms', {
-    stream : {
-      write : (message) => {
-        Debug(message.trim());
+  if (debugMode)
+    app.use(morgan(':method :url :status :response-time ms', {
+      stream : {
+        write : (message) => {
+          Debug(message.trim());
+        }
       }
-    }
-  }));
+    }));
+  else
+    app.use(morgan(':method :url :status :response-time ms', {
+      skip : (_req, res) => res.statusCode < 400,
+      stream : {
+        write : (message) => {
+          Errors(message.trim());
+        }
+      }
+    }));
 }
 
 export const logger = winston.createLogger({
   levels : {
-    error: 0,
-    warn: 1,
-    info: 2,
-    debug: 3,
+    error : 0,
+    warn : 1,
+    info : 2,
+    debug : 3,
   },
-  format: winston.format.combine(
+  format : winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(({ timestamp, level, message }) => {
-      return `${timestamp} ${level}: ${message}`;
+      return `${ timestamp } ${ level }: ${ message }`;
     })
   ),
-  transports: [
+  transports : [
     new DailyRotateFile({
-      filename: 'logs/%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      zippedArchive: true,
-      maxSize: '20m',
-      maxFiles: '14d'
+      filename : 'logs/%DATE%.log',
+      datePattern : 'YYYY-MM-DD',
+      zippedArchive : true,
+      maxSize : '20m',
+      maxFiles : '14d'
     }),
   ],
 });

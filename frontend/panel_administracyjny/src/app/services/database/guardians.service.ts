@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Packet, TypesService } from '@database/types.service';
+import { Packet, StatusCodes, TypesService } from '@database/types.service';
 import { ZPerson } from '@database/persons.service';
 import { map, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -30,13 +30,13 @@ export class GuardiansService extends TypesService {
 
     return this.http.get<Packet>(`${ this.api }zsti/guardian/${ id_person }`).pipe(
       map((res) => {
-        return res.status === 200 ? res.data![0] as ZGuardian : null;
+        return res.status === StatusCodes.OK ? res.data![0] as ZGuardian : null;
       }),
       catchError(() => of(null))
     );
   }
 
-  public updateZGuardian(id_person : ZPerson["opiekun_id"], guardian : Partial<ZGuardian>) : Observable<boolean> {
+  public updateZGuardian(id_person : ZPerson["opiekun_id"], guardian : ZGuardian) : Observable<ZGuardian["id_opiekun"] | null> {
     if (!id_person)
       throw new Error('Osoba nie posiada przypisanego opiekuna.');
     else if (id_person <= 0)
@@ -46,22 +46,11 @@ export class GuardiansService extends TypesService {
       ...guardian
     };
 
-    return this.http.put<Packet>(`${ this.api }zsti/guardian/${ id_person }`, body).pipe(
+    return this.http.put<Packet>(`${ this.api }zsti/guardian/${ id_person }/update`, body).pipe(
       map((res) => {
-        return res.status === 202;
-      }),
-      catchError(() => of(false))
-    );
-  }
-
-  public getGuardianID(guardian : Partial<ZGuardian>) : Observable<number | null> {
-    const body = {
-      ...guardian
-    };
-
-    return this.http.post<Packet>(`${ this.api }zsti/guardian/get-id`, body).pipe(
-      map((res) => {
-        return res.status === 200 ? (res.data as any)[0].id_opiekun as number : null;
+        if (!this.isArray(res)) return null;
+        console.log(res.data);
+        return res.status === StatusCodes.Updated ? res.data![0] as ZGuardian["id_opiekun"] : null;
       }),
       catchError(() => of(null))
     );

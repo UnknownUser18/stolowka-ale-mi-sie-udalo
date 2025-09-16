@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node index.ts",
-    "prod": "tsc && node dist/index.js",
+    "dev": "set DEBUG_MODE='true' && tsc && node dist/index.js",
+    "prod": "set DEBUG_MODE='false' tsc && node dist/index.js",
     "test": "jest --config jest.config.js"
   },
   "dependencies": {
