@@ -1,8 +1,8 @@
 import { Component, signal, viewChild } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PersonsService, ZPerson, TypOsoby } from '@database/persons.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faArrowsRotate, faArrowUpWideShort, faCheck, faCircle, faFilter, faMagnifyingGlass, faPlus, faRotateLeft, faSchool, faUser, faWarning } from '@fortawesome/free-solid-svg-icons';
+import { faArrowsRotate, faArrowUpWideShort, faCheck, faCircle, faFilter, faMagnifyingGlass, faPlus, faRotateLeft, faSchool, faUser, faUserPlus, faUserShield, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { NotificationsService } from '@services/notifications.service';
 import { DialogComponent } from '@tooltips/dialog/dialog.component';
 import { DialogTriggerDirective } from '@tooltips/dialog-trigger.directive';
@@ -45,6 +45,9 @@ export class ZstiComponent {
   protected readonly dialog = viewChild.required<DialogComponent>('filterDialog');
   protected readonly isRefreshing = signal(false);
   protected readonly usedSortOption = signal<SortOption>('idAsc');
+  protected readonly isAddingPerson = signal(false);
+
+  protected readonly Number = Number;
 
   protected readonly filteringOptions : Map<FilteringOption, string> = new Map([
     ['match', 'Dokładne dopasowanie'],
@@ -81,6 +84,8 @@ export class ZstiComponent {
   protected readonly faSchool = faSchool;
   protected readonly faCheck = faCheck;
   protected readonly faRotateLeft = faRotateLeft;
+  protected readonly faUserPlus = faUserPlus;
+  protected readonly faUserShield = faUserShield;
   protected readonly TypOsoby = TypOsoby;
 
   protected search = '';
@@ -97,6 +102,21 @@ export class ZstiComponent {
     typ_osoby : new FormControl<TypOsoby | 'all'>('all')
   });
 
+  protected readonly namePattern = /^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+$/;
+  protected readonly phonePattern = /^\+\d{1,3} \d{9}$/;
+
+  protected addPersonForm : FormGroup = new FormGroup({
+    imie : new FormControl('', [Validators.required, Validators.pattern(this.namePattern)]),
+    nazwisko : new FormControl('', [Validators.required, Validators.pattern(this.namePattern)]),
+    klasa : new FormControl(''),
+    uczeszcza : new FormControl<boolean>(true, [Validators.required]),
+    miasto : new FormControl<boolean>(false, [Validators.required]),
+    typ_osoby : new FormControl<TypOsoby>(TypOsoby.UCZEN, [Validators.required]),
+    imie_opiekuna : new FormControl(''),
+    nazwisko_opiekuna : new FormControl(''),
+    telefon : new FormControl('', [Validators.required, Validators.pattern(this.phonePattern)]),
+    email : new FormControl('', [Validators.required, Validators.email]),
+  });
 
   constructor(
     private personS : PersonsService,
@@ -281,5 +301,116 @@ export class ZstiComponent {
   protected selectPerson(person : ZPerson) {
     this.personS.selectZPerson(person);
     this.router.navigate(['/osoba/zsti', person.id]).then();
+  }
+
+  protected updateValidators() {
+    const typ_osoby = this.addPersonForm.get('typ_osoby')?.value;
+    const klasa = this.addPersonForm.get('klasa')!;
+    const imie_opiekuna = this.addPersonForm.get('imie_opiekuna')!;
+    const nazwisko_opiekuna = this.addPersonForm.get('nazwisko_opiekuna')!;
+    const telefon = this.addPersonForm.get('telefon')!;
+    const email = this.addPersonForm.get('email')!;
+
+    if (Number(typ_osoby) === TypOsoby.UCZEN) {
+      imie_opiekuna.setValidators([Validators.required, Validators.pattern(this.namePattern)]);
+      nazwisko_opiekuna.setValidators([Validators.required, Validators.pattern(this.namePattern)]);
+      klasa.setValidators([Validators.required]);
+      telefon.setValidators([Validators.required, Validators.pattern(this.phonePattern)]);
+      email.setValidators([Validators.required, Validators.email]);
+      imie_opiekuna.enable();
+      nazwisko_opiekuna.enable();
+      klasa.enable();
+      telefon.enable();
+      email.enable();
+    } else {
+      imie_opiekuna.setValidators(null);
+      nazwisko_opiekuna.setValidators(null);
+      klasa.setValidators(null);
+      telefon.setValidators(null);
+      email.setValidators(null);
+      imie_opiekuna.disable();
+      nazwisko_opiekuna.disable();
+      klasa.disable();
+      telefon.disable();
+      email.disable();
+      this.addPersonForm.patchValue({ imie_opiekuna : '', nazwisko_opiekuna : '', telefon : '', email : '' });
+    }
+  }
+
+  protected addPerson() {
+    if (this.addPersonForm.invalid) {
+      this.notificationsS.createErrorNotification('Formularz zawiera błędy. Popraw je i spróbuj ponownie.', 5);
+      return;
+    }
+
+    this.isAddingPerson.set(true);
+
+    const { imie, nazwisko, klasa, uczeszcza, miasto, typ_osoby, imie_opiekuna, nazwisko_opiekuna, telefon, email } = this.addPersonForm.value;
+
+    const newPerson : Omit<ZPerson, 'id' | 'opiekun_id'> = {
+      imie : imie.trim(),
+      nazwisko : nazwisko.trim(),
+      klasa : klasa ? klasa.trim() : null,
+      uczeszcza : uczeszcza,
+      miasto : miasto,
+      typ_osoby_id : typ_osoby,
+    }
+
+    if (typ_osoby === TypOsoby.UCZEN) {
+      if (!imie_opiekuna || !nazwisko_opiekuna || imie_opiekuna.trim() === '' || nazwisko_opiekuna.trim() === '') {
+        this.notificationsS.createErrorNotification('Formularz zawiera błędy. Popraw je i spróbuj ponownie.', 5);
+        return;
+      }
+      const newGuardian = {
+        imie_opiekuna : imie_opiekuna.trim(),
+        nazwisko_opiekuna : nazwisko_opiekuna.trim(),
+        nr_kierunkowy : Number(telefon.split(' ')[0].replace('+', '')),
+        telefon : Number(telefon.split(' ')[1]),
+        email : email.trim(),
+      }
+      this.personS.addZPerson(newPerson, newGuardian).subscribe((res) => {
+        this.isAddingPerson.set(false);
+        if (!res) {
+          this.notificationsS.createErrorNotification('Nie udało się dodać osoby. Spróbuj ponownie.', 10);
+          return;
+        }
+        this.notificationsS.createSuccessNotification('Pomyślnie dodano osobę.', 5);
+        this.addPersonForm.reset({
+          imie : '',
+          nazwisko : '',
+          klasa : '',
+          uczeszcza : true,
+          miasto : false,
+          typ_osoby : TypOsoby.UCZEN,
+          imie_opiekuna : '',
+          nazwisko_opiekuna : '',
+          telefon : '',
+          email : '',
+        });
+        this.requestPersons();
+      });
+    } else {
+      this.personS.addZPerson(newPerson, null).subscribe((res) => {
+        this.isAddingPerson.set(false);
+        if (!res) {
+          this.notificationsS.createErrorNotification('Nie udało się dodać osoby. Spróbuj ponownie.', 10);
+          return;
+        }
+        this.notificationsS.createSuccessNotification('Pomyślnie dodano osobę.', 5);
+        this.addPersonForm.reset({
+          imie : '',
+          nazwisko : '',
+          klasa : '',
+          uczeszcza : true,
+          miasto : false,
+          typ_osoby : TypOsoby.NAUCZYCIEL,
+          imie_opiekuna : '',
+          nazwisko_opiekuna : '',
+          telefon : '',
+          email : '',
+        });
+        this.requestPersons();
+      });
+    }
   }
 }

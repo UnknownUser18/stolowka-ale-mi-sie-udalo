@@ -335,3 +335,46 @@ option {
     background-color: color-mix(in oklch, var(--border) 20%, transparent 80%);
   }
 }
+
+.add-person {
+  display: flex;
+  flex-direction: column;
+  gap: i.$padding-md;
+
+  label {
+    display: flex;
+    gap: i.$padding-sm;
+    align-items: center;
+  }
+
+  legend {
+    color: var(--text-muted);
+  }
+
+  form {
+    display: grid;
+    gap: i.$padding-md;
+    grid-template-columns: auto auto;
+  }
+
+  input {
+    @include i.input;
+
+    &:disabled {
+      background-color: var(--bg);
+      color: var(--text-muted);
+      cursor: not-allowed;
+
+      &:hover, &:focus {
+        color: var(--text-muted);
+        border-color: var(--border-muted);
+      }
+    }
+  }
+
+  select {
+    @include i.select;
+  }
+
+  @include i.form-buttons;
+}
