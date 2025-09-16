@@ -1,4 +1,4 @@
-import { Component, Inject, PLATFORM_ID, signal } from '@angular/core';
+import { Component, effect, Inject, PLATFORM_ID, signal } from '@angular/core';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faGraduationCap, faRefresh, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Router, RouterLink } from '@angular/router';
@@ -43,6 +43,14 @@ export class OsobyNavComponent {
       }
     }
     this.requestPersonsZ();
+
+    effect(() => {
+      if (this.userS.personZ()) {
+        const isInList = this.personsZ?.some((p) => p.id === this.userS.personZ()!.id);
+        if (isInList)
+          this.requestPersonsZ();
+      }
+    })
   }
 
   protected selectPerson(person : ZPerson) : void {

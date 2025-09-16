@@ -57,6 +57,20 @@ label {
 }
 
 input {
+  &:disabled {
+    cursor: not-allowed;
+    background-color: var(--bg);
+    color: var(--text-muted);
+
+    border-color: var(--border-muted);
+
+    &:hover, &:focus {
+      background-color: var(--bg);
+      color: var(--text-muted);
+      border-color: var(--border-muted);
+    }
+  }
+
   @include i.input;
 }
 

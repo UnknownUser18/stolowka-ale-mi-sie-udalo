@@ -171,7 +171,6 @@ export class DbService {
       catchError(() => of(null))
     );
   }
-
   public getZAbsenceDaysPerson(id_person : number) : Observable<ZAbsenceDay[] | null> {
     return this.http.get<Packet>(`${ this.api }zsti/absence/${ id_person }`).pipe(
       map((res : Packet) => {

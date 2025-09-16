@@ -25,6 +25,7 @@ export class Packet {
   statusMessage : string;
   timestamp : Date;
   data? : any[] | null;
+
   constructor(status : StatusCodes, statusMessage : string, timestamp : string, ...data : any[]) {
     this.status = status;
     this.statusMessage = statusMessage;
@@ -35,6 +36,7 @@ export class Packet {
 
 export class ErrorPacket extends Packet {
   override data : null;
+
   constructor(status : StatusCodes, statusMessage : string, timestamp : string) {
     super(status, statusMessage, timestamp);
     this.data = null;
@@ -49,14 +51,10 @@ export abstract class TypesService {
   protected readonly api = 'http://localhost:9000/api/';
 
   protected isArray(res : Packet) : boolean {
-    return res.status === StatusCodes.OK && Array.isArray(res.data);
+    return [StatusCodes.OK, StatusCodes.Updated, StatusCodes.Inserted].includes(res.status) && Array.isArray(res.data);
   }
 
   protected convertToDBDate(date : Date) : string {
-    date = new Date(date);
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${ year }-${ month }-${ day }`;
+    return date.toLocaleDateString('pl-PL', { year : 'numeric', month : '2-digit', day : '2-digit' }).split('.').reverse().join('-');
   }
 }

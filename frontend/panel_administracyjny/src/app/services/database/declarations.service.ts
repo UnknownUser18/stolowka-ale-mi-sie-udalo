@@ -144,7 +144,7 @@ export class DeclarationsService extends TypesService {
   }
 
   public addZAbsenceDay(id_person : number, date : Date) : Observable<boolean> {
-    return this.http.post<Packet>(`${ this.api }zsti/absence/add/${ id_person }`, { dzien_wypisania : this.convertToDBDate(date) }).pipe(
+    return this.http.post<Packet>(`${ this.api }zsti/absence/${ id_person }/add`, { dzien_wypisania : this.convertToDBDate(date) }).pipe(
       map((res) => {
         if (res.status !== 201) {
           console.error(`Error adding absence day: ${ res.statusMessage }`);
@@ -157,7 +157,7 @@ export class DeclarationsService extends TypesService {
   }
 
   public removeZAbsenceDay(id_person : number, date : Date) : Observable<boolean> {
-    return this.http.delete<Packet>(`${ this.api }zsti/absence/delete/${ id_person }`, { body : { dzien_wypisania : this.convertToDBDate(date) } }).pipe(
+    return this.http.delete<Packet>(`${ this.api }zsti/absence/${ id_person }/delete`, { body : { dzien_wypisania : this.convertToDBDate(date) } }).pipe(
       map((res) => {
         if (res.status !== 200) {
           console.error(`Error removing absence day: ${ res.statusMessage }`);
