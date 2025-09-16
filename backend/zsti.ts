@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createPacket, executeQuery, sendResponse } from './index';
 import { Debug, ErrorPacket, Info, StatusCodes } from "./types";
+import { ResultSetHeader } from "mysql2/promise";
 
 const router = Router({
   caseSensitive : true,
@@ -23,7 +24,69 @@ const baseGetPersonsQuery = `
     FROM osobyZ
              LEFT JOIN klasy ON osobyZ.klasa = klasy.id
              LEFT JOIN opiekunZ ON osobyZ.opiekun_id = opiekunZ.id_opiekun`;
+router.post('/person/add', async (req, res) => {
+  const { person, guardian } = req.body;
+  const { imie, nazwisko, klasa, uczeszcza, miasto, imie_opiekuna, nazwisko_opiekuna, nr_kierunkowy, telefon, email, typ_osoby_id } = { ...person, ...guardian };
 
+  if (typ_osoby_id === 1) { // UCZEN
+    if (typeof imie !== 'string' || typeof nazwisko !== 'string' ||
+      (klasa !== null && (typeof klasa !== 'string' || klasa.length > 5)) ||
+      (typeof uczeszcza !== 'boolean') ||
+      (typeof miasto !== 'boolean') ||
+      typeof imie_opiekuna !== 'string' || typeof nazwisko_opiekuna !== 'string' ||
+      !isID(nr_kierunkowy) || !isID(telefon) ||
+      (typeof email !== 'string' || email.length > 100)) {
+      const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+      return sendResponse(res, packet);
+    }
+
+    // First insert guardian
+    const guardianResult = await executeQuery(`INSERT INTO opiekunZ (imie_opiekuna, nazwisko_opiekuna, nr_kierunkowy, telefon, email)
+    VALUES (:imie_opiekuna, :nazwisko_opiekuna, :nr_kierunkowy, :telefon, :email)`, { imie_opiekuna, nazwisko_opiekuna, nr_kierunkowy, telefon, email });
+
+    const successPacket = createPacket(guardianResult, StatusCodes.Inserted);
+
+    if (successPacket instanceof ErrorPacket) {
+      return sendResponse(res, successPacket);
+    }
+
+    // Then insert person with guardian id
+    const personResult = await executeQuery(`
+        INSERT INTO osobyZ (typ_osoby_id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id)
+        VALUES (:typ_osoby_id, :imie, :nazwisko, (SELECT id FROM klasy WHERE nazwa = :klasa), :uczeszcza, :miasto, :opiekun_id)`, {
+      typ_osoby_id : typ_osoby_id,
+      imie,
+      nazwisko,
+      klasa,
+      uczeszcza,
+      miasto,
+      opiekun_id : (guardianResult as ResultSetHeader).insertId,
+    });
+
+    const packet = createPacket(personResult, StatusCodes.Inserted);
+    return sendResponse(res, packet);
+  } else {
+    if (typeof imie !== 'string' || typeof nazwisko !== 'string' ||
+      (typeof uczeszcza !== 'boolean') ||
+      (typeof miasto !== 'boolean')) {
+      const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+      return sendResponse(res, packet);
+    }
+
+    const personResult = await executeQuery(`
+        INSERT INTO osobyZ (typ_osoby_id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id)
+        VALUES (:typ_osoby_id, :imie, :nazwisko, NULL, :uczeszcza, :miasto, NULL)`, {
+      typ_osoby_id : typ_osoby_id,
+      imie,
+      nazwisko,
+      uczeszcza,
+      miasto,
+    });
+
+    const packet = createPacket(personResult, StatusCodes.Inserted);
+    return sendResponse(res, packet);
+  }
+})
 
 router.get('/person', async (req, res) => {
   let limit : number | undefined;
@@ -84,7 +147,7 @@ router.put('/person/:id/update', async (req, res) => {
           uczeszcza  = :uczeszcza,
           miasto     = :miasto,
           opiekun_id = :opiekun_id
-      WHERE id = :id`, { id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id: opiekunIdValue });
+      WHERE id = :id`, { id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id : opiekunIdValue });
 
   const packet = createPacket(result, StatusCodes.Updated);
   return sendResponse(res, packet);

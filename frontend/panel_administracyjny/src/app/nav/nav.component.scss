@@ -46,3 +46,12 @@ li {
     color: var(--primary);
   }
 }
+
+.in-progress-title {
+  text-align: center;
+  background: none;
+  padding: unset;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: i.$margin-md;
+}
