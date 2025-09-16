@@ -3,7 +3,7 @@
   <menu>
     <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'kalendarz']">Kalendarz</a></li>
     <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'dane']">Dane</a></li>
-    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'deklaracje']">Deklaracje</a></li>
+    <li><a routerLinkActive="active" [dialog]="inProgressDialog">Deklaracje</a></li>
   </menu>
 }
 @if (title()) {
@@ -12,8 +12,16 @@
 @if (personS.personZ() !== null) {
   @let id = personS.personZ()?.id!;
   <menu>
-    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'platnosci']">Płatności</a></li>
-    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'karta']">Karta</a></li>
-    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'raport']">Raport</a></li>
+    <li><a routerLinkActive="active" [dialog]="inProgressDialog">Płatności</a></li>
+    <li><a routerLinkActive="active" [dialog]="inProgressDialog">Karta</a></li>
+    <li><a routerLinkActive="active" [dialog]="inProgressDialog">Raport</a></li>
   </menu>
 }
+
+<app-dialog #inProgressDialog>
+  <h2 class="in-progress-title">
+    <fa-icon [icon]="faCircleInfo" />
+    W trakcie realizacji
+  </h2>
+  <p>Ta opcja jest jeszcze niedostępna, przepraszamy!</p>
+</app-dialog>

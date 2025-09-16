@@ -46,3 +46,16 @@ li {
     color: var(--primary);
   }
 }
+
+app-dialog {
+  display: none;
+}
+
+.in-progress-title {
+  text-align: center;
+  background: none;
+  padding: unset;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: i.$margin-md;
+}
