@@ -10,14 +10,15 @@ import cors from 'cors';
 
 const env = process.env;
 
+
 if (env.DEBUG_MODE === undefined)
   Warning('DEBUG_MODE is not set, defaulting to false');
 
 const app = express();
 
-if (env.DEBUG_MODE === 'false')
-  configureConsoleOutput(app);
-app.use(cors())
+configureConsoleOutput(app, env.DEBUG_MODE === 'true');
+
+app.use(cors());
 app.use(express.json());
 app.use('/api/zsti', zstiRoutes);
 app.use('/api/info', infoRoutes)
@@ -83,7 +84,8 @@ export async function executeQuery(query : string, params? : {}) : Promise<Query
       return null;
     }
     const result = await connection.query(query, params);
-    Debug('Query executed successfully', query, params);
+    if (env.DEBUG_MODE === 'true')
+      Debug('Query executed successfully', query, params);
     return result[0]; // MySQL2 returns an array with results and fields
   } catch (error) {
     Errors('Error executing query', error);
@@ -110,7 +112,10 @@ export function sendResponse(res : express.Response, packet : Packet) : express.
 
   const httpStatusCode = !isError ? (responseStatus.get(statusCode) || 200) : 500; // Default to 500 for errors
 
-  return res.status(httpStatusCode).send({
+  res.status(httpStatusCode)
+    .contentType('application/json')
+    .setHeader('Access-Control-Allow-Origin', '*');
+  return res.send({
     status : statusCode,
     statusMessage : packet.statusMessage,
     timestamp : packet.timestamp,
@@ -118,15 +123,15 @@ export function sendResponse(res : express.Response, packet : Packet) : express.
   });
 }
 
-function isQuerySuccesful(result : QueryResult | QueryError | null) : boolean {
+function isQuerySuccessful(result : QueryResult | QueryError | null) : boolean {
   return !(result instanceof Error || result === null);
 }
 
-export function createPacket(data : QueryResult | QueryError | null, succesfulStatusCode : StatusCodes) : Packet | ErrorPacket {
+export function createPacket(data : QueryResult | QueryError | null, successfulStatusCode : StatusCodes) : Packet | ErrorPacket {
   let packet : Packet | ErrorPacket;
 
-  if (isQuerySuccesful(data))
-    packet = new Packet(succesfulStatusCode, data);
+  if (isQuerySuccessful(data))
+    packet = new Packet(successfulStatusCode, data);
   else if (data === null)
     packet = new ErrorPacket(StatusCodes["Internal Server Error"]);
   else

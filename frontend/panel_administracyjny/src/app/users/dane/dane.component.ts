@@ -2,11 +2,13 @@ import { Component, effect, ElementRef, NgZone, signal, ViewChild } from '@angul
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TransitionService } from '@services/transition.service';
 import { PersonsService, TypOsoby, ZPerson } from '@database/persons.service';
-import { faUser, faUserShield, faPaperPlane, faArrowsRotate, faRotateLeft } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faUserShield, faPaperPlane, faArrowsRotate, faRotateLeft, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { GuardiansService, ZGuardian } from '@database/guardians.service';
 import { NotificationsService } from '@services/notifications.service';
 import { SwitchComponent } from '@switch';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
+import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.directive';
 
 @Component({
   selector : 'app-dane',
@@ -14,7 +16,9 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
     FormsModule,
     ReactiveFormsModule,
     SwitchComponent,
-    FaIconComponent
+    FaIconComponent,
+    TooltipComponent,
+    TooltipDelayTriggerDirective
   ],
   templateUrl : './dane.component.html',
   styleUrl : './dane.component.scss'
@@ -25,7 +29,6 @@ export class DaneComponent {
   @ViewChild('window') window! : ElementRef;
 
   protected showWindow : boolean = false;
-  protected readonly Number = Number;
 
   protected readonly isRefreshing = signal(false);
   protected readonly isSending = signal(false);
@@ -33,7 +36,9 @@ export class DaneComponent {
   protected readonly namePattern = /^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+ [a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+$/;
   protected readonly phonePattern = /^\+\d{1,3} \d{9}$/;
   protected readonly TypOsoby = TypOsoby;
+  protected readonly Number = Number;
 
+  protected readonly faCircleInfo = faCircleInfo;
   protected readonly faUser = faUser;
   protected readonly faUserShield = faUserShield;
   protected readonly faPaperPlane = faPaperPlane;
@@ -49,8 +54,8 @@ export class DaneComponent {
     imie_nazwisko_opiekuna : new FormControl<string | null>('', Validators.pattern(this.namePattern)),
     telefon : new FormControl<string | null>('', [Validators.required, Validators.pattern(this.phonePattern)]),
     email : new FormControl<string | null>('', [Validators.required, Validators.email]),
-    uczeszcza : new FormControl(true, Validators.required),
-  })
+    uczeszcza : new FormControl(false, Validators.required),
+  });
 
   constructor(
     private guardiansS : GuardiansService,
@@ -62,6 +67,7 @@ export class DaneComponent {
     effect(() => {
       this.personsS.personZ();
       this.getData;
+      this.updateValidators();
     })
   }
 
@@ -144,62 +150,43 @@ export class DaneComponent {
       id : user.id,
       imie : imie_nazwisko!.split(' ')[0],
       nazwisko : imie_nazwisko!.split(' ')[1],
+      klasa : typ_osoby === TypOsoby.UCZEN ? klasa! : undefined,
       miasto : !!miasto,
       uczeszcza : !!uczeszcza,
       typ_osoby_id : typ_osoby!,
     }
 
-    if (typ_osoby === TypOsoby.UCZEN && guardianData) {
-      this.guardiansS.updateZGuardian(user.id, guardianData).subscribe((success) => {
-        if (!success) {
-          this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych opiekuna.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+    if (typ_osoby === TypOsoby.UCZEN) {
+      if (!guardianData) {
+        this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych opiekuna.', 10, 'Nie znaleziono danych opiekuna. To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+        this.isSending.set(false);
+        return;
+      }
+
+      this.guardiansS.updateZGuardian(user.id, guardianData).subscribe((guardian_id) => {
+        if (!guardian_id) {
+          this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych opiekuna.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem. Problem: brak ID opiekuna.');
           this.isSending.set(false);
           return;
         }
 
-        this.guardiansS.getGuardianID(guardianData).subscribe((id_opiekun) => {
-          if (!id_opiekun) {
-            this.notificationsS.createErrorNotification('Nie udało się pobrać ID opiekuna.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+        person.opiekun_id = guardian_id;
+
+        this.personsS.updateZPerson(person).subscribe((success) => {
+          if (!success) {
+            this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych osoby.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
             this.isSending.set(false);
             return;
           }
 
-          person.opiekun_id = id_opiekun;
-
-
-
-          this.personsS.updateZPerson(person).subscribe((successPerson) => {
-            if (!successPerson) {
-              this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych osoby.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
-              this.isSending.set(false);
-              return;
-            }
-
-            this.notificationsS.createSuccessNotification('Dane zostały zaktualizowane pomyślnie.', 3);
-            this.personsS.personZ.set({ ...user, ...person, opiekun_id : id_opiekun });
-            this.forms.markAsPristine();
-            this.forms.markAsUntouched();
-            this.isSending.set(false);
-            return;
-          });
-        });
-      });
-    } else if (typ_osoby === TypOsoby.NAUCZYCIEL) {
-      person.opiekun_id = null;
-
-      this.personsS.updateZPerson(person).subscribe((successPerson) => {
-        if (!successPerson) {
-          this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych osoby.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+          this.notificationsS.createSuccessNotification('Dane zostały zaktualizowane pomyślnie.', 3);
+          this.personsS.personZ.set({ ...user, ...person, opiekun_id : guardian_id });
+          this.forms.markAsPristine();
+          this.forms.markAsUntouched();
           this.isSending.set(false);
+          this.personsS.selectZPerson(person);
           return;
-        }
-
-        this.notificationsS.createSuccessNotification('Dane zostały zaktualizowane pomyślnie.', 3);
-        this.personsS.personZ.set({ ...user, ...person, opiekun_id : null });
-        this.forms.markAsPristine();
-        this.forms.markAsUntouched();
-        this.isSending.set(false);
-        return;
+        })
       });
     }
   }
@@ -237,10 +224,11 @@ export class DaneComponent {
   }
 
   protected updateValidators() : void {
-    const typ_osoby = this.forms.get('typ_osoby')?.value;
+    let typ_osoby = this.forms.get('typ_osoby')?.value;
+    typ_osoby = typ_osoby !== null && typ_osoby !== undefined ? Number(typ_osoby) : typ_osoby;
+
     const klasa = this.forms.get('klasa')!;
     const opiekun = this.forms.get('imie_nazwisko_opiekuna')!;
-
     if (typ_osoby === TypOsoby.UCZEN) {
       const required = Validators.required;
       klasa.setValidators(required);
@@ -255,4 +243,5 @@ export class DaneComponent {
       this.forms.patchValue({ klasa : '', imie_nazwisko_opiekuna : '' });
     }
   }
+
 }

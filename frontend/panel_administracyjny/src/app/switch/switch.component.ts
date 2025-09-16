@@ -1,4 +1,4 @@
-import { Component, forwardRef, input, viewChild } from '@angular/core';
+import { Component, forwardRef, input, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
 import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.directive';
@@ -28,9 +28,9 @@ export type SwitchType = '2-way' | '3-way';
     },
   ],
   host : {
-    '[class.on]' : "value === 'on'",
-    '[class.off]' : "value === 'off'",
-    '[class.all]' : "value === 'all'",
+    '[class.on]' : "value() === 'on'",
+    '[class.off]' : "value() === 'off'",
+    '[class.all]' : "value() === 'all'",
     '[class.twoWay]' : "type() === '2-way'",
   }
 })
@@ -49,7 +49,7 @@ export class SwitchComponent implements ControlValueAccessor {
   constructor() {
   }
 
-  public value : State = 'off';
+  public value = signal<State>('off');
 
   private onChange : (value : State) => void = () => {
   };
@@ -58,22 +58,24 @@ export class SwitchComponent implements ControlValueAccessor {
 
   protected changeStep(number : number) {
     const states : State[] = this.type() === '2-way' ? ['off', 'on'] : ['off', 'on', 'all'];
-    let index = states.indexOf(this.value);
+    let index = states.indexOf(this.value());
     index = (index + number + states.length) % states.length;
-    this.value = states[index];
+    this.value.set(states[index]);
 
-    this.onChange(this.value);
+    this.onChange(this.value());
     this.onTouched();
   }
 
   protected setValueAndClose(value : State) {
-  this.value = value;
+    this.value.set(value);
     this.tooltipChange().hide();
   }
 
-  public writeValue(value : State) : void {
-    if (value !== undefined && value !== null) {
-      this.value = value;
+  public writeValue(value : State | boolean) : void {
+    if (typeof value === 'boolean') {
+      this.value.set(value ? 'on' : 'off');
+    } else if (value !== undefined && value !== null) {
+      this.value.set(value);
     }
   }
 
