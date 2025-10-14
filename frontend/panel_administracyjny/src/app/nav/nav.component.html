@@ -3,14 +3,13 @@
   <menu>
     <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'kalendarz']">Kalendarz</a></li>
     <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'dane']">Dane</a></li>
-    <li><a routerLinkActive="active" [dialog]="inProgressDialog">Deklaracje</a></li>
+    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'deklaracje']">Deklaracje</a></li>
   </menu>
 }
 @if (title()) {
   <h2>{{ title() }}</h2>
 }
 @if (personS.personZ() !== null) {
-  @let id = personS.personZ()?.id!;
   <menu>
     <li><a routerLinkActive="active" [dialog]="inProgressDialog">Płatności</a></li>
     <li><a routerLinkActive="active" [dialog]="inProgressDialog">Karta</a></li>
