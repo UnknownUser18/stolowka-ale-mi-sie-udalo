@@ -1,0 +1,33 @@
+@use 'index' as i;
+
+:host {
+  width: 1vw;
+  min-width: 20px;
+  height: 1vw;
+  min-height: 20px;
+  padding: i.$padding-xs;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  cursor: pointer;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+  background-color: color-mix(in oklch, var(--highlight) 25%, var(--bg) 70%);
+  color: var(--bg);
+  transition: i.transition(border-color, i.$duration-sm), i.transition(background-color, i.$duration-sm);
+
+  &.checked {
+    background-color: var(--primary);
+    border-color: var(--border);
+
+    &:hover, &:focus {
+      background-color: var(--primary);
+      border-color: var(--border);
+    }
+  }
+}
+
+fa-icon {
+  font-size: i.$font-size-md;
+}

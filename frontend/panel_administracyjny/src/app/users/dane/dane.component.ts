@@ -1,6 +1,5 @@
-import { Component, effect, ElementRef, NgZone, signal, ViewChild } from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TransitionService } from '@services/transition.service';
 import { PersonsService, TypOsoby, ZPerson } from '@database/persons.service';
 import { faUser, faUserShield, faPaperPlane, faArrowsRotate, faRotateLeft, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { GuardiansService, ZGuardian } from '@database/guardians.service';
@@ -26,7 +25,6 @@ import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.di
 export class DaneComponent {
   protected guardian : ZGuardian | null | undefined;
 
-  @ViewChild('window') window! : ElementRef;
 
   protected showWindow : boolean = false;
 
@@ -60,9 +58,7 @@ export class DaneComponent {
   constructor(
     private guardiansS : GuardiansService,
     private personsS : PersonsService,
-    private notificationsS : NotificationsService,
-    private transition : TransitionService,
-    private zone : NgZone) {
+    private notificationsS : NotificationsService) {
 
     effect(() => {
       this.personsS.personZ();
@@ -127,6 +123,7 @@ export class DaneComponent {
     }
   }
 
+
   protected sendChanges() {
     const user = this.personsS.personZ();
     if (!user) return;
@@ -186,40 +183,24 @@ export class DaneComponent {
           return;
         })
       });
+    } else if (typ_osoby === TypOsoby.NAUCZYCIEL) {
+      this.personsS.updateZPerson(person).subscribe((success) => {
+        if (!success) {
+          this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych osoby.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+          this.isSending.set(false);
+          return;
+        }
+
+        this.notificationsS.createSuccessNotification('Dane zostały zaktualizowane pomyślnie.', 3);
+        this.personsS.personZ.set({ ...user, ...person, opiekun_id : undefined });
+        this.forms.markAsPristine();
+        this.forms.markAsUntouched();
+        this.isSending.set(false);
+        this.personsS.selectZPerson(person);
+        return;
+      });
     }
-  }
-
-
-  protected closeWindow() : void {
-    this.transition.applyAnimation(this.window.nativeElement, false, this.zone).then(() => {
-      this.showWindow = false;
-    });
-  }
-
-  protected async archivePerson() : Promise<void> {
-    // if (!this.user) return;
-    // const cardId = await this.database.request('zsti.card.getById', { id : this.user.id }, 'dump');
-    // if (!cardId[0]) {
-    //   this.globalInfo.generateNotification(NotificationType.WARNING, 'Nie udało się znaleźć karty osoby. Prawdopodobnie nie posiada karty.');
-    // } else {
-    //   await this.database.request('zsti.scan.deleteForCard', { id_karty : cardId[0].id }, 'dump');
-    //   await this.database.request('zsti.card.deleteByStudentId', { id_ucznia : this.user.id }, 'dump');
-    // }
-    //
-    // await this.database.request('zsti.payment.deleteByStudentId', { id_ucznia : this.user.id }, 'dump');
-    // await this.database.request('zsti.absence.deleteForStudent', { id : this.user.id }, 'dump');
-    // await this.database.request('zsti.declaration.deleteAll', { id_osoby : this.user.id }, 'dump');
-    //
-    // const resultStudent = await this.database.request('zsti.student.delete', { id : this.user.id }, 'dump');
-    // if (!resultStudent[0]) {
-    //   this.globalInfo.generateNotification(NotificationType.ERROR, 'Nie udało się usunąć użytkownika.');
-    //   return;
-    // }
-    //
-    // this.globalInfo.generateNotification(NotificationType.SUCCESS, 'Użytkownik został zarchiwizowany.');
-    // this.globalInfo.setActiveUser(undefined);
-    // this.router.navigate(['osoby/zsti']).then();
-  }
+  };
 
   protected updateValidators() : void {
     let typ_osoby = this.forms.get('typ_osoby')?.value;
@@ -227,15 +208,25 @@ export class DaneComponent {
 
     const klasa = this.forms.get('klasa')!;
     const opiekun = this.forms.get('imie_nazwisko_opiekuna')!;
+    const telefon = this.forms.get('telefon')!;
+    const email = this.forms.get('email')!;
     if (typ_osoby === TypOsoby.UCZEN) {
       const required = Validators.required;
       klasa.setValidators(required);
       opiekun.setValidators([required, Validators.pattern(this.namePattern)]);
+      telefon.setValidators([required, Validators.pattern(this.phonePattern)]);
+      email.setValidators([required, Validators.email]);
       klasa.enable();
       opiekun.enable();
+      telefon.enable();
+      email.enable();
     } else if (typ_osoby === TypOsoby.NAUCZYCIEL) {
       klasa.setValidators(null);
       opiekun.setValidators(null);
+      telefon.setValidators(null);
+      email.setValidators(null);
+      telefon.disable();
+      email.disable();
       klasa.disable();
       opiekun.disable();
       this.forms.patchValue({ klasa : '', imie_nazwisko_opiekuna : '' });

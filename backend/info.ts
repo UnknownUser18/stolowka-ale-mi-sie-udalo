@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {Debug, ErrorPacket, Packet, StatusCodes} from "./types";
+import { Debug, ErrorPacket, Packet, StatusCodes } from "./types";
 import { sendResponse, db, executeQuery, createPacket } from "./index";
 
 const router = Router({
@@ -8,10 +8,16 @@ const router = Router({
 });
 
 router.get('/health', (_req, res) => {
-  db.then((conn) => {
-    const packet = conn ? new Packet(StatusCodes.OK, 'Server is healthy') : new Packet(StatusCodes["Internal Server Error"], 'No database connection');
-    sendResponse(res, packet);
-  })
+  db.getConnection().then((connection) => {
+    const packet = connection
+      ? new Packet(StatusCodes.OK, 'Server is healthy')
+      : new Packet(StatusCodes["Internal Server Error"], 'No database connection');
+    if (connection) connection.release(); // Release the connection back to the pool
+    return sendResponse(res, packet);
+  }).catch(() => {
+    const packet = new ErrorPacket(StatusCodes["Internal Server Error"]);
+    return sendResponse(res, packet);
+  });
 });
 
 router.get('/closed-days', async (_req, res) => {
@@ -28,7 +34,7 @@ router.delete('/closed-days/delete/:id', async (req, res) => {
     return sendResponse(res, packet);
   }
 
-  const result = await executeQuery(`DELETE FROM dniN WHERE dniN.id = :id`, { id,  });
+  const result = await executeQuery(`DELETE FROM dniN WHERE dniN.id = :id`, { id, });
 
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
@@ -44,7 +50,7 @@ router.post('/closed-days/add', async (req, res) => {
     return sendResponse(res, packet);
   }
 
-  const result = await executeQuery(`INSERT INTO dniN (dzien) VALUES(:date)`, { date });
+  const result = await executeQuery(`INSERT INTO dniN (dzien) VALUES (:date)`, { date });
 
   const packet = createPacket(result, StatusCodes.Inserted);
   return sendResponse(res, packet);

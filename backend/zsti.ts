@@ -195,6 +195,58 @@ router.get('/declaration/:id/in_date', async (req, res) => {
   return sendResponse(res, packet);
 });
 
+router.put('/declaration/:id/update', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { data_od, data_do, dni } = req.body;
+
+  if (!isID(id) || (data_od !== null && typeof data_od !== 'string') ||
+    (data_do !== null && typeof data_do !== 'string') ||
+    (typeof dni !== 'string' || dni.length !== 5 || !/^[01]{5}$/.test(dni))) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`
+      UPDATE deklaracjaZ
+      SET data_od = :data_od,
+          data_do = :data_do,
+          dni     = :dni
+      WHERE id = :id`, { id, data_od, data_do, dni });
+
+  const packet = createPacket(result, StatusCodes.Updated);
+  return sendResponse(res, packet);
+});
+
+router.post('/declaration/add', async (req, res) => {
+  const { id_osoby, data_od, data_do, dni } = req.body;
+
+  if (!isID(id_osoby) ||
+    (data_od !== null && typeof data_od !== 'string') ||
+    (data_do !== null && typeof data_do !== 'string') ||
+    (typeof dni !== 'string' || dni.length !== 5 || !/^[01]{5}$/.test(dni))) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`INSERT INTO deklaracjaZ (id_osoby, data_od, data_do, dni) VALUES (:id_osoby, :data_od, :data_do, :dni)`, { id_osoby, data_od, data_do, dni });
+
+  const packet = createPacket(result, StatusCodes.Inserted);
+  return sendResponse(res, packet);
+})
+
+router.delete('/declaration/:id/delete', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`DELETE FROM deklaracjaZ WHERE id = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
 router.get('/absence/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {

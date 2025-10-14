@@ -1,39 +1,187 @@
 @use 'index' as i;
-@use 'mixed-apps';
+
+:host {
+  height: 100%;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: 0.9fr 1fr;
+  grid-template-rows: auto auto;
+  padding-right: i.$padding-md;
+}
+
+.td-button button {
+  margin: auto;
+  font-size: i.$font-size-sm;
+
+  &.selected {
+    background-color: var(--secondary);
+
+    &:hover, &:focus {
+      background-color: var(--secondary);
+      color: var(--bg);
+    }
+  }
+
+  @include i.button-primary;
+}
+
+
+label {
+  display: flex;
+  gap: i.$padding-2xs;
+  flex-direction: column;
+  font-size: i.$font-size-lg;
+
+  &.one-line {
+    width: fit-content;
+    align-items: center;
+    flex-direction: row;
+  }
+}
+
+td {
+  font-size: i.$font-size-sm;
+}
+
+.table-container {
+  display: flex;
+  flex-direction: column;
+
+  & > div {
+    padding: i.$padding-sm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    font-size: i.$font-size-md;
+  }
+}
+
+.filter-declaration {
+  @include i.button-default;
+}
+
+fieldset {
+  @include i.fieldset;
+  transition: i.transition(border-color);
+
+  &.error {
+    border-color: var(--danger);
+  }
+}
+
+input {
+  @include i.input;
+}
+
 
 form {
-  @include i.flex-center(column, space-between, start);
-  margin-right: 5%;
-  gap: 25px;
-  height: 100%;
+  display: flex;
+  gap: i.$padding-md;
+  flex-direction: column;
 
-  h3 {
-    @include i.font(1.5em, 500, var(--color-13));
-  }
-
-  .checkbox-label {
-    @include i.checkbox;
-    flex-direction: row !important;
-    align-items: center;
+  div {
+    display: flex;
+    gap: i.$padding-sm;
     justify-content: space-between;
   }
+
+  button {
+    font-size: i.$font-size-md;
+  }
+
+  @include i.form-buttons;
 }
 
+.remove-declaration {
+  @include i.danger-button;
+}
 
-.window {
-  form .checkbox-label {
-    span {
-      margin-bottom: 0;
+.add-declaration {
+  height: fit-content;
+  justify-self: center;
+  font-size: i.$font-size-md;
+  @include i.button-primary;
+}
+
+.declaration-form {
+  height: fit-content;
+  align-self: center;
+  grid-column: 2;
+  grid-row: 1 / -1;
+}
+
+.add-dialog-form {
+  max-width: 40vw;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: repeat(2, 1fr);
+
+  fieldset {
+    min-width: 15vw;
+  }
+
+  app-calendar {
+    grid-column: 1 / -1;
+  }
+}
+
+h3 {
+  margin-bottom: i.$padding-sm;
+  font-size: i.$font-size-xl;
+  text-align: center;
+}
+
+.error-message {
+  color: var(--danger);
+  font-size: i.$font-size-xs;
+}
+
+.delete-dialog {
+  max-width: 25vw;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  text-align: center;
+
+  h3 {
+    grid-column: 1 / -1;
+  }
+
+  p {
+    grid-column: 1 / -1;
+    font-size: i.$font-size-md;
+  }
+
+  button {
+    width: fit-content;
+    font-size: i.$font-size-md;
+
+    &:first-of-type {
+      @include i.danger-button;
     }
 
-    div {
-      margin-top: 0;
-      padding: 0;
-    }
-
-    input[type="checkbox"]:checked + div::after {
-      top: -3px;
-      left: 1px;
+    &:last-of-type {
+      justify-self: end;
+      @include i.button-default;
     }
   }
 }
+
+.filter-dialog-form {
+  max-width: 30vw;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: repeat(2, 1fr);
+
+  fieldset {
+    min-width: 12vw;
+  }
+
+  @include i.form-buttons;
+}
+
+@include i.table;
