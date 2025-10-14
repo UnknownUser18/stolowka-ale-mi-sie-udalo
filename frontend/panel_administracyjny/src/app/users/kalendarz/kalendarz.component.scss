@@ -138,16 +138,7 @@ section {
 }
 
 .refresh-data {
-  border: i.$base-border var(--border-muted);
-  background-color: var(--bg-light);
-  color: var(--text-muted);
-  transition: i.transition(background-color, i.$duration-sm), i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm);
-
-  &:hover, &:focus {
-    background-color: color-mix(in oklch, var(--highlight) 40%, var(--bg-light) 60%);
-    color: var(--text);
-    border-color: var(--border);
-  }
+  @include i.button-default;
 }
 
 .send-absence {

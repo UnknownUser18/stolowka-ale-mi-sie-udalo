@@ -1,4 +1,4 @@
-  import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Packet, TypesService } from './types.service';
 import { map, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -45,13 +45,13 @@ interface ClosedDayDB {
 }
 
 export interface ZPricingDB {
-  id  : number;
+  id : number;
   data_od : string;
   data_do : string;
-  cena: number;
+  cena : number;
 }
 
-export interface ZPricing{
+export interface ZPricing {
   id : number;
   data_od : Date;
   data_do : Date;
@@ -63,11 +63,6 @@ export class LocalAbsenceChanges {
   public removed : Date[];
 
   constructor() {
-    this.added = [];
-    this.removed = [];
-  }
-
-  public clear() : void {
     this.added = [];
     this.removed = [];
   }
@@ -182,8 +177,8 @@ export class DeclarationsService extends TypesService {
     );
   }
 
-  public deleteClosedDay(id: number) : Observable<boolean | null> {
-    return this.http.delete<Packet>(`${ this.api }info/closed-days/delete/${id}`).pipe(
+  public deleteClosedDay(id : number) : Observable<boolean | null> {
+    return this.http.delete<Packet>(`${ this.api }info/closed-days/delete/${ id }`).pipe(
       map((res) => {
         if (res.status !== 200) {
           console.error(`Error removing closed day: ${ res.statusMessage }`);
@@ -195,9 +190,9 @@ export class DeclarationsService extends TypesService {
     )
   }
 
-  public addClosedDay(date: Date): Observable<boolean | null> {
+  public addClosedDay(date : Date) : Observable<boolean | null> {
     console.log(`${ this.api }info/closed-days/add`, this.convertToDBDate(date), date)
-    return this.http.post<Packet>(`${ this.api }info/closed-days/add?date=${this.convertToDBDate(date)}`, {date: this.convertToDBDate(date)}).pipe(
+    return this.http.post<Packet>(`${ this.api }info/closed-days/add?date=${ this.convertToDBDate(date) }`, { date : this.convertToDBDate(date) }).pipe(
       map((res) => {
         if (res.status !== 201) {
           console.error(`Error adding closed day: ${ res.statusMessage }`);
@@ -210,11 +205,11 @@ export class DeclarationsService extends TypesService {
 
   }
 
-  public getPricing(): Observable<ZPricing[] | null> {
+  public getPricing() : Observable<ZPricing[] | null> {
     return this.http.get<Packet>(`${ this.api }zsti/pricing`).pipe(
       map((res : Packet) => {
         if (!this.isArray(res)) return null;
-        return (res.data as ZPricingDB[]).map((pricingDB : ZPricingDB): ZPricing => ({
+        return (res.data as ZPricingDB[]).map((pricingDB : ZPricingDB) : ZPricing => ({
           ...pricingDB,
           data_od : new Date(pricingDB.data_od),
           data_do : new Date(pricingDB.data_do)
@@ -224,8 +219,8 @@ export class DeclarationsService extends TypesService {
     )
   }
 
-  public addPricing(date_start : Date, date_end : Date, price: number) : Observable<boolean | null> {
-    return this.http.post<Packet>(`${ this.api }zsti/pricing/add`, {date_start: this.convertToDBDate(date_start), date_end: this.convertToDBDate(date_end), price}).pipe(
+  public addPricing(date_start : Date, date_end : Date, price : number) : Observable<boolean | null> {
+    return this.http.post<Packet>(`${ this.api }zsti/pricing/add`, { date_start : this.convertToDBDate(date_start), date_end : this.convertToDBDate(date_end), price }).pipe(
       map((res) => {
         if (res.status !== 201) {
           console.error(`Error adding pricing: ${ res.statusMessage }`);
@@ -238,8 +233,8 @@ export class DeclarationsService extends TypesService {
 
   }
 
-  public deletePricing(id: number) : Observable<boolean | null> {
-    return this.http.delete<Packet>(`${ this.api }zsti/pricing/delete/${id}`).pipe(
+  public deletePricing(id : number) : Observable<boolean | null> {
+    return this.http.delete<Packet>(`${ this.api }zsti/pricing/delete/${ id }`).pipe(
       map((res) => {
         if (res.status !== 200) {
           console.error(`Error removing pricing: ${ res.statusMessage }`);
@@ -251,9 +246,9 @@ export class DeclarationsService extends TypesService {
     )
   }
 
-  public updatePricing(id: number, date_start: Date, date_end: Date, price: number) : Observable<boolean | null> {
-    console.log(`${ this.api }zsti/pricing/update/${id}`, {body: {date_start: this.convertToDBDate(date_start), date_end: this.convertToDBDate(date_end), price}})
-    return this.http.put<Packet>(`${ this.api }zsti/pricing/update/${id}`, {date_start: this.convertToDBDate(date_start), date_end: this.convertToDBDate(date_end), price}).pipe(
+  public updatePricing(id : number, date_start : Date, date_end : Date, price : number) : Observable<boolean | null> {
+    console.log(`${ this.api }zsti/pricing/update/${ id }`, { body : { date_start : this.convertToDBDate(date_start), date_end : this.convertToDBDate(date_end), price } })
+    return this.http.put<Packet>(`${ this.api }zsti/pricing/update/${ id }`, { date_start : this.convertToDBDate(date_start), date_end : this.convertToDBDate(date_end), price }).pipe(
       map((res) => {
         if (res.status !== 200) {
           console.error(`Error updating pricing: ${ res.statusMessage }`);
@@ -265,8 +260,8 @@ export class DeclarationsService extends TypesService {
     )
   }
 
-  public checkPricing(id:number, date_start: Date, date_end: Date) : Observable<number | null> {
-    return this.http.get<Packet>(`${ this.api }zsti/pricing/not-in-dates/${id}?date_start=${this.convertToDBDate(date_start)}&date_end=${this.convertToDBDate(date_end)}`).pipe(
+  public checkPricing(id : number, date_start : Date, date_end : Date) : Observable<number | null> {
+    return this.http.get<Packet>(`${ this.api }zsti/pricing/not-in-dates/${ id }?date_start=${ this.convertToDBDate(date_start) }&date_end=${ this.convertToDBDate(date_end) }`).pipe(
       map((res) => {
         if (res.status !== 200) {
           console.error(`Error adding closed day: ${ res.statusMessage }`);
@@ -277,5 +272,53 @@ export class DeclarationsService extends TypesService {
       }),
       catchError(() => of(null))
     )
+  }
+
+  public updateZDeclaration(declaration : ZDeclaration) : Observable<boolean> {
+    return this.http.put<Packet>(`${ this.api }zsti/declaration/${ declaration.id }/update`, {
+      data_od : this.convertToDBDate(declaration.data_od),
+      data_do : this.convertToDBDate(declaration.data_do),
+      dni : declaration.dni
+    }).pipe(
+      map((res) => {
+        if (res.status !== 202) {
+          console.error(`Error updating declaration: ${ res.statusMessage }`);
+          return false;
+        }
+        return true;
+      }),
+      catchError(() => of(false))
+    );
+  }
+
+  public deleteZDeclaration(id : number) : Observable<boolean> {
+    return this.http.delete<Packet>(`${ this.api }zsti/declaration/${ id }/delete`).pipe(
+      map((res) => {
+        if (res.status !== 200) {
+          console.error(`Error removing declaration: ${ res.statusMessage }`);
+          return false;
+        }
+        return true;
+      }),
+      catchError(() => of(false))
+    );
+  }
+
+  public addZDeclaration(declaration : Omit<ZDeclaration, 'id'>) : Observable<number | false> {
+    return this.http.post<Packet>(`${ this.api }zsti/declaration/add`, {
+      id_osoby : declaration.id_osoby,
+      data_od : this.convertToDBDate(declaration.data_od),
+      data_do : this.convertToDBDate(declaration.data_do),
+      dni : declaration.dni
+    }).pipe(
+      map((res) => {
+        if (res.status !== 201) {
+          console.error(`Error adding declaration: ${ res.statusMessage }`);
+          return false;
+        }
+        return (res.data as any).insertId as number;
+      }),
+      catchError(() => of(<false>false))
+    );
   }
 }

@@ -24,12 +24,7 @@ form {
 }
 
 fieldset {
-  padding: i.$padding-md;
-  display: flex;
-  gap: i.$padding-xl;
-  flex-direction: column;
-  border: i.$base-border var(--border-muted);
-  border-radius: i.$border-radius-2xl;
+  @include i.fieldset;
 }
 
 label {
@@ -86,17 +81,6 @@ option {
   }
 }
 
-legend {
-  display: inline-flex;
-  gap: i.$padding-3xs;
-  align-items: center;
-  font-size: i.$font-size-lg;
-  color: var(--text-muted);
-
-  fa-icon {
-    font-size: 0.9em;
-  }
-}
 
 div {
   display: flex;

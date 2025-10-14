@@ -321,8 +321,8 @@ export class KalendarzComponent {
         this.notificationS.createErrorNotification('Wystąpił błąd podczas zapisywania zmian.', 10, `Nie udało się zapisać ${ failedRequests.length } z ${ results.length } zmian.`);
       } else {
         this.notificationS.createSuccessNotification('Pomyślnie zapisano zmiany.', 5);
-        this.personS.localAbsenceChanges().clear();
-        this.getData;
+        this.personS.localAbsenceChanges.set(new LocalAbsenceChanges());
+        this.getData().then();
       }
     });
   }

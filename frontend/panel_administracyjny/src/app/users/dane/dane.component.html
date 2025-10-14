@@ -54,16 +54,24 @@
     </label>
     <label>
       <span>Telefon:</span>
-      <input type="tel" formControlName="telefon" placeholder="Telefon..." name="telefon" aria-label="Telefon" [pattern]="phonePattern" [attr.aria-errormessage]="forms.get('telefon')?.invalid ? 'phone-error' : null">
-      @if (forms.get('telefon')?.invalid) {
-        <span class="error" id="phone-error">Niepoprawny numer telefonu. Proszę wpisać w formacie <code>+48 123456789</code>.</span>
+      @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
+        <input type="tel" formControlName="telefon" placeholder="Nauczyciel..." name="telefon" aria-label="Nauczyciel" [delayT]="disabledTooltip" [delay]="500" />
+      } @else {
+        <input type="tel" formControlName="telefon" placeholder="Telefon..." name="telefon" aria-label="Telefon" [pattern]="phonePattern" required [attr.aria-errormessage]="forms.get('telefon')?.invalid ? 'phone-error' : null">
+        @if (forms.get('telefon')?.invalid) {
+          <span class="error" id="phone-error">Niepoprawny numer telefonu. Proszę wpisać w formacie <code>+48 123456789</code>.</span>
+        }
       }
     </label>
     <label>
       <span>Email:</span>
-      <input type="email" formControlName="email" placeholder="Email" name="email" aria-label="Email" [attr.aria-errormessage]="forms.get('email')?.invalid ? 'email-error' : null">
-      @if (forms.get('email')?.invalid) {
-        <span class="error" id="email-error">Niepoprawny adres email. Proszę wpisać poprawny adres email.</span>
+      @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
+        <input type="email" formControlName="email" placeholder="Nauczyciel..." name="email" aria-label="Nauczyciel" [delayT]="disabledTooltip" [delay]="500" />
+      } @else {
+        <input type="email" formControlName="email" placeholder="Email..." name="email" aria-label="Email" [attr.required]="typOsoby === TypOsoby.UCZEN" [attr.aria-errormessage]="forms.get('email')?.invalid ? 'email-error' : null">
+        @if (forms.get('email')?.invalid) {
+          <span class="error" id="email-error">Niepoprawny adres email. Proszę wpisać poprawny adres email.</span>
+        }
       }
     </label>
   </fieldset>
@@ -90,21 +98,6 @@
     </button>
   </div>
 </form>
-
-@if (showWindow) {
-  <section #window>
-    <div>
-      <i role="button" tabindex="0" class="fa-solid fa-xmark close" (click)="closeWindow()"></i>
-      <h3>Czy na pewno chcesz archiwizować?</h3>
-      <p>Dla osoby <b>{{ forms.get('imie_nazwisko')?.value!.split(' ')[0] }}</b> <b>{{ forms.get('imie_nazwisko')?.value!.split(' ')[1] }}</b>?</p>
-      <h4>Co to oznacza?</h4>
-      <p>Oznacza to, że ta osoba oficjalnie nie będzie chodzić na stołówkę i nie będzie mogła mieć przypisanej karty, deklaracji ani płatności.</p>
-      <p>Tą czynność można później cofnąć w <i>"Administracja Osób"</i>.</p>
-      <button type="button" (click)="closeWindow()">Anuluj</button>
-      <button type="button" (click)="archivePerson()">Archiwizuj</button>
-    </div>
-  </section>
-}
 
 <app-tooltip #disabledTooltip [horizontal]="true">
   <fa-icon [icon]="faCircleInfo" />
