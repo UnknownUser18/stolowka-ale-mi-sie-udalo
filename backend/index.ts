@@ -3,7 +3,7 @@ import 'dotenv/config';
 import * as dbConstructor from 'mysql2/promise';
 import { Debug, Errors, getStatusCodeByCode, Info, StatusCodes, Warning, Packet, ErrorPacket } from './types';
 import { configureConsoleOutput } from './config';
-import { QueryError, QueryResult } from "mysql2/promise";
+import { Connection, QueryError, QueryResult } from "mysql2/promise";
 import zstiRoutes from './zsti';
 import infoRoutes from './info';
 import cors from 'cors';
@@ -34,35 +34,23 @@ if (!env.PORT || isNaN(parseInt(env.PORT, 10))) {
   process.exit(1);
 }
 
-const connection = {
+const pool = dbConstructor.createPool({
   host : env.DB_HOST,
   port : parseInt(env.DB_PORT, 10),
   user : env.DB_USER,
   password : env.DB_PASSWORD,
   database : env.DB_NAME,
   namedPlaceholders : true,
-}
-
-export const db = dbConstructor.createConnection(connection).then((connection) => {
-  Info('Database connection established successfully');
-  return connection;
-}).catch((error) => {
-  Errors('Failed to connect to the database', error);
-  if (env.DEBUG_MODE === 'true')
-    process.exit(1);
-  else {
-    setInterval(() => {
-      Info('Attempting to reconnect to the database...');
-      dbConstructor.createConnection(connection).then((connection) => {
-        Info('Database reconnection successful');
-        return connection;
-      }).catch((err) => {
-        Errors('Reconnection attempt failed', err);
-      });
-    }, 60000); // Retry every 60 seconds
-    return null;
-  }
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
+
+pool.on('connection', (conn: Connection) => {
+  Info('New database connection established with ID', conn.threadId);
+})
+
+export const db = pool;
 
 app.listen(env.PORT, () => {
   Info('Server is running on port', env.PORT);
@@ -78,12 +66,7 @@ app.listen(env.PORT, () => {
  */
 export async function executeQuery(query : string, params? : {}) : Promise<QueryResult | QueryError | null> {
   try {
-    const connection = await db;
-    if (!connection) {
-      Errors('No database connection available');
-      return null;
-    }
-    const result = await connection.query(query, params);
+    const result = await db.query(query, params);
     if (env.DEBUG_MODE === 'true')
       Debug('Query executed successfully', query, params);
     return result[0]; // MySQL2 returns an array with results and fields

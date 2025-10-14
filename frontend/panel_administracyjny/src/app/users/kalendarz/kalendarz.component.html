@@ -27,7 +27,7 @@
               <div class="day-static weekend" [delayT]="weekendTooltip" [delay]="1500">
                 {{ date }}
               </div>
-            } @else if (!(day | inDeclaration:declarationZ)) {
+            } @else if (!(day | inDeclaration:declarationZ:true)) {
               <div class="day-static no-declaration" [delayT]="notInDeclarationTooltip" [delay]="1500">
                 {{ date }}
               </div>
@@ -96,7 +96,7 @@
       <tr>
         <th>Usunięte nieobecności:
           @let removed_title = 'Zobacz wszystkie usunięte nieobecności';
-          <button [dialog]="addedAbsenceDaysDialog" [title]="removed_title" [attr.aria-label]="removed_title">
+          <button [dialog]="removedAbsenceDaysDialog" [title]="removed_title" [attr.aria-label]="removed_title">
             <fa-icon [icon]="faUpRightAndDownLeftFromCenter" />
           </button>
         </th>
@@ -172,7 +172,7 @@
   </div>
 </app-dialog>
 
-<app-dialog>
+<app-dialog #removedAbsenceDaysDialog>
   <div class="dialog">
     <h2>Usunięte nieobecności</h2>
     <table>

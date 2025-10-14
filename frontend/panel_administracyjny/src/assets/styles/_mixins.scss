@@ -1,6 +1,108 @@
 @use 'variables' as v;
 @use 'functions' as f;
 
+@mixin button-layout {
+  padding: v.$padding-2xs v.$padding-xs;
+  display: flex;
+  gap: v.$padding-2xs;
+  align-items: center;
+  border-radius: v.$border-radius-md;
+  transition: f.transition(border-color, v.$duration-sm), f.transition(background-color, v.$duration-sm);
+}
+
+@mixin button-default {
+  @include button-layout;
+  color: var(--text-muted);
+  border: v.$base-border var(--border-muted);
+  background-color: var(--bg-light);
+  transition: f.transition(border-color, v.$duration-sm), f.transition(background-color, v.$duration-sm), f.transition(color, v.$duration-sm);
+
+  &:hover, &:focus {
+    background-color: color-mix(in oklch, var(--highlight) 10%, var(--bg-light) 90%);
+    border-color: var(--border);
+    color: var(--text);
+  }
+}
+
+@mixin button-primary {
+  @include button-layout;
+  color: var(--bg);
+  background-color: var(--primary);
+  transition: f.transition(border-color, v.$duration-sm), f.transition(background-color, v.$duration-sm), f.transition(color, v.$duration-sm);
+
+  &:hover, &:focus {
+    background-color: var(--secondary);
+    color: var(--bg);
+  }
+}
+
+@mixin fieldset {
+  padding: v.$padding-sm v.$padding-md;
+  display: flex;
+  gap: v.$padding-md;
+  flex-direction: column;
+  border: v.$base-border var(--border-muted);
+  border-radius: v.$border-radius-md;
+
+  legend {
+    display: inline-flex;
+    gap: v.$padding-3xs;
+    align-items: center;
+    font-size: v.$font-size-lg;
+    color: var(--text-muted);
+
+    fa-icon {
+      font-size: 0.9em;
+    }
+  }
+}
+
+
+@mixin table {
+  table {
+    width: 100%;
+    overflow: auto;
+    border-spacing: 0;
+  }
+
+  .table-body-scroll {
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  thead {
+    display: block;
+    width: 100%;
+  }
+
+  tr {
+    width: 100%;
+    display: table;
+    table-layout: fixed;
+
+    &:nth-child(even) {
+      background-color: var(--bg-light);
+    }
+  }
+
+  th {
+    padding: v.$padding-2xs v.$padding-xs;
+    border: v.$base-border var(--border-muted);
+    background-color: var(--bg-light);
+    color: var(--text-muted);
+  }
+
+  td {
+    padding: v.$padding-sm v.$padding-md;
+    font-size: v.$font-size-md;
+    border: v.$base-border var(--border-muted);
+    color: var(--text);
+    text-align: center;
+  }
+}
+
+
 @mixin sidebar-item-layout {
   padding: v.$padding-2xs v.$padding-xs;
   display: flex;
@@ -39,39 +141,59 @@
   }
 }
 
+@mixin success-button {
+  @include button-layout;
+  border: v.$base-border color-mix(in oklch, var(--success) 80%, var(--bg) 20%);
+  background-color: color-mix(in oklch, var(--success) 20%, var(--bg) 80%);
+  color: var(--success);
+
+  &:hover, &:focus {
+    background-color: var(--success);
+    color: var(--bg);
+    border-color: var(--success);
+  }
+
+  &:disabled {
+    background-color: color-mix(in oklch, var(--success) 80%, var(--bg) 20%);
+    color: var(--bg);
+    border-color: color-mix(in oklch, var(--success) 80%, var(--bg) 20%);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+@mixin danger-button {
+  @include button-layout;
+  border: v.$base-border color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
+  background-color: color-mix(in oklch, var(--danger) 20%, var(--bg) 80%);
+  color: var(--danger);
+
+  &:hover, &:focus {
+    background-color: var(--danger);
+    color: var(--bg);
+    border-color: var(--danger);
+  }
+
+  &:disabled {
+    background-color: color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
+    color: var(--bg);
+    border-color: color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
 @mixin form-buttons {
   button {
-    display: flex;
-    gap: v.$padding-2xs;
     width: fit-content;
-    padding: v.$padding-2xs v.$padding-xs;
-    border: v.$base-border;
-    border-radius: v.$border-radius-md;
-    transition: f.transition(background-color, v.$duration-sm), f.transition(border-color, v.$duration-sm), f.transition(color, v.$duration-sm);
 
     &[type="reset"] {
-      background-color: color-mix(in oklch, var(--danger) 20%, var(--bg) 80%);
-      color: var(--danger);
-      border-color: color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
-
-      &:hover, &:focus {
-        background-color: var(--danger);
-        color: var(--bg);
-        border-color: var(--danger);
-      }
+      @include danger-button;
     }
 
     &[type="submit"] {
       justify-self: end;
-      background-color: color-mix(in oklch, var(--success) 20%, var(--bg) 80%);
-      color: var(--success);
-      border-color: color-mix(in oklch, var(--success) 80%, var(--bg) 20%);
-
-      &:hover, &:focus {
-        background-color: var(--success);
-        color: var(--bg);
-        border-color: var(--success);
-      }
+      @include success-button;
     }
   }
 }
@@ -101,12 +223,22 @@
   color: var(--text-muted);
   transition: f.transition(border-color, v.$duration-sm), f.transition(color, v.$duration-sm);
 
+  &.ng-invalid.ng-touched {
+    border-color: var(--danger);
+
+    &::placeholder {
+      color: var(--danger);
+      opacity: 1;
+    }
+  }
+
   &:hover, &:focus {
     color: var(--text);
     border-color: var(--border);
     outline: none;
   }
 }
+
 
 @mixin flex-center($direction: row, $justify: center, $align: center) {
   display: flex;
@@ -204,87 +336,6 @@
 
     &.done {
       margin-top: 0;
-    }
-  }
-}
-
-@mixin table {
-  tbody, thead, tr {
-    width: 100%;
-    display: contents;
-  }
-  td, th {
-    @include flex-center;
-    border-right: 2px solid var(--color-10);
-
-    &:last-child {
-      border-right: none;
-    }
-  }
-}
-
-@mixin fieldset {
-  fieldset {
-    transition: f.transition(border-color, v.$medium);
-    margin: 0 10px;
-    display: flex;
-    padding: 25px 10px;
-    border-radius: 10px;
-    flex-direction: column;
-    border-color: var(--color-11);
-
-    &:focus-within {
-      border-color: var(--color-12);
-
-      legend, legend i {
-        color: var(--color-13);
-      }
-    }
-
-    legend {
-      @include font-500(var(--color-12));
-      transition: f.transition(color);
-      margin: 0 15px 15px 15px;
-
-      i {
-        margin-right: 10px;
-      }
-    }
-  }
-
-  label {
-    display: flex;
-    flex-direction: column;
-    margin: 10px 0;
-
-    button {
-      @include font-500(var(--color-13));
-      margin-bottom: 15px;
-    }
-
-    input {
-      transition: f.transition(outline-color);
-      outline: 2px solid transparent;
-      border-radius: 20px;
-      padding: 10px 15px;
-      background-color: var(--color-2);
-      font-size: 1.3em;
-
-      &:focus {
-        outline-color: var(--color-10);
-      }
-    }
-
-    select {
-      border-radius: 20px;
-      padding: 10px 15px;
-      background-color: var(--color-2);
-      font-size: 1.3em;
-
-      option {
-        font-size: 0.9em;
-        color: var(--color-13);
-      }
     }
   }
 }
