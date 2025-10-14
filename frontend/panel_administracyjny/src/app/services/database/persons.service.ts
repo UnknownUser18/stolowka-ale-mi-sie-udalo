@@ -66,14 +66,6 @@ export class PersonsService extends TypesService {
     );
   }
 
-  public getZPerson(id : number) : Observable<ZPerson | null> {
-    return this.http.get<Packet>(`${ this.api }zsti/person/${ id }`).pipe(
-      map((res) => {
-        return res.status === 200 ? res.data![0] as ZPerson : null;
-      }),
-      catchError(() => of(null)))
-  }
-
   public updateZPerson(person : ZPerson) : Observable<boolean> {
     return this.http.put<Packet>(`${ this.api }zsti/person/${ person.id }/update`, person).pipe(
       map((res) => {

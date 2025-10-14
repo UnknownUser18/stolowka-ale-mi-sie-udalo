@@ -6,6 +6,8 @@
   height: 100%;
 }
 
+@include i.table;
+
 section {
   width: 100%;
   padding: i.$padding-xs i.$padding-md;
@@ -35,40 +37,13 @@ section {
   animation: spin 1s linear infinite;
 }
 
-%button {
-  padding: i.$padding-2xs i.$padding-xs;
-  display: flex;
-  gap: i.$padding-2xs;
-  align-items: center;
-  border-radius: i.$border-radius-md;
-  transition: i.transition(border-color, i.$duration-sm), i.transition(background-color, i.$duration-sm) !important;
-}
 
-%default-button {
-  @extend %button;
-  border: i.$base-border var(--border-muted);
-  background-color: var(--bg-light);
-
-  &:hover, &:focus {
-    background-color: color-mix(in oklch, var(--highlight) 10%, var(--bg-light) 90%);
-    border-color: var(--border);
-  }
-}
-
-.filter-button {
-  @extend %default-button;
-}
-
-.sort-button {
-  @extend %default-button;
-}
-
-.refresh-button {
-  @extend %default-button;
+.filter-button, .sort-button, .refresh-button {
+  @include i.button-default;
 }
 
 .add-button {
-  @extend %button;
+  @include i.button-layout;
   border: i.$base-border var(--border-muted);
   background-color: var(--primary);
   color: var(--bg) !important;
@@ -109,43 +84,7 @@ search {
   }
 }
 
-table {
-  margin-top: i.$margin-sm;
-  width: 100%;
-  overflow: auto;
-  border-collapse: collapse;
-}
-
-.table-body-scroll {
-  width: 100%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-tr {
-  width: 100%;
-  display: table;
-  table-layout: fixed;
-
-  &:nth-child(even) {
-    background-color: var(--bg-light);
-  }
-}
-
-th {
-  padding: i.$padding-2xs i.$padding-xs;
-  border: i.$base-border var(--border-muted);
-  background-color: var(--bg-light);
-  color: var(--text-muted);
-}
-
 td {
-  padding: i.$padding-sm i.$padding-md;
-  font-size: i.$font-size-md;
-  border: i.$base-border var(--border-muted);
-  color: var(--text);
-  text-align: center;
-
   button:hover, button:focus {
     text-decoration: underline;
     outline: none;

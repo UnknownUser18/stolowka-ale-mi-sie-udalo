@@ -11,8 +11,7 @@ import { TooltipRegistryService } from '../tooltip-registry.service';
     NgTemplateOutlet
   ],
   templateUrl : './tooltip.component.html',
-  styleUrl : './tooltip.component.scss',
-  host : {}
+  styleUrl : './tooltip.component.scss'
 })
 export class TooltipComponent {
   private tooltipRegistry = inject(TooltipRegistryService)
