@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { createPacket, executeQuery, sendResponse } from './index';
 import { Debug, ErrorPacket, Info, StatusCodes } from "./types";
-import { ResultSetHeader } from "mysql2/promise";
 
 const router = Router({
   caseSensitive : true,
@@ -24,70 +23,9 @@ const baseGetPersonsQuery = `
     FROM osobyZ
              LEFT JOIN klasy ON osobyZ.klasa = klasy.id
              LEFT JOIN opiekunZ ON osobyZ.opiekun_id = opiekunZ.id_opiekun`;
-router.post('/person/add', async (req, res) => {
-  const { person, guardian } = req.body;
-  const { imie, nazwisko, klasa, uczeszcza, miasto, imie_opiekuna, nazwisko_opiekuna, nr_kierunkowy, telefon, email, typ_osoby_id } = { ...person, ...guardian };
 
-  if (typ_osoby_id === 1) { // UCZEN
-    if (typeof imie !== 'string' || typeof nazwisko !== 'string' ||
-      (klasa !== null && (typeof klasa !== 'string' || klasa.length > 5)) ||
-      (typeof uczeszcza !== 'boolean') ||
-      (typeof miasto !== 'boolean') ||
-      typeof imie_opiekuna !== 'string' || typeof nazwisko_opiekuna !== 'string' ||
-      !isID(nr_kierunkowy) || !isID(telefon) ||
-      (typeof email !== 'string' || email.length > 100)) {
-      const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
-      return sendResponse(res, packet);
-    }
 
-    // First insert guardian
-    const guardianResult = await executeQuery(`INSERT INTO opiekunZ (imie_opiekuna, nazwisko_opiekuna, nr_kierunkowy, telefon, email)
-    VALUES (:imie_opiekuna, :nazwisko_opiekuna, :nr_kierunkowy, :telefon, :email)`, { imie_opiekuna, nazwisko_opiekuna, nr_kierunkowy, telefon, email });
-
-    const successPacket = createPacket(guardianResult, StatusCodes.Inserted);
-
-    if (successPacket instanceof ErrorPacket) {
-      return sendResponse(res, successPacket);
-    }
-
-    // Then insert person with guardian id
-    const personResult = await executeQuery(`
-        INSERT INTO osobyZ (typ_osoby_id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id)
-        VALUES (:typ_osoby_id, :imie, :nazwisko, (SELECT id FROM klasy WHERE nazwa = :klasa), :uczeszcza, :miasto, :opiekun_id)`, {
-      typ_osoby_id : typ_osoby_id,
-      imie,
-      nazwisko,
-      klasa,
-      uczeszcza,
-      miasto,
-      opiekun_id : (guardianResult as ResultSetHeader).insertId,
-    });
-
-    const packet = createPacket(personResult, StatusCodes.Inserted);
-    return sendResponse(res, packet);
-  } else {
-    if (typeof imie !== 'string' || typeof nazwisko !== 'string' ||
-      (typeof uczeszcza !== 'boolean') ||
-      (typeof miasto !== 'boolean')) {
-      const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
-      return sendResponse(res, packet);
-    }
-
-    const personResult = await executeQuery(`
-        INSERT INTO osobyZ (typ_osoby_id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id)
-        VALUES (:typ_osoby_id, :imie, :nazwisko, NULL, :uczeszcza, :miasto, NULL)`, {
-      typ_osoby_id : typ_osoby_id,
-      imie,
-      nazwisko,
-      uczeszcza,
-      miasto,
-    });
-
-    const packet = createPacket(personResult, StatusCodes.Inserted);
-    return sendResponse(res, packet);
-  }
-})
-
+//region Person endpoints
 router.get('/person', async (req, res) => {
   let limit : number | undefined;
 
@@ -152,7 +90,9 @@ router.put('/person/:id/update', async (req, res) => {
   const packet = createPacket(result, StatusCodes.Updated);
   return sendResponse(res, packet);
 });
+//endregion
 
+//region Declaration endpoints
 router.get('/declaration/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {
@@ -246,7 +186,9 @@ router.delete('/declaration/:id/delete', async (req, res) => {
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
 });
+//endregion
 
+//region Absence endpoints
 router.get('/absence/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {
@@ -293,7 +235,9 @@ router.delete('/absence/:id/delete', async (req, res) => {
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
 });
+//endregion
 
+//region Guardian endpoints
 router.get('/guardian/:id_person', async (req, res) => {
   const id_person = parseInt(req.params.id_person, 10);
 
@@ -375,20 +319,9 @@ router.post('/guardian/get-id', async (req, res) => {
   const packet = createPacket(guardian, StatusCodes.OK);
   return sendResponse(res, packet);
 });
+//endregion
 
-router.get('/payment/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (!isID(id)) {
-    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
-    return sendResponse(res, packet);
-  }
-
-  const result = await executeQuery(`SELECT * from platnosciZ pZ where pZ.id_ucznia = :id`, { id });
-
-  const packet = createPacket(result, StatusCodes.OK);
-  return sendResponse(res, packet);
-})
-
+//region Scan endpoints
 router.get('/scan/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {
@@ -427,17 +360,86 @@ router.post('/scan/add/:id', async (req, res) => {
     return sendResponse(res, packet);
   }
 })
+// endregion
 
-router.get('/card/withDetails', async (_req, res) => {
-  const result = await executeQuery(`SELECT k_z.*, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto
-  FROM kartyZ k_z
-           LEFT JOIN osobyZ o_z ON o_z.id = k_z.id_ucznia
-  ORDER BY o_z.nazwisko, o_z.imie;`)
+//region Payment endpoints
+router.get('/payment/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`SELECT * from platnosciZ pZ where pZ.id_ucznia = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+router.get('/payment/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery('SELECT * FROM platnosciZ WHERE id_ucznia = :id', { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
+router.put('/payment/:id/update', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { platnosc, data_platnosci, miesiac, rok, opis } = req.body;
+
+  if (!isID(id) || isNaN(Number(platnosc)) || !data_platnosci || !isID(miesiac) || !isID(rok) || (opis !== null && typeof opis !== 'string')) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`
+      UPDATE platnosciZ
+      SET platnosc       = :platnosc,
+          data_platnosci = :data_platnosci,
+          miesiac        = :miesiac,
+          rok            = :rok,
+          opis           = :opis
+      WHERE id = :id`, { id, platnosc, data_platnosci, miesiac, rok, opis });
+
+  const packet = createPacket(result, StatusCodes.Updated);
+  return sendResponse(res, packet);
+});
+
+router.delete('/payment/:id/delete', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`DELETE FROM platnosciZ WHERE id = :id`, { id });
 
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
 })
 
+router.post('/payment/add', async (req, res) => {
+  const { id_osoby, platnosc, data_platnosci, miesiac, rok, opis } = req.body;
+
+  if (!isID(id_osoby) || isNaN(Number(platnosc)) || !data_platnosci || !isID(miesiac) || !isID(rok) || (opis !== null && typeof opis !== 'string')) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`INSERT INTO platnosciZ (id_ucznia, platnosc, data_platnosci, miesiac, rok, opis)
+  VALUES (:id_ucznia, :platnosc, :data_platnosci, :miesiac, :rok, :opis)`, { id_ucznia : id_osoby, platnosc, data_platnosci, miesiac, rok, opis });
+
+  const packet = createPacket(result, StatusCodes.Inserted);
+  return sendResponse(res, packet);
+})
+//endregion
+
+//region Payment endpoints
 router.get('/pricing', async (_req, res) => {
   const result = await executeQuery(`SELECT * from cennikZ order by data_od;`)
 
@@ -505,5 +507,56 @@ router.get('/pricing/not-in-dates/:id', async (req, res) => {
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
 })
+//endregion
+
+//region Card endpoints
+router.get('/card/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`SELECT * from kartyZ kZ where kZ.id_ucznia = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
+router.delete('/card/:id/delete', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+  const result = await executeQuery(`DELETE FROM kartyZ WHERE id = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
+router.post('/card/add', async (req, res) => {
+  const { id_ucznia, key_card, data_wydania } = req.body;
+
+  if (!isID(id_ucznia) || !key_card || !data_wydania) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+  const result = await executeQuery(`INSERT INTO kartyZ (id_ucznia, key_card, data_wydania) VALUES (:id_ucznia, :key_card, :data_wydania)`, { id_ucznia, key_card, data_wydania });
+
+  const packet = createPacket(result, StatusCodes.Inserted);
+  return sendResponse(res, packet);
+});
+
+router.get('/card/withDetails', async (_req, res) => {
+  const result = await executeQuery(`SELECT k_z.*, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto
+  FROM kartyZ k_z
+           LEFT JOIN osobyZ o_z ON o_z.id = k_z.id_ucznia
+  ORDER BY o_z.nazwisko, o_z.imie;`)
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+//endregion
 
 export default router;
