@@ -13,9 +13,17 @@
     text-align: center;
   }
 
-  p {
+
+  a {
     font-size: i.$font-size-md;
     color: var(--text-muted);
+    transition: i.transition(color, i.$duration-sm);
+    text-decoration: none;
+
+    &:hover, &:focus {
+      color: var(--text);
+      text-decoration: underline;
+    }
   }
 
   i {

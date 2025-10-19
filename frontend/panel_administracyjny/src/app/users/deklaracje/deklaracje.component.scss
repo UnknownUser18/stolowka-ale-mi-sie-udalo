@@ -113,6 +113,14 @@ form {
   grid-row: 1 / -1;
 }
 
+.refresh-declarations {
+  @include i.button-default;
+
+  fa-icon.spin {
+    animation: spin 2s linear infinite;
+  }
+}
+
 .add-dialog-form {
   max-width: 40vw;
   display: grid;
@@ -135,8 +143,8 @@ h3 {
 }
 
 .error-message {
-  color: var(--danger);
   font-size: i.$font-size-xs;
+  color: var(--danger);
 }
 
 .delete-dialog {
@@ -154,6 +162,11 @@ h3 {
   p {
     grid-column: 1 / -1;
     font-size: i.$font-size-md;
+    color: var(--text-muted);
+
+    b {
+      color: var(--text);
+    }
   }
 
   button {

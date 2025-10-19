@@ -1,100 +1,174 @@
-import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
-import { TransitionService } from '../../services/transition.service';
-import { Subject } from 'rxjs';
+import { Component, DEFAULT_CURRENCY_CODE, effect, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { VariablesService } from '../../services/variables.service';
+import { PersonsService } from "@database/persons.service";
+import { CurrencyPipe, DatePipe } from "@angular/common";
+import { FaIconComponent } from "@fortawesome/angular-fontawesome";
+import { faFileInvoiceDollar, faFilter, faPaperPlane, faPlus, faRotate, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { PaymentsService, ZPayment } from "@database/payments.service";
+import { IsSelectedPaymentPipe } from "@pipes/is-selected-payment.pipe";
+import { NotificationsService } from "@services/notifications.service";
+import { DialogComponent } from "@tooltips/dialog/dialog.component";
+import { DialogTriggerDirective } from "@tooltips/dialog-trigger.directive";
 
 @Component({
   selector : 'app-platnosci',
   imports : [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    DatePipe,
+    FaIconComponent,
+    IsSelectedPaymentPipe,
+    CurrencyPipe,
+    DialogComponent,
+    DialogTriggerDirective
+  ],
+  providers : [
+    { provide : DEFAULT_CURRENCY_CODE, useValue : 'PLN' },
+    DatePipe
   ],
   templateUrl : './platnosci.component.html',
   styleUrl : './platnosci.component.scss'
 })
-export class PlatnosciComponent implements OnDestroy {
-  private destroy$ = new Subject<void>();
-  private id : number = 0;
-  private user_id : number = 0;
+export class PlatnosciComponent {
+  private payments : ZPayment[] | null = null;
 
-  protected showWindow : '' | 'add' | 'delete' | 'filter' = '';
-  // protected result : Payment[] = [];
-  // protected payments : Payment[] = [];
+  protected isLoading = false;
+  protected shownPayments : ZPayment[] | null = null;
 
-  protected platnosciForm = this.createForm();
+  protected readonly miesiac_rok_pattern = '^(\\d{4})-(0[1-9]|1[0-2])$';
+  protected readonly data_pattern = '^\\d{4}-\\d{2}-\\d{2}$';
+  protected readonly platnosc_pattern = '^\\d+(\\.\\d{1,2})?$';
 
-  protected addForm = this.createForm(true);
+  protected readonly selectedPayment = signal<ZPayment | null>(null);
 
-  protected filterForm = new FormGroup({
-    miesiac_rok : new FormControl('', [Validators.pattern('^(0[1-9]|1[0-2])-(\\d{4})$')]),
-    platnosc : new FormControl('', [Validators.min(0), Validators.pattern('^\\d+(\\.\\d{1,2})?$')]),
-    dataZaplaty : new FormControl('', [Validators.pattern('^\\d{4}-\\d{2}-\\d{2}$')]),
+  protected platnosciForm = new FormGroup({
+    miesiac_rok : new FormControl('', [Validators.required, Validators.pattern(this.miesiac_rok_pattern)]),
+    platnosc : new FormControl('', [Validators.required, Validators.min(0), Validators.pattern(this.platnosc_pattern)]),
+    data : new FormControl('', [Validators.required, Validators.pattern(this.data_pattern)]),
     opis : new FormControl('', [Validators.maxLength(200)])
   });
 
-  @ViewChild('window') window! : ElementRef;
+  protected addForm = new FormGroup({
+    miesiac_rok : new FormControl('', [Validators.required, Validators.pattern(this.miesiac_rok_pattern)]),
+    platnosc : new FormControl('', [Validators.required, Validators.min(0), Validators.pattern(this.platnosc_pattern)]),
+    data : new FormControl('', [Validators.required, Validators.pattern(this.data_pattern)]),
+    opis : new FormControl('', [Validators.maxLength(200)])
+  });
+
+  protected filterForm = new FormGroup({
+    miesiac_rok : new FormControl('', [Validators.pattern(this.miesiac_rok_pattern)]),
+    platnosc : new FormControl('', [Validators.min(0), Validators.pattern(this.platnosc_pattern)]),
+    data : new FormControl('', [Validators.pattern(this.data_pattern)]),
+    opis : new FormControl('', [Validators.maxLength(200)])
+  });
+
+  protected readonly faPlus = faPlus;
+  protected readonly faFilter = faFilter;
+  protected readonly faRotate = faRotate;
+  protected readonly faFileInvoiceDollar = faFileInvoiceDollar;
+  protected readonly faPaperPlane = faPaperPlane;
+  protected readonly faTrash = faTrash;
+
 
   constructor(
-    private variables : VariablesService,
-    private transition : TransitionService,
-    private cdr : ChangeDetectorRef,
-    private zone : NgZone,
-    protected infoService : GlobalInfoService) {
-    // this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() : void => {
-    //
-    //   this.infoService.activeUser.pipe(takeUntil(this.destroy$)).subscribe(user => {
-    //     if (!user) return;
-    //     this.user_id = user.id;
-    //     this.infoService.setTitle(`${ user.imie } ${ user.nazwisko } - Płatności`);
-    //     this.infoService.setActiveTab('PLATNOSCI');
-    //     this.reloadPayments();
-    //   });
-    // });
-  }
+    private personS : PersonsService,
+    private paymentsS : PaymentsService,
+    private notificationsS : NotificationsService,
+    private datePipe : DatePipe) {
+    effect(() => {
+      this.personS.personZ();
+      this.refreshPayments();
+    });
 
-  private createForm(use_date : boolean = false) : FormGroup {
-    if (use_date) {
-      const date = new Date();
-      const formattedDate = `${ date.getFullYear().toString().padStart(4, '0') }-${ (date.getMonth() + 1).toString().padStart(2, '0') }-${ date.getDate().toString().padStart(2, '0') }`;
-      return new FormGroup({
-        miesiac_rok : new FormControl('', [Validators.required, Validators.pattern('^(0[1-9]|1[0-2])-(\\d{4})$')]),
-        platnosc : new FormControl('', [Validators.required, Validators.min(0), Validators.pattern('^\\d+(\\.\\d{1,2})?$')]),
-        dataZaplaty : new FormControl(formattedDate, [Validators.required, Validators.pattern('^\\d{4}-\\d{2}-\\d{2}$')]),
-        opis : new FormControl('', [Validators.maxLength(200)])
-      });
-    }
-    return new FormGroup({
-      miesiac_rok : new FormControl('', [Validators.required, Validators.pattern('^(0[1-9]|1[0-2])-(\\d{4})$')]),
-      platnosc : new FormControl('', [Validators.required, Validators.min(0), Validators.pattern('^\\d+(\\.\\d{1,2})?$')]),
-      dataZaplaty : new FormControl('', [Validators.required, Validators.pattern('^\\d{4}-\\d{2}-\\d{2}$')]),
-      opis : new FormControl('', [Validators.maxLength(200)])
+    effect(() => {
+      this.selectedPayment();
+      this.setFormValues();
     });
   }
 
-  private reloadPayments() : void {
-    // this.database.request('zsti.payment.getById', { id_ucznia : this.infoService.activeUser.value?.id }, 'paymentList').then((payload) : void => {
-    //   if (!payload) {
-    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać płatności.');
-    //     return;
-    //   } else if (payload.length === 0) {
-    //     this.infoService.generateNotification(NotificationType.WARNING, 'Brak płatności dla tej osoby.');
-    //     this.result = this.payments = [];
-    //     return;
-    //   }
-    //
-    //   this.result = this.payments = payload;
-    //   this.result = this.result.sort((a, b) => a.id - b.id);
-    // });
+  private checkIfValuesAreCorrect(miesiac_rok : string, platnosc : string, data : string, opis : string) {
+    const monthYear = miesiac_rok?.split('-');
+
+    if (!monthYear) {
+      this.notificationsS.createErrorNotification('Nieprawidłowy format miesiąca i roku.', 5);
+      return false;
+    }
+
+    const month = parseInt(monthYear[1], 10);
+    const year = parseInt(monthYear[0], 10);
+
+    if (isNaN(month) || isNaN(year)) {
+      this.notificationsS.createErrorNotification('Nieprawidłowy format miesiąca i roku.', 5);
+      return false;
+    }
+
+    if (month < 1 || month > 12) {
+      this.notificationsS.createErrorNotification('Miesiąc musi być w zakresie od 01 do 12.', 5);
+      return false;
+    }
+
+    if (!platnosc) {
+      this.notificationsS.createErrorNotification('Kwota płatności jest wymagana.', 5);
+      return false;
+    }
+
+    if (!data) {
+      this.notificationsS.createErrorNotification('Data płatności jest wymagana.', 5);
+      return false;
+    }
+
+    const dataPlatnosci = new Date(data);
+    if (isNaN(dataPlatnosci.getTime())) {
+      this.notificationsS.createErrorNotification('Nieprawidłowa data płatności.', 5);
+      return false;
+    }
+
+    dataPlatnosci.setHours(0, 0, 0, 0);
+
+    const kwota = parseFloat(platnosc);
+    if (isNaN(kwota) || kwota < 0) {
+      this.notificationsS.createErrorNotification('Nieprawidłowa kwota płatności.', 5);
+      return false;
+    }
+
+    if (opis && opis.length > 200) {
+      this.notificationsS.createErrorNotification('Opis nie może przekraczać 200 znaków.', 5);
+      return false;
+    }
+
+    const opisTrimmed = opis ? opis.trim() : '';
+
+    return { month, year, kwota, data_platnosci : dataPlatnosci, opis : opisTrimmed };
   }
 
-  protected checkForFilters() : boolean {
-    return !!(this.filterForm.value.miesiac_rok ||
-      this.filterForm.value.platnosc ||
-      this.filterForm.value.dataZaplaty ||
-      this.filterForm.value.opis);
+  private setFormValues() {
+    const payment = this.selectedPayment();
+    if (!payment) return;
+
+
+    this.platnosciForm.patchValue({
+      miesiac_rok : this.datePipe.transform(payment.rok + '-' + payment.miesiac, 'yyyy-MM'),
+      platnosc : payment.platnosc.toString(),
+      data : this.datePipe.transform(payment.data_platnosci, 'yyyy-MM-dd'),
+      opis : payment.opis,
+    });
   }
 
+  private get fetchData() {
+    const person = this.personS.personZ();
+    if (!person) return;
+
+    this.paymentsS.getZPayments(person.id).subscribe((payments) => {
+      if (payments === null)
+        this.notificationsS.createErrorNotification('Nie udało się pobrać płatności.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+      else if (payments.length === 0)
+        this.notificationsS.createWarningNotification('Brak płatności dla tej osoby.', 5);
+      else
+        this.notificationsS.createSuccessNotification('Pomyślnie pobrano płatności.');
+
+      this.isLoading = false;
+      this.shownPayments = this.payments = payments;
+    });
+  }
 
   protected formatDate(date : string) : string {
     if (/^\d{2}-\d{4}$/.test(date)) {
@@ -109,172 +183,154 @@ export class PlatnosciComponent implements OnDestroy {
     });
   }
 
-  // protected selectPayment(payment : Payment) : void {
-  //   const date = new Date(payment.data_platnosci);
-  //   this.platnosciForm.patchValue({
-  //     miesiac_rok : `${ payment.miesiac.toString().padStart(2, '0') }-${ payment.rok }`,
-  //     platnosc : payment.platnosc.toFixed(2),
-  //     dataZaplaty : `${ date.getFullYear().toString().padStart(4, '0') }-${ (date.getMonth() + 1).toString().padStart(2, '0') }-${ date.getDate().toString().padStart(2, '0') }`,
-  //     opis : payment.opis
-  //   });
-  //   this.id = payment.id;
-  // }
+  protected updatePayment() {
 
-  protected updatePayment() : void {
     if (this.platnosciForm.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.notificationsS.createErrorNotification('Formularz zawiera błędy.', 5);
       return;
     }
 
-    const formValue = this.platnosciForm.value;
-    const monthYear = formValue.miesiac_rok?.split('-')!;
-    const month = parseInt(monthYear[0], 10);
-    const year = parseInt(monthYear[1], 10);
-    // const originalPayment = this.payments.find(p => p.id === this.id);
-    // if (!originalPayment) {
-    //   this.infoService.generateNotification(NotificationType.ERROR, 'Nie znaleziono płatności do aktualizacji.');
-    //   return;
-    // }
-    //
-    // const originalDate = new Date(originalPayment.data_platnosci);
-    // const sameDate = `${ originalDate.getFullYear().toString().padStart(4, '0') }-${ (originalDate.getMonth() + 1).toString().padStart(2, '0') }-${ originalDate.getDate().toString().padStart(2, '0') }` === formValue.dataZaplaty;
-    // if (originalPayment.platnosc === parseFloat(formValue.platnosc!) &&
-    //   sameDate &&
-    //   originalPayment.miesiac === month &&
-    //   originalPayment.rok === year &&
-    //   originalPayment.opis === formValue.opis) {
-    //   this.infoService.generateNotification(NotificationType.WARNING, 'Płatność nie została zmieniona.');
-    //   return;
-    // }
-    //
-    // if (isNaN(month) || isNaN(year)) {
-    //   this.infoService.generateNotification(NotificationType.ERROR, 'Nieprawidłowy format miesiąca i roku.');
-    //   return;
-    // }
-    //
-    // if (month < 1 || month > 12) {
-    //   this.infoService.generateNotification(NotificationType.ERROR, 'Miesiąc musi być w zakresie od 01 do 12.');
-    //   return;
-    // }
+    const { miesiac_rok, platnosc, data, opis : opisForm } = this.platnosciForm.value;
 
-    // this.database.request('zsti.payment.update', { platnosc : formValue.platnosc, id : this.id, data_platnosci : formValue.dataZaplaty, miesiac : formValue.miesiac_rok?.split('-')[0], rok : formValue.miesiac_rok?.split('-')[1], opis : (formValue.opis || 'Brak Opisu') }, 'paymentList').then((payload) => {
-    //   if (!payload) {
-    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować płatności.');
-    //     return;
-    //   }
-    //   this.infoService.generateNotification(NotificationType.SUCCESS, 'Płatność została zaktualizowana.');
-    //   this.reloadPayments();
-    //   this.closeWindow();
-    // });
+    const checkedValues = this.checkIfValuesAreCorrect(miesiac_rok!, platnosc!, data!, opisForm!);
+    if (!checkedValues) return;
+
+    const { month, year, kwota, data_platnosci, opis } = checkedValues;
+
+
+    const payment = this.selectedPayment()!;
+
+    const updatedPayment : ZPayment = {
+      ...payment,
+      miesiac : month,
+      rok : year,
+      platnosc : kwota,
+      data_platnosci : data_platnosci,
+      opis : opis,
+    };
+
+    this.paymentsS.updateZPayment(updatedPayment).subscribe((success) => {
+      if (!success) {
+        this.notificationsS.createErrorNotification('Nie udało się zaktualizować płatności.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+        return;
+      }
+
+      this.notificationsS.createSuccessNotification('Pomyślnie zaktualizowano płatność.');
+      this.selectedPayment.set(updatedPayment);
+      this.refreshPayments();
+    })
   }
 
-  protected deletePayment() : void {
-    // this.database.request('zsti.payment.delete', { id : this.id }, 'paymentList').then((payload) => {
-    //   if (!payload) {
-    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się usunąć płatności.');
-    //     return;
-    //   }
-    //   this.infoService.generateNotification(NotificationType.SUCCESS, 'Płatność została usunięta.');
-    //   this.reloadPayments();
-    //   this.platnosciForm.reset({
-    //     miesiac_rok : undefined,
-    //     platnosc : undefined,
-    //     dataZaplaty : undefined,
-    //     opis : undefined
-    //   });
-    //   this.closeWindow();
-    // });
+  protected deletePayment() {
+    const payment = this.selectedPayment();
+    if (!payment) return;
+
+    this.paymentsS.deleteZPayment(payment.id).subscribe((success) => {
+      if (!success) {
+        this.notificationsS.createErrorNotification('Nie udało się usunąć płatności.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+        return;
+      }
+
+      this.notificationsS.createSuccessNotification('Pomyślnie usunięto płatność.');
+      this.selectedPayment.set(null);
+      this.refreshPayments();
+    })
   }
 
-  protected addPayment() : void {
+  protected addPaymentToDB() {
     if (this.addForm.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.notificationsS.createErrorNotification('Formularz zawiera błędy.', 5);
       return;
     }
 
-    const formValue = this.addForm.value;
-    const monthYear = formValue.miesiac_rok?.split('-')!;
-    const month = parseInt(monthYear[0], 10);
-    const year = parseInt(monthYear[1], 10);
-
-    if (isNaN(month) || isNaN(year)) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Nieprawidłowy format miesiąca i roku.');
+    const person = this.personS.personZ();
+    if (!person) {
+      this.notificationsS.createErrorNotification('Nie można dodać płatności. Nie wybrano osoby.', 5);
       return;
     }
 
-    if (month < 1 || month > 12) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Miesiąc musi być w zakresie od 01 do 12.');
-      return;
-    }
+    const { miesiac_rok, platnosc, data, opis : opisForm } = this.addForm.value;
 
-    // if (this.payments.some(p => p.miesiac === month && p.rok === year)) {
-    //   this.infoService.generateNotification(NotificationType.ERROR, 'Płatność dla tego miesiąca i roku już istnieje.');
-    //   return;
-    // }
-    //
-    // this.database.request('zsti.payment.add', { platnosc : formValue.platnosc, data_platnosci : formValue.dataZaplaty, miesiac : formValue.miesiac_rok?.split('-')[0], rok : formValue.miesiac_rok?.split('-')[1], opis : (formValue.opis || 'Brak Opisu'), id_ucznia : this.user_id }, 'paymentList').then((payload) => {
-    //   if (!payload) {
-    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać płatności.');
-    //     return;
-    //   }
-    //   this.infoService.generateNotification(NotificationType.SUCCESS, 'Płatność została dodana.');
-    //   this.reloadPayments();
-    //   this.closeWindow();
-    // });
+    const checkedValues = this.checkIfValuesAreCorrect(miesiac_rok!, platnosc!, data!, opisForm!);
+    if (!checkedValues) return;
+
+    const { month, year, kwota, data_platnosci, opis } = checkedValues;
+
+    const newPayment : Omit<ZPayment, 'id'> = {
+      id_ucznia : person.id,
+      miesiac : month,
+      rok : year,
+      platnosc : kwota,
+      data_platnosci : data_platnosci,
+      opis : opis,
+    };
+
+    this.paymentsS.addZPayment(newPayment).subscribe((insertId) => {
+      if (insertId === false) {
+        this.notificationsS.createErrorNotification('Nie udało się dodać płatności.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+        return;
+      }
+
+      this.notificationsS.createSuccessNotification('Pomyślnie dodano płatność.');
+      this.addForm.reset();
+      this.refreshPayments();
+    })
   }
 
-  protected openWindow(type : '' | 'add' | 'delete' | 'filter') : void {
-    this.showWindow = type;
-    this.cdr.detectChanges();
-    this.transition.applyAnimation(this.window.nativeElement, true, this.zone).then();
-  }
+  protected applyFilter() {
+    if (!this.payments) return;
 
-  protected closeWindow() : void {
-    this.transition.applyAnimation(this.window.nativeElement, false, this.zone).then(() => {
-      this.showWindow = '';
+    const { miesiac_rok, platnosc, data, opis } = this.filterForm.value;
+
+    this.shownPayments = this.payments.filter((payment) => {
+      let matches = true;
+
+      if (miesiac_rok) {
+        const [year, month] = miesiac_rok.split('-').map(Number);
+        matches = matches && payment.rok === year && payment.miesiac === month;
+      }
+
+      if (platnosc) {
+        const kwota = parseFloat(platnosc);
+        matches = matches && payment.platnosc === kwota;
+      }
+
+      if (data) {
+        const dataPlatnosci = new Date(data);
+        dataPlatnosci.setHours(0, 0, 0, 0);
+        const paymentDate = new Date(payment.data_platnosci);
+        paymentDate.setHours(0, 0, 0, 0);
+        matches = matches && paymentDate.getTime() === dataPlatnosci.getTime();
+      }
+
+      if (opis) {
+        matches = matches && payment.opis.toLowerCase().includes(opis.toLowerCase());
+      }
+
+      return matches;
     });
   }
 
-  protected applyFilter() : void {
-    if (this.filterForm.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
-      return;
-    }
-
-    const filters = this.filterForm.value;
-    // this.result = this.payments.filter(payment => {
-    //   const monthYear = filters.miesiac_rok?.split('-');
-    //   const month = monthYear ? parseInt(monthYear[0], 10) : null;
-    //   const year = monthYear ? parseInt(monthYear[1], 10) : null;
-    //
-    //   return (!filters.miesiac_rok || (payment.miesiac === month && payment.rok === year)) &&
-    //          (!filters.platnosc || payment.platnosc === parseFloat(filters.platnosc)) &&
-    //          (!filters.dataZaplaty || payment.data_platnosci === filters.dataZaplaty) &&
-    //          (!filters.opis || payment.opis.includes(filters.opis));
-    // });
-    // this.closeWindow();
-    // if (this.result.length === 0) {
-    //   this.infoService.generateNotification(NotificationType.WARNING, 'Brak wyników pasujących do filtra.');
-    // } else {
-    //   this.infoService.generateNotification(NotificationType.SUCCESS, `Pomyślnie zastosowano filtry. Znaleziono ${ this.result.length } ${ wynikString(this.result.length) }.`);
-    // }
+  protected resetFilters() {
+    this.filterForm.reset();
+    this.shownPayments = this.payments;
   }
 
-  protected resetFilter() : void {
-    this.filterForm.reset({
-      miesiac_rok : undefined,
-      platnosc : undefined,
-      dataZaplaty : undefined,
-      opis : undefined
+  protected refreshPayments() {
+    this.isLoading = true;
+    this.fetchData;
+  }
+
+  protected resetPayment() {
+    const payment = this.selectedPayment();
+
+    if (!payment) return;
+
+    this.platnosciForm.reset({
+      miesiac_rok : this.datePipe.transform(`${ payment.rok }-${ payment.miesiac }`, 'yyyy-MM'),
+      platnosc : payment.platnosc.toString(),
+      data : this.datePipe.transform(payment.data_platnosci, 'yyyy-MM-dd'),
+      opis : payment.opis,
     });
-    // this.result = this.payments;
-    this.infoService.generateNotification(NotificationType.INFO, 'Filtry zostały zresetowane.');
-
-  }
-
-  public ngOnDestroy() : void {
-    // this.result = this.payments = [];
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

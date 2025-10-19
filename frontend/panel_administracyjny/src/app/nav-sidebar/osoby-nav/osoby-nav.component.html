@@ -4,7 +4,7 @@
     @let nazwisko_imie = person?.nazwisko + ' ' + person?.imie;
     @let deselect_title = `Odznacz osobę ${nazwisko_imie}`;
     <h3>Wybrana osoba ZSTI:</h3>
-    <p>{{ nazwisko_imie }} <i>({{ isTeacher(person) ? 'n.' : person?.klasa }})</i></p>
+    <p><a [routerLink]="['osoba/zsti/', person?.id, 'kalendarz']">{{ nazwisko_imie }} <i>({{ isTeacher(person) ? 'n.' : person?.klasa }})</i></a></p>
     <button (click)="deselectPerson()" [title]="deselect_title" [attr.aria-label]="deselect_title">
       <fa-icon [icon]="faTimes" />
       Odznacz
