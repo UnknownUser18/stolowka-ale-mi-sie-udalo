@@ -70,7 +70,7 @@ export class KartyComponent {
       this.cardForm.setValue({
         key_card : String(card.key_card),
         data_wydania : this.datePipe.transform(card.data_wydania, 'yyyy-MM-dd') || '',
-        ostatnie_uzycie : this.datePipe.transform(card.ostatnie_uzycie, 'yyyy-MM-dd') || '',
+        ostatnie_uzycie : this.datePipe.transform(card.ostatnie_uzycie, 'yyyy-MM-ddTHH:mm') || '',
       });
 
       this.cardForm.disable();
