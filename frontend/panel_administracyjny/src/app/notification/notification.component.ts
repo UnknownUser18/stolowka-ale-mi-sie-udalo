@@ -5,6 +5,7 @@ import { faCheck, faInfinity, faInfo, faWarning, faXmark } from '@fortawesome/fr
 import { DatePipe } from '@angular/common';
 import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
 import { TooltipTriggerDirective } from '@tooltips/tooltip-trigger.directive';
+import { TooltipDelayTriggerDirective } from "@tooltips/tooltip-delay-trigger.directive";
 
 @Component({
   selector : 'app-notification',
@@ -12,7 +13,8 @@ import { TooltipTriggerDirective } from '@tooltips/tooltip-trigger.directive';
     FaIconComponent,
     DatePipe,
     TooltipComponent,
-    TooltipTriggerDirective
+    TooltipTriggerDirective,
+    TooltipDelayTriggerDirective
   ],
   templateUrl : './notification.component.html',
   styleUrl : './notification.component.scss',

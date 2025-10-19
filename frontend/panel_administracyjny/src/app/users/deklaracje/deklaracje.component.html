@@ -4,6 +4,14 @@
       Dodaj deklarację
       <fa-icon [icon]="faPlus" />
     </button>
+    <button class="refresh-declarations" (click)="refreshDeclarations()">
+      @if (isLoading) {
+        Ładowanie...
+      } @else {
+        Odśwież deklaracje
+      }
+      <fa-icon [icon]="faRotate" [class.spin]="isLoading" />
+    </button>
     <button class="filter-declaration" [dialog]="filterDeclarationsDialog">
       Filtruj deklaracje
       <fa-icon [icon]="faFilter" />
@@ -235,37 +243,3 @@
 <app-tooltip #cantSendTooltip>
   <p>Nie zgadzają się dni. Zmień daty, jeżeli w kalendarzu pokazują się błędy albo jak dzień początkowy jest później niż dzień końcowy.</p>
 </app-tooltip>
-
-<!--@if (showWindow !== '') {-->
-<!--  <section #filter [class]="{'filter': showWindow === 'filter','delete': showWindow === 'delete','add': showWindow === 'add'}" class="window">-->
-<!--    <div>-->
-<!--      <i class="fa-solid fa-xmark close" (click)="closeWindow()"></i>-->
-<!--      @if (showWindow === 'filter') {-->
-<!--        <h3>Filtruj deklaracje</h3>-->
-<!--        <form>-->
-<!--          <fieldset>-->
-<!--            <legend><i class="fa-solid fa-calendar"></i> Pomiędzy dniami:</legend>-->
-<!--            <label>-->
-<!--              <span>Data rozpoczęcia:</span>-->
-<!--              <input type="date" formControlName="data_od">-->
-<!--            </label>-->
-<!--            <label>-->
-<!--              <span>Data zakończenia:</span>-->
-<!--              <input type="date" formControlName="data_do">-->
-<!--            </label>-->
-<!--          </fieldset>-->
-<!--          <fieldset>-->
-<!--            <legend><i class="fa-solid fa-calendar-day"></i> Wybierz dni:</legend>-->
-<!--                        @for (dzien of dniNazwy; track dzien.key) {-->
-<!--                          <label class="checkbox-label">-->
-<!--                            <span>{{ dzien.label }}</span>-->
-<!--                            <input type="checkbox" [formControl]="getDzienKey(dzien.key, 'filterForm')">-->
-<!--                            <div></div>-->
-<!--                          </label>-->
-<!--                        }-->
-<!--          </fieldset>-->
-<!--          <button type="button" (click)="applyFilter()">Zastosuj</button>-->
-<!--        </form>-->
-<!--    </div>-->
-<!--  </section>-->
-<!--}-->

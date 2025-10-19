@@ -49,7 +49,6 @@ export class GuardiansService extends TypesService {
     return this.http.put<Packet>(`${ this.api }zsti/guardian/${ id_person }/update`, body).pipe(
       map((res) => {
         if (!this.isArray(res)) return null;
-        console.log(res.data);
         return res.status === StatusCodes.Updated ? res.data![0] as ZGuardian["id_opiekun"] : null;
       }),
       catchError(() => of(null))

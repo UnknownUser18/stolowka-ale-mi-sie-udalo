@@ -44,7 +44,7 @@ interface ClosedDayDB {
   dzien : string;
 }
 
-export interface ZPricingDB {
+interface ZPricingDB {
   id : number;
   data_od : string;
   data_do : string;

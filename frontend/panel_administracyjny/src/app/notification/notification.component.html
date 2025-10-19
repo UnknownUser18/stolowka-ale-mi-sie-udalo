@@ -22,7 +22,7 @@
 </button>
 
 @let timestamp_title = `Data i godzina utworzenia: ${ notification() ? (notification()?.timestamp | date: 'yyyy-MM-dd HH:mm:ss') : '' }`;
-<time class="timestamp" [title]="timestamp_title" [attr.aria-label]="timestamp_title">
+<time class="timestamp" [attr.aria-label]="timestamp_title" [delayT]="timeLeftTooltip" [delay]="500">
   {{ notification()?.timestamp | date: 'HH:mm:ss' }}
 </time>
 @let timeleft_title = timeLeft() === Infinity ? 'Nie wygasa' : `Czas do wygaśnięcia: ${ formatDate(timeLeft()) }`;
@@ -37,4 +37,12 @@
 
 <app-tooltip #tooltip [horizontal]="true">
   {{ notification()?.detailedMessage }}
+</app-tooltip>
+
+<app-tooltip #timeLeftTooltip [horizontal]="true">
+  @if (timeLeft() === Infinity) {
+    To powiadomienie nie wygasa automatycznie.
+  } @else {
+    To powiadomienie wygaśnie za {{ formatDate(timeLeft()) }}.
+  }
 </app-tooltip>

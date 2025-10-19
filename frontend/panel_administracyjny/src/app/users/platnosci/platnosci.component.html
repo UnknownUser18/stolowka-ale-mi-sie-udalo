@@ -1,120 +1,262 @@
-<section>
-  <h2>Lista dostępnych płatności : <i role="button" tabindex="0" class="fa-solid fa-filter" (click)="openWindow('filter')"></i> @if (checkForFilters()) {
-    <span>W użyciu są filtry <abbr title="Zresetuj filtry"><i role="button" tabindex="0" class="fa-solid fa-xmark" (click)="resetFilter()"></i></abbr></span>
-  } </h2>
+<div class="table-container">
+  <div>
+    <button class="add-payment" [dialog]="addPaymentDialog">
+      Dodaj płatność
+      <fa-icon [icon]="faPlus" />
+    </button>
+    <button class="refresh-payment" (click)="refreshPayments()" [disabled]="isLoading">
+      @if (isLoading) {
+        Odświeżanie...
+      } @else {
+        Odśwież płatności
+      }
+      <fa-icon [icon]="faRotate" [class.spin]="isLoading" />
+    </button>
+    <button class="filter-payment" [dialog]="filterDialog">
+      Filtruj płatności
+      <fa-icon [icon]="faFilter" />
+    </button>
+  </div>
   <table>
     <thead>
     <tr>
-      <th>Numer</th>
-      <th>Miesiąc & Rok objęty</th>
+      <th>#</th>
       <th>Kwota</th>
-      <th></th>
+      <th>Objęty miesiąc</th>
+      <th>Wybierz</th>
     </tr>
     </thead>
-    <tbody>
-<!--      @for (platnosc of result; track platnosc.id; let i = $index) {-->
-<!--        <tr>-->
-<!--          <td>{{ i + 1 }}</td>-->
-<!--          <td>{{ formatMonth(platnosc.miesiac) }} {{ platnosc.rok }}</td>-->
-<!--          <td>{{ platnosc.platnosc }} zł</td>-->
-<!--          <td>-->
-<!--            <button (click)="selectPayment(platnosc)">Wybierz</button>-->
-<!--          </td>-->
-<!--          } @empty {-->
-<!--        <td class="empty">Brak dostępnych płatności...</td>-->
-<!--      }-->
-    </tbody>
+    <div class="table-body-scroll">
+      <tbody>
+        @for (payment of shownPayments; track payment.id; let i = $index) {
+          <tr>
+            @let year_month = (payment.rok + '-' + payment.miesiac.toString().padStart(2, '0')) | date : 'LLLL yyyy';
+            <td>{{ i + 1 }}</td>
+            <td>{{ payment.platnosc | currency }}</td>
+            <td>{{ year_month }}</td>
+            <td class="td-button">
+              <button [class.selected]="payment | isSelectedPayment:selectedPayment()" (click)="selectedPayment.set(payment)">
+                @if (payment | isSelectedPayment:selectedPayment()) {
+                  Wybrano
+                } @else {
+                  Wybierz
+                }
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4">Brak dostępnych płatności...</td>
+          </tr>
+        }
+      </tbody>
+    </div>
   </table>
-</section>
+</div>
+@let monthYearLabel = 'Objęty miesiąc i rok płatności';
+@let dateLabel = 'Dzień zapłaty płatności';
+@let amountLabel = 'Kwota płatności';
+@let descriptionLabel = 'Opis płatności';
+
+@let monthYearPlaceholder = 'Wprowadź miesiąc i rok...';
+@let datePlaceholder = 'Wybierz datę zapłaty...';
+@let amountPlaceholder = 'Wprowadź kwotę...';
+@let descriptionPlaceholder = 'Wprowadź opis płatności...';
+
 <form [formGroup]="platnosciForm">
-  @defer (when platnosciForm.get('miesiac_rok')?.value) {
-    <label>
-      <span>Objęty miesiąc i rok :</span>
-      <input type="month" formControlName="miesiac_rok" placeholder="Wybierz miesiąc i rok..." required>
-    </label>
-    <label>
-      <span>Kwota :</span>
-      <input type="number" formControlName="platnosc" placeholder="Wprowadź kwotę..." min="0" required>
-    </label>
-    <label>
-      <span>Dzień zapłaty :</span>
-      <input type="date" formControlName="dataZaplaty" placeholder="Wybierz datę zapłaty..." required>
-    </label>
-    <label>
-      <span>Opis :</span>
-      <input type="text" formControlName="opis" placeholder="Wprowadź opis płatności..." maxlength="200">
-    </label>
-    <button type="submit" (click)="updatePayment()">Prześlij dane</button>
-    <button type="button" (click)="openWindow('delete')">Usuń płatność</button>
+  @if (selectedPayment()) {
+    <fieldset>
+      <legend>
+        <fa-icon [icon]="faFileInvoiceDollar" />
+        Szczegóły płatności
+      </legend>
+      <label>
+        @let selectedMonthYearInvalid = platnosciForm.get('miesiac_rok')?.invalid && platnosciForm.get('miesiac_rok')?.touched;
+        <span>Objęty rok i miesiąc:</span>
+        <input type="month" formControlName="miesiac_rok" [placeholder]="monthYearPlaceholder" [attr.aria-label]="monthYearLabel" [attr.aria-errormessage]="selectedMonthYearInvalid ? 'error-month' :  null" [attr.pattern]="miesiac_rok_pattern">
+        @if (selectedMonthYearInvalid) {
+          <span class="error-message" id="error-month">Proszę wpisać poprawną datę w formacie <code>YYYY-MD</code>.</span>
+        }
+      </label>
+      <label>
+        @let selectedAmountInvalid = platnosciForm.get('platnosc')?.invalid && platnosciForm.get('platnosc')?.touched;
+        <span>Kwota:</span>
+        <input type="number" formControlName="platnosc" [placeholder]="amountPlaceholder" [attr.aria-label]="amountLabel" [attr.aria-errormessage]="selectedAmountInvalid ? 'error-amount' :  null" min="0" step="0.01">
+        @if (selectedAmountInvalid) {
+          <span class="error-message" id="error-amount">Proszę wpisać poprawną kwotę (większą lub równą 0).</span>
+        }
+      </label>
+      <label>
+        @let selectedDateInvalid = platnosciForm.get('data')?.invalid && platnosciForm.get('data')?.touched;
+        <span>Dzień zapłaty:</span>
+        <input type="date" formControlName="data" [placeholder]="datePlaceholder" [attr.aria-label]="dateLabel" [attr.aria-errormessage]="selectedDateInvalid ? 'error-date' :  null" [attr.pattern]="data_pattern">
+        @if (selectedDateInvalid) {
+          <span class="error-message" id="error-date">Proszę wpisać poprawną datę w formacie <code>YYYY-MM-DD</code>.</span>
+        }
+      </label>
+      <label>
+        @let selectedDescriptionInvalid = platnosciForm.get('opis')?.invalid && platnosciForm.get('opis')?.touched;
+        <span>Opis:</span>
+        <input type="text" formControlName="opis" [placeholder]="descriptionPlaceholder" [attr.aria-label]="descriptionLabel" [attr.aria-errormessage]="selectedDescriptionInvalid ? 'error-description' :  null" maxlength="200">
+        @if (selectedDescriptionInvalid) {
+          <span class="error-message" id="error-description">Opis nie może przekraczać 200 znaków.</span>
+        }
+      </label>
+      <div>
+        @if (platnosciForm.invalid) {
+          <button type="submit" disabled>
+            Prześlij dane
+            <fa-icon [icon]="faPaperPlane" />
+          </button>
+        } @else {
+          <button type="submit" (click)="updatePayment()">
+            Prześlij dane
+            <fa-icon [icon]="faPaperPlane" />
+          </button>
+        }
+        <button type="reset" (click)="resetPayment()">
+          Resetuj
+          <fa-icon [icon]="faRotate" />
+        </button>
+        <button [dialog]="deletePaymentDialog" class="delete-payment">
+          Usuń płatność
+          <fa-icon [icon]="faTrash" />
+        </button>
+      </div>
+    </fieldset>
   }
 </form>
-<button (click)="openWindow('add')">Dodaj płatność</button>
-@if (showWindow !== '') {
-  <section #window class="window" [class]="{'filter': showWindow === 'filter','delete': showWindow === 'delete','add': showWindow === 'add'}">
-    <div>
-      <i class="fa-solid fa-xmark close" role="button" tabindex="0" (click)="closeWindow()"></i>
-      @if (showWindow === 'delete') {
-        <h3>Ostrzeżenie</h3>
-        <p>Czy na pewno chcesz usunąć płatność, która obejmuję <b>{{ formatDate(platnosciForm.get('miesiac_rok')?.value!) }}</b>?</p>
-        <p>Wpisana dnia <b>{{ formatDate(platnosciForm.get('dataZaplaty')?.value!) }}</b>.</p>
-<!--        <p>Dla osoby <b>{{ infoService.activeUser.value?.imie }}</b> <b>{{ infoService.activeUser.value?.nazwisko }}</b>?</p>-->
-        <button type="button" (click)="deletePayment()">Usuń</button>
-        <button type="button" (click)="closeWindow()">Anuluj</button>
-      } @else if (showWindow === 'add') {
-        <h3>Dodaj płatność</h3>
-        <form [formGroup]="addForm">
-          <fieldset>
-            <legend><i class="fa-solid fa-calendar-day"></i>Daty</legend>
-            <label>
-              <span>Objęty miesiąc i rok :</span>
-              <input type="month" formControlName="miesiac_rok" placeholder="Wybierz miesiąc i rok..." required>
-            </label>
-            <label>
-              <span>Dzień zapłaty :</span>
-              <input type="date" formControlName="dataZaplaty" placeholder="Wybierz datę zapłaty..." required>
-            </label>
-          </fieldset>
-          <fieldset>
-            <legend><i class="fa-solid fa-money-bill"></i>Kwota</legend>
-            <label>
-              <span>Kwota :</span>
-              <input type="number" formControlName="platnosc" placeholder="Wprowadź kwotę..." min="0" required>
-            </label>
-            <label>
-              <span>Opis :</span>
-              <input type="text" formControlName="opis" placeholder="Wprowadź opis płatności..." maxlength="200">
-            </label>
-          </fieldset>
-          <button type="submit" (click)="addPayment()">Dodaj płatność</button>
-        </form>
-      } @else if (showWindow === 'filter') {
-        <h3>Filtry</h3>
-        <form [formGroup]="filterForm">
-          <fieldset>
-            <legend><i class="fa-solid fa-calendar-day"></i>Daty</legend>
-            <label>
-              <span>Objęty miesiąc i rok :</span>
-              <input type="month" formControlName="miesiac_rok" placeholder="Wybierz miesiąc i rok...">
-            </label>
-            <label>
-              <span>Dzień zapłaty :</span>
-              <input type="date" formControlName="dataZaplaty" placeholder="Wybierz datę zapłaty...">
-            </label>
-          </fieldset>
-          <fieldset>
-            <legend><i class="fa-solid fa-money-bill"></i>Kwota</legend>
-            <label>
-              <span>Kwota :</span>
-              <input type="number" formControlName="platnosc" placeholder="Wprowadź kwotę..." min="0">
-            </label>
-            <label>
-              <span>Opis :</span>
-              <input type="text" formControlName="opis" placeholder="Wprowadź opis płatności..." maxlength="200">
-            </label>
-          </fieldset>
-          <button type="submit" (click)="applyFilter()">Zastosuj filtry</button>
-        </form>
+
+<app-dialog #deletePaymentDialog>
+  <div class="delete-dialog">
+    @if (selectedPayment() !== null) {
+      @let paymentYearMonth = platnosciForm.get('miesiac_rok')?.value;
+      @let paymentDate = platnosciForm.get('data')?.value;
+      @let originalYearMonth = selectedPayment()!.rok + '-' + selectedPayment()!.miesiac.toString().padStart(2, '0');
+      @let originalDate = selectedPayment()!.data_platnosci;
+      <h3>Ostrzeżenie</h3>
+      <p>Czy na pewno chcesz usunąć płatność, która obejmuje <b>{{ paymentYearMonth | date : 'LLLL yyyy' }}</b>?</p>
+      @if (paymentYearMonth !== originalYearMonth) {
+        <p>Oryginalna wartość miesiąca objętego: <b>{{ originalYearMonth | date : 'LLLL yyyy' }}</b>.</p>
       }
+      <p>Wpisana dnia <b>{{ paymentDate | date : 'longDate' }}</b>.</p>
+      @if (paymentDate !== (originalDate | date : 'yyyy-MM-dd')) {
+        <p>Oryginalna wartość dnia płatności: <b>{{ originalDate | date : 'longDate' }}</b>.</p>
+      }
+    }
+    <button (click)="deletePayment(); deletePaymentDialog.hide();">
+      Usuń
+    </button>
+    <button (click)="deletePaymentDialog.hide();">
+      Anuluj
+    </button>
+  </div>
+</app-dialog>
+
+<app-dialog #addPaymentDialog>
+  <h3>Dodaj płatność</h3>
+  <form [formGroup]="addForm" class="add-payment-form">
+    <fieldset>
+      <legend>
+        <fa-icon [icon]="faFileInvoiceDollar" />
+        Szczegóły płatności
+      </legend>
+      <label>
+        @let addMonthYearInvalid = addForm.get('miesiac_rok')?.invalid && addForm.get('miesiac_rok')?.touched;
+        <span>Objęty rok i miesiąc:</span>
+        <input type="month" formControlName="miesiac_rok" [placeholder]="monthYearPlaceholder" [attr.aria-label]="monthYearLabel" [attr.aria-errormessage]="addMonthYearInvalid ? 'error-add-month' :  null" [attr.pattern]="miesiac_rok_pattern">
+        @if (addMonthYearInvalid) {
+          <span class="error-message" id="error-add-month">Proszę wpisać poprawną datę w formacie <code>YYYY-MM</code>.</span>
+        }
+      </label>
+      <label>
+        @let addDateInvalid = addForm.get('dzien_zaplaty')?.invalid && addForm.get('dzien_zaplaty')?.touched;
+        <span>Dzień zapłaty:</span>
+        <input type="date" formControlName="data" [placeholder]="datePlaceholder" [attr.aria-label]="dateLabel" [attr.aria-errormessage]="addDateInvalid ? 'error-add-date' :  null" [attr.pattern]="data_pattern">
+        @if (addDateInvalid) {
+          <span class="error-message" id="error-add-date">Proszę wpisać poprawną datę w formacie <code>YYYY-MM-DD</code>.</span>
+        }
+      </label>
+      <label>
+        @let addAmountInvalid = addForm.get('platnosc')?.invalid && addForm.get('platnosc')?.touched;
+        <span>Kwota:</span>
+        <input type="number" formControlName="platnosc" [placeholder]="amountPlaceholder" [attr.aria-label]="amountLabel" min="0" step="0.01" [attr.aria-errormessage]="addAmountInvalid ? 'error-add-amount' :  null">
+        @if (addAmountInvalid) {
+          <span class="error-message" id="error-add-amount">Proszę wpisać poprawną kwotę (większą lub równą 0).</span>
+        }
+      </label>
+      <label>
+        @let addDescriptionInvalid = addForm.get('opis')?.invalid && addForm.get('opis')?.touched;
+        <span>Opis:</span>
+        <input type="text" formControlName="opis" [placeholder]="descriptionPlaceholder" [attr.aria-label]="descriptionLabel" maxlength="200" [attr.aria-errormessage]="addDescriptionInvalid ? 'error-add-description' :  null">
+        @if (addDescriptionInvalid) {
+          <span class="error-message" id="error-add-description">Opis nie może przekraczać 200 znaków.</span>
+        }
+      </label>
+    </fieldset>
+    <div>
+      <button type="reset" (click)="addForm.reset()">
+        <fa-icon [icon]="faRotate" />
+        Resetuj
+      </button>
+      <button type="submit" (click)="addPaymentToDB()">
+        Dodaj płatność
+        <fa-icon [icon]="faPlus" />
+      </button>
     </div>
-  </section>
-}
+  </form>
+</app-dialog>
+
+<app-dialog #filterDialog>
+  <h3>Filtry</h3>
+  <form [formGroup]="filterForm" class="filter-payment-form">
+    <fieldset>
+      <legend>
+        <fa-icon [icon]="faFileInvoiceDollar" />
+        Szczegóły płatności
+      </legend>
+      <label>
+        @let filterMonthYearInvalid = filterForm.get('miesiac_rok')?.invalid && filterForm.get('miesiac_rok')?.touched;
+        <span>Objęty rok i miesiąc:</span>
+        <input type="month" formControlName="miesiac_rok" [placeholder]="monthYearPlaceholder" [attr.aria-label]="monthYearLabel" [attr.aria-errormessage]="filterMonthYearInvalid ? 'error-filter-month' :  null" [attr.pattern]="miesiac_rok_pattern">
+        @if (filterMonthYearInvalid) {
+          <span class="error-message" id="error-filter-month">Proszę wpisać poprawną datę w formacie <code>YYYY-MM</code>.</span>
+        }
+      </label>
+      <label>
+        @let filterDateInvalid = filterForm.get('dzien_zaplaty')?.invalid && filterForm.get('dzien_zaplaty')?.touched;
+        <span>Dzień zapłaty:</span>
+        <input type="date" formControlName="data" [placeholder]="datePlaceholder" [attr.aria-label]="dateLabel" [attr.aria-errormessage]="filterDateInvalid ? 'error-filter-date' :  null" [attr.pattern]="data_pattern">
+        @if (filterDateInvalid) {
+          <span class="error-message" id="error-filter-date">Proszę wpisać poprawną datę w formacie <code>YYYY-MM-DD</code>.</span>
+        }
+      </label>
+      <label>
+        @let filterAmountInvalid = filterForm.get('platnosc')?.invalid && filterForm.get('platnosc')?.touched;
+        <span>Kwota:</span>
+        <input type="number" formControlName="platnosc" [placeholder]="amountPlaceholder" [attr.aria-label]="amountLabel" min="0" step="0.01" [attr.aria-errormessage]="filterAmountInvalid ? 'error-filter-amount' :  null">
+        @if (filterAmountInvalid) {
+          <span class="error-message" id="error-filter-amount">Proszę wpisać poprawną kwotę (większą lub równą 0).</span>
+        }
+      </label>
+      <label>
+        @let filterDescriptionInvalid = filterForm.get('opis')?.invalid && filterForm.get('opis')?.touched;
+        <span>Opis:</span>
+        <input type="text" formControlName="opis" [placeholder]="descriptionPlaceholder" [attr.aria-label]="descriptionLabel" maxlength="200" [attr.aria-errormessage]="filterDescriptionInvalid ? 'error-filter-description' :  null">
+        @if (filterDescriptionInvalid) {
+          <span class="error-message" id="error-filter-description">Opis nie może przekraczać 200 znaków.</span>
+        }
+      </label>
+    </fieldset>
+    <div>
+      <button type="reset" (click)="resetFilters()">
+        <fa-icon [icon]="faRotate" />
+        Wyczyść
+      </button>
+      <button type="submit" (click)="applyFilter(); filterDialog.hide();">
+        Zastosuj
+        <fa-icon [icon]="faFilter" />
+      </button>
+    </div>
+  </form>
+</app-dialog>

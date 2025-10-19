@@ -84,7 +84,7 @@ router.put('/person/:id/update', async (req, res) => {
           uczeszcza  = :uczeszcza,
           miasto     = :miasto,
           opiekun_id = :opiekun_id
-      WHERE id = :id`, { id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id: opiekunIdValue });
+      WHERE id = :id`, { id, imie, nazwisko, klasa, uczeszcza, miasto, opiekun_id : opiekunIdValue });
 
   const packet = createPacket(result, StatusCodes.Updated);
   return sendResponse(res, packet);
@@ -372,6 +372,68 @@ router.get('/card/withDetails', async (_req, res) => {
   ORDER BY o_z.nazwisko, o_z.imie;`)
 
   const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.get('/payment/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery('SELECT * FROM platnosciZ WHERE id_ucznia = :id', { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
+router.put('/payment/:id/update', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { platnosc, data_platnosci, miesiac, rok, opis } = req.body;
+
+  if (!isID(id) || isNaN(Number(platnosc)) || !data_platnosci || !isID(miesiac) || !isID(rok) || (opis !== null && typeof opis !== 'string')) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`
+      UPDATE platnosciZ
+      SET platnosc       = :platnosc,
+          data_platnosci = :data_platnosci,
+          miesiac        = :miesiac,
+          rok            = :rok,
+          opis           = :opis
+      WHERE id = :id`, { id, platnosc, data_platnosci, miesiac, rok, opis });
+
+  const packet = createPacket(result, StatusCodes.Updated);
+  return sendResponse(res, packet);
+});
+
+router.delete('/payment/:id/delete', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`DELETE FROM platnosciZ WHERE id = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+})
+
+router.post('/payment/add', async (req, res) => {
+  const { id_osoby, platnosc, data_platnosci, miesiac, rok, opis } = req.body;
+
+  if (!isID(id_osoby) || isNaN(Number(platnosc)) || !data_platnosci || !isID(miesiac) || !isID(rok) || (opis !== null && typeof opis !== 'string')) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`INSERT INTO platnosciZ (id_ucznia, platnosc, data_platnosci, miesiac, rok, opis) VALUES (:id_ucznia, :platnosc, :data_platnosci, :miesiac, :rok, :opis)`, { id_ucznia : id_osoby, platnosc, data_platnosci, miesiac, rok, opis });
+
+  const packet = createPacket(result, StatusCodes.Inserted);
   return sendResponse(res, packet);
 })
 
