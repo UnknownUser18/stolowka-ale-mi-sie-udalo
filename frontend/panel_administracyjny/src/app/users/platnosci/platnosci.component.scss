@@ -30,12 +30,6 @@ label {
   gap: i.$padding-2xs;
   flex-direction: column;
   font-size: i.$font-size-lg;
-
-  &.one-line {
-    width: fit-content;
-    align-items: center;
-    flex-direction: row;
-  }
 }
 
 td {
