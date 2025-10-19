@@ -25,6 +25,7 @@ const baseGetPersonsQuery = `
              LEFT JOIN opiekunZ ON osobyZ.opiekun_id = opiekunZ.id_opiekun`;
 
 
+//region Person endpoints
 router.get('/person', async (req, res) => {
   let limit : number | undefined;
 
@@ -89,7 +90,9 @@ router.put('/person/:id/update', async (req, res) => {
   const packet = createPacket(result, StatusCodes.Updated);
   return sendResponse(res, packet);
 });
+//endregion
 
+//region Declaration endpoints
 router.get('/declaration/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {
@@ -183,7 +186,9 @@ router.delete('/declaration/:id/delete', async (req, res) => {
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
 });
+//endregion
 
+//region Absence endpoints
 router.get('/absence/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {
@@ -230,7 +235,9 @@ router.delete('/absence/:id/delete', async (req, res) => {
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
 });
+//endregion
 
+//region Guardian endpoints
 router.get('/guardian/:id_person', async (req, res) => {
   const id_person = parseInt(req.params.id_person, 10);
 
@@ -312,20 +319,9 @@ router.post('/guardian/get-id', async (req, res) => {
   const packet = createPacket(guardian, StatusCodes.OK);
   return sendResponse(res, packet);
 });
+//endregion
 
-router.get('/payment/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (!isID(id)) {
-    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
-    return sendResponse(res, packet);
-  }
-
-  const result = await executeQuery(`SELECT * from platnosciZ pZ where pZ.id_ucznia = :id`, { id });
-
-  const packet = createPacket(result, StatusCodes.OK);
-  return sendResponse(res, packet);
-})
-
+//region Scan endpoints
 router.get('/scan/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {
@@ -364,17 +360,21 @@ router.post('/scan/add/:id', async (req, res) => {
     return sendResponse(res, packet);
   }
 })
+// endregion
 
-router.get('/card/withDetails', async (_req, res) => {
-  const result = await executeQuery(`SELECT k_z.*, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto
-  FROM kartyZ k_z
-           LEFT JOIN osobyZ o_z ON o_z.id = k_z.id_ucznia
-  ORDER BY o_z.nazwisko, o_z.imie;`)
+//region Payment endpoints
+router.get('/payment/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`SELECT * from platnosciZ pZ where pZ.id_ucznia = :id`, { id });
 
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
 })
-
 router.get('/payment/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!isID(id)) {
@@ -431,12 +431,15 @@ router.post('/payment/add', async (req, res) => {
     return sendResponse(res, packet);
   }
 
-  const result = await executeQuery(`INSERT INTO platnosciZ (id_ucznia, platnosc, data_platnosci, miesiac, rok, opis) VALUES (:id_ucznia, :platnosc, :data_platnosci, :miesiac, :rok, :opis)`, { id_ucznia : id_osoby, platnosc, data_platnosci, miesiac, rok, opis });
+  const result = await executeQuery(`INSERT INTO platnosciZ (id_ucznia, platnosc, data_platnosci, miesiac, rok, opis)
+  VALUES (:id_ucznia, :platnosc, :data_platnosci, :miesiac, :rok, :opis)`, { id_ucznia : id_osoby, platnosc, data_platnosci, miesiac, rok, opis });
 
   const packet = createPacket(result, StatusCodes.Inserted);
   return sendResponse(res, packet);
 })
+//endregion
 
+//region Payment endpoints
 router.get('/pricing', async (_req, res) => {
   const result = await executeQuery(`SELECT * from cennikZ order by data_od;`)
 
@@ -504,5 +507,56 @@ router.get('/pricing/not-in-dates/:id', async (req, res) => {
   const packet = createPacket(result, StatusCodes.OK);
   return sendResponse(res, packet);
 })
+//endregion
+
+//region Card endpoints
+router.get('/card/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+
+  const result = await executeQuery(`SELECT * from kartyZ kZ where kZ.id_ucznia = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
+router.delete('/card/:id/delete', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!isID(id)) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+  const result = await executeQuery(`DELETE FROM kartyZ WHERE id = :id`, { id });
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+
+router.post('/card/add', async (req, res) => {
+  const { id_ucznia, key_card, data_wydania } = req.body;
+
+  if (!isID(id_ucznia) || !key_card || !data_wydania) {
+    const packet = new ErrorPacket(StatusCodes["Incorrect data value"])
+    return sendResponse(res, packet);
+  }
+  const result = await executeQuery(`INSERT INTO kartyZ (id_ucznia, key_card, data_wydania) VALUES (:id_ucznia, :key_card, :data_wydania)`, { id_ucznia, key_card, data_wydania });
+
+  const packet = createPacket(result, StatusCodes.Inserted);
+  return sendResponse(res, packet);
+});
+
+router.get('/card/withDetails', async (_req, res) => {
+  const result = await executeQuery(`SELECT k_z.*, o_z.typ_osoby_id, o_z.imie, o_z.nazwisko, o_z.klasa, o_z.uczeszcza, o_z.miasto
+  FROM kartyZ k_z
+           LEFT JOIN osobyZ o_z ON o_z.id = k_z.id_ucznia
+  ORDER BY o_z.nazwisko, o_z.imie;`)
+
+  const packet = createPacket(result, StatusCodes.OK);
+  return sendResponse(res, packet);
+});
+//endregion
 
 export default router;
