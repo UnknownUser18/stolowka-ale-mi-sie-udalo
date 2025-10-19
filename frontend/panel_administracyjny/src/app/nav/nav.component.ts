@@ -2,12 +2,19 @@ import { Component, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { filter } from 'rxjs';
 import { PersonsService } from '@database/persons.service';
+import { DialogComponent } from "@tooltips/dialog/dialog.component";
+import { DialogTriggerDirective } from "@tooltips/dialog-trigger.directive";
+import { FaIconComponent } from "@fortawesome/angular-fontawesome";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 
 @Component({
   selector : 'app-nav',
   imports : [
     RouterLink,
     RouterLinkActive,
+    DialogComponent,
+    DialogTriggerDirective,
+    FaIconComponent,
   ],
   templateUrl : './nav.component.html',
   styleUrl : './nav.component.scss',
@@ -33,4 +40,6 @@ export class NavComponent {
         this.title.set(title);
     });
   }
+
+  protected readonly faCircleInfo = faCircleInfo;
 }

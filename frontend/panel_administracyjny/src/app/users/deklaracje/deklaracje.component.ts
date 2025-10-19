@@ -5,7 +5,7 @@ import { PersonsService } from '@database/persons.service';
 import { DeclarationsService, ZDeclaration } from '@database/declarations.service';
 import { NotificationsService } from '@services/notifications.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faCalendarDay, faPaperPlane, faTrash, faRotate, faPlus, faFilter } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faCalendarDay, faFilter, faPaperPlane, faPlus, faRotate, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { CheckboxComponent } from '@checkbox';
 import { CalendarComponent } from '@calendar';
 import { IsSelectedDeclarationPipe } from "@pipes/is-selected-declaration.pipe";
@@ -33,6 +33,7 @@ import { TooltipDelayTriggerDirective } from "@tooltips/tooltip-delay-trigger.di
   providers : [DatePipe],
 })
 export class DeklaracjeComponent {
+  protected isLoading = false;
   protected declarations : ZDeclaration[] | null | undefined;
   protected shownDeclarations : ZDeclaration[] | null | undefined;
 
@@ -104,7 +105,7 @@ export class DeklaracjeComponent {
 
     effect(() => {
       this.personS.personZ();
-      this.getData;
+      this.refreshDeclarations();
     });
 
     effect(() => {
@@ -148,9 +149,11 @@ export class DeklaracjeComponent {
         this.notificationsS.createErrorNotification('Nie udało się pobrać deklaracji.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
       else if (declarations.length === 0)
         this.notificationsS.createWarningNotification('Brak deklaracji dla tej osoby.', 5);
-
+      else
+        this.notificationsS.createSuccessNotification('Pomyślnie pobrano deklaracje.');
       this.shownDeclarations = this.declarations = declarations;
       this.dbDeclarations.set(declarations);
+      this.isLoading = false;
     });
   }
 
@@ -399,5 +402,10 @@ export class DeklaracjeComponent {
       pt : true,
     });
     this.shownDeclarations = this.declarations;
+  }
+
+  protected refreshDeclarations() {
+    this.isLoading = true;
+    this.getData;
   }
 }

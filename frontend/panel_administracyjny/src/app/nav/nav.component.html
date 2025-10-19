@@ -12,8 +12,16 @@
 @if (personS.personZ() !== null) {
   @let id = personS.personZ()?.id!;
   <menu>
-    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'deklaracje']">Płatności</a></li>
-    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'deklaracje']">Karta</a></li>
-    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'deklaracje']">Raport</a></li>
+    <li><a [routerLink]="['/osoba/zsti', id, 'platnosci']" routerLinkActive="active">Płatności</a></li>
+    <li><a [routerLink]="['/osoba/zsti', id, 'karta']" routerLinkActive="active">Karta</a></li>
+    <li><a [dialog]="inProgressDialog">Raport</a></li>
   </menu>
 }
+
+<app-dialog #inProgressDialog>
+  <h2 class="in-progress-title">
+    <fa-icon [icon]="faCircleInfo" />
+    W trakcie realizacji
+  </h2>
+  <p>Ta opcja jest jeszcze niedostępna, przepraszamy!</p>
+</app-dialog>
