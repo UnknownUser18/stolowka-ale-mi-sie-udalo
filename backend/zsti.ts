@@ -439,7 +439,7 @@ router.post('/payment/add', async (req, res) => {
 })
 //endregion
 
-//region Payment endpoints
+//region Pricing endpoints
 router.get('/pricing', async (_req, res) => {
   const result = await executeQuery(`SELECT * from cennikZ order by data_od;`)
 
