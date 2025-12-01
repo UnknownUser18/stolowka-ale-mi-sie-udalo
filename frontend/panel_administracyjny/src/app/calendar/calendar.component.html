@@ -32,7 +32,7 @@
           <td class="day-static error" [delayT]="tooltip" [delay]="500">
             {{ date }}
           </td>
-        } @else if (day | dayInDeclaration:selectedDeclarationZ()) {
+        } @else if (day | dayInDeclaration:selectedElement()) {
           <td class="day-static selected-declaration">
             {{ date }}
           </td>
@@ -51,5 +51,5 @@
 </table>
 
 <app-tooltip #tooltip>
-  Ten dzień jest już zaznaczony w innej deklaracji!
+  Ten dzień jest już zaznaczony w innej deklaracji/cenniku!
 </app-tooltip>

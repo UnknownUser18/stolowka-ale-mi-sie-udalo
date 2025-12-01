@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Packet, TypesService } from './types.service';
 import { map, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ZPricing, ZPricingDB } from "@database/prices.service";
 
 type Bit = '0' | '1';
 type DniCode = `${ Bit }${ Bit }${ Bit }${ Bit }${ Bit }`;
@@ -44,19 +45,6 @@ interface ClosedDayDB {
   dzien : string;
 }
 
-interface ZPricingDB {
-  id : number;
-  data_od : string;
-  data_do : string;
-  cena : number;
-}
-
-export interface ZPricing {
-  id : number;
-  data_od : Date;
-  data_do : Date;
-  cena : number;
-}
 
 export class LocalAbsenceChanges {
   public added : Date[];

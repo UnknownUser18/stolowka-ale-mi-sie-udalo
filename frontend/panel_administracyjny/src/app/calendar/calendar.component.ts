@@ -1,4 +1,4 @@
-import { Component, signal, effect, input, output } from '@angular/core';
+import { Component, effect, input, output, signal } from '@angular/core';
 import { IsWeekendPipe } from "@pipes/is-weekend.pipe";
 import { InDeclarationPipe } from "@pipes/in-declaration.pipe";
 import { ZDeclaration } from "@database/declarations.service";
@@ -9,6 +9,7 @@ import { DayInDeclarationPipe } from "@pipes/day-in-declaration.pipe";
 import { DayInMoreDeclarationsPipe } from "@pipes/day-in-more-declarations.pipe";
 import { TooltipComponent } from "@tooltips/tooltip/tooltip.component";
 import { TooltipDelayTriggerDirective } from "@tooltips/tooltip-delay-trigger.directive";
+import { ZPricing } from "@database/prices.service";
 
 @Component({
   selector : 'app-calendar',
@@ -28,19 +29,16 @@ import { TooltipDelayTriggerDirective } from "@tooltips/tooltip-delay-trigger.di
 })
 export class CalendarComponent {
   protected weeks : { days : (Date | null)[] }[] = [];
-  protected declarations : ZDeclaration[] | null = null;
+  public readonly elements = input.required<ZDeclaration[] | Omit<ZPricing, 'cena'>[] | undefined>();
 
   protected readonly faArrowLeft = faArrowLeft;
   protected readonly faArrowRight = faArrowRight;
 
   protected readonly date = signal(new Date());
-
-
-  public readonly declarationsZ = input.required<ZDeclaration[] | undefined>();
-  public readonly selectedDeclarationZ = input<ZDeclaration | null>(null);
-  public readonly isForNewDeclaration = input<boolean>(false);
+  public readonly selectedElement = input<ZDeclaration | Omit<ZPricing, 'cena'> | null>(null);
+  public readonly isForNewElement = input<boolean>(false);
+  protected declarations : ZDeclaration[] | Omit<ZPricing, 'cena'>[] | null = null;
   public readonly hasWrongDays = output<boolean>();
-
 
   constructor(
     private dayinMoreDeclarations : DayInMoreDeclarationsPipe,
@@ -51,14 +49,14 @@ export class CalendarComponent {
     });
 
     effect(() => {
-      this.selectedDeclarationZ();
+      this.selectedElement();
 
-      if (this.isForNewDeclaration() && this.selectedDeclarationZ() !== null) {
-        const selected = this.selectedDeclarationZ() as ZDeclaration;
-        if (!this.declarationsZ()?.some(d => d === selected))
-          this.declarations = [selected, ...(this.declarationsZ() ?? [])];
+      if (this.isForNewElement() && this.selectedElement() !== null) {
+        const selected = this.selectedElement() as ZDeclaration | ZPricing;
+        if (!this.elements()?.some(d => d === selected))
+          this.declarations = [selected, ...(this.elements() ?? [])];
       } else
-        this.declarations = this.declarationsZ() ?? [];
+        this.declarations = this.elements() ?? [];
 
       this.generateWeeks();
     });
@@ -118,7 +116,7 @@ export class CalendarComponent {
   }
 
   private checkWrongDays() : boolean {
-    const declaration = this.selectedDeclarationZ();
+    const declaration = this.selectedElement();
     if (!declaration) return false;
 
     for (const week of this.weeks) {
