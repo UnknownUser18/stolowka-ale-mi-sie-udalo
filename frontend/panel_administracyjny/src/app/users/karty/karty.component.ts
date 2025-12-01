@@ -1,25 +1,30 @@
-import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { Card, DataService } from '../../services/data.service';
-import { TransitionService } from '../../services/transition.service';
-import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Component, effect } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { VariablesService } from '../../services/variables.service';
+import { CardsService, ZCard } from "@database/cards.service";
+import { PersonsService } from "@database/persons.service";
+import { NotificationsService } from "@services/notifications.service";
+import { FaIconComponent } from "@fortawesome/angular-fontawesome";
+import { faArrowRight, faBan, faCheck, faIdCard, faPlus, faRotateLeft, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { DialogComponent } from "@tooltips/dialog/dialog.component";
+import { DialogTriggerDirective } from "@tooltips/dialog-trigger.directive";
 
 @Component({
   selector : 'app-karty',
   imports : [
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    FaIconComponent,
+    DialogComponent,
+    DialogTriggerDirective
   ],
   templateUrl : './karty.component.html',
   styleUrl : './karty.component.scss',
-  providers: [DatePipe]
+  providers : [DatePipe]
 })
-export class KartyComponent implements OnDestroy {
-  private destroy$ = new Subject<void>();
+export class KartyComponent {
+  private card : ZCard | null = null;
 
-  protected card : Card | null = null;
+
   protected showWindow : '' | 'remove' | 'add' | 'add-continue' = '';
 
   protected cardForm = new FormGroup({
@@ -29,112 +34,103 @@ export class KartyComponent implements OnDestroy {
   });
 
   protected addCardForm = new FormGroup({
-    key_card: new FormControl('', Validators.required),
+    key_card : new FormControl('', Validators.required),
   });
 
-
-  @ViewChild('window') window! : ElementRef;
+  protected readonly faIdCard = faIdCard;
+  protected readonly faTrashCan = faTrashCan;
+  protected readonly faPlus = faPlus;
+  protected readonly faBan = faBan;
+  protected readonly faArrowRight = faArrowRight;
+  protected readonly faRotateLeft = faRotateLeft;
+  protected readonly faCheck = faCheck;
 
   constructor(
-    private variables : VariablesService,
+    private cardS : CardsService,
+    private notificationsS : NotificationsService,
+    private personsS : PersonsService,
     private datePipe : DatePipe,
-    private database : DataService,
-    private transition : TransitionService,
-    private infoService : GlobalInfoService,
-    private cdr : ChangeDetectorRef,
-    private zone : NgZone
   ) {
-    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+    effect(() => {
+      this.personsS.personZ();
+      this.fetchCard;
+    });
+  }
 
-      this.infoService.activeUser.pipe(takeUntil(this.destroy$)).subscribe(user => {
-        if (!user) return;
+  private get fetchCard() {
+    const person = this.personsS.personZ();
+    if (!person) return;
 
-        this.infoService.setTitle(`${ user.imie } ${ user.nazwisko } - Karty`);
-        this.infoService.setActiveTab('KARTA');
-
-        this.database.request('zsti.card.getById', { id_ucznia : user.id }, 'cardList').then((payload) => {
-          if (!payload) {
-            this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać karty.');
-            return;
-          } else if (payload.length === 0) {
-            this.infoService.generateNotification(NotificationType.WARNING, 'Osoba nie posiada przypisanej do niej karty.');
-          }
-          this.card = payload[0];
-          this.cardForm.patchValue({
-            key_card : this.card?.key_card !== undefined ? this.card.key_card.toString() : '',
-            data_wydania : this.card?.data_wydania !== undefined ? this.datePipe.transform(this.card.data_wydania, 'yyyy-MM-dd') : '',
-            ostatnie_uzycie : this.card?.ostatnie_uzycie !== null ? this.datePipe.transform(this.card?.ostatnie_uzycie!, 'yyyy-MM-ddTHH:mm') : '',
-          });
-        });
+    this.cardS.getZCard(person.id).subscribe((card) => {
+      if (!card) {
+        this.notificationsS.createWarningNotification('Nie znaleziono karty przypisanej do tego ucznia.', 5);
+        return;
+      }
+      this.card = card;
+      this.cardForm.setValue({
+        key_card : String(card.key_card),
+        data_wydania : this.datePipe.transform(card.data_wydania, 'yyyy-MM-dd') || '',
+        ostatnie_uzycie : this.datePipe.transform(card.ostatnie_uzycie, 'yyyy-MM-dd') || '',
       });
+
+      this.cardForm.disable();
     });
   }
 
-  protected openWindow(type : '' | 'remove' | 'add' | 'add-continue') : void {
-    this.showWindow = type;
-    this.cdr.detectChanges();
-    this.transition.applyAnimation(this.window.nativeElement, true, this.zone).then();
-  }
 
-  protected closeWindow() : void {
-    this.transition.applyAnimation(this.window.nativeElement, false, this.zone).then(() : void => {
-      this.showWindow = '';
-    });
-  }
-
-  protected removeCard(close : boolean) : void {
-    if (!this.card && close) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Nie można usunąć karty, ponieważ nie jest ona przypisana do żadnej osoby.');
+  protected deleteCard() : void {
+    if (!this.card) {
+      this.notificationsS.createErrorNotification('Brak karty do usunięcia.', 5);
       return;
     }
-    if (this.card) {
-      this.database.request('zsti.card.update', { id: this.card?.id, key_card: '0' }, 'cardList').then((payload) => {
-        if (!payload) {
-          this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się usunąć karty.');
-          return;
-        }
-        this.infoService.generateNotification(NotificationType.SUCCESS, 'Karta została pomyślnie usunięta.');
-        this.card = null;
-        this.cardForm.reset();
-      });
-    }
-    if (close) this.closeWindow();
-    else this.openWindow('add-continue');
+
+    this.cardS.deleteZCard(this.card.id).subscribe((result) => {
+      if (!result) {
+        this.notificationsS.createErrorNotification('Nie udało się usunąć karty.', 5);
+        return;
+      }
+      this.notificationsS.createSuccessNotification('Karta została pomyślnie usunięta.');
+    });
   }
 
   protected addCard() : void {
     if (this.addCardForm.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.notificationsS.createErrorNotification('Formularz zawiera błędy.', 5);
       return;
     }
-    const keyCard = this.addCardForm.value.key_card!.toString();
-    const date = new Date();
-    const dataWydania = `${ date.getFullYear() }-${ (date.getMonth() + 1).toString().padStart(2, '0') }-${ date.getDate().toString().padStart(2, '0') }`;
-    this.database.request('zsti.card.updateWithData', { id_ucznia: this.infoService.activeUser.value?.id, key_card: keyCard, data_wydania: dataWydania }, 'cardList').then((payload) => {
-      if (!payload) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać karty.');
+
+    const person = this.personsS.personZ();
+    if (!person) {
+      this.notificationsS.createErrorNotification('Nie znaleziono ucznia, do którego ma być przypisana karta.', 5);
+      return;
+    }
+
+    const newCard : Omit<ZCard, 'id' | 'ostatnie_uzycie'> = {
+      id_ucznia : person.id,
+      key_card : Number(this.addCardForm.value.key_card),
+      data_wydania : new Date(),
+    };
+
+    this.cardS.addZCard(newCard).subscribe((result) => {
+      if (result === false) {
+        this.notificationsS.createErrorNotification('Nie udało się dodać karty.', 5);
         return;
       }
-      this.infoService.generateNotification(NotificationType.SUCCESS, 'Karta została pomyślnie dodana.');
-      this.closeWindow();
+      this.notificationsS.createSuccessNotification('Karta została pomyślnie dodana.');
 
-      this.database.request('zsti.card.getById', { id_ucznia: this.infoService.activeUser.value?.id }, 'cardList').then((payload) => {
-        if (!payload || payload.length === 0) {
-          this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać karty po dodaniu.');
-          return;
-        }
-        this.card = payload[0];
-        this.cardForm.patchValue({
-          key_card : this.card?.key_card.toString(),
-          data_wydania : this.datePipe.transform(this.card?.data_wydania!, 'yyyy-MM-dd'),
-          ostatnie_uzycie : this.datePipe.transform(this.card?.ostatnie_uzycie, 'yyyy-MM-ddTHH:mm'),
-        });
+      this.card = {
+        ...newCard,
+        id : result,
+        ostatnie_uzycie : new Date(),
+      };
+
+      this.cardForm.patchValue({
+        key_card : String(this.card.key_card),
+        data_wydania : this.datePipe.transform(this.card.data_wydania, 'yyyy-MM-dd') || '',
       });
+
+      this.cardForm.disable();
+      this.addCardForm.reset();
     });
-  }
-  public ngOnDestroy() : void {
-    this.card = null;
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

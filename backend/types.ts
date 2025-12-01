@@ -4,7 +4,28 @@ import { logger } from "./config";
 
 type LogType = 'info' | 'warning' | 'error' | 'debug';
 
-
+/**
+ * @class Packet
+ * @classDesc Standardized response packet structure for API responses.
+ * @property {StatusCodes} status - Status code of the response.
+ * @property {string} statusMessage - Human-readable message corresponding to the status code.
+ * @property {string} timestamp - ISO string timestamp of when the packet was created.
+ * @property {any[] | null} [data] - Optional array of data returned in the response.
+ * @constructor
+ * @param {StatusCodes} status - Status code of the response.
+ * @param {any[]} [data] - Optional array of data to include in the response.
+ * @example
+ * const packet = new Packet(StatusCodes.OK, { id: 1, name: ' Jacek' });
+ * console.log(packet);
+ * // Output:
+ *
+ * {
+ *   status: 200,
+ *   statusMessage: 'OK',
+ *   timestamp: '2023-10-05T12:34:56.789Z',
+ *   data: [ { id: 1, name: ' Jacek' } ]
+ * }
+ */
 export class Packet {
   status : StatusCodes;
   statusMessage : string;
@@ -34,7 +55,6 @@ export enum StatusCodes {
   'OK' = 200,
   'Inserted' = 201,
   'Updated' = 202,
-  'Removed' = 203,
   'Internal Server Error' = 500,
   'Database Connection Error' = 700,
   'Duplicate Entry' = 701,

@@ -1,0 +1,55 @@
+<button (click)="changeMonth('previous')">
+  <fa-icon [icon]="faArrowLeft" />
+</button>
+<h2>{{
+    date().toLocaleDateString(undefined, {
+      month : 'long',
+      year : 'numeric'
+    }) | titlecase
+  }}</h2>
+<button (click)="changeMonth('next')">
+  <fa-icon [icon]="faArrowRight" />
+</button>
+<table>
+  <tr>
+    @for (dayName of ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie']; track dayName) {
+      <th>
+        {{ dayName }}
+      </th>
+    }
+  </tr>
+  @for (week of weeks; track $index) {
+    <tr class="week">
+      @for (day of week.days; track $index) {
+        @let date = day?.getDate();
+        @if (day == null) {
+          <td class="day-static not-in-month"></td>
+        } @else if (day | isWeekend) {
+          <td class="day-static weekend">
+            {{ date }}
+          </td>
+        } @else if (day | dayInMoreDeclarations:declarations) {
+          <td class="day-static error" [delayT]="tooltip" [delay]="500">
+            {{ date }}
+          </td>
+        } @else if (day | dayInDeclaration:selectedElement()) {
+          <td class="day-static selected-declaration">
+            {{ date }}
+          </td>
+        } @else if (!(day | inDeclaration:declarations)) {
+          <td class="day-static available">
+            {{ date }}
+          </td>
+        } @else {
+          <td class="day-static">
+            {{ date }}
+          </td>
+        }
+      }
+    </tr>
+  }
+</table>
+
+<app-tooltip #tooltip>
+  Ten dzień jest już zaznaczony w innej deklaracji/cenniku!
+</app-tooltip>

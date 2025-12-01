@@ -1,19 +1,35 @@
-import { Component } from '@angular/core';
-import { GlobalInfoService } from '../../../services/global-info.service';
+import { Component, viewChild } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
+import { InfoService } from '@services/info.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TooltipClickTriggerDirective } from '@tooltips/tooltip-click-trigger.directive';
 
 @Component({
   selector : 'app-date-changer',
   imports : [
-    TitleCasePipe
+    TitleCasePipe,
+    FaIconComponent,
+    TooltipComponent,
+    FormsModule,
+    TooltipClickTriggerDirective,
+    ReactiveFormsModule
   ],
   templateUrl : './date-changer.component.html',
   styleUrl : './date-changer.component.scss',
   providers : [DatePipe]
 })
 export class DateChangerComponent {
-  constructor(protected globalInfo : GlobalInfoService, private datePipe : DatePipe) {
-    this.globalInfo.setActiveMonth(new Date());
+  private tooltip = viewChild.required<TooltipComponent>('tooltip');
+
+  protected month = new FormControl('', { nonNullable : true, validators : [Validators.required, Validators.maxLength(7), Validators.minLength(7), Validators.pattern('[0-9]{4}-[0-9]{2}')] });
+
+  protected readonly faArrowRight = faArrowRight;
+  protected readonly faArrowLeft = faArrowLeft;
+
+  constructor(private datePipe : DatePipe, private infoS : InfoService) {
   }
 
   private formatMonth(date : Date) : string {
@@ -21,25 +37,35 @@ export class DateChangerComponent {
   }
 
   protected previousMonth() : string {
-    if (!this.globalInfo.activeMonth.value) return '';
-    const prevMonth = new Date(this.globalInfo.activeMonth.value.getFullYear(), this.globalInfo.activeMonth.value.getMonth() - 1, 1);
+    const date = this.infoS.currentDate();
+    const prevMonth = new Date(date.getFullYear(), date.getMonth() - 1, 1);
     return this.formatMonth(prevMonth);
   }
 
   protected currentMonth() : string {
-    if (!this.globalInfo.activeMonth.value) return '';
-    return this.formatMonth(new Date(this.globalInfo.activeMonth.value));
+    return this.formatMonth(this.infoS.currentDate());
   }
 
   protected nextMonth() : string {
-    if (!this.globalInfo.activeMonth.value) return '';
-    const nextMonth = new Date(this.globalInfo.activeMonth.value.getFullYear(), this.globalInfo.activeMonth.value.getMonth() + 1, 1);
+    const date = this.infoS.currentDate();
+    const nextMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
     return this.formatMonth(nextMonth);
   }
 
   protected setNewMonth(number : number) : void {
-    if (!this.globalInfo.activeMonth.value) return;
-    const newDate = new Date(this.globalInfo.activeMonth.value.getFullYear(), this.globalInfo.activeMonth.value.getMonth() + number, 1);
-    this.globalInfo.setActiveMonth(newDate);
+    const date = this.infoS.currentDate();
+    return this.infoS.setDate(new Date(date.getFullYear(), date.getMonth() + number, 1));
+  }
+
+  protected changeMonth() {
+    const month = this.month.value.trim()
+    if (!month) return;
+
+    const [year, monthNumber] = month.split('-').map(Number);
+    if (!year || !monthNumber || monthNumber < 1 || monthNumber > 12) return;
+
+    this.infoS.setDate(new Date(year, monthNumber - 1, 1));
+    this.tooltip().hide();
+    this.month.setValue('');
   }
 }

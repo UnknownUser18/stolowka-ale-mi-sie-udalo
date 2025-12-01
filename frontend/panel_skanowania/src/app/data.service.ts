@@ -25,27 +25,33 @@ export interface Card {
 export interface AbsenceDay {
   id: number;
   dzien_wypisania: string;
-  osoby_zsti_id: number;
+  zsti_id: number;
+}
+
+export enum TypOsoby {
+  UCZEN = 1,
+  NAUCZYCIEL = 2,
 }
 
 export interface Student {
-  id: number;
-  typ_osoby_id: number;
-  imie: string;
-  nazwisko: string;
-  klasa: string;
-  uczeszcza: boolean;
-  miasto: boolean;
+  id : number,
+  typ_osoby_id? : TypOsoby,
+  imie : string,
+  nazwisko : string,
+  klasa? : string,
+  uczeszcza? : boolean,
+  miasto? : boolean,
+  opiekun_id? : number | null
 }
 
-export interface Payment {
+export interface ZPayment {
   id: number;
   id_ucznia: number;
   platnosc: number;
-  data_platnosci: string;
+  data_platnosci: Date;
   miesiac: number;
-  opis: string;
   rok: number;
+  opis?: string;
 }
 
 export interface Scan {
@@ -58,8 +64,8 @@ export interface CardDetails {
   id: number;
   id_ucznia: number;
   key_card: number;
-  data_wydania: string;
-  ostatnie_uzycie: string;
+  data_wydania: Date;
+  ostatnie_uzycie: Date;
   typ_osoby_id: number;
   imie: string;
   nazwisko: string;
@@ -91,7 +97,7 @@ type VariableTypeMap = {
   canceledDayList: CanceledDay[],
   cardList: Card[],
   absenceDayList: AbsenceDay[],
-  paymentList: Payment[],
+  paymentList: ZPayment[],
   scanList: Scan[],
   closedDays: CanceledDay[],
   cardDetailsList: CardDetails[],
@@ -119,7 +125,7 @@ export class DataService {
   public dataChange: Subject<VariableName> = new Subject<VariableName>()
 
   constructor() {
-    this.initializeWebSocket();
+    // this.initializeWebSocket();
   }
 
   /**

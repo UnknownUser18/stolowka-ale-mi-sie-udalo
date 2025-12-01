@@ -1,131 +1,61 @@
-import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { NavComponent } from './nav/nav.component';
-import { NgOptimizedImage } from '@angular/common';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { GlobalInfoService, NotificationType } from './services/global-info.service';
-import { filter, take } from 'rxjs';
-import { DataService, Opiekun, Student, TypOsoby, WebSocketStatus } from './services/data.service';
-import { TransitionService } from './services/transition.service';
-import { VariablesService } from './services/variables.service';
-import { PersonsService } from './services/database/persons.service';
-
-export type classNames = 'main-page' | 'osoby' | 'all' | 'cennik' | 'nieczynne' | 'raporty' | 'administracja';
+import { Component } from '@angular/core';
+import { NavigationCancel, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { CNotification, NotificationsService } from '@services/notifications.service';
+import { NotificationComponent } from './notification/notification.component';
+import { InfoService } from '@services/info.service';
+import { faEllipsis, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { PersonsService } from "@database/persons.service";
+import { filter } from "rxjs";
 
 @Component({
   selector : 'app-root',
-  imports : [NavComponent, NgOptimizedImage, RouterLink, RouterOutlet],
+  imports : [RouterOutlet, NotificationComponent, FaIconComponent],
   templateUrl : './app.component.html',
   styleUrl : './app.component.scss'
 })
-export class AppComponent implements AfterViewInit {
-  protected persons_zsti : (Student & Opiekun)[] | undefined
-  protected readonly TypOsoby = TypOsoby;
+export class AppComponent {
+  protected notifications : CNotification[] = [];
+  protected notificationsQueueLength = 0;
 
-  @ViewChild('nav') nav! : ElementRef;
-  @ViewChild('scrollable') scrollable! : ElementRef;
+  protected readonly faEllipsis = faEllipsis;
+  protected readonly faTrash = faTrash;
 
   constructor(
-    private variables : VariablesService,
-    private database : DataService,
-    private zone : NgZone,
-    private transition : TransitionService,
-    protected router : Router,
-    protected infoService : GlobalInfoService,
-    private personsS : PersonsService) {
-    this.personsS.getZPersons()
-    this.database.initializeWebSocket().then(status => {
-      this.infoService.setWebSocketStatus(status);
+    private notificationsS : NotificationsService,
+    private infoS : InfoService,
+    private personS : PersonsService,
+    private router : Router
+  ) {
+    this.infoS.getHealth.subscribe(health => {
+      if (health !== 'OK')
+        this.notificationsS.createErrorNotification('Błąd połączenia z serwerem. Większość funkcji może być niedostępna.', Infinity, 'Nie udało się nawiązać połączenie z serwerem. Większość funkcji może być niedostępna. Sprawdź połączenie z internetem lub skontaktuj się z administratorem.');
+      else
+        this.notificationsS.createSuccessNotification('Pomyślnie połączono z serwerem.', 3);
     });
-    this.infoService.webSocketStatus.subscribe(status => {
-      if (status === WebSocketStatus.ERROR) this.infoService.generateNotification(NotificationType.ERROR, 'Bład podczas łączenia się z bazą danych.')
-    })
-  }
 
-  private async animateElement(class_name : classNames, remove : boolean = false) : Promise<boolean> {
-    await this.transition.waitForAllTransitions();
-    return new Promise((resolve, reject) : void => {
-      const element : HTMLElement = this.nav.nativeElement.querySelector(`.${ class_name }`)!;
-      if (!element) {
-        reject('Element not found');
-        return;
-      }
-      element.classList.toggle('done', !remove);
-      element.addEventListener('transitionend', () : void => {
-        resolve(true);
-      });
+    this.notificationsS.getVisibleNotifications.subscribe(notifications => {
+      this.notifications = notifications;
     });
-  };
 
-  private async startPageLogic() : Promise<void> {
-    const url = this.router.url;
-    if (url === '/') {
-      this.infoService.setTitle('Strona Główna');
-      await this.animateElement('main-page');
-      return;
-    }
+    this.notificationsS.getQueueNotifications.subscribe(notifications => {
+      this.notificationsQueueLength = notifications.length;
+    });
 
-    if (url.startsWith('/osoby') || url.startsWith('/osoba')) {
-      if (url === '/osoby')
-        this.infoService.setTitle('Osoby');
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd || event instanceof NavigationCancel)
+    ).subscribe(() => {
+      if (this.router.url.startsWith('/osob')) return;
 
-      this.animateElement('osoby').then(() : void => {
-        if (this.persons_zsti) return;
-
-        this.infoService.webSocketStatus.subscribe(async (status) => {
-          if (status !== WebSocketStatus.OPEN) return;
-          this.persons_zsti = await this.variables.mapStudentsToOpiekun();
-        });
-      });
-      return;
-    }
-    if (url.startsWith('/cennik')) {
-      this.infoService.setTitle('Cennik');
-      await this.animateElement('cennik');
-      return;
-    }
-    if (url.startsWith('/nieczynne')) {
-      this.infoService.setTitle('Dni Nieczynne');
-      await this.animateElement('nieczynne');
-      return;
-    }
-    if (url.startsWith('/raporty')) {
-      await this.animateElement('raporty');
-      return;
-    }
-    if (url.startsWith('/administracja')) {
-      await this.animateElement('administracja');
-      return;
-    }
-  }
-
-  protected navigate(path : string, class_name : classNames, ignore : boolean = true) : void {
-    if (!ignore) {
-      this.router.navigate([path]).then();
-      return;
-    }
-    this.animateElement(class_name, true).then(() : void => {
-      this.router.navigate([path]).then();
+      this.personS.deselectPerson();
     });
   }
 
-  protected selectPerson(student : Student & Opiekun) : void {
-    this.router.navigate(['osoba/zsti', student.id, 'kalendarz']).then(() : void => {
-      this.infoService.setActiveUser(student);
-    });
+  protected dismissNotification(id : string) {
+    this.notificationsS.dismissNotification(id);
   }
 
-
-  public ngAfterViewInit() : void {
-    const mainPage : HTMLElement = this.scrollable.nativeElement.querySelector('.main-page')!;
-    mainPage.classList.add('done');
-    this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe(() => {
-        this.zone.onStable.pipe(take(1)).subscribe(() => {
-          requestAnimationFrame(() => {
-            this.startPageLogic().then();
-          });
-        });
-      });
+  protected clearNotifications() {
+    this.notificationsS.clearNotifications();
   }
 }

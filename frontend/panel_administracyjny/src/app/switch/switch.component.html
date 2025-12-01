@@ -1,0 +1,49 @@
+<span
+  [attr.aria-label]="label()"
+  class="slider"
+  [auxclickT]="tooltipChange"
+  [delayT]="tooltip"
+  [delay]="300"
+  (click)="changeStep(1)"
+  (keydown.space)="changeStep(1)"
+  (keydown.enter)="changeStep(1)"
+  (contextmenu)="$event.preventDefault()"
+  role="switch" tabindex="0"></span>
+
+
+<app-tooltip #tooltip>
+  <span>Status :
+    <span>
+      @switch (value()) {
+        @case ('on') {
+          Tak
+        }
+        @case ('off') {
+          Nie
+        }
+        @case ('all') {
+          Wszyscy
+        }
+      }
+    </span>
+  </span>
+</app-tooltip>
+<app-tooltip #tooltipChange>
+  <div class="tooltip-change">
+    <span>Przełącz na:</span>
+    <button class="off" (click)="setValueAndClose('off')">
+      <fa-icon [icon]="faXmark" />
+      Nie
+    </button>
+    <button class="on" (click)="setValueAndClose('on')">
+      <fa-icon [icon]="faCheck" />
+      Tak
+    </button>
+    @if (type() === '3-way') {
+      <button class="all" (click)="setValueAndClose('all')">
+        <fa-icon [icon]="faArrowsRotate" />
+        Wszyscy
+      </button>
+    }
+  </div>
+</app-tooltip>

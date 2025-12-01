@@ -1,0 +1,32 @@
+<ul>
+  @let osoby_title = "Przejdź do sekcji Osoby";
+  @let raporty_title = "Przejdź do sekcji Raporty";
+  @let cennik_title = "Przejdź do sekcji Cennik";
+  @let nieczynne_title = "Przejdź do sekcji Dni nieczynne";
+  @let administracja_title = "Przejdź do sekcji Administracja osób";
+  @let ustawienia_title = "Przejdź do sekcji Ustawienia";
+  <li><a routerLink="osoby" [attr.aria-label]="osoby_title" [title]="osoby_title">
+    <fa-icon [icon]="faUser" />
+    Osoby
+  </a></li>
+  <li><a routerLink="raporty" [attr.aria-label]="raporty_title" [title]="raporty_title">
+    <fa-icon [icon]="faTableColumns" />
+    Raporty
+  </a></li>
+  <li><a routerLink="cennik" [attr.aria-label]="cennik_title" [title]="cennik_title">
+    <fa-icon [icon]="faMoneyBills" />
+    Cennik
+  </a></li>
+  <li><a routerLink="nieczynne" [attr.aria-label]="nieczynne_title" [title]="nieczynne_title">
+    <fa-icon [icon]="faCalendar" />
+    Dni nieczynne
+  </a></li>
+  <li><a routerLink="administracja" [attr.aria-label]="administracja_title" [title]="administracja_title">
+    <fa-icon [icon]="faLock" />
+    Administracja osób
+  </a></li>
+  <li><a routerLink="ustawienia" [attr.aria-label]="ustawienia_title" [title]="ustawienia_title">
+    <fa-icon [icon]="faGear" />
+    Ustawienia
+  </a></li>
+</ul>

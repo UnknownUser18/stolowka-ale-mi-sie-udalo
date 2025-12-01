@@ -1,16 +1,23 @@
 import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CanceledDay, DataService } from '../services/data.service';
-import { GlobalInfoService, NotificationType } from '../services/global-info.service';
-import { TransitionService } from '../services/transition.service';
-import { VariablesService } from '../services/variables.service';
+import { GlobalInfoService, NotificationType } from '@services/global-info.service';
+import { TransitionService } from '@services/transition.service';
+import { VariablesService } from '@services/variables.service';
 import { DatePipe } from '@angular/common';
+import {FaIconComponent} from '@fortawesome/angular-fontawesome';
+import {faArrowsRotate, faCircle, faPlus, faXmark} from '@fortawesome/free-solid-svg-icons';
+import {ClosedDay, DeclarationsService} from '@database/declarations.service';
+import {PersonsService} from '@database/persons.service';
+import {firstValueFrom} from 'rxjs';
+import {NotificationsService} from '@services/notifications.service';
+// import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector : 'app-nieczynne',
-  imports : [
+  imports: [
     ReactiveFormsModule,
-    DatePipe
+    DatePipe,
+    FaIconComponent,
   ],
   templateUrl : './nieczynne.component.html',
   styleUrl : './nieczynne.component.scss',
@@ -18,9 +25,11 @@ import { DatePipe } from '@angular/common';
 export class NieczynneComponent {
   private invalidDates : Date[] = [];
 
-  protected canceled_days_zsti : CanceledDay[] = [];
-  protected id : number = 0;
+  protected canceled_days_zsti : ClosedDay[] | null = null;
+  protected id : number | null = null;
   protected showWindow : "" | "add" | "delete" = "";
+
+  protected readonly xmarkClose= faXmark
 
   protected pricingForm : FormGroup = new FormGroup({
     dzien : new FormControl(this.dateInput(new Date()), Validators.required),
@@ -35,19 +44,14 @@ export class NieczynneComponent {
   constructor(
     private variables : VariablesService,
     private infoService : GlobalInfoService,
-    private database : DataService,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef,
-    private zone : NgZone
+    private zone : NgZone,
+    private declarationS : DeclarationsService,
+    private notificationS: NotificationsService
   ) {
     this.infoService.setTitle('ZSTI - Dni Nieczynne');
-    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
-
-      this.database.request('global.canceledDay.get', {}, 'canceledDayList').then((payload : CanceledDay[]) => {
-        this.canceled_days_zsti = payload;
-      });
-    })
-
+    firstValueFrom(this.declarationS.getClosedDays).then(value => this.canceled_days_zsti = value);
   }
 
   protected dateInput(date : Date) : string {
@@ -57,7 +61,7 @@ export class NieczynneComponent {
     return `${ year }-${ month }-${ day }`;
   }
 
-  protected selectPricing(canceled_day : CanceledDay) {
+  protected selectPricing(canceled_day : ClosedDay) {
     this.pricingForm.patchValue({
       dzien : this.dateInput(new Date(canceled_day.dzien)),
     })
@@ -65,27 +69,38 @@ export class NieczynneComponent {
   }
 
   protected deletePricing() {
-    this.database.request('global.canceledDay.delete', { id : this.id }, 'canceledDayList').then(() => {
-      this.id = 0;
-      this.reloadPricing()
-    })
+    if(!this.id) return
+    this.declarationS.deleteClosedDay(this.id).subscribe((res) => {
+      this.closeWindow()
+      if (!res) {
+        this.notificationS.createErrorNotification( 'Nie udało się usunąć nieczynnego dnia.', 3)
+        // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się usunąć nieczynnego dnia.');
+        return;
+      }
+
+      this.notificationS.createSuccessNotification( 'Dzień nieczynny został usunięty.', 2)
+      // this.infoService.generateNotification(NotificationType.SUCCESS, 'Dzień nieczynny został usunięty.');
+      this.reloadPricing();
+  });
   }
 
-  private reloadPricing() {
-    this.database.request('global.canceledDay.get', {}, 'canceledDayList').then((payload : CanceledDay[]) => {
-      if (!payload) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
+  protected reloadPricing() {
+    this.id = null
+    firstValueFrom(this.declarationS.getClosedDays).then((days: ClosedDay[] | null) => {
+      if (!days) {
+        this.notificationS.createErrorNotification( 'Nie udało się pobrać cenników.', 3)
+        // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
         return;
-      } else if (payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.WARNING, 'Brak dni nieczynnych.');
+      } else if (days.length === 0) {
+        this.notificationS.createErrorNotification( 'Brak dni nieczynnych.', 2.5)
+        // this.infoService.generateNotification(NotificationType.WARNING, 'Brak dni nieczynnych.');
         this.canceled_days_zsti = [];
         this.invalidDates = [];
         return;
       }
-      this.canceled_days_zsti = payload;
+      this.canceled_days_zsti = days;
       this.invalidDates = [];
-
-    });
+    })
   }
 
   protected closeWindow() : void {
@@ -102,22 +117,41 @@ export class NieczynneComponent {
 
   protected addCanceledDay() : void {
     if (this.addForm.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.notificationS.createErrorNotification( 'Proszę poprawić błędy w formularzu.', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
     }
     const formValue = this.addForm.value;
-    const canceledDay : CanceledDay = {
+    const canceledDay : ClosedDay = {
+      id: 0,
       dzien : formValue.dzien!,
-    } as CanceledDay;
-    this.database.request('global.canceledDay.add', canceledDay, 'dump').then((payload) => {
-      if (!payload || payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać nieczynnego dnia.');
-        return;
-      }
+    };
+    // this.database.request('global.canceledDay.add', canceledDay, 'dump').then((payload) => {
+    //   if (!payload || payload.length === 0) {
+    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać nieczynnego dnia.');
+    //     return;
+    //   }
+    //
+    //   this.infoService.generateNotification(NotificationType.SUCCESS, 'Dzień nieczynny został dodany.');
+    //   this.reloadPricing();
+    // });
+    this.declarationS.addClosedDay(canceledDay.dzien).subscribe((res) => {
+      this.closeWindow()
+        if(!res){
+          this.notificationS.createErrorNotification( 'Nie udało się dodać nieczynnego dnia.', 3)
+          // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać nieczynnego dnia.');
+          return;
+        }
 
-      this.infoService.generateNotification(NotificationType.SUCCESS, 'Dzień nieczynny został dodany.');
-      this.reloadPricing();
-    });
+        this.notificationS.createSuccessNotification( 'Dzień nieczynny został dodany.', 2)
+        // this.infoService.generateNotification(NotificationType.SUCCESS, 'Dzień nieczynny został dodany.');
+        this.reloadPricing();
+      }
+    )
   }
+
+  protected readonly faCircle = faCircle;
+  protected readonly faArrowsRotate = faArrowsRotate;
+  protected readonly faPlus = faPlus;
 }
 

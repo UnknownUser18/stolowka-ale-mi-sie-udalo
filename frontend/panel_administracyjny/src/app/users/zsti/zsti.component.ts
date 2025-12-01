@@ -1,184 +1,285 @@
-import { ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
-import { Opiekun, Student, TypOsoby } from '../../services/data.service';
+import { Component, signal, viewChild } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { PersonsService, ZPerson, TypOsoby } from '@database/persons.service';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faArrowsRotate, faArrowUpWideShort, faCheck, faCircle, faFilter, faMagnifyingGlass, faPlus, faRotateLeft, faSchool, faUser, faWarning } from '@fortawesome/free-solid-svg-icons';
+import { NotificationsService } from '@services/notifications.service';
+import { DialogComponent } from '@tooltips/dialog/dialog.component';
+import { DialogTriggerDirective } from '@tooltips/dialog-trigger.directive';
+import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
+import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.directive';
+import { SwitchComponent, State } from '@switch';
+import { TooltipClickTriggerDirective } from '@tooltips/tooltip-click-trigger.directive';
+import { TooltipTriggerDirective } from '@tooltips/tooltip-trigger.directive';
 import { Router } from '@angular/router';
-import { GlobalInfoService, NotificationType } from '../../services/global-info.service';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TransitionService } from '../../services/transition.service';
-import { VariablesService } from '../../services/variables.service';
-import { Subject } from 'rxjs';
 
-export function wynikString(number : number) : string {
-  if (number < 0) console.warn('Number cannot be negative in wynikString function');
-  if (number === 1) return 'wynik';
-  if (number < 5 && number > 0) return 'wyniki';
-  return 'wyników';
-}
-
+type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
+type SortOption = 'surnameAsc' | 'surnameDesc' |
+  'nameAsc' | 'nameDesc' |
+  'classAsc' | 'classDesc' |
+  'typeAsc' | 'typeDesc' |
+  'attendanceAsc' | 'attendanceDesc' |
+  'cityAsc' | 'cityDesc' |
+  'idAsc' | 'idDesc';
 
 @Component({
   selector : 'app-zsti',
   imports : [
     FormsModule,
     ReactiveFormsModule,
+    FaIconComponent,
+    DialogComponent,
+    DialogTriggerDirective,
+    TooltipComponent,
+    TooltipDelayTriggerDirective,
+    SwitchComponent,
+    TooltipClickTriggerDirective,
+    TooltipTriggerDirective,
   ],
   templateUrl : './zsti.component.html',
   styleUrl : './zsti.component.scss'
 })
-export class ZstiComponent implements OnDestroy {
-  private destroy$ = new Subject<void>();
+export class ZstiComponent {
+  private ZPersons : ZPerson[] | null = [];
 
-  protected readonly wynikString = wynikString;
+  protected readonly dialog = viewChild.required<DialogComponent>('filterDialog');
+  protected readonly isRefreshing = signal(false);
+  protected readonly usedSortOption = signal<SortOption>('idAsc');
+
+  protected readonly filteringOptions : Map<FilteringOption, string> = new Map([
+    ['match', 'Dokładne dopasowanie'],
+    ['startsWith', 'Zaczyna się od'],
+    ['endsWith', 'Kończy się na'],
+    ['contains', 'Zawiera'],
+    ['excludes', 'Nie zawiera'],
+  ]);
+  protected readonly sortOptions : Map<SortOption, string> = new Map([
+    ['nameAsc', 'Imię rosnąco'],
+    ['nameDesc', 'Imię malejąco'],
+    ['surnameAsc', 'Nazwisko rosnąco'],
+    ['surnameDesc', 'Nazwisko malejąco'],
+    ['classAsc', 'Klasa rosnąco'],
+    ['classDesc', 'Klasa malejąco'],
+    ['typeAsc', 'Typ osoby rosnąco'],
+    ['typeDesc', 'Typ osoby malejąco'],
+    ['attendanceAsc', 'Uczęszcza rosnąco'],
+    ['attendanceDesc', 'Uczęszcza malejąco'],
+    ['cityAsc', 'Miasto rosnąco'],
+    ['cityDesc', 'Miasto malejąco'],
+    ['idAsc', 'ID rosnąco'],
+    ['idDesc', 'ID malejąco'],
+  ]);
+
+  protected readonly faMagnifyingGlass = faMagnifyingGlass;
+  protected readonly faFilter = faFilter;
+  protected readonly faPlus = faPlus;
+  protected readonly faArrowUpWideShort = faArrowUpWideShort;
+  protected readonly faArrowsRotate = faArrowsRotate;
+  protected readonly faCircle = faCircle;
+  protected readonly faWarning = faWarning;
+  protected readonly faUser = faUser;
+  protected readonly faSchool = faSchool;
+  protected readonly faCheck = faCheck;
+  protected readonly faRotateLeft = faRotateLeft;
   protected readonly TypOsoby = TypOsoby;
-  protected searchTerm : string | undefined;
-  protected persons_zsti : (Student & Opiekun)[] | undefined;
-  protected result : (Student & Opiekun)[] | undefined;
-  protected showFilter : boolean = false;
-  protected filter = new FormGroup({
-    imie : new FormControl('', Validators.pattern('[a-zA-ZżźćńśłóęąŻŹĆŃŚŁÓĘĄ]')),
-    nazwisko : new FormControl('', Validators.pattern('[a-zA-ZżźćńśłóęąŻŹĆŃŚŁÓĘĄ]')),
-    klasa : new FormControl('', Validators.pattern('[0-9a-zA-ZżźćńśłóęąŻŹĆŃŚŁÓĘĄ/ -]*')),
-    miasto : new FormControl('wszyscy', Validators.required),
-    typ_osoby : new FormControl('3', Validators.required),
-    uczeszcza : new FormControl('wszyscy', Validators.required),
-  });
 
-  @ViewChild('section_filter') sectionFilter : ElementRef | undefined;
+  protected search = '';
+  protected shownZPersons : ZPerson[] | null | undefined;
+
+  protected filterForm : FormGroup = new FormGroup({
+    imie : new FormControl(''),
+    imie_filter : new FormControl<FilteringOption>('contains'),
+    nazwisko : new FormControl(''),
+    nazwisko_filter : new FormControl<FilteringOption>('contains'),
+    klasa : new FormControl(''),
+    uczeszcza : new FormControl<State>('all'),
+    miasto : new FormControl<State>('all'),
+    typ_osoby : new FormControl<TypOsoby | 'all'>('all')
+  });
 
 
   constructor(
-    private variables : VariablesService,
-    private infoService : GlobalInfoService,
-    private router : Router,
-    private zone : NgZone,
-    private transition : TransitionService,
-    private cdr : ChangeDetectorRef) {
-    this.infoService.setTitle('ZSTI - Osoby');
-    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() : void => {
+    private personS : PersonsService,
+    private notificationsS : NotificationsService,
+    private router : Router) {
+    this.requestPersons();
+  }
 
-      this.variables.mapStudentsToOpiekun(true).then((persons : (Student & Opiekun)[]) => {
-        this.result = this.persons_zsti = persons;
-      });
+  private filterByOption(input : string, object : string, option : FilteringOption,) : boolean {
+    const filterQuery = input.toLowerCase();
+
+
+    switch (option) {
+      case 'match':
+        return object.toLowerCase() === filterQuery;
+      case 'startsWith':
+        return object.toLowerCase().startsWith(filterQuery);
+      case 'endsWith':
+        return object.toLowerCase().endsWith(filterQuery);
+      case 'contains':
+        return object.toLowerCase().includes(filterQuery);
+      case 'excludes':
+        return !object.toLowerCase().includes(filterQuery);
+      default:
+        return false;
+    }
+  }
+
+  protected isTeacher(person : ZPerson) : boolean {
+    return this.personS.isTeacher(person);
+  }
+
+  protected requestPersons() {
+    this.shownZPersons = undefined;
+    this.isRefreshing.set(true);
+
+    this.personS.getZPersons().subscribe((persons : ZPerson[] | null) => {
+      this.ZPersons = persons;
+      this.shownZPersons = this.ZPersons;
+
+      this.isRefreshing.set(false);
+
+      if (!persons)
+        this.notificationsS.createErrorNotification('Nie udało się pobrać listy osób.', 10);
+      else if (persons.length === 0)
+        this.notificationsS.createWarningNotification('Brak osób w bazie danych.', 10);
+      else {
+        this.notificationsS.createSuccessNotification('Pobrano listę osób z serwera.', 2);
+        this.sortPersons(this.usedSortOption());
+      }
     });
   }
 
-  private applyFilterLogic(use_filter : boolean = false) : void {
-    if (this.filter.get('typ_osoby')?.value! === (TypOsoby.NAUCZYCIEL + '')) this.filter.get('klasa')?.setValue('');
-    const filter = this.filter.getRawValue();
-    if (!this.persons_zsti) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Nie można zastosować filtru, ponieważ nie załadowano jeszcze osób.');
+  protected osobString(number : number) : string {
+    if (number === 0) return 'osób.';
+    else if (number === 1) return 'osoba.';
+    else if (number > 1 && number < 5) return 'osoby.';
+    else return 'osób.';
+  }
+
+  protected filterZPersons() : void {
+    if (!this.ZPersons) return;
+
+    if (this.search === '') {
+      this.shownZPersons = this.ZPersons;
       return;
     }
-    if (!this.checkIfFilterUsed() && use_filter && this.searchTerm !== '') return;
 
-    this.result = this.persons_zsti!.filter((person : Student & Opiekun) : boolean => {
-      const searchTerm : string = this.searchTerm?.trim().toLowerCase() ?? '';
-      if (use_filter) {
-        if (searchTerm.split(' ').length > 1) {
-          return (
-            (person.imie.toLowerCase().includes(searchTerm.split(' ')[0])) &&
-            (person.nazwisko.toLowerCase().includes(searchTerm.split(' ')[1]))
-          )
-        } else {
-          return (
-            (person.imie.toLowerCase().includes(searchTerm)) ||
-            (person.nazwisko.toLowerCase().includes(searchTerm))
-          )
-        }
+    const search = this.search;
+    let imie, nazwisko;
+    const split = search.split(' ');
 
-      } else {
-        return (
-          (person.imie.toLowerCase().includes(filter.imie?.toLowerCase() ?? '')) &&
-          (person.nazwisko.toLowerCase().includes(filter.nazwisko?.toLowerCase() ?? '')) &&
-          (person.klasa ? person.klasa.toString().toLowerCase() : '').includes(filter.klasa?.toLowerCase() || '') &&
-          (filter.miasto === 'wszyscy' ? true : filter.miasto === 'true' ? person.miasto : !person.miasto) &&
-          (filter.typ_osoby === '3' || Number(filter.typ_osoby) === Number(person.typ_osoby_id)) &&
-          (filter.uczeszcza === 'wszyscy' ? true : filter.uczeszcza === 'true' ? person.uczeszcza : !person.uczeszcza)
-        )
-      }
-    });
-  }
-
-  protected filterPersons(event : Event) : void {
-    if (event instanceof KeyboardEvent && event.key !== 'Enter') return;
-    if (this.searchTerm === undefined) return;
-    this.applyFilterLogic(true);
-  }
-
-  protected openFilterMenu() : void {
-    this.showFilter = true;
-    this.cdr.detectChanges();
-    this.transition.applyAnimation(this.sectionFilter!.nativeElement, true, this.zone).then(() : void => {
-      const searchTerm : string = this.searchTerm ?? '';
-      if (searchTerm.includes(' ') && searchTerm.length > 0) {
-        this.filter.get('imie')?.setValue(searchTerm.charAt(0).toUpperCase() + searchTerm.split(' ')[0].slice(1));
-        this.filter.get('nazwisko')?.setValue(searchTerm.split(' ')[1].charAt(0).toUpperCase() + searchTerm.split(' ')[1].slice(1));
-      } else {
-        this.filter.get('imie')?.setValue(searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1));
-      }
-    });
-  }
-
-  protected applyFilter() : void {
-    this.transition.applyAnimation(this.sectionFilter!.nativeElement, false, this.zone).then(() : void => {
-      this.showFilter = false;
-    }).finally(() : void => {
-      this.applyFilterLogic();
-      this.searchTerm = (this.filter.get('imie')?.value + ' ' + this.filter.get('nazwisko')?.value).trim();
-      this.infoService.generateNotification(NotificationType.SUCCESS, 'Pomyślnie zastosowano filtr.');
-    });
-  }
-
-  protected closeFilterMenu() : void {
-    this.transition.applyAnimation(this.sectionFilter!.nativeElement, false, this.zone).then(() : void => {
-      this.showFilter = false;
-    });
-  }
-
-  protected selectPerson(user : Student & Opiekun) : void {
-    this.router.navigate(['osoba/zsti', user.id, 'kalendarz']).then(() : void => {
-      this.infoService.setActiveUser(user);
-    });
-  }
-
-  protected onTypOsobyChange() : void {
-    const typ = this.filter.get('typ_osoby')?.value;
-    if (typ === (this.TypOsoby.NAUCZYCIEL + '')) {
-      this.filter.get('klasa')?.disable({ emitEvent : false });
-      this.filter.get('klasa')?.setValue('', { emitEvent : false });
+    if (split.length > 1) {
+      nazwisko = split[0]
+      imie = split[1];
     } else {
-      this.filter.get('klasa')?.enable({ emitEvent : false });
+      imie = nazwisko = search;
     }
+    this.shownZPersons = this.ZPersons.filter(person => {
+      const { imie : imieP, nazwisko : nazwiskoP } = person;
+      return (imieP.toLowerCase().includes(imie.toLowerCase()) || nazwiskoP.toLowerCase().includes(nazwisko.toLowerCase()));
+    })
   }
 
-  protected resetFilter() : void {
-    this.filter.reset({
-      imie : '',
-      nazwisko : '',
-      klasa : '',
-      miasto : 'wszyscy',
-      typ_osoby : '3',
-      uczeszcza : 'wszyscy'
+  protected applyFilters() {
+    if (!this.ZPersons) return;
+
+    const { imie, imie_filter, nazwisko, nazwisko_filter, klasa, uczeszcza, miasto, typ_osoby } = this.filterForm.value;
+
+    if (imie.trim() === '' && nazwisko.trim() === '' && klasa.trim() === '' && uczeszcza === 'all' && miasto === 'all' && typ_osoby === 'all') {
+      this.shownZPersons = this.ZPersons;
+      this.dialog().hide();
+      return;
+    }
+
+    this.shownZPersons = this.ZPersons.filter((person) => {
+      let matches = true;
+      if (imie && imie.trim() !== '')
+        matches = matches && this.filterByOption(imie, person.imie, imie_filter);
+
+      if (nazwisko && nazwisko.trim() !== '')
+        matches = matches && this.filterByOption(nazwisko, person.nazwisko, nazwisko_filter);
+
+      if (klasa && klasa.trim() !== '') {
+        if (klasa.includes(',')) {
+          const classes = klasa.split(',').map((c : string) => c.trim().toLowerCase());
+          matches = matches && person.klasa ? classes.includes(person.klasa.toLowerCase()) : false;
+        } else
+          matches = matches && person.klasa ? person.klasa.toLowerCase() === klasa.trim().toLowerCase() : false;
+      }
+
+      if (uczeszcza !== 'all')
+        matches = matches && ((uczeszcza === 'on') ? person.uczeszcza : !person.uczeszcza)!;
+
+      if (miasto !== 'all')
+        matches = matches && ((miasto === 'on') ? person.miasto : !person.miasto)!;
+
+      if (typ_osoby !== 'all')
+        matches = matches && person.typ_osoby_id === typ_osoby;
+
+      return matches ? person : null;
     });
-    this.searchTerm = '';
-    this.applyFilterLogic();
-    this.infoService.generateNotification(NotificationType.INFO, 'Pomyślnie zresetowano filtr.');
+
+    this.search = (imie.trim() + ' ' + nazwisko.trim()).trim();
+
+    this.dialog().hide();
   }
 
-  protected checkIfFilterUsed() : boolean {
-    const filter = this.filter.getRawValue();
-    return (
-      filter.imie !== '' ||
-      filter.nazwisko !== '' ||
-      filter.klasa !== '' ||
-      filter.miasto !== 'wszyscy' ||
-      filter.typ_osoby !== '3' ||
-      filter.uczeszcza !== 'wszyscy' ||
-      (this.searchTerm !== undefined && this.searchTerm.trim() !== '')
-    );
+  protected sortPersons(option : SortOption) {
+    if (!this.shownZPersons) return;
+
+    this.usedSortOption.set(option);
+
+    this.shownZPersons = [...this.shownZPersons].sort((a, b) => {
+      switch (option) {
+        case 'surnameAsc':
+          return a.nazwisko.localeCompare(b.nazwisko) || a.imie.localeCompare(b.imie);
+        case 'surnameDesc':
+          return b.nazwisko.localeCompare(a.nazwisko) || b.imie.localeCompare(a.imie);
+        case 'nameAsc':
+          return a.imie.localeCompare(b.imie) || a.nazwisko.localeCompare(b.nazwisko);
+        case 'nameDesc':
+          return b.imie.localeCompare(a.imie) || b.nazwisko.localeCompare(a.nazwisko);
+        case 'classAsc':
+          return (a.klasa ?? '').localeCompare(b.klasa ?? '') || a.nazwisko.localeCompare(b.nazwisko) || a.imie.localeCompare(b.imie);
+        case 'classDesc':
+          return (b.klasa ?? '').localeCompare(a.klasa ?? '') || b.nazwisko.localeCompare(a.nazwisko) || b.imie.localeCompare(a.imie);
+        case 'typeAsc':
+          return (a.typ_osoby_id?.toString() ?? '').localeCompare(b.typ_osoby_id?.toString() ?? '') ||
+            a.nazwisko.localeCompare(b.nazwisko) ||
+            a.imie.localeCompare(b.imie);
+        case 'typeDesc':
+          return (b.typ_osoby_id?.toString() ?? '').localeCompare(a.typ_osoby_id?.toString() ?? '') ||
+            b.nazwisko.localeCompare(a.nazwisko) ||
+            b.imie.localeCompare(a.imie);
+        case 'attendanceAsc':
+          return (a.uczeszcza === b.uczeszcza) ? 0 : a.uczeszcza ? -1 : 1 ||
+            a.nazwisko.localeCompare(b.nazwisko) ||
+            a.imie.localeCompare(b.imie);
+        case 'attendanceDesc':
+          return (a.uczeszcza === b.uczeszcza) ? 0 : a.uczeszcza ? 1 : -1 ||
+            b.nazwisko.localeCompare(a.nazwisko) ||
+            b.imie.localeCompare(a.imie);
+        case 'cityAsc':
+          return (a.miasto === b.miasto) ? 0 : a.miasto ? -1 : 1 ||
+            a.nazwisko.localeCompare(b.nazwisko) ||
+            a.imie.localeCompare(b.imie);
+        case 'cityDesc':
+          return (a.miasto === b.miasto) ? 0 : a.miasto ? 1 : -1 ||
+            b.nazwisko.localeCompare(a.nazwisko) ||
+            b.imie.localeCompare(a.imie);
+        case 'idAsc':
+          return (a.id ?? 0) - (b.id ?? 0);
+        case 'idDesc':
+          return (b.id ?? 0) - (a.id ?? 0);
+        default:
+          return 0;
+      }
+    });
   }
 
-  public ngOnDestroy() : void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  protected selectPerson(person : ZPerson) {
+    this.personS.selectZPerson(person);
+    this.router.navigate(['/osoba/zsti', person.id]).then();
   }
 }

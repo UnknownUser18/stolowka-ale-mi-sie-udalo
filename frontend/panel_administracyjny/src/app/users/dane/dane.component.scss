@@ -3,133 +3,120 @@
 form {
   width: 100%;
   height: 100%;
+  padding: i.$padding-sm i.$padding-lg;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(5, 1fr);
-  padding: 40px 25px 20px 25px;
-  row-gap: 55px;
+  gap: i.$padding-md;
+  grid-template-columns: auto auto;
+  grid-template-rows: 1fr 0.15fr;
 
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    font-size: 1.5em;
-    justify-content: start;
+  @include i.form-buttons;
 
-    &:has(> select) {
-      flex-direction: row;
-    }
+  button[type="submit"] {
+    border: none;
+    background-color: var(--primary);
+    color: var(--bg);
 
-    span {
-      color: var(--color-13);
-      font-weight: 500;
-    }
-
-    input, select {
-      padding: 10px;
-      border-radius: 10px;
-      background-color: var(--color-2);
-
-      &:focus {
-        color: var(--color-13);
-        outline-color: var(--color-10);
-      }
-    }
-
-    input {
-      transition: i.transition(background-color), i.transition(color), i.transition(outline-color);
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.9em;
-      width: 50%;
-      min-width: 350px;
-      outline: 2px solid transparent;
-
-      &::placeholder:focus {
-        color: var(--color-13);
-      }
-
-      &:disabled {
-        background-color: var(--color-1);
-        color: var(--color-11);
-        cursor: not-allowed;
-      }
-    }
-
-    select {
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.7em;
-      height: fit-content;
-      width: 20%;
-      min-width: 120px;
-    }
-  }
-
-  button {
-    @include i.button(10px, $bg-color: var(--color-6), $h-bg-color: var(--color-9));
-    @include i.font-500(var(--color-13));
-    width: fit-content;
-    height: fit-content;
-
-    &:first-of-type {
-      place-self: end start;
-    }
-
-    &:last-of-type {
-      place-self: end end;
+    &:hover, &:focus {
+      background-color: var(--secondary);
+      color: var(--bg);
     }
   }
 }
 
-section {
-  @include i.window;
+fieldset {
+  @include i.fieldset;
+}
 
-  div {
-    width: 40%;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+label {
+  display: flex;
+  gap: i.$padding-2xs;
+  flex-direction: column;
+  font-size: i.$font-size-lg;
 
-    & > *:not(button) {
-      grid-column: 1 / -1;
+  &.one-line {
+    width: fit-content;
+    align-items: center;
+    flex-direction: row;
+  }
+
+
+  &:focus-within span:not(.error) {
+    border-color: var(--border) !important;
+  }
+
+  &:not(.one-line) span:not(.error) {
+    transition: i.transition(border-color, i.$duration-sm);
+    padding-bottom: i.$padding-3xs;
+    border-bottom: i.$base-border var(--border-muted);
+  }
+}
+
+input {
+  &:disabled {
+    cursor: not-allowed;
+    background-color: var(--bg);
+    color: var(--text-muted);
+
+    border-color: var(--border-muted);
+
+    &:hover, &:focus {
+      background-color: var(--bg);
+      color: var(--text-muted);
+      border-color: var(--border-muted);
     }
   }
 
-  h3 {
-    @include i.font-500(var(--color-13));
-    text-align: center;
-    margin: 0 0 20px 0;
+  @include i.input;
+}
+
+select {
+  @include i.select;
+}
+
+option {
+  color: var(--text-muted);
+
+  &:hover, &:focus {
+    color: var(--text);
   }
+}
 
-  b {
-    display: inline-block;
 
-    &:not(:first-of-type) {
-      margin-left: 5px;
+div {
+  display: flex;
+  gap: i.$padding-xl;
+  align-items: center;
+
+  &:first-of-type button {
+    background-color: color-mix(in oklch, var(--bg-light) 80%, var(--bg) 20%);
+    color: var(--text-muted);
+    border-color: var(--border-muted);
+
+    &:hover, &:focus {
+      background-color: var(--bg-light);
+      color: var(--text);
+      border-color: var(--border);
     }
   }
 
-  h4 {
-    @include i.font-500(var(--color-13));
-    margin: 10px 0;
-  }
-
-  p {
-    @include i.font(1.2em, 400, var(--color-13));
-    line-height: 2;
+  &:last-of-type {
+    justify-content: flex-end;
   }
 
   button {
-    @include i.button(10px, $bg-color: var(--color-6), $h-bg-color: var(--color-9));
-    @include i.font(1.2em, 400, var(--color-13));
-    margin-top: 20px;
-    width: fit-content;
-    height: fit-content;
-
-    &:first-of-type {
-      place-self: center start;
-    }
-
-    &:last-of-type {
-      place-self: center end;
-    }
+    font-size: i.$font-size-lg;
   }
+}
+
+button fa-icon {
+  display: inline-block;
+}
+
+.error {
+  font-size: i.$font-size-xs;
+  color: var(--danger);
+}
+
+.spin {
+  animation: spin 2s infinite linear;
 }
