@@ -1,4 +1,4 @@
-import { Component, signal, WritableSignal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { NgOptimizedImage } from "@angular/common";
 import { ActivatedRoute, NavigationEnd, Router, RouterLink } from "@angular/router";
@@ -33,7 +33,7 @@ export class SidebarComponent {
   protected readonly nav_label = signal('Nawigacja');
   protected readonly imageError = signal(false);
   protected readonly isNotInRoot = signal(false);
-  protected readonly sidebarLoaded : WritableSignal<SidebarData> = signal('')
+  protected readonly sidebarLoaded = signal<SidebarData>('')
   protected readonly previousUrl = signal<string | null>(null);
 
   protected readonly faArrowRotateRight = faArrowRotateRight;
@@ -70,9 +70,17 @@ export class SidebarComponent {
         this.nav_label.set('Nawigacja');
         return;
       }
-      const previousPath = urlSegments.length > 1
+      let previousPath = urlSegments.length > 1
         ? '/' + urlSegments.slice(0, -1).join('/')
         : '/';
+
+
+      if (!isNaN(parseInt(previousPath[previousPath.length - 1]))) { // if last segment is a number (usually an ID from user)
+        previousPath = '/osoby';
+      }
+
+      console.log(previousPath, previousPath[previousPath.length - 1]);
+
       this.previousUrl.set(previousPath);
       this.isNotInRoot.set(true);
       const matchedRoute = Array.from(mapRoutes.entries()).find(([regex]) => regex.test(urlSegments[0]));

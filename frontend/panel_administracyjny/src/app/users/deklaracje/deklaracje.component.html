@@ -107,7 +107,7 @@
         Resetuj
         <fa-icon [icon]="faRotate" />
       </button>
-      <button type="button" class="remove-declaration" [dialog]="deleteDeclarationDialog">
+      <button [dialog]="deleteDeclarationDialog" class="remove-declaration">
         Usuń deklaracje
         <fa-icon [icon]="faTrash" />
       </button>
@@ -115,7 +115,7 @@
   }
 </form>
 @if (selectedDeclaration()) {
-  <app-calendar [declarationsZ]="dbDeclarations()!" [selectedDeclarationZ]="tempSelectedDeclaration()" (hasWrongDays)="isWrong($event, 'edit')" />
+  <app-calendar (hasWrongDays)="isWrong($event, 'edit')" [elements]="dbDeclarations()!" [selectedElement]="tempSelectedDeclaration()" />
 }
 
 <app-dialog #addDeclarationDialog>
@@ -158,7 +158,7 @@
         </label>
       }
     </fieldset>
-    <app-calendar [declarationsZ]="dbDeclarations()!" [selectedDeclarationZ]="addDeclaration()" [isForNewDeclaration]="true" (hasWrongDays)="isWrong($event, 'add')" />
+    <app-calendar (hasWrongDays)="isWrong($event, 'add')" [elements]="dbDeclarations()!" [isForNewElement]="true" [selectedElement]="addDeclaration()" />
     <button type="reset">
       <fa-icon [icon]="faRotate" />
       Resetuj
