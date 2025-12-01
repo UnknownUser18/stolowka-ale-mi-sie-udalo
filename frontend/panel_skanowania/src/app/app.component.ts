@@ -3,8 +3,10 @@ import {NfcScanComponent} from './nfc-scan/nfc-scan.component';
 import {ClockComponent} from './clock/clock.component';
 import {UserDataDisplayComponent} from './user-data-display/user-data-display.component';
 import {RestartComponent} from './restart/restart.component';
-import {AbsenceDay, CardDetails, DataService, Declaration, Payment, Scan} from './data.service';
+import {AbsenceDay, CardDetails, DataService, Declaration, ZPayment, Scan} from './data.service';
 import {NgOptimizedImage} from '@angular/common';
+import {DbService, ZAbsenceDay, ZDeclaration, ZScan} from './db.service';
+import {firstValueFrom} from 'rxjs';
 
 export interface affirmationInfo{
   message: string;
@@ -34,8 +36,8 @@ export class AppComponent {
   enterInfo: affirmationInfo = {message: "nothing happened", isAbleToEnter: true};
   today: Date = new Date();
 
-  constructor(private dataService: DataService) {
-    this.dataService.WS_OPENED.subscribe(async () => {await this.fetchInitialData()})
+  constructor(private dataService: DataService, private database: DbService) {
+    // this.dataService.WS_OPENED.subscribe(async () => {await this.fetchInitialData()})
   }
 
   private async fetchInitialData(): Promise<void> {
@@ -54,66 +56,74 @@ export class AppComponent {
 
   public async loadNfcOutput(input: string) {
     console.log(input);
-    this.user = this.findUser(await this.dataService.request('zsti.card.getWithDetails', {}, "cardDetailsList"), input)
+    this.user = this.findUser(await this.getCardsWithDetails(), input)
     console.log(this.user);
     if (!this.user) {
       this.noUserFound();
       return;
     }
     const [declaration, absences, payments, scans] =
-      [this.getDeclarationForUser(this.user),
-      this.getAbsenceForUser(this.user),
-      this.getPaymentsForUser(this.user),
-      this.getScansForUser(this.user)];
+      [await this.getDeclarationForUser(this.user),
+        await this.getAbsenceForUser(this.user),
+        await this.getPaymentsForUser(this.user),
+        await this.getScansForUser(this.user)];
     this.enterInfo = this.parseUserData(declaration, absences, payments, scans)
     this.loadedUser = true;
     console.log(this.user, this.enterInfo);
     if(this.enterInfo.isAbleToEnter)
-      this.scanUser(this.user).then(() => {
-        this.fetchInitialData()
-      })
-    else
-      await this.fetchInitialData()
+      this.scanUser(this.user)
   }
 
   private dateToDBDate(date: Date): string {
-    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+    // return date.toISOString();
+    return `${date.getFullYear().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
   }
 
   private async scanUser(user: CardDetails) {
-    this.dataService.request('zsti.scan.add', {
-     id_karty: user.id,
-      czas: this.dateToDBDate(new Date())
-    }).then(() => {
-      console.log('promise resolved')
-      return this.dataService.request('zsti.scan.get', {}, 'scanList');
+    // this.dataService.request('zsti.scan.add', {
+    //  id_karty: user.id,
+    //   czas: this.dateToDBDate(new Date())
+    // })
+    console.log(`Scanning user of card id: ${user.id}`)
+    this.database.addZScansPerson(user.id, this.dateToDBDate(new Date())).subscribe((res) => {
+      console.log(res);
+
     })
+      // .then(() => {
+    //   console.log('promise resolved')
+    //   return this.dataService.request('zsti.scan.get', {}, 'scanList');
+    // })
   }
 
   private formatAbsence(date: Date): string{
     return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
   }
 
-  private checkAbsences(absences: AbsenceDay[]): boolean {
-    return !absences.find((absence: AbsenceDay) =>
+  private checkAbsences(absences: ZAbsenceDay[] | null): boolean {
+    if(!absences) return true;
+    return !absences.find((absence: ZAbsenceDay) =>
       (this.formatAbsence(new Date(absence.dzien_wypisania)) === this.formatAbsence(this.today))
     )
   }
 
-  private checkDeclaration(declaration: Declaration): boolean {
+  private checkDeclaration(declaration: ZDeclaration): boolean {
     const day = this.today.getDay();
-    if([0, 6].includes(day)) return false;
+    if([0, 6].includes(day)) return true;
     return declaration.dni[day - 1] === '1';
   }
 
-  private checkPayments(payments: Payment[], user: CardDetails): boolean {
+  private checkPayments(payments: ZPayment[] | null, user: CardDetails): boolean {
     if(user.miasto) return true;
-    return !payments.find((payment: Payment) => (payment.miesiac === (this.today.getMonth() + 1)));
+    if(!payments) return false
+    return !payments.find((payment: ZPayment) => (payment.miesiac === (this.today.getMonth() + 1)));
   }
 
-  private checkScans(scans: Scan[]){
-    return !scans.find((scan: Scan) =>
-      (this.formatAbsence(new Date(scan.czas)) === this.formatAbsence(this.today))
+  private checkScans(scans: ZScan[] | null){
+    console.table(scans);
+    if(!scans)
+      return true
+    return !scans.find((scan: ZScan) =>
+      (this.formatAbsence(scan.czas) === this.formatAbsence(this.today))
     )
   }
 
@@ -122,13 +132,19 @@ export class AppComponent {
     const start = (new Date());
     start.setHours(12, 0, 0, 0);
     const end = (new Date());
-    end.setHours(18, 0, 0,0);
+    end.setHours(24, 0, 0,0);
     return (start <= date) && (date <= end);
   }
 
-  private parseUserData(declaration?: Declaration, absences: AbsenceDay[] = [], payments: Payment[] = [], scans: Scan[] = []): affirmationInfo {
+  private parseUserData(declaration?: ZDeclaration[] | null, absences: ZAbsenceDay[] | null = null, payments: ZPayment[] | null = null, scans: ZScan[] | null = null): affirmationInfo {
     let info: affirmationInfo = {message: "Uczeń może wejść", isAbleToEnter: true};
-    if (!declaration)
+    console.group("Dane o uczniu")
+    console.table(declaration);
+    console.table(payments);
+    console.table(absences);
+    console.table(scans);
+    console.groupEnd()
+    if (!declaration || declaration.length === 0)
       return {message: 'Uczeń nie posiada deklaracji', isAbleToEnter: false};
     if(!this.checkScans(scans))
       info = {message: 'Uczeń już odebrał obiad w dniu dzisiejszym', isAbleToEnter: false};
@@ -136,7 +152,7 @@ export class AppComponent {
       info = {message: 'Uczeń nie zapłacił za obiad w dniu dzisiejszym', isAbleToEnter: false};
     if(!this.checkAbsences(absences))
       info = {message: 'Uczeń jest zwolniony z obiadów w dniu dzisiejszym', isAbleToEnter: false};
-    if(!this.checkDeclaration(declaration))
+    if(!this.checkDeclaration(declaration[0]))
       info = {message: 'Uczeń nie je obiadów w ten dzień tygodnia', isAbleToEnter: false};
     if(!this.checkDate())
       info = {message: 'Poza godzinami obiadowymi', isAbleToEnter: false};
@@ -144,39 +160,35 @@ export class AppComponent {
   }
 
   noUserFound() {
-    this.user = {id: 0, imie: 'Nie znaleziono', nazwisko: 'ucznia :/', uczeszcza: false, typ_osoby_id: 0, id_ucznia: 0, klasa: '', ostatnie_uzycie: '', data_wydania: '', key_card: 0, miasto: false}
+    this.user = {id: 0, imie: 'Nie znaleziono', nazwisko: 'ucznia :/', uczeszcza: false, typ_osoby_id: 0, id_ucznia: 0, klasa: '', ostatnie_uzycie: this.today, data_wydania: this.today, key_card: 0, miasto: false}
     this.enterInfo = {message: 'Wprowadzono złe ID lub napotkano nieznany błąd', isAbleToEnter: false};
     this.loadedUser = true;
   }
 
-  public findUser(list: CardDetails[], input: string): CardDetails | undefined {
+  public findUser(list: CardDetails[] | null, input: string): CardDetails | undefined {
     console.table(list);
-
+    if(!list)
+      return undefined;
     return list.find((userCard: CardDetails) => userCard.key_card.toString() === input);
   }
 
-  private getDeclarationForUser(user: CardDetails): Declaration | undefined {
-    return this.dataService.get('declarationList')?.find((declaration: Declaration) =>
-      (new Date(declaration.data_od) <= this.today && this.today <= new Date(declaration.data_do)) &&
-      (declaration.id_osoby === user.id_ucznia)
-    )
+  private async getDeclarationForUser(user: CardDetails): Promise<ZDeclaration[] | null> {
+    return await firstValueFrom(this.database.getZDeclarationsPersonInDate(user.id_ucznia, this.today))
   }
 
-  private getAbsenceForUser(user: CardDetails): Array<AbsenceDay> | undefined {
-    return this.dataService.get('absenceDayList')?.filter((absDay: AbsenceDay) =>
-      (absDay.osoby_zsti_id == user.id_ucznia)
-    )
+  private async getAbsenceForUser(user: CardDetails): Promise<ZAbsenceDay[] | null> {
+    return await firstValueFrom(this.database.getZAbsenceDaysPerson(user.id_ucznia))
   }
 
-  private getPaymentsForUser(user: CardDetails): Array<Payment> | undefined {
-    return this.dataService.get('paymentList')?.filter((payment: Payment) =>
-      (payment.id_ucznia === user.id_ucznia)
-    )
+  private async getPaymentsForUser(user: CardDetails): Promise<ZPayment[] | null> {
+    return await firstValueFrom(this.database.getZPaymentsPerson(user.id_ucznia))
   }
 
-  private getScansForUser(user: CardDetails): Array<Scan> | undefined {
-    return this.dataService.get('scanList')?.filter((scan: Scan) =>
-      (scan.id_karty === user.id)
-    )
+  private async getScansForUser(user: CardDetails): Promise<ZScan[] | null> {
+    return await firstValueFrom(this.database.getZScansPerson(user.id))
+  }
+
+  private async getCardsWithDetails(): Promise<CardDetails[] | null> {
+    return await firstValueFrom(this.database.getZCardsWithDetails())
   }
 }

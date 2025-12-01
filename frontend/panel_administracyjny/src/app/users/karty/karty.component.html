@@ -1,45 +1,94 @@
 <form [formGroup]="cardForm">
-  <label>
-    <span>Numer karty :</span>
-    <input type="text" formControlName="key_card" readonly required>
-  </label>
-  <label>
-    <span>Data aktywacji :</span>
-    <input type="date" formControlName="data_wydania" readonly required>
-  </label>
-  <label>
-    <span>Ostatnie użycie :</span>
-    <input type="datetime-local" formControlName="ostatnie_uzycie" readonly required>
-  </label>
-  <button (click)="openWindow('add')">Aktywuj nową kartę</button>
-  <button (click)="openWindow('remove')">Dezaktywuj kartę</button>
-</form>
-@if (showWindow !== '') {
-  <section #window>
+  <fieldset>
+    <legend>
+      <fa-icon [icon]="faIdCard" />
+      Karta
+    </legend>
+    <label>
+      <span>Numer karty:</span>
+      <input type="text" formControlName="key_card" readonly required aria-label="Numer karty">
+    </label>
+    <label>
+      <span>Data aktywacji:</span>
+      <input type="date" formControlName="data_wydania" readonly required aria-label="Data aktywacji">
+    </label>
+    <label>
+      <span>Ostatnie użycie:</span>
+      <input type="datetime-local" formControlName="ostatnie_uzycie" readonly required aria-label="Ostatnie użycie">
+    </label>
     <div>
-      <i role="button" tabindex="0" class="fa-solid fa-xmark close" (click)="closeWindow()"></i>
-      @if (showWindow === 'remove') {
-        <h3>Czy na pewno chcesz zdeaktywować kartę?</h3>
-        <h4>Co to oznacza?</h4>
-        <p>Oznacza to, że ta osoba nie będzie mogła za pomocą karty przychodzić na stołówkę.</p>
-        <button (click)="closeWindow()">Anuluj</button>
-        <button (click)="removeCard(true)">Tak</button>
-      } @else if (showWindow === 'add') {
-        <h3>Czy na pewno chcesz aktywować nową kartę?</h3>
-        <h4>Co to oznacza?</h4>
-        <p>Oznacza to, że ówczesna karta przestanie działać po zatwierdzeniu opcji i należy aktywować nową.</p>
-        <button (click)="closeWindow()">Anuluj</button>
-        <button (click)="removeCard(false)">Tak</button>
-      } @else if (showWindow === 'add-continue') {
-        <h3>Aktywacja karty</h3>
-        <form [formGroup]="addCardForm" class="addCard">
-          <label>
-            <span>Numer karty : </span>
-            <input type="text" formControlName="key_card" required>
-          </label>
-          <button type="submit" (click)="addCard()">Aktywuj kartę</button>
-        </form>
-      }
+      <button class="warning-button" [dialog]="deleteCardDialog" [disabled]="!cardForm.get('key_card')?.value">
+        <fa-icon [icon]="faTrashCan" />
+        Dezaktywuj kartę
+      </button>
+      <button class="success-button" [dialog]="addCardDialog">
+        Aktywuj nową kartę
+        <fa-icon [icon]="faPlus" />
+      </button>
     </div>
-  </section>
-}
+  </fieldset>
+</form>
+
+<app-dialog #addCardDialog>
+  <div class="dialog activate-new-card-dialog">
+    <h3>Aktywacja nowej karty</h3>
+    <p>Aktywacja nowej karty spowoduje dezaktywację obecnej karty przypisanej do tego użytkownika.</p>
+    <p>Czy na pewno chcesz aktywować nową kartę?</p>
+    <div>
+      <button (click)="addCardDialog.hide()" class="warning-button">
+        <fa-icon [icon]="faBan" />
+        Anuluj
+      </button>
+      <button [dialog]="addCardContinueDialog" (click)="deleteCard(); addCardDialog.hide()" class="success-button">
+        Kontynuuj
+        <fa-icon [icon]="faArrowRight" />
+      </button>
+    </div>
+  </div>
+</app-dialog>
+
+<app-dialog #addCardContinueDialog>
+  <div class="dialog activate-card-dialog">
+    <h3>Aktywacja karty</h3>
+    <form [formGroup]="addCardForm" class="add-card-form">
+      <fieldset>
+        <legend>
+          <fa-icon [icon]="faIdCard" />
+          Karta
+        </legend>
+        <label>
+          <span>Numer karty:</span>
+          <input type="text" formControlName="key_card" required>
+        </label>
+      </fieldset>
+      <div>
+        <button type="reset">
+          <fa-icon [icon]="faRotateLeft" />
+          Resetuj
+        </button>
+        <button type="submit" (click)="addCard(); addCardContinueDialog.hide()" [disabled]="addCardForm.invalid" class="success-button">
+          Aktywuj kartę
+          <fa-icon [icon]="faCheck" />
+        </button>
+      </div>
+    </form>
+  </div>
+</app-dialog>
+
+<app-dialog #deleteCardDialog>
+  <div class="dialog deactivate-card-dialog">
+    <h3>Czy na pewno chcesz zdeaktywować kartę?</h3>
+    <h4>Co to oznacza?</h4>
+    <p>Oznacza to, że ta osoba nie będzie mogła za pomocą karty przychodzić na stołówkę.</p>
+    <div>
+      <button (click)="deleteCardDialog.hide()" class="warning-button">
+        <fa-icon [icon]="faBan" />
+        Anuluj
+      </button>
+      <button (click)="deleteCard(); deleteCardDialog.hide()" class="success-button">
+        Tak
+        <fa-icon [icon]="faCheck" />
+      </button>
+    </div>
+  </div>
+</app-dialog>

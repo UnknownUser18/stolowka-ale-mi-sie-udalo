@@ -1,29 +1,23 @@
-@use 'assets/font/inter.css';
-@use 'assets/styles/index' as i;
-@import '@fortawesome/fontawesome-free/css/all.css';
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
-
-@mixin positional($width, $height, $b-radius: 25px) {
-  width: $width;
-  height: $height;
-  @if $b-radius != null {
-    border-radius: $b-radius;
-  }
-  margin: auto;
-}
+@use 'assets/font/inter/inter.css';
+@use 'assets/font/manrope/manrope.css';
+@use 'index' as i;
 
 * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--highlight) var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--highlight);
+  border-radius: i.$border-radius-sm;
 }
 
 ::selection {
-  background-color: var(--color-11);
-}
-
-.placeholder {
-  animation: light 1.5s i.$cubic-bezier infinite alternate;
+  background-color: var(--highlight);
+  color: var(--text);
 }
 
 input, select, option, button {
@@ -34,140 +28,98 @@ input, select, option, button {
   outline: none;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@keyframes out {
+  to {
+    margin-left: 50%;
+    opacity: 0;
+  }
+}
+
+@keyframes in {
+  from {
+    margin-left: -50%;
+    opacity: 0;
+  }
+  to {
+    margin-left: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.dialog-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  transition: i.transition(backdrop-filter);
+  backdrop-filter: none;
+
+  &.visible {
+    backdrop-filter: blur(5px);
+  }
+}
+
+.placeholder {
+  background-color: var(--highlight);
+  animation: pulse i.$duration-xl infinite alternate i.$cubic-in-out;
+}
+
+::view-transition-old(page) {
+  animation: out i.$duration-lg i.$cubic-in-out forwards;
+}
+
+::view-transition-new(page) {
+  animation: in i.$duration-lg i.$cubic-in-out forwards;
+}
+
+.change-sidebar {
+  view-transition-name: sidebar;
+}
+
 button {
   cursor: pointer;
 }
 
-abbr {
-  text-decoration: none;
-}
-
 body {
-  font-family: 'Inter', 'Roboto', sans-serif;
-  background-color: var(--color-1);
-  color: var(--color-12);
+  font-family: 'Inter', i.$font-base;
+  background-color: var(--bg);
+  height: 100vh;
+  color: var(--text);
   overflow-x: hidden;
 }
 
-app-root {
-  height: 100vh;
-  display: grid;
-  grid-template-columns: 0.2fr 1fr;
-  grid-template-rows: 0.08fr 1fr;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Manrope', i.$font-base;
+  color: var(--text);
 }
 
 ol, ul, menu {
   list-style: none;
 }
 
-app-zsti {
-  @include positional(90%, 90%, 50px);
-  grid-template-rows: auto 1fr;
-  flex-direction: column;
-  background-color: var(--color-3);
-  max-height: 80vh;
-  margin: auto;
+app-root {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-app-dane {
-  @include positional(80%, 80%);
-  background-color: var(--color-3);
-}
 
-app-kalendarz {
-  @include positional(95%, 95%, null);
-  row-gap: 25px;
-  display: grid;
-  grid-template-rows: 0.08fr 1fr;
-}
-
-app-deklaracje, app-platnosci, app-cennik, app-nieczynne {
-  @include positional(80%, 90%);
-  background-color: var(--color-3);
-  display: grid;
-  grid-template-columns: 1fr 0.5fr;
-  grid-template-rows: auto 0.1fr;
-  column-gap: 20px;
-  row-gap: 10px;
-  justify-content: space-between;
-  padding: 30px 40px;
-
-  & > button {
-    place-self: center start;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-}
-
-app-karty {
-  @include positional(50%, 50%);
-  @include i.flex-center($direction: column, $justify: space-between);
-  background-color: var(--color-3);
-  padding: 30px 40px;
-}
-
-app-raports, app-individual-raport {
-  @include positional(95%, 95%);
-  display: grid;
-  grid-template-columns: 1fr;
-  row-gap: 20px;
-  background-color: var(--color-3);
-}
-
-app-administracja-osob {
-  @include positional(100%, 100%);
-}
-
-app-login {
-
-}
-
-.notification {
-  @include i.flex-center(column, start, start);
-  transition: i.transition(right, i.$xlong), i.transition(bottom, i.$medium);
-  position: absolute;
-  bottom: 10%;
-  right: -25%;
-  width: 300px;
-  height: 100px;
-  border-left: 5px solid transparent;
-  background-color: var(--color-3);
-  border-radius: 5px;
-  padding: 10px;
-  z-index: 3;
-
-  &.done {
-    right: 0;
-  }
-
-  &.error {
-    border-color: #f38ba8;
-  }
-
-  &.warning {
-    border-color: #f9e2af;
-  }
-
-  &.info {
-    border-color: #89b4fa;
-  }
-
-  &.success {
-    border-color: #a6e3a1;
-  }
-
-  h2 {
-    @include i.font-500(var(--color-13));
-  }
-
-  p {
-    font-size: 1em;
-  }
-}
-
-@keyframes light {
-  0% {
-    background-color: var(--color-11);
-  }
-  100% {
-    background-color: var(--color-12);
+  to {
+    transform: rotate(360deg);
   }
 }

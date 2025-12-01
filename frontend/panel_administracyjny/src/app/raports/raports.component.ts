@@ -1,12 +1,10 @@
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { DataService, VariableName } from '../services/data.service';
 import { GlobalInfoService, NotificationType } from '../services/global-info.service';
 import { Subject } from 'rxjs';
-import { NavigationEnd, NavigationSkipped, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import * as xlsx from 'xlsx';
-import { wynikString } from '../users/zsti/zsti.component';
 import { VariablesService } from '../services/variables.service';
 
 @Component({
@@ -45,66 +43,67 @@ export class RaportsComponent implements OnDestroy {
   constructor(
     private variables : VariablesService,
     private datePipe : DatePipe,
-    private database : DataService,
     private infoService : GlobalInfoService,
     protected router : Router,
   ) {
-    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
-
-      this.infoService.setTitle('Raporty');
-      this.router.events.subscribe((event) => {
-        if (!(event instanceof NavigationEnd || event instanceof NavigationSkipped) || !router.url.startsWith('raporty')) return;
-        this.result = null;
-        this.condensedMode = false;
-        this.infoService.setTitle(`Raporty - ${ this.router.url.split('/')[2] ? this.router.url.split('/')[2].charAt(0).toUpperCase() + this.router.url.split('/')[2].slice(1) : 'ZSTI' }`);
-      })
-    });
+    // this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+    //
+    //   this.infoService.setTitle('Raporty');
+    //   this.router.events.subscribe((event) => {
+    //     if (!(event instanceof NavigationEnd || event instanceof NavigationSkipped) || !router.url.startsWith('raporty')) return;
+    //     this.result = null;
+    //     this.condensedMode = false;
+    //     this.infoService.setTitle(`Raporty - ${ this.router.url.split('/')[2] ? this.router.url.split('/')[2].charAt(0).toUpperCase() + this.router.url.split('/')[2].slice(1) : 'ZSTI' }`);
+    //   })
+    // });
   }
 
-  /**
-   * @method generateReport
-   * @description Generuje raport na podstawie formularza i endpointu.
-   * @param form - FormGroup zawierający dane do raportu.
-   * @param endpoint{string} - Endpoint, do którego wysyłane jest żądanie.
-   * @param paramName{VariableName} - Nazwa parametru, który będzie używany w żądaniu.
-   * @param ignore_notification{boolean} - Flaga określająca, czy ignorować powiadomienia o błędach i sukcesach.
-   * @returns {void}
-   * @memberOf RaportsComponent
-   */
-  private generateReport(form : any, endpoint : string, paramName : VariableName, ignore_notification : boolean = false) : void {
-    if (form.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę naprawić błedy w formularzu.');
-      return;
-    } else if (form.get('data_do')?.value < form.get('data_od')?.value) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Data końcowa musi być późniejsza niż data początkowa.');
-      return;
-    }
+  // /**
+  //  * @method generateReport
+  //  * @description Generuje raport na podstawie formularza i endpointu.
+  //  * @param form - FormGroup zawierający dane do raportu.
+  //  * @param endpoint{string} - Endpoint, do którego wysyłane jest żądanie.
+  //  * @param paramName{VariableName} - Nazwa parametru, który będzie używany w żądaniu.
+  //  * @param ignore_notification{boolean} - Flaga określająca, czy ignorować powiadomienia o błędach i sukcesach.
+  //  * @returns {void}
+  //  * @memberOf RaportsComponent
+  //  */
+  // TODO: Reimplement this function when backend is ready and API is defined
+  // private generateReport(form : any, endpoint : string, paramName : VariableName, ignore_notification : boolean = false) : void {
+  //   if (form.invalid) {
+  //     this.infoService.generateNotification(NotificationType.ERROR, 'Proszę naprawić błedy w formularzu.');
+  //     return;
+  //   } else if (form.get('data_do')?.value < form.get('data_od')?.value) {
+  //     this.infoService.generateNotification(NotificationType.ERROR, 'Data końcowa musi być późniejsza niż data początkowa.');
+  //     return;
+  //   }
 
-    let data_od = form.get('data_od')?.value;
-    let data_do = form.get('data_do')?.value;
-    if (data_od === '') data_od = null;
-    if (data_do === '') data_do = null;
-    this.database.request(endpoint, { data_od, data_do }, paramName).then((payload : any) => {
-      if (!payload) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania danych.');
-        return;
-      } else if (payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.WARNING, 'Brak danych do wyświetlenia.');
-      }
-      this.result = payload;
-      if (!ignore_notification && payload.length > 0) {
-        this.infoService.generateNotification(NotificationType.SUCCESS, `Raport został wygenerowany. Znaleziono ${ payload.length } ${ wynikString(payload.length) }.`);
-      }
-    });
-  }
-
-  protected generateObecnosciReport(ignore_notfication = false) : void {
-    this.generateReport(this.dataForm, 'raportsZsti.checkedCard.get', 'scanList', ignore_notfication);
-  }
-
-  protected generateKorektyReport(ignore_notfication = false) : void {
-    this.generateReport(this.dataForm, 'raportsZsti.absence.get', 'absenceDayList', ignore_notfication);
-  }
+  // let data_od = form.get('data_od')?.value;
+  // let data_do = form.get('data_do')?.value;
+  // if (data_od === '') data_od = null;
+  // if (data_do === '') data_do = null;
+  // TODO: Uncomment when backend is ready and API is implemented
+  // this.database.request(endpoint, { data_od, data_do }, paramName).then((payload : any) => {
+  //   if (!payload) {
+  //     this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania danych.');
+  //     return;
+  //   } else if (payload.length === 0) {
+  //     this.infoService.generateNotification(NotificationType.WARNING, 'Brak danych do wyświetlenia.');
+  //   }
+  //   this.result = payload;
+  //   if (!ignore_notification && payload.length > 0) {
+  //     this.infoService.generateNotification(NotificationType.SUCCESS, `Raport został wygenerowany. Znaleziono ${ payload.length } ${ wynikString(payload.length) }.`);
+  //   }
+  // });
+  // }
+  //
+  // protected generateObecnosciReport(ignore_notfication = false) : void {
+  //   this.generateReport(this.dataForm, 'raportsZsti.checkedCard.get', 'scanList', ignore_notfication);
+  // }
+  //
+  // protected generateKorektyReport(ignore_notfication = false) : void {
+  //   this.generateReport(this.dataForm, 'raportsZsti.absence.get', 'absenceDayList', ignore_notfication);
+  // }
 
   protected generatePlatnosciReport(ignore_notification = false) : void {
     if (this.platnosciForm.invalid) {
@@ -125,61 +124,62 @@ export class RaportsComponent implements OnDestroy {
     if (data_od === '') data_od = null;
     if (data_do === '') data_do = null;
     if (miesiac === '') miesiac = null;
-    this.database.request('raportsZsti.platnosci.get', { data_od, data_do, miesiac }, 'paymentList').then((payload : any) => {
-      if (!payload) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania danych.');
-        return;
-      } else if (payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.WARNING, 'Brak danych do wyświetlenia.');
-      }
-
-      this.result = payload;
-      if (!ignore_notification && payload.length > 0) {
-        this.infoService.generateNotification(NotificationType.SUCCESS, `Raport został wygenerowany. Znaleziono ${ payload.length } ${ wynikString(payload.length) }.`);
-      }
-
-      if (!this.result || this.result.length === 0) return;
-      this.result.forEach((r : any) => {
-        r.czas = r.rok + '-' + r.miesiac.padStart(2, '0');
-      });
-    });
+    // TODO: Uncomment when backend is ready and API is implemented
+    // this.database.request('raportsZsti.platnosci.get', { data_od, data_do, miesiac }, 'paymentList').then((payload : any) => {
+    //   if (!payload) {
+    //     this.infoService.generateNotification(NotificationType.ERROR, 'Błąd podczas pobierania danych.');
+    //     return;
+    //   } else if (payload.length === 0) {
+    //     this.infoService.generateNotification(NotificationType.WARNING, 'Brak danych do wyświetlenia.');
+    //   }
+    //
+    //   this.result = payload;
+    //   if (!ignore_notification && payload.length > 0) {
+    //     this.infoService.generateNotification(NotificationType.SUCCESS, `Raport został wygenerowany. Znaleziono ${ payload.length } ${ wynikString(payload.length) }.`);
+    //   }
+    //
+    //   if (!this.result || this.result.length === 0) return;
+    //   this.result.forEach((r : any) => {
+    //     r.czas = r.rok + '-' + r.miesiac.padStart(2, '0');
+    //   });
+    // });
   }
 
-  protected toggleCondensedMode() : void {
-    if (!this.condensedMode) {
-      switch (this.router.url.split('/')[2]) {
-        case 'korekty':
-          this.generateKorektyReport(true)
-          break;
-        case 'obecnosci':
-          this.generateObecnosciReport(true);
-          break;
-      }
-    }
-    switch (this.router.url.split('/')[2]) {
-      case 'korekty':
-        this.result = Object.values(
-          this.result.reduce((acc : any, { nazwisko, imie, dzien_wypisania } : any) => {
-            const key = `${ nazwisko }|${ imie }`;
-            acc[key] = acc[key] || { nazwisko, imie, dni : [] };
-            acc[key].dni.push(dzien_wypisania);
-            return acc;
-          }, {})
-        );
-        break;
-      case 'obecnosci':
-        this.result = Object.values(
-          this.result.reduce((acc : any, { nazwisko, imie, czas } : any) => {
-            const key = `${ nazwisko }|${ imie }`;
-            acc[key] = acc[key] || { nazwisko, imie, dni : [] };
-            const formattedDate = this.datePipe.transform(czas, 'dd-MM-yyyy HH:mm:ss');
-            acc[key].dni.push(formattedDate);
-            return acc;
-          }, {})
-        );
-        break;
-    }
-  }
+  // protected toggleCondensedMode() : void {
+  //   if (!this.condensedMode) {
+  //     switch (this.router.url.split('/')[2]) {
+  //       case 'korekty':
+  //         this.generateKorektyReport(true)
+  //         break;
+  //       case 'obecnosci':
+  //         this.generateObecnosciReport(true);
+  //         break;
+  //     }
+  //   }
+  //   switch (this.router.url.split('/')[2]) {
+  //     case 'korekty':
+  //       this.result = Object.values(
+  //         this.result.reduce((acc : any, { nazwisko, imie, dzien_wypisania } : any) => {
+  //           const key = `${ nazwisko }|${ imie }`;
+  //           acc[key] = acc[key] || { nazwisko, imie, dni : [] };
+  //           acc[key].dni.push(dzien_wypisania);
+  //           return acc;
+  //         }, {})
+  //       );
+  //       break;
+  //     case 'obecnosci':
+  //       this.result = Object.values(
+  //         this.result.reduce((acc : any, { nazwisko, imie, czas } : any) => {
+  //           const key = `${ nazwisko }|${ imie }`;
+  //           acc[key] = acc[key] || { nazwisko, imie, dni : [] };
+  //           const formattedDate = this.datePipe.transform(czas, 'dd-MM-yyyy HH:mm:ss');
+  //           acc[key].dni.push(formattedDate);
+  //           return acc;
+  //         }, {})
+  //       );
+  //       break;
+  //   }
+  // }
 
   protected formatDni(dni : any[], format : string) : string {
     return dni.map(day => this.datePipe.transform(day, format)).join('; ');

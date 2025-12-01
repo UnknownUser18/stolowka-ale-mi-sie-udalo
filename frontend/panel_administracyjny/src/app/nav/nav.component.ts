@@ -1,31 +1,37 @@
-import { ChangeDetectorRef, Component, AfterViewInit } from '@angular/core';
-import { GlobalInfoService } from '../services/global-info.service';
-import { Router, RouterLink } from '@angular/router';
-import { AsyncPipe } from '@angular/common';
+import { Component, signal } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter } from 'rxjs';
+import { PersonsService } from '@database/persons.service';
 
 @Component({
   selector : 'app-nav',
   imports : [
     RouterLink,
-    AsyncPipe
+    RouterLinkActive
   ],
   templateUrl : './nav.component.html',
   styleUrl : './nav.component.scss',
+  host : {
+    '[class.person-selected]' : '!!personS.personZ()'
+  }
 })
-export class NavComponent implements AfterViewInit {
+export class NavComponent {
+  protected readonly title = signal<string | null>(null);
 
   constructor(
-    private cdr : ChangeDetectorRef,
-    protected infoService : GlobalInfoService,
-    protected router : Router
-  ) {}
-
-  public ngAfterViewInit(): void {
-    this.infoService.title.subscribe(() => {
-      this.cdr.detectChanges();
-    });
-    this.infoService.activeTab.subscribe(() => {
-      this.cdr.detectChanges();
+    private router : Router,
+    private activatedRoute : ActivatedRoute,
+    protected personS : PersonsService
+  ) {
+    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(() => {
+      let route = this.activatedRoute;
+      while(route.firstChild) {
+        route = route.firstChild;
+      }
+      const title = route.snapshot.data['title'] as string | null;
+      if (title)
+        this.title.set(title);
     });
   }
+
 }

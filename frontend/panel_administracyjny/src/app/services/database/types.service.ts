@@ -5,7 +5,6 @@ export enum StatusCodes {
   'OK' = 200,
   'Inserted' = 201,
   'Updated' = 202,
-  'Removed' = 203,
   'Internal Server Error' = 500,
   'Database Connection Error' = 700,
   'Duplicate Entry' = 701,
@@ -26,6 +25,7 @@ export class Packet {
   statusMessage : string;
   timestamp : Date;
   data? : any[] | null;
+
   constructor(status : StatusCodes, statusMessage : string, timestamp : string, ...data : any[]) {
     this.status = status;
     this.statusMessage = statusMessage;
@@ -36,6 +36,7 @@ export class Packet {
 
 export class ErrorPacket extends Packet {
   override data : null;
+
   constructor(status : StatusCodes, statusMessage : string, timestamp : string) {
     super(status, statusMessage, timestamp);
     this.data = null;
@@ -47,5 +48,13 @@ export class ErrorPacket extends Packet {
 })
 export abstract class TypesService {
   protected http = inject(HttpClient);
-  protected readonly api = '/api/';
+  protected readonly api = 'http://localhost:9000/api/';
+
+  protected isArray(res : Packet) : boolean {
+    return [StatusCodes.OK, StatusCodes.Updated, StatusCodes.Inserted].includes(res.status) && Array.isArray(res.data);
+  }
+
+  protected convertToDBDate(date : Date) : string {
+    return date.toLocaleDateString('pl-PL', { year : 'numeric', month : '2-digit', day : '2-digit' }).split('.').reverse().join('-');
+  }
 }

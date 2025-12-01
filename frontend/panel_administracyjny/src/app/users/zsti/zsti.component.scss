@@ -1,152 +1,276 @@
-@use '../../../assets/styles/index' as i;
+@use 'index' as i;
 
-header {
-  @include i.flex-center($justify: space-between, $align: center);
-  padding: 15px 5%;
-  background-color: var(--color-4);
-  border-radius: 30px 30px 0 0;
-
-  span {
-    @include i.font-500(var(--color-13));
-  }
-  div {
-    @include i.flex-center;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    abbr {
-      @include i.flex-center;
-      cursor: pointer;
-      width: 20px;
-      height: 20px;
-      &:hover i {
-        color: var(--color-13);
-      }
-      i {
-        transition: i.transition(color);
-        font-size: 30px;
-      }
-    }
-  }
+:host {
+  margin: auto;
+  width: 100%;
+  height: 100%;
 }
 
-input {
-  transition: i.transition(color);
-  background-color: transparent;
-  color: var(--color-12);
+@include i.table;
 
-  &:placeholder-shown {
-    color: var(--color-11);
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    background-color: var(--color-1) !important;
-  }
-}
-
-header label {
-  transition: i.transition(outline-color);
+section {
+  width: 100%;
+  padding: i.$padding-xs i.$padding-md;
   display: flex;
+  gap: i.$padding-md;
   align-items: center;
-  width: fit-content;
-  padding: 10px 15px;
-  background-color: var(--color-2);
-  border-radius: 30px;
-  outline: 2px solid transparent;
+  border: i.$base-border var(--border-muted);
+  background-color: var(--bg);
 
-  input {
-    font-size: 1.3em;
+  p {
+    margin: 0 auto;
+    font-family: 'Manrope', i.$font-base;
+    font-size: i.$font-size-lg;
   }
 
-  i {
-    @include i.clickable-hover($h-color: var(--color-13));
-    font-size: 1.5em;
-    margin: 0 10px;
-  }
+  button {
+    color: var(--text-muted);
+    transition: i.transition(color, i.$duration-sm);
 
-  &:focus-within {
-    outline-color: var(--color-10);
+    &:hover, &:focus {
+      color: var(--text);
+    }
   }
 }
 
-table {
-  @include i.table;
-  &:has(tbody > :first-child:not(.placeholder)) {
-    border-radius: 0 0 50px 50px;
-  }
+.spin {
+  animation: spin 1s linear infinite;
+}
 
-  position: relative;
-  max-height: 90%;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: 0.3fr 1fr 0.7fr 0.5fr;
-  th {
-    @include i.font-500(var(--color-13));
-    position: sticky;
-    top: 0;
-    padding: 10px 5px;
-    background-color: var(--color-2);
-  }
-  tr {
 
-    &:nth-child(even) td {
-      background-color: var(--color-5);
-    }
+.filter-button, .sort-button, .refresh-button {
+  @include i.button-default;
+}
 
-    &:last-child td {
-      border-bottom: 0;
-    }
-  }
+.add-button {
+  @include i.button-layout;
+  border: i.$base-border var(--border-muted);
+  background-color: var(--primary);
+  color: var(--bg) !important;
 
-  td {
-    @include i.font($size: 1.5em, $color: var(--color-13));
-    border-bottom: 2px solid var(--color-10);
-    padding: 15px 0;
+  &:hover, &:focus {
+    background-color: var(--secondary);
+    color: var(--text);
+    border-color: var(--border);
   }
 }
 
 button {
-  @include i.button(10px, $bg-color: var(--color-6), $h-bg-color: var(--color-9));
-  padding: 10px 50px;
+  font-size: inherit;
 }
 
-.placeholder {
-  &:last-child td {
-    &:first-child {
-      border-radius: 0 0 0 50px;
-    }
+search {
+  padding: i.$padding-2xs i.$padding-xs;
+  display: flex;
+  gap: i.$padding-sm;
+  align-items: center;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+  transition: i.transition(border-color, i.$duration-sm);
 
-    &:last-child {
-      border-radius: 0 0 50px 0;
-    }
+  &:focus-within {
+    border-color: var(--border);
   }
 
-  td {
-    padding: 30px 0;
-    animation: light 1.5s i.$cubic-bezier infinite alternate;
+  input {
+    font-size: i.$font-size-sm;
+    color: var(--text-muted);
+    transition: i.transition(color, i.$duration-sm);
+
+    &:focus {
+      color: var(--text);
+      outline: none;
+    }
   }
 }
 
-section {
-  @include i.window;
-  @include i.fieldset;
-  h3 {
-    @include i.font(2em, 500, var(--color-13));
-    text-align: center;
-    margin-bottom: 20px;
+td {
+  button:hover, button:focus {
+    text-decoration: underline;
+    outline: none;
   }
 
-  form {
+  span {
+    padding: i.$padding-3xs i.$padding-2xs;
+    display: inline-flex;
+    gap: i.$padding-2xs;
+    align-items: center;
+    border: i.$base-border;
+    border-radius: i.$border-radius-md;
+
+    &.yes {
+      background-color: color-mix(in oklch, var(--success) 20%, var(--bg) 80%);
+      color: var(--success);
+    }
+
+    &.no {
+      background-color: color-mix(in oklch, var(--danger) 20%, var(--bg) 80%);
+      color: var(--danger);
+    }
+
+    fa-icon {
+      font-size: 0.85em;
+    }
+  }
+}
+
+.placeholder-row td {
+  padding: i.$padding-md;
+  animation: pulse 2s infinite;
+}
+
+h2 {
+  text-align: center;
+}
+
+fieldset {
+  padding: i.$padding-sm i.$padding-md;
+  display: flex;
+  gap: i.$padding-md;
+  flex-direction: column;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+}
+
+select {
+  @include i.select;
+}
+
+.filter-form {
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+
+  @include i.form-buttons;
+
+  div {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    gap: i.$padding-2xs;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+
+    &:not(.one-line):focus-within span {
+      border-color: var(--border);
+    }
+
+    &.one-line {
+      display: flex;
+      gap: i.$padding-sm;
+      align-items: center;
+
+      span {
+        border-bottom: none;
+      }
+    }
   }
 
+  span {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    transition: i.transition(border-color, i.$duration-sm);
+    padding-bottom: i.$padding-3xs;
+    border-bottom: i.$base-border var(--border-muted);
+  }
+
+  label:first-of-type {
+    grid-column: 1;
+  }
+
+  label:nth-of-type(2) {
+    grid-column: 2 / span 2;
+  }
+
+  input {
+    @include i.input;
+  }
+}
+
+.sort-options {
+  div {
+    max-height: 60vh;
+    display: flex;
+    gap: i.$padding-md;
+    align-items: center;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  p {
+    margin-bottom: i.$padding-sm;
+    color: var(--text-muted);
+    text-align: center;
+    border-bottom: i.$base-border var(--border-muted);
+    padding-bottom: i.$padding-2xs;
+  }
 
   button {
-    place-self: end;
-    grid-column: 2 / 2;
-    width: fit-content;
-    margin-top: 10px;
+    padding: i.$padding-2xs i.$padding-xs;
+    border-radius: i.$border-radius-md;
+    color: var(--text-muted);
+    transition: i.transition(border-color, i.$duration-sm), i.transition(background-color, i.$duration-sm), i.transition(color, i.$duration-sm);
+
+    &:hover, &:focus {
+      background-color: color-mix(in oklch, var(--highlight) 10%, var(--bg-light) 90%);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    &.selected {
+      background-color: var(--highlight);
+      color: var(--bg);
+      border-color: var(--border);
+
+      &:hover, &:focus {
+        background-color: var(--secondary);
+        border-color: var(--border);
+      }
+    }
+  }
+}
+
+option {
+  color: var(--text-muted);
+
+  &:hover, &:focus {
+    color: var(--text);
+  }
+}
+
+.ul-bullets {
+  display: flex;
+  gap: i.$padding-2xs;
+  flex-direction: column;
+  list-style: disc inside;
+  line-height: i.$padding-lg;
+
+  &::marker, li {
+    color: var(--text-muted);
+  }
+
+  strong {
+    color: var(--text);
+  }
+}
+
+.used-sort-tooltip {
+  p {
+    color: var(--text-muted);
+  }
+
+  span {
+    color: var(--text);
+  }
+}
+
+@keyframes pulse {
+  from {
+    background-color: color-mix(in oklch, var(--border) 20%, transparent 80%);
+  }
+  50% {
+    background-color: color-mix(in oklch, var(--border) 40%, transparent 60%);
+  }
+  to {
+    background-color: color-mix(in oklch, var(--border) 20%, transparent 80%);
   }
 }

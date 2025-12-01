@@ -1,105 +1,208 @@
-<app-date-changer></app-date-changer>
-<section #section>
-  <div class="select-buttons"></div>
-  <main>
-    <div class="weekdays">
-      @for (i of ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie']; track i) {
-        <span>{{ i }}</span>
+<app-date-changer />
+<section>
+  @if (declarationZ === null) {
+    Nie udało się załadować deklaracji. Spróbuj ponownie później.
+  } @else {
+    <div class="calendar-view">
+      @for (_ of weeks; track $index; let i = $index) {
+        @let select_row_title = 'Zaznacz/odznacz cały tydzień';
+        <button class="select-button" (click)="selectRow(i)" (auxclick)="forceSelectRow(i)" (contextmenu)="$event.preventDefault()" [title]="select_row_title" [attr.aria-label]="select_row_title" [delayT]="selectTooltip" [delay]="1500">
+          <fa-icon [icon]="(weeks[i].days | isEntireRowSelected:absenceDays:declarationZ:closedDays) ? faCheck : faXmark" [size]="'lg'" />
+        </button>
       }
-    </div>
-  </main>
-  <div>
-    <button (click)="sendAbsence()">Prześlij</button>
-  </div>
-  <div class="diff">
-    <div>
-      <h3>Dodane nieobecności:</h3>
-      <table>
-        @for (day of infoService.selectedDays.added.slice(Math.max(0, infoService.selectedDays.added.length - 4)).reverse(); track day; let last = $last) {
-          <tr>
-            <td>{{ day | date : 'shortDate' }}</td>
-            @if (last) {
-              <td><i class="fa-solid fa-up-right-and-down-left-from-center" (click)="applyAnimation(AbsenceWindowStatus.DODANE)"></i></td>
-            }
-          </tr>
-        } @empty {
-          <tr class="empty">
-            <td>Brak dodanych nieobecności...</td>
-          </tr>
-        }
-      </table>
-    </div>
-    <div>
-      <h3>Usunięte nieobecności:</h3>
-      <table>
-        @for (day of infoService.selectedDays.removed.slice(Math.max(0, infoService.selectedDays.removed.length - 4)).reverse(); track day; let last = $last) {
-          <tr>
-            <td>{{ day | date : 'shortDate' }}</td>
-            @if (last) {
-              <td><i class="fa-solid fa-up-right-and-down-left-from-center" (click)="applyAnimation(AbsenceWindowStatus.USUNIETE)"></i></td>
-            }
-          </tr>
-        } @empty {
-          <tr class="empty">
-            <td>Brak usuniętych nieobecności...</td>
-          </tr>
-        }
-      </table>
-    </div>
-  </div>
-</section>
-@if (openStatus !== AbsenceWindowStatus.CLOSED) {
-  <section class="absenceWindow" #absencesMenu>
-    <div>
-      @switch (openStatus) {
-        @case (AbsenceWindowStatus.DODANE) {
-          <h2>Dodane nieobecności</h2>
-        }
-        @case (AbsenceWindowStatus.USUNIETE) {
-          <h2>Usunięte nieobecności</h2>
+      @for (i of ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie']; track i; let index = $index) {
+        @if (i === 'Sob' || i === 'Nie') {
+          <span class="day-name weekend-day">{{ i }}</span>
+        } @else {
+          <button class="day-name" [class.first]="$first" (click)="selectColumn(index)" (auxclick)="forceSelectColumn(index)" (contextmenu)="$event.preventDefault()" [delayT]="selectTooltip" [delay]="1500">{{ i }}</button>
         }
       }
-      <table>
-        <thead>
-        <tr>
-          <th>Numer</th>
-          <th>Data</th>
-          <th></th>
-        </tr>
-        </thead>
-        <tbody>
-          @if (openStatus === AbsenceWindowStatus.DODANE) {
-            @for (absence of infoService.selectedDays.added; track absence; let index = $index) {
-              <tr>
-                <td>{{ index + 1 }}</td>
-                <td>{{ absence | date : 'longDate' }}</td>
-                <td>
-                  <button (click)="removeAbsence(absence)">Usuń</button>
-                </td>
-              </tr>
-            } @empty {
-              <tr class="empty">
-                <td>Brak dodanych nieobecności...</td>
-              </tr>
-            }
-          } @else if (openStatus === AbsenceWindowStatus.USUNIETE) {
-            @for (absence of infoService.selectedDays.removed; track absence; let index = $index) {
-              <tr>
-                <td>{{ index + 1 }}</td>
-                <td>{{ absence | date : 'longDate' }}</td>
-                <td>
-                  <button (click)="removeAbsence(absence)">Usuń</button>
-                </td>
-              </tr>
-            } @empty {
-              <tr class="empty">
-                <td>Brak dodanych nieobecności...</td>
-              </tr>
+      @for (week of weeks; track $index) {
+        <div class="week">
+          @for (day of week.days; track $index) {
+            @let date = day?.getDate();
+            @if (day == null) {
+              <div class="day-static not-in-month"></div>
+            } @else if (day | isWeekend) {
+              <div class="day-static weekend" [delayT]="weekendTooltip" [delay]="1500">
+                {{ date }}
+              </div>
+            } @else if (!(day | inDeclaration:declarationZ:true)) {
+              <div class="day-static no-declaration" [delayT]="notInDeclarationTooltip" [delay]="1500">
+                {{ date }}
+              </div>
+            } @else if (day | isClosed:closedDays) {
+              <div class="day-static closed-day" [delayT]="closedDayTooltip" [delay]="1500">
+                {{ date }}
+              </div>
+            } @else {
+              <button class="day-static day" [class.selected]="day | isAbsence:absenceDays:personS.localAbsenceChanges()" (click)="toggleSelect(day)">
+                {{ date }}
+              </button>
             }
           }
-        </tbody>
-      </table>
-      <i class="fa-solid fa-xmark close" (click)="closeAbsenceWindow()"></i>
+        </div>
+      }
     </div>
-  </section>
-}
+  }
+  <div class="action-buttons">
+    <button (click)="sendAbsence()" class="send-absence">
+      @if (!isSending()) {
+        <fa-icon [icon]="faPaperPlane" />
+        Prześlij
+      } @else {
+        <fa-icon [icon]="faArrowsRotate" class="spin" />
+        Przesyłanie...
+      }
+    </button>
+    <button (click)="getData().then()" class="refresh-data">
+      <fa-icon [icon]="faArrowsRotate" [class.spin]="isRefreshing()" />
+      @if (!isRefreshing()) {
+        Odśwież dane
+      } @else {
+        Odświeżanie...
+      }
+    </button>
+  </div>
+  <div class="diff">
+    <table>
+      <thead>
+      <tr>
+        <th>Dodane nieobecności:
+          @let added_title = 'Zobacz wszystkie dodane nieobecności';
+          <button [dialog]="addedAbsenceDaysDialog" [title]="added_title" [attr.aria-label]="added_title">
+            <fa-icon [icon]="faUpRightAndDownLeftFromCenter" />
+          </button>
+        </th>
+      </tr>
+      </thead>
+      @for (day of personS.localAbsenceChanges().added.reverse().slice(0, 4); track $index) {
+        <tr>
+          <td>{{ day | date : 'shortDate' }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td>Brak dodanych nieobecności...</td>
+        </tr>
+      }
+      @if (personS.localAbsenceChanges().added.length > 4) {
+        <tr>
+          <td class="more-info">i {{ personS.localAbsenceChanges().added.length - 4 }} więcej...</td>
+        </tr>
+      }
+    </table>
+    <table>
+      <thead>
+      <tr>
+        <th>Usunięte nieobecności:
+          @let removed_title = 'Zobacz wszystkie usunięte nieobecności';
+          <button [dialog]="removedAbsenceDaysDialog" [title]="removed_title" [attr.aria-label]="removed_title">
+            <fa-icon [icon]="faUpRightAndDownLeftFromCenter" />
+          </button>
+        </th>
+      </tr>
+      </thead>
+      @for (day of personS.localAbsenceChanges().removed.reverse().slice(0, 4); track $index) {
+        <tr>
+          <td>{{ day | date : 'shortDate' }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td>Brak usuniętych nieobecności...</td>
+        </tr>
+      }
+      @if (personS.localAbsenceChanges().removed.length > 4) {
+        <tr>
+          <td class="more-info">i {{ personS.localAbsenceChanges().removed.length - 4 }} więcej...</td>
+        </tr>
+      }
+    </table>
+  </div>
+</section>
+
+<app-tooltip #selectTooltip>
+  <p>Kliknij, aby zamienić każdy dzień na zaznaczony i odznaczony.</p>
+  <p>Albo prawym przyciskiem myszy aby zaznaczyć/odznaczyć cały tydzień, w zależności od ilości zaznaczonych i niezaznaczonych w kolumnie/wierszu.</p>
+</app-tooltip>
+
+<app-tooltip #notInDeclarationTooltip>
+  <p>Nie można modyfikować tym dniem, ponieważ nie należy on do deklaracji ważnej.</p>
+</app-tooltip>
+
+<app-tooltip #closedDayTooltip>
+  <p>Nie można modyfikować tym dniem, ponieważ jest on oznaczony jako dzień zamknięty.</p>
+</app-tooltip>
+
+<app-tooltip #weekendTooltip>
+  <p>Nie można modyfikować tym dniem, ponieważ jest on weekendem.</p>
+</app-tooltip>
+
+<app-dialog #addedAbsenceDaysDialog>
+  <div class="dialog">
+    <h2>Dodane nieobecności</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Data</th>
+        <th>Usuń</th>
+      </tr>
+      </thead>
+      <div class="table-wrapper">
+        <tbody>
+          @for (day of personS.localAbsenceChanges().added.reverse(); track day; let index = $index) {
+            <tr>
+              <td>{{ index + 1 }}</td>
+              <td>{{ day | date : 'longDate' }}</td>
+              <td>
+                @let remove_title = 'Usuń tę nieobecność z listy dodanych nieobecności';
+                <button (click)="removeAbsence(day)" [title]="remove_title" [attr.aria-label]="remove_title">
+                  <fa-icon [icon]="faXmark" />
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3">Brak dodanych nieobecności...</td>
+            </tr>
+          }
+        </tbody>
+      </div>
+    </table>
+  </div>
+</app-dialog>
+
+<app-dialog #removedAbsenceDaysDialog>
+  <div class="dialog">
+    <h2>Usunięte nieobecności</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Data</th>
+        <th>Usuń</th>
+      </tr>
+      </thead>
+      <div class="table-wrapper">
+        <tbody>
+          @for (day of personS.localAbsenceChanges().removed.reverse(); track day; let index = $index) {
+            <tr>
+              <td>{{ index + 1 }}</td>
+              <td>{{ day | date : 'longDate' }}</td>
+              <td>
+                @let remove_title = 'Usuń tę nieobecność z listy usuniętych nieobecności';
+                <button (click)="removeAbsence(day)" [title]="remove_title" [attr.aria-label]="remove_title">
+                  <fa-icon [icon]="faXmark" />
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3">Brak usuniętych nieobecności...</td>
+            </tr>
+          }
+        </tbody>
+      </div>
+    </table>
+  </div>
+</app-dialog>

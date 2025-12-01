@@ -1,0 +1,17 @@
+@use 'index' as i;
+
+ul {
+  display: flex;
+  gap: i.$margin-xl;
+  flex-direction: column;
+}
+
+a {
+  width: 100%;
+  height: 100%;
+  @include i.sidebar-item-layout;
+}
+
+li {
+  @include i.sidebar-item;
+}

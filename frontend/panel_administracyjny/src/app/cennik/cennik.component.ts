@@ -1,58 +1,134 @@
-import { ChangeDetectorRef, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
-import { GlobalInfoService, NotificationType } from '../services/global-info.service';
-import { DataService, Pricing } from '../services/data.service';
+import { ChangeDetectorRef, Component, DEFAULT_CURRENCY_CODE, effect, ElementRef, NgZone, signal, ViewChild } from '@angular/core';
+import { GlobalInfoService, NotificationType } from '@services/global-info.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TransitionService } from '../services/transition.service';
-import { VariablesService } from '../services/variables.service';
+import { TransitionService } from '@services/transition.service';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { faArrowsRotate, faFileInvoiceDollar, faFilter, faPaperPlane, faPlus, faRotate, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { firstValueFrom } from 'rxjs';
+import { DeclarationsService } from '@database/declarations.service';
+import { NotificationsService } from '@services/notifications.service';
+import { PricesService, ZPricing } from "@database/prices.service";
+import { IsSelectedPricePipe } from "@pipes/is-selected-price.pipe";
+import { CalendarComponent } from "@calendar";
 
 @Component({
   selector : 'app-cennik',
-  imports : [
+  imports   : [
     ReactiveFormsModule,
     DatePipe,
     CurrencyPipe,
+    FaIconComponent,
+    IsSelectedPricePipe,
+    CalendarComponent
+  ],
+  providers : [
+    { provide : DEFAULT_CURRENCY_CODE, useValue : 'PLN' },
+    DatePipe
   ],
   templateUrl : './cennik.component.html',
   styleUrl : './cennik.component.scss'
 })
 export class CennikComponent {
-  protected pricing_zsti : Pricing[] = [];
-  private invalidDates : Date[] = [];
+  protected ZPricing : ZPricing[] | null = null;
+  protected wrongDaysInCalendar = false;
 
-  protected id : number = 0;
+  protected ZPricingWithoutCena : Omit<ZPricing, 'cena'>[] | null = null;
+
   protected showWindow : "" | "add" | "delete" = "";
 
+  protected readonly selectedPricing = signal<ZPricing | null>(null);
+  protected readonly tempSelectedPricing = signal<ZPricing | null>(null);
+
+  protected isLoading = false;
+
   protected pricingForm : FormGroup = new FormGroup({
-    cena : new FormControl(0, [Validators.required, Validators.min(0)]),
-    data_od : new FormControl(this.dateInput(new Date()), Validators.required),
-    data_do : new FormControl(this.dateInput(new Date())),
+    cena    : new FormControl('', [Validators.required, Validators.min(0)]),
+    data_od : new FormControl('', Validators.required),
+    data_do : new FormControl('', Validators.required),
   });
 
   protected addForm : FormGroup = new FormGroup({
-    cena : new FormControl(0, [Validators.required, Validators.min(0)]),
-    data_od : new FormControl(this.dateInput(new Date()), Validators.required),
-    data_do : new FormControl(this.dateInput(new Date())),
+    cena    : new FormControl('', [Validators.required, Validators.min(0)]),
+    data_od : new FormControl('', Validators.required),
+    data_do : new FormControl('', Validators.required),
   });
+
+  protected readonly xmarkClose = faXmark
+  protected readonly faArrowsRotate = faArrowsRotate;
+  protected readonly faPlus = faPlus;
+  protected readonly faFilter = faFilter;
+  protected readonly faFileInvoiceDollar = faFileInvoiceDollar;
+  protected readonly faPaperPlane = faPaperPlane;
+  protected readonly faRotate = faRotate;
+  protected readonly faTrash = faTrash;
 
   @ViewChild('filter') filter! : ElementRef;
 
   constructor(
-    private variables : VariablesService,
+    private pricesS : PricesService,
+    private datePipe : DatePipe,
     private infoService : GlobalInfoService,
-    private database : DataService,
     private transition : TransitionService,
     private cdr : ChangeDetectorRef,
-    private zone : NgZone
+    private zone : NgZone,
+    private declarationS : DeclarationsService,
+    private notificationS : NotificationsService
   ) {
-    this.infoService.setTitle('ZSTI - Cennik');
-    this.variables.waitForWebSocket(this.infoService.webSocketStatus).then(() => {
+    this.fetchPricing();
 
-      this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
-        this.pricing_zsti = payload;
+    effect(() => {
+      this.selectedPricing();
+
+      const selected = this.selectedPricing();
+      if (!selected) return;
+
+      this.pricingForm.setValue({
+        cena    : selected.cena,
+        data_od : this.datePipe.transform(selected.data_od, 'yyyy-MM-dd'),
+        data_do : this.datePipe.transform(selected.data_do, 'yyyy-MM-dd'),
       });
-    })
 
+      this.updateCalendar();
+    });
+  }
+
+  protected hasWrongDays(event : boolean) {
+    this.wrongDaysInCalendar = event;
+  }
+
+  protected updateCalendar() {
+    const { cena, data_od, data_do } = this.pricingForm.value;
+
+    if (!this.selectedPricing()) return;
+
+    if (!cena || !data_od || !data_do || data_od === '' || data_do === '') {
+    }
+
+    this.tempSelectedPricing.set({
+      ...this.selectedPricing()!,
+      cena,
+      data_od : new Date(data_od),
+      data_do : new Date(data_do),
+    });
+  }
+
+  protected fetchPricing() {
+    this.isLoading = true;
+
+    this.pricesS.getPricing.subscribe(pricing => {
+      if (!pricing) {
+        this.notificationS.createErrorNotification('Nie udało się pobrać cenników.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.')
+      } else if (pricing.length === 0) {
+        this.notificationS.createWarningNotification('Brak cenników w bazie danych.', 5);
+      } else {
+        this.notificationS.createSuccessNotification('Pobrano cenniki z bazy danych.');
+      }
+
+      this.ZPricing = pricing;
+      this.ZPricingWithoutCena = pricing?.map(({ cena, ...rest }) => rest) || null;
+      this.isLoading = false;
+    });
   }
 
   protected formatDate(date : string) : string {
@@ -64,86 +140,71 @@ export class CennikComponent {
   }
 
   protected dateInput(date : Date) : string {
+    date = new Date(date);
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
+    console.log(date, `${ year }-${ month }-${ day }`)
     return `${ year }-${ month }-${ day }`;
   }
 
-  protected selectPricing(pricing_zsti : Pricing) {
-    console.log(pricing_zsti);
-    this.pricingForm.patchValue({
-      cena : pricing_zsti.cena,
-      data_od : this.dateInput(new Date(pricing_zsti.data_od)),
-      date_do : pricing_zsti.data_do ? this.dateInput(new Date(pricing_zsti.data_do)) : null,
-    })
-    this.id = pricing_zsti.id;
-  }
-
   protected deletePricing() {
-    this.database.request('zsti.pricing.delete', { id : this.id }, 'pricingList').then(() => {
-      this.id = 0;
-      this.reloadPricing()
-    })
+    // firstValueFrom(this.declarationS.deletePricing(this.id)).then(() => {
+    //   this.id = 0;
+    //   this.closeWindow()
+    //   this.fetchPricing()
+    // });
   }
 
-  protected updatePricing() : void {
+  protected async updatePricing() {
+    if (!this.ZPricing)
+      return;
     if (this.pricingForm.invalid) {
       this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
     }
     const formValue = this.pricingForm.value;
-    const pricing : Pricing = {
-      id : this.id,
+    const pricing : any = { // TODO: Define proper type for pricing
+      // id : this.id,
       data_od : formValue.data_od!,
       cena : formValue.cena!,
       data_do : formValue.data_do,
     }
-    const original = this.pricing_zsti.find(d => d.id === pricing.id);
+    const original = this.ZPricing.find(d => d.id === pricing.id);
     const datesChanged = !!original && (
       this.dateInput(new Date(original.data_od)) !== pricing.data_od ||
       (!original.data_do || this.dateInput(new Date(original.data_do)) !== pricing.data_do)
     );
     if (!(datesChanged) && (original?.cena === pricing.cena)) {
-      this.infoService.generateNotification(NotificationType.WARNING, 'Cennik nie został zmieniony.');
+      this.notificationS.createWarningNotification('Cennik nie został zmieniony.', 2.5)
+      // this.infoService.generateNotification(NotificationType.WARNING, 'Cennik nie został zmieniony.');
       return;
     }
     if (pricing.data_do && pricing.data_od > pricing.data_do) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
+      this.notificationS.createErrorNotification('Data "od" nie może być późniejsza niż data "do".', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
       return;
     }
     console.log(pricing)
-    const method = pricing.data_do ? `zsti.pricing.update` : `zsti.pricing.updateWOdatado`;
-    this.database.request(method, pricing, 'dump').then((payload) => {
-      if (!payload || payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować cennika.');
-        return;
-      }
-
-      this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został zaktualizowany.');
-
-      this.reloadPricing();
-    });
-  }
-
-  private reloadPricing() {
-    this.database.request('zsti.pricing.get', {}, 'pricingList').then((payload : Pricing[]) => {
+    const numOfErrDates = await firstValueFrom(this.declarationS.checkPricing(pricing.id, pricing.data_od, pricing.data_do))
+    console.log(numOfErrDates)
+    if (numOfErrDates === null || numOfErrDates > 0) {
+      this.notificationS.createErrorNotification('Daty nie mogą nachodzić na te z innych cenników', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Daty nie mogą nachodzić na te z innych cenników');
+      return;
+    }
+    console.log(numOfErrDates)
+    firstValueFrom(this.declarationS.updatePricing(pricing.id, pricing.data_od, pricing.data_do, pricing.cena)).then((payload) => {
       if (!payload) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się pobrać cenników.');
-        return;
-      } else if (payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.WARNING, 'Brak deklaracji dla tej osoby.');
-        this.pricing_zsti = [];
-        this.invalidDates = [];
+        this.notificationS.createErrorNotification('Nie udało się zaktualizować cennika.')
+        // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się zaktualizować cennika.');
         return;
       }
-      this.pricing_zsti = payload;
-      this.invalidDates = [];
 
-      this.pricing_zsti.forEach((price) => {
-        if (!(price.data_od && price.data_do)) return;
-        this.invalidDates.push(new Date(price.data_od), new Date(price.data_do));
-      });
+      this.notificationS.createSuccessNotification('Cennik został zaktualizowany.')
+      // this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został zaktualizowany.');
+
+      this.fetchPricing();
     });
   }
 
@@ -161,28 +222,39 @@ export class CennikComponent {
 
   protected addPricing() : void {
     if (this.addForm.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+      this.notificationS.createErrorNotification('Proszę poprawić błędy w formularzu.', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
     }
     const formValue = this.addForm.value;
-    const pricing : Pricing = {
+    const pricing : ZPricing = {
       cena : formValue.cena!,
       data_od : formValue.data_od!,
-      data_do : formValue.data_do ?? null,
-    } as any
+      data_do : formValue.data_do!,
+    } as any;
+
     if (pricing.data_do && pricing.data_od > pricing.data_do) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
+      this.notificationS.createErrorNotification('Data "od" nie może być późniejsza niż data "do".', 3)
+      // this.infoService.generateNotification(NotificationType.ERROR, 'Data "od" nie może być późniejsza niż data "do".');
       return;
     }
-    const method = pricing.data_do ? `zsti.pricing.add` : `zsti.pricing.addWOdatado`;
-    this.database.request(method, pricing, 'dump').then((payload) => {
-      if (!payload || payload.length === 0) {
-        this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać cennika.');
+    // const method = pricing.data_do ? `zsti.pricing.add` : `zsti.pricing.addWOdatado`;
+    firstValueFrom(this.declarationS.addPricing(pricing.data_od, pricing.data_do, pricing.cena)).then(payload => {
+      this.closeWindow()
+      if (!payload) {
+        this.notificationS.createErrorNotification('Nie udało się dodać cennika.', 3)
+        // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać cennika.');
         return;
       }
 
+      this.notificationS.createSuccessNotification('Cennik został dodany.', 2)
       this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został dodany.');
-      this.reloadPricing();
-    });
+      this.fetchPricing();
+    })
   }
+
+  protected resetForm() {
+
+  }
+
 }

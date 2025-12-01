@@ -1,0 +1,21 @@
+<ng-template #projected>
+  <ng-content></ng-content>
+</ng-template>
+
+<ng-template #tooltip>
+  @if (isHoverable()) {
+    <div class="tooltip-panel"
+         (mouseover)="clearHideTimeout()"
+         (mouseleave)="hide()"
+         [class.visible]="isVisible()"
+         [class.horizontal]="horizontal()">
+      <ng-container [ngTemplateOutlet]="projected"></ng-container>
+    </div>
+  } @else {
+    <div class="tooltip-panel"
+         [class.visible]="isVisible()"
+         [class.horizontal]="horizontal()">
+      <ng-container [ngTemplateOutlet]="projected"></ng-container>
+    </div>
+  }
+</ng-template>

@@ -3,6 +3,17 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@pipes/*": ["src/app/pipes/*"],
+      "@services/*": ["src/app/services/*"],
+      "@components/*": ["src/app/components/*"],
+      "@database/*": ["src/app/services/database/*"],
+      "@tooltips/*": ["src/app/tooltip-service/*"],
+      "@switch": ["src/app/switch/switch.component"],
+      "@checkbox": ["src/app/checkbox/checkbox.component"],
+      "@calendar": ["src/app/calendar/calendar.component"]
+    },
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,

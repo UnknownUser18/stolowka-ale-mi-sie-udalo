@@ -1,15 +1,19 @@
-@if (router.url.includes('osoba')) {
+@if (personS.personZ() !== null) {
+  @let id = personS.personZ()?.id!;
   <menu>
-    <li [class]="(infoService.activeTab | async) === 'KALENDARZ' ? 'active' : ''" [routerLink]="['osoba','zsti', infoService.activeUser.value?.id, 'kalendarz']">Kalendarz</li>
-    <li [class]="(infoService.activeTab | async) === 'DANE' ? 'active' : ''" [routerLink]="['osoba','zsti', infoService.activeUser.value?.id, 'dane']">Dane</li>
-    <li [class]="(infoService.activeTab | async) === 'DEKLARACJE' ? 'active' : ''" [routerLink]="['osoba', 'zsti', infoService.activeUser.value?.id, 'deklaracje']">Deklaracje</li>
+    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'kalendarz']">Kalendarz</a></li>
+    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'dane']">Dane</a></li>
+    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'deklaracje']">Deklaracje</a></li>
   </menu>
 }
-<h2 [class]="!router.url.includes('osoba') ? 'center' : ''"> {{ infoService.title | async }} </h2>
-@if (router.url.includes('osoba')) {
+@if (title()) {
+  <h2>{{ title() }}</h2>
+}
+@if (personS.personZ() !== null) {
+  @let id = personS.personZ()?.id!;
   <menu>
-    <li [class]="(infoService.activeTab | async) === 'PLATNOSCI' ? 'active' : ''" [routerLink]="['osoba','zsti', infoService.activeUser.value?.id, 'platnosci']">Płatności</li>
-    <li [class]="(infoService.activeTab | async) === 'KARTA' ? 'active' : ''" [routerLink]="['osoba','zsti', infoService.activeUser.value?.id, 'karta']">Karta</li>
-    <li [class]="(infoService.activeTab | async) === 'RAPORT' ? 'active' : ''" [routerLink]="['osoba', 'zsti', infoService.activeUser.value?.id, 'raport']">Raport</li>
+    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'platnosci']">Płatności</a></li>
+    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'karta']">Karta</a></li>
+    <li><a routerLinkActive="active" [routerLink]="['/osoba/zsti', id, 'raport']">Raport</a></li>
   </menu>
 }
