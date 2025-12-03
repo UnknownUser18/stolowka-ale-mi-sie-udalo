@@ -1,6 +1,6 @@
 import { Component, signal, viewChild } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { PersonsService, ZPerson, TypOsoby } from '@database/persons.service';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { PersonsService, TypOsoby, ZPerson } from '@database/persons.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faArrowsRotate, faArrowUpWideShort, faCheck, faCircle, faFilter, faMagnifyingGlass, faPlus, faRotateLeft, faSchool, faUser, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { NotificationsService } from '@services/notifications.service';
@@ -8,10 +8,11 @@ import { DialogComponent } from '@tooltips/dialog/dialog.component';
 import { DialogTriggerDirective } from '@tooltips/dialog-trigger.directive';
 import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
 import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.directive';
-import { SwitchComponent, State } from '@switch';
+import { State, Switch } from '@switch';
 import { TooltipClickTriggerDirective } from '@tooltips/tooltip-click-trigger.directive';
 import { TooltipTriggerDirective } from '@tooltips/tooltip-trigger.directive';
 import { Router } from '@angular/router';
+import { Field, form } from "@angular/forms/signals";
 
 type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
 type SortOption = 'surnameAsc' | 'surnameDesc' |
@@ -32,9 +33,10 @@ type SortOption = 'surnameAsc' | 'surnameDesc' |
     DialogTriggerDirective,
     TooltipComponent,
     TooltipDelayTriggerDirective,
-    SwitchComponent,
+    Switch,
     TooltipClickTriggerDirective,
     TooltipTriggerDirective,
+    Field,
   ],
   templateUrl : './zsti.component.html',
   styleUrl : './zsti.component.scss'
@@ -70,32 +72,34 @@ export class ZstiComponent {
     ['idDesc', 'ID malejąco'],
   ]);
 
-  protected readonly faMagnifyingGlass = faMagnifyingGlass;
-  protected readonly faFilter = faFilter;
-  protected readonly faPlus = faPlus;
-  protected readonly faArrowUpWideShort = faArrowUpWideShort;
-  protected readonly faArrowsRotate = faArrowsRotate;
-  protected readonly faCircle = faCircle;
-  protected readonly faWarning = faWarning;
-  protected readonly faUser = faUser;
-  protected readonly faSchool = faSchool;
-  protected readonly faCheck = faCheck;
-  protected readonly faRotateLeft = faRotateLeft;
-  protected readonly TypOsoby = TypOsoby;
+  protected readonly faIcons = {
+    faMagnifyingGlass,
+    faFilter,
+    faPlus,
+    faArrowUpWideShort,
+    faArrowsRotate,
+    faCircle,
+    faWarning,
+    faUser,
+    faSchool,
+    faCheck,
+    faRotateLeft,
+  }
 
   protected search = '';
   protected shownZPersons : ZPerson[] | null | undefined;
-
-  protected filterForm : FormGroup = new FormGroup({
-    imie : new FormControl(''),
-    imie_filter : new FormControl<FilteringOption>('contains'),
-    nazwisko : new FormControl(''),
-    nazwisko_filter : new FormControl<FilteringOption>('contains'),
-    klasa : new FormControl(''),
-    uczeszcza : new FormControl<State>('all'),
-    miasto : new FormControl<State>('all'),
-    typ_osoby : new FormControl<TypOsoby | 'all'>('all')
+  protected readonly TypOsoby = TypOsoby;
+  private filterModel = signal({
+    imie            : '',
+    imie_filter     : 'contains' as FilteringOption,
+    nazwisko        : '',
+    nazwisko_filter : 'contains' as FilteringOption,
+    klasa           : '',
+    uczeszcza       : 'all' as State,
+    miasto          : 'all' as State,
+    typ_osoby       : 'all' as string,
   });
+  protected filterForm = form(this.filterModel);
 
 
   constructor(
@@ -175,6 +179,7 @@ export class ZstiComponent {
     } else {
       imie = nazwisko = search;
     }
+
     this.shownZPersons = this.ZPersons.filter(person => {
       const { imie : imieP, nazwisko : nazwiskoP } = person;
       return (imieP.toLowerCase().includes(imie.toLowerCase()) || nazwiskoP.toLowerCase().includes(nazwisko.toLowerCase()));
@@ -184,7 +189,7 @@ export class ZstiComponent {
   protected applyFilters() {
     if (!this.ZPersons) return;
 
-    const { imie, imie_filter, nazwisko, nazwisko_filter, klasa, uczeszcza, miasto, typ_osoby } = this.filterForm.value;
+    const { imie, imie_filter, nazwisko, nazwisko_filter, klasa, uczeszcza, miasto, typ_osoby } = this.filterForm().value();
 
     if (imie.trim() === '' && nazwisko.trim() === '' && klasa.trim() === '' && uczeszcza === 'all' && miasto === 'all' && typ_osoby === 'all') {
       this.shownZPersons = this.ZPersons;
@@ -215,7 +220,7 @@ export class ZstiComponent {
         matches = matches && ((miasto === 'on') ? person.miasto : !person.miasto)!;
 
       if (typ_osoby !== 'all')
-        matches = matches && person.typ_osoby_id === typ_osoby;
+        matches = matches && person.typ_osoby_id === (Number.isNaN(Number(typ_osoby)) ? typ_osoby : Number(typ_osoby));
 
       return matches ? person : null;
     });
@@ -282,4 +287,5 @@ export class ZstiComponent {
     this.personS.selectZPerson(person);
     this.router.navigate(['/osoba/zsti', person.id]).then();
   }
+
 }

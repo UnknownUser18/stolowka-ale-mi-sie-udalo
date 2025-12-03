@@ -1,10 +1,10 @@
 import { Component, effect, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PersonsService, TypOsoby, ZPerson } from '@database/persons.service';
-import { faUser, faUserShield, faPaperPlane, faArrowsRotate, faRotateLeft, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { faArrowsRotate, faCircleInfo, faPaperPlane, faRotateLeft, faUser, faUserShield } from '@fortawesome/free-solid-svg-icons';
 import { GuardiansService, ZGuardian } from '@database/guardians.service';
 import { NotificationsService } from '@services/notifications.service';
-import { SwitchComponent } from '@switch';
+import { Switch } from '@switch';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { TooltipComponent } from '@tooltips/tooltip/tooltip.component';
 import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.directive';
@@ -14,7 +14,7 @@ import { TooltipDelayTriggerDirective } from '@tooltips/tooltip-delay-trigger.di
   imports : [
     FormsModule,
     ReactiveFormsModule,
-    SwitchComponent,
+    Switch,
     FaIconComponent,
     TooltipComponent,
     TooltipDelayTriggerDirective
