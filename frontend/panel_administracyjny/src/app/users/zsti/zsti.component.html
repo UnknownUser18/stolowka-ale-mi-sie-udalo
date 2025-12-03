@@ -108,11 +108,11 @@
       <div>
         <span>Imię:</span>
         <label>
-          <select [delayT]="filterTooltip" [delay]="1000" [field]="filterForm.imie_filter" aria-label="Filtr imienia">
-            @for (option of filteringOptions; track option[0]) {
-              <option [value]="option[0]">{{ option[1] }}</option>
-            }
-          </select>
+          <!--          <select [delayT]="filterTooltip" [delay]="1000" [field]="filterForm.imie_filter" aria-label="Filtr imienia">-->
+          <!--            @for (option of filteringOptions; track option[0]) {-->
+          <!--              <option [value]="option[0]">{{ option[1] }}</option>-->
+          <!--            }-->
+          <!--          </select>-->
         </label>
         <label>
           <input [field]="filterForm.imie" aria-label="Imię" placeholder="Imię..." type="text" />
@@ -121,11 +121,12 @@
       <div>
         <span>Nazwisko:</span>
         <label>
-          <select [delayT]="filterTooltip" [delay]="1000" [field]="filterForm.nazwisko_filter" aria-label="Filtr nazwiska">
-            @for (option of filteringOptions; track option[0]) {
-              <option [value]="option[0]">{{ option[1] }}</option>
-            }
-          </select>
+          <dropdown [delayT]="filterTooltip" [delay]="2500" [field]="filterForm.nazwisko_filter" [values]="filteringOptions" aria-label="Filtr nazwiska" />
+          <!--          <select [delayT]="filterTooltip" [delay]="1000" [field]="filterForm.nazwisko_filter" aria-label="Filtr nazwiska">-->
+          <!--            @for (option of filteringOptions; track option[0]) {-->
+          <!--              <option [value]="option[0]">{{ option[1] }}</option>-->
+          <!--            }-->
+          <!--          </select>-->
         </label>
         <label>
           <input [field]="filterForm.nazwisko" aria-label="Nazwisko" placeholder="Nazwisko..." type="text" />

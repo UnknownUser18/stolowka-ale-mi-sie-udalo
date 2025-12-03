@@ -13,6 +13,7 @@ import { TooltipClickTriggerDirective } from '@tooltips/tooltip-click-trigger.di
 import { TooltipTriggerDirective } from '@tooltips/tooltip-trigger.directive';
 import { Router } from '@angular/router';
 import { Field, form } from "@angular/forms/signals";
+import { Dropdown } from "../../dropdown/dropdown";
 
 type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
 type SortOption = 'surnameAsc' | 'surnameDesc' |
@@ -37,12 +38,14 @@ type SortOption = 'surnameAsc' | 'surnameDesc' |
     TooltipClickTriggerDirective,
     TooltipTriggerDirective,
     Field,
+    Dropdown,
   ],
   templateUrl : './zsti.component.html',
   styleUrl : './zsti.component.scss'
 })
 export class ZstiComponent {
   private ZPersons : ZPerson[] | null = [];
+
 
   protected readonly dialog = viewChild.required<DialogComponent>('filterDialog');
   protected readonly isRefreshing = signal(false);
@@ -55,6 +58,7 @@ export class ZstiComponent {
     ['contains', 'Zawiera'],
     ['excludes', 'Nie zawiera'],
   ]);
+
   protected readonly sortOptions : Map<SortOption, string> = new Map([
     ['nameAsc', 'Imię rosnąco'],
     ['nameDesc', 'Imię malejąco'],
