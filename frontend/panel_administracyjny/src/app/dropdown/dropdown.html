@@ -1,0 +1,15 @@
+<button (click)="toggle()" [attr.aria-expanded]="isOpen()" class="dropdown-toggle">
+  <span>{{ displayValue() }}</span>
+  <fa-icon [class.open]="isOpen()" [icon]="faChevronDown" />
+</button>
+@if (isOpen()) {
+  <div animate.enter="fadeIn" animate.leave="fadeOut" class="dropdown-menu">
+    @for (option of Array.from(values().entries()); track option[0]) {
+      @if (option[0] === value()) {
+        <button (click)="select(option[0])" class="selected">{{ option[1] }}</button>
+      } @else {
+        <button (click)="select(option[0])">{{ option[1] }}</button>
+      }
+    }
+  </div>
+}

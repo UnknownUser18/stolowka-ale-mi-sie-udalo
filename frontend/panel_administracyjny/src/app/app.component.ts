@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { NavigationCancel, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { CNotification, NotificationsService } from '@services/notifications.service';
 import { NotificationComponent } from './notification/notification.component';
@@ -15,7 +15,7 @@ import { filter } from "rxjs";
   styleUrl : './app.component.scss'
 })
 export class AppComponent {
-  protected notifications : CNotification[] = [];
+  protected readonly notifications = signal<CNotification[]>([]);
   protected notificationsQueueLength = 0;
 
   protected readonly faEllipsis = faEllipsis;
@@ -35,7 +35,7 @@ export class AppComponent {
     });
 
     this.notificationsS.getVisibleNotifications.subscribe(notifications => {
-      this.notifications = notifications;
+      this.notifications.set(notifications);
     });
 
     this.notificationsS.getQueueNotifications.subscribe(notifications => {

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Switch } from '@switch';
+import { Dropdown } from './dropdown';
 
-describe('SwitchComponent', () => {
-  let component : Switch;
-  let fixture : ComponentFixture<Switch>;
+describe('DropdownComponent', () => {
+  let component : Dropdown;
+  let fixture : ComponentFixture<Dropdown>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports : [Switch]
+      imports : [Dropdown]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Switch);
+    fixture = TestBed.createComponent(Dropdown);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

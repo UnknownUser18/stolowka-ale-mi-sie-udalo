@@ -53,7 +53,7 @@ export class SidebarComponent {
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
-      map((event => (event as NavigationEnd).urlAfterRedirects.split('/').filter(Boolean))),
+      map((event => event.urlAfterRedirects.split('/').filter(Boolean))),
     ).subscribe((urlSegments) => {
       let route = this.activatedRoute;
       let sidebarData : SidebarData = '';
@@ -78,8 +78,6 @@ export class SidebarComponent {
       if (!isNaN(parseInt(previousPath[previousPath.length - 1]))) { // if last segment is a number (usually an ID from user)
         previousPath = '/osoby';
       }
-
-      console.log(previousPath, previousPath[previousPath.length - 1]);
 
       this.previousUrl.set(previousPath);
       this.isNotInRoot.set(true);

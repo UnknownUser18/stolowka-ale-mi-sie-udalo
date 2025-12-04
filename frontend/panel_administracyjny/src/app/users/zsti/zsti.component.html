@@ -4,21 +4,21 @@
     <input type="search" name="searchSimple" [placeholder]="searchInput_title" [(ngModel)]="search" [title]="searchInput_title" [attr.aria-label]="searchInput_title" (keydown.enter)="filterZPersons()" />
     <button (click)="filterZPersons()" [disabled]="shownZPersons === null || shownZPersons === undefined || shownZPersons.length === 0">
       @let search_title = 'Wyszukaj osobę';
-      <fa-icon [icon]="faMagnifyingGlass" [title]="search_title" [attr.aria-label]="search_title" />
+      <fa-icon [attr.aria-label]="search_title" [icon]="faIcons.faMagnifyingGlass" [title]="search_title" />
     </button>
   </search>
 
   <button class="filter-button" [dialog]="filterDialog">
     Filtruj
     @let filter_title = 'Otwórz menu filtrów';
-    <fa-icon [icon]="faFilter" [title]="filter_title" [attr.aria-label]="filter_title" />
+    <fa-icon [attr.aria-label]="filter_title" [icon]="faIcons.faFilter" [title]="filter_title" />
   </button>
 
   @if (shownZPersons === undefined) {
     <p>Ładowanie osób...</p>
   } @else if (shownZPersons === null) {
     <p>
-      <fa-icon [icon]="faWarning" />
+      <fa-icon [icon]="faIcons.faWarning" />
       Wystąpił błąd podczas ładowania.
     </p>
   } @else {
@@ -28,19 +28,19 @@
   <button class="sort-button" [tooltip]="usedSortTooltip" [clickT]="sortTooltip" [underCursor]="true" [disabled]="shownZPersons === null || shownZPersons === undefined || shownZPersons.length === 0">
     Sortuj
     @let sort_title = 'Sortuj osoby';
-    <fa-icon [icon]="faArrowUpWideShort" [title]="sort_title" [attr.aria-label]="sort_title" />
+    <fa-icon [attr.aria-label]="sort_title" [icon]="faIcons.faArrowUpWideShort" [title]="sort_title" />
   </button>
 
   <button class="refresh-button" (click)="requestPersons()" [disabled]="isRefreshing()">
     Odśwież
     @let refresh_title = 'Odśwież listę osób';
-    <fa-icon [icon]="faArrowsRotate" [title]="refresh_title" [attr.aria-label]="refresh_title" [class.spin]="isRefreshing()" />
+    <fa-icon [attr.aria-label]="refresh_title" [class.spin]="isRefreshing()" [icon]="faIcons.faArrowsRotate" [title]="refresh_title" />
   </button>
 
   <button class="add-button">
     Dodaj osobę
     @let add_title = 'Dodaj nową osobę do stołówki';
-    <fa-icon [icon]="faPlus" [title]="add_title" [attr.aria-label]="add_title" />
+    <fa-icon [attr.aria-label]="add_title" [icon]="faIcons.faPlus" [title]="add_title" />
     <!-- This will redirect to another route (DO NOT MAKE A VIEW ON THIS COMPONENT)   -->
   </button>
 </section>
@@ -68,13 +68,13 @@
             <td>{{ isTeacher(person) ? 'Nauczyciel' : person.klasa }}</td>
             <td>
               <span [class]="{ 'yes': person.uczeszcza, 'no': !person.uczeszcza }">
-              <fa-icon [icon]="faCircle" [size]="'2xs'" />
+              <fa-icon [icon]="faIcons.faCircle" [size]="'2xs'" />
                 {{ person.uczeszcza ? 'Tak' : 'Nie' }}
               </span>
             </td>
             <td>
               <span [class]="{ 'yes': person.miasto, 'no': !person.miasto }">
-              <fa-icon [icon]="faCircle" [size]="'2xs'" />
+              <fa-icon [icon]="faIcons.faCircle" [size]="'2xs'" />
                 {{ person.miasto ? 'Tak' : 'Nie' }}
               </span>
             </td>
@@ -99,61 +99,62 @@
 
 <app-dialog #filterDialog [label]="'Filtry'">
   <h2>Filtry</h2>
-  <form [formGroup]="filterForm" class="filter-form">
+  <form class="filter-form">
     <fieldset>
       <legend>
-        <fa-icon [icon]="faUser" />
+        <fa-icon [icon]="faIcons.faUser" />
         Dane osobowe
       </legend>
       <div>
         <span>Imię:</span>
         <label>
-          <select formControlName="imie_filter" aria-label="Filtr imienia" [delayT]="filterTooltip" [delay]="1000">
-            @for (option of filteringOptions; track option[0]) {
-              <option [value]="option[0]">{{ option[1] }}</option>
-            }
-          </select>
+          <!--          <select [delayT]="filterTooltip" [delay]="1000" [field]="filterForm.imie_filter" aria-label="Filtr imienia">-->
+          <!--            @for (option of filteringOptions; track option[0]) {-->
+          <!--              <option [value]="option[0]">{{ option[1] }}</option>-->
+          <!--            }-->
+          <!--          </select>-->
         </label>
         <label>
-          <input type="text" formControlName="imie" aria-label="Imię" placeholder="Imię..." />
+          <input [field]="filterForm.imie" aria-label="Imię" placeholder="Imię..." type="text" />
         </label>
       </div>
       <div>
         <span>Nazwisko:</span>
         <label>
-          <select formControlName="nazwisko_filter" aria-label="Filtr nazwiska" [delayT]="filterTooltip" [delay]="1000">
-            @for (option of filteringOptions; track option[0]) {
-              <option [value]="option[0]">{{ option[1] }}</option>
-            }
-          </select>
+          <dropdown [delayT]="filterTooltip" [delay]="2500" [field]="filterForm.nazwisko_filter" [values]="filteringOptions" aria-label="Filtr nazwiska" />
+          <!--          <select [delayT]="filterTooltip" [delay]="1000" [field]="filterForm.nazwisko_filter" aria-label="Filtr nazwiska">-->
+          <!--            @for (option of filteringOptions; track option[0]) {-->
+          <!--              <option [value]="option[0]">{{ option[1] }}</option>-->
+          <!--            }-->
+          <!--          </select>-->
         </label>
         <label>
-          <input type="text" formControlName="nazwisko" aria-label="Nazwisko" placeholder="Nazwisko..." />
+          <input [field]="filterForm.nazwisko" aria-label="Nazwisko" placeholder="Nazwisko..." type="text" />
         </label>
       </div>
       <div>
         <span>Klasa:</span>
         <label>
-          <input type="text" formControlName="klasa" aria-label="Klasa" placeholder="Klasa..." [delayT]="klasaTooltip" />
+          <input [delayT]="klasaTooltip" [field]="filterForm.klasa" aria-label="Klasa" placeholder="Klasa..." type="text" />
         </label>
       </div>
     </fieldset>
     <fieldset>
       <legend>
-        <fa-icon [icon]="faSchool" />
+        <fa-icon [icon]="faIcons.faSchool" />
         Dane szkolne
       </legend>
       <div class="one-line">
         <span>Może uczęszczać:</span>
-        <app-switch formControlName="uczeszcza" [label]="'Może uczęszczać'" [type]="'3-way'" />
+        <switch [field]="filterForm.uczeszcza" [label]="'Może uczęszczać'" [type]="'3-way'" />
       </div>
       <div class="one-line">
         <span>Opłacany przez miasto:</span>
-        <app-switch formControlName="miasto" [label]="'Opłacany przez miasto'" [type]="'3-way'" />
+        <switch [field]="filterForm.miasto" [label]="'Opłacany przez miasto'" [type]="'3-way'" />
       </div>
       <div class="one-line">
         <span>Typ osoby:</span>
-        <select formControlName="typ_osoby">
+        <select [field]="filterForm.typ_osoby">
           <option [value]="TypOsoby.UCZEN">Uczeń</option>
           <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
           <option [value]="'all'">Wszyscy</option>
@@ -161,12 +162,12 @@
       </div>
     </fieldset>
     <button type="reset">
-      <fa-icon [icon]="faRotateLeft" />
+      <fa-icon [icon]="faIcons.faRotateLeft" />
       Resetuj
     </button>
     <button type="submit" (click)="applyFilters()">
       Zastosuj
-      <fa-icon [icon]="faCheck" />
+      <fa-icon [icon]="faIcons.faCheck" />
     </button>
   </form>
 </app-dialog>

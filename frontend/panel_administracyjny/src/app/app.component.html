@@ -1,7 +1,7 @@
 <router-outlet />
-@if (notifications.length > 0) {
+@if (notifications().length > 0) {
   <div class="notifications">
-    @for (notification of notifications; track notification.id) {
+    @for (notification of notifications(); track notification.id) {
       <app-notification [notification]="notification" (dismiss)="dismissNotification(notification.id)" />
     }
     @if (notificationsQueueLength > 0) {

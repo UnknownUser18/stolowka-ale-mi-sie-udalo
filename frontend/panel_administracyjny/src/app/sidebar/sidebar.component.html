@@ -1,9 +1,9 @@
 @let logo_title = 'Powrót do strony głównej';
 @let return_title = 'Powrót do poprzedniej strony';
 <a routerLink="" [title]="logo_title" [attr.aria-label]="logo_title" class="logo">
-  @defer (on immediate; prefetch on idle) {
+  @defer (prefetch on idle) {
     @if (!imageError()) {
-      <img ngSrc="assets/hella_chopped.jpg" alt="Logo" height="50" width="50" (error)="imageError.set(true)" priority />
+      <img (error)="imageError.set(true)" alt="Logo" height="50" ngSrc="assets/hella_chopped.jpg" priority width="50">
     } @else {
       <fa-icon [icon]="faWarning" />
     }
