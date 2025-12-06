@@ -1,0 +1,14 @@
+@use 'index' as i;
+
+:host {
+  border: i.$base-border var(--border-muted);
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface);
+
+  &:hover {
+    background-color: var(--surface);
+    color: var(--on-surface-variant);
+  }
+
+  @include i.button-layout;
+}

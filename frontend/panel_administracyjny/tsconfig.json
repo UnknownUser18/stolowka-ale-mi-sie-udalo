@@ -40,6 +40,21 @@
       ],
       "%checkbox": [
         "src/app/shared/checkbox/checkbox.ts"
+      ],
+      "%button-primary": [
+        "src/app/shared/button-primary/button-primary.ts"
+      ],
+      "%button-secondary": [
+        "src/app/shared/button-secondary/button-secondary.ts"
+      ],
+      "%button-default": [
+        "src/app/shared/button-default/button-default.ts"
+      ],
+      "%primary-text": [
+        "src/app/shared/primary-text/primary-text.ts"
+      ],
+      "%secondary-text": [
+        "src/app/shared/secondary-text/secondary-text.ts"
       ]
     },
     "outDir": "./dist/out-tsc",

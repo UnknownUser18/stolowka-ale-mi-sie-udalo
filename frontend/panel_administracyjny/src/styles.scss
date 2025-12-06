@@ -16,7 +16,7 @@
 
 :focus-visible {
   border-radius: i.$border-radius-sm;
-  outline: 2px solid var(--highlight);
+  outline: 2px solid var(--outline);
 }
 
 ::selection {
@@ -26,6 +26,7 @@
 
 input, select, option, button {
   font-family: inherit;
+  font-size: inherit;
   border: none;
   background-color: inherit;
   color: inherit;

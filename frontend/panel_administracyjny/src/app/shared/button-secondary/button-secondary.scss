@@ -1,0 +1,13 @@
+@use 'index' as i;
+
+:host {
+  background-color: var(--secondary);
+  color: var(--on-secondary);
+
+  &:hover {
+    background-color: var(--secondary-container);
+    color: var(--on-secondary-container);
+  }
+
+  @include i.button-layout;
+}
