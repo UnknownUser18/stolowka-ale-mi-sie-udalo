@@ -1,0 +1,139 @@
+@use 'index' as i;
+
+:host {
+  margin: auto;
+  width: 100%;
+  height: 100%;
+}
+
+section {
+  width: 100%;
+  height: fit-content;
+  padding: i.$padding-xs i.$padding-md;
+  display: flex;
+  gap: i.$padding-md;
+  grid-template-rows: 1fr;
+  align-items: center;
+  flex-direction: row-reverse;
+  border: i.$base-border var(--border-muted);
+  border-radius: 0;
+  background-color: var(--bg);
+
+  h2 {
+    position: absolute;
+    transform: translate(50%, 0);
+    right: 42.5%;
+  }
+
+  button {
+    position: relative;
+  }
+
+}
+
+table button {
+  margin: auto;
+}
+
+.placeholder-row td {
+  padding: i.$padding-md;
+  animation: pulse 2s infinite;
+}
+
+h2 {
+  text-align: center;
+}
+
+section:nth-of-type(1) {
+  overflow-y: auto;
+}
+
+form {
+  margin-right: 5%;
+  gap: 25px;
+  //height: 100%;
+
+  button {
+    justify-self: end;
+    border-radius: 12px;
+    background-color: var(--success);
+    color: var(--bg-light);
+
+  }
+
+  h3 {
+    //@include i.font(1.5em, 500, var(--color-13));
+  }
+
+  .checkbox-label {
+    width: clamp(200px, 60%, 350px);
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row !important;
+    cursor: pointer;
+    user-select: none;
+
+    input {
+      display: none;
+    }
+
+    div {
+      //@include i.flex-center;
+      position: relative;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      border-radius: 5px;
+      background-color: var(--color-4);
+    }
+
+    input[type="checkbox"]:checked + div::after {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      font-size: 1.5em;
+      border-radius: 3px;
+      content: '✓';
+      top: -2px;
+      left: 2px;
+    }
+  }
+}
+
+
+.window {
+  div {
+    background-color: #222222db;
+  }
+
+  form .checkbox-label {
+    span {
+      margin-bottom: 0;
+    }
+
+    div {
+      margin-top: 0;
+      padding: 0;
+    }
+
+    input[type="checkbox"]:checked + div::after {
+      top: -3px;
+      left: 1px;
+    }
+  }
+}
+
+form.selected {
+  position: relative;
+  width: fit-content;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 12px;
+  background-color: var(--bg-light);
+  top: 50px;
+  left: 50px;
+
+  @include i.form-buttons;
+}

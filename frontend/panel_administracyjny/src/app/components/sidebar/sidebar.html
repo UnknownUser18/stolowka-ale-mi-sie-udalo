@@ -1,0 +1,35 @@
+@let logo_title = 'Powrót do strony głównej';
+@let return_title = 'Powrót do poprzedniej strony';
+<a routerLink="" [title]="logo_title" [attr.aria-label]="logo_title" class="logo">
+  @defer (prefetch on idle) {
+    @if (!imageError()) {
+      <img (error)="imageError.set(true)" alt="Logo" height="50" ngSrc="../../../assets/hella_chopped.jpg" priority width="50">
+    } @else {
+      <fa-icon [icon]="faWarning" />
+    }
+  } @placeholder (minimum 1000ms) {
+    <span class="placeholder"></span>
+  }
+</a>
+@if (isNotInRoot()) {
+  <a [routerLink]="previousUrl()" [title]="return_title" [attr.aria-label]="return_title" class="return">
+    <fa-icon [icon]="faArrowLeft" size="2x" />
+  </a>
+}
+<div class="change-sidebar">
+  @switch (sidebarLoaded()) {
+    @case ('home-nav') {
+      <app-home-nav />
+    }
+    @case ('osoby-nav') {
+      <app-osoby-nav />
+    }
+  }
+</div>
+@if (infoS.status() !== undefined && !infoS.status()) {
+  @let retry_title = 'Ponów próbę połączenia z serwerem';
+  <button class="retry-button" (click)="getHealth()" [title]="retry_title" [attr.aria-label]="retry_title">
+    <fa-icon [icon]="faArrowRotateRight" [class.spin]="isLoading()" />
+    Ponów próbę połączenia
+  </button>
+}

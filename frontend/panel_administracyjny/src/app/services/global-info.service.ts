@@ -1,15 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export enum TabType {
-  KALENDARZ = 'kalendarz',
-  DANE = 'dane',
-  DEKLARACJE = 'deklaracje',
-  PLATNOSCI = 'platnosci',
-  KARTA = 'karta',
-  RAPORT = 'raport',
-}
-
 export enum NotificationType {
   INFO = 'info',
   SUCCESS = 'success',
@@ -17,7 +8,6 @@ export enum NotificationType {
   WARNING = 'warning',
 }
 
-export type TabTypeKey = keyof typeof TabType;
 
 @Injectable({
   providedIn : 'root'
@@ -31,12 +21,7 @@ export class GlobalInfoService {
 
   private pendingNotifications : Array<{ type : NotificationType, message : string }> = [];
   public title : BehaviorSubject<string> = new BehaviorSubject<string>('Strona Główna');
-  public activeTab : BehaviorSubject<TabTypeKey | undefined> = new BehaviorSubject<TabTypeKey | undefined>(undefined);
   public activeMonth : BehaviorSubject<Date | undefined> = new BehaviorSubject<Date | undefined>(undefined);
-  public selectedDays = {
-    added : [] as Date[],
-    removed : [] as Date[]
-  }
 
   public generateNotification(type : NotificationType, message : string) : void {
     if (this.numberOfNotifications >= this.maxNotifications) {
@@ -96,10 +81,6 @@ export class GlobalInfoService {
 
   public setTitle(title : string) : void {
     this.title.next(title);
-  }
-
-  public setActiveMonth(date : Date) : void {
-    this.activeMonth.next(date);
   }
 
 }

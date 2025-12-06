@@ -1,0 +1,21 @@
+@use 'index' as i;
+
+:host {
+  border: i.$base-border var(--border-muted);
+  background-color: var(--surface-container-highest);
+  color: var(--on-surface);
+
+  &:hover {
+    background-color: var(--surface);
+    color: var(--on-surface-variant);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: var(--surface-container-low);
+    color: var(--text-muted);
+    border-color: var(--border-muted);
+  }
+
+  @include i.button-layout;
+}

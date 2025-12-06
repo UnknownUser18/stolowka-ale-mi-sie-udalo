@@ -1,0 +1,9 @@
+@use 'index' as i;
+
+:host {
+  transition: i.transition(color, i.$duration-sm);
+
+  &:hover {
+    color: var(--secondary);
+  }
+}

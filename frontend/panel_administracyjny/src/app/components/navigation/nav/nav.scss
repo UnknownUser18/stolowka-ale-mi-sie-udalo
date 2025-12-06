@@ -1,0 +1,48 @@
+@use 'index' as i;
+
+:host {
+  padding: i.$padding-sm i.$padding-md;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-dark);
+  border-bottom: i.$base-border var(--border);
+
+  &.person-selected {
+    justify-content: space-between;
+  }
+}
+
+h2 {
+  padding: i.$padding-xs i.$padding-sm;
+  font-size: i.$font-size-lg;
+  font-weight: 500;
+  border-radius: i.$border-radius-2xl;
+  background: linear-gradient(45deg, var(--bg), var(--bg-light) 50%, var(--bg-light) 90%, color-mix(in oklch, var(--bg-light) 80%, var(--highlight) 20%) 100%);
+  color: var(--text-muted);
+}
+
+menu {
+  padding: i.$padding-xs i.$padding-sm;
+  display: flex;
+  gap: i.$padding-md;
+  justify-content: center;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-xl;
+  background-color: var(--bg-light);
+}
+
+li {
+  font-size: i.$font-size-md;
+  color: var(--text-muted);
+  transition: i.transition(color, i.$duration-sm);
+
+
+  &:hover, &:focus-within {
+    color: var(--text);
+  }
+
+  a.active {
+    color: var(--primary);
+  }
+}

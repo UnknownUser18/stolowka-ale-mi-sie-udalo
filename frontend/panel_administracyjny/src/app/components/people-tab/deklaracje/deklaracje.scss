@@ -1,0 +1,125 @@
+@use 'index' as i;
+
+:host {
+  height: 100%;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: 0.9fr 1fr;
+  grid-template-rows: auto auto;
+  padding-right: i.$padding-md;
+}
+
+td button {
+  margin: auto;
+}
+
+.table-container {
+  display: flex;
+  flex-direction: column;
+
+  & > div {
+    padding: i.$padding-sm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    font-size: i.$font-size-md;
+  }
+}
+
+fieldset {
+  transition: i.transition(border-color);
+
+  &.error {
+    border-color: var(--danger);
+  }
+}
+
+form {
+  display: flex;
+  gap: i.$padding-md;
+  flex-direction: column;
+
+  div {
+    display: flex;
+    gap: i.$padding-sm;
+    justify-content: space-between;
+  }
+
+  button {
+    font-size: i.$font-size-md;
+  }
+
+  @include i.form-buttons;
+}
+
+.declaration-form {
+  height: fit-content;
+  align-self: center;
+  grid-column: 2;
+  grid-row: 1 / -1;
+}
+
+.add-dialog-form {
+  max-width: 40vw;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: repeat(2, 1fr);
+
+  fieldset {
+    min-width: 15vw;
+  }
+
+  app-calendar {
+    grid-column: 1 / -1;
+  }
+}
+
+h3 {
+  margin-bottom: i.$padding-sm;
+  font-size: i.$font-size-xl;
+  text-align: center;
+}
+
+.error-message {
+  font-size: i.$font-size-xs;
+  color: var(--danger);
+}
+
+.delete-dialog {
+  max-width: 25vw;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  text-align: center;
+
+  h3 {
+    grid-column: 1 / -1;
+  }
+
+  p {
+    grid-column: 1 / -1;
+    font-size: i.$font-size-md;
+    color: var(--text-muted);
+
+    b {
+      color: var(--text);
+    }
+  }
+}
+
+.filter-dialog-form {
+  max-width: 30vw;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: repeat(2, 1fr);
+
+  fieldset {
+    min-width: 12vw;
+  }
+
+  @include i.form-buttons;
+}

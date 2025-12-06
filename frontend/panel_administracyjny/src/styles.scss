@@ -3,16 +3,20 @@
 @use 'index' as i;
 
 * {
-  padding: 0;
-  margin: 0;
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
   scrollbar-width: thin;
   scrollbar-color: var(--highlight) var(--bg);
 }
 
+.cdk-overlay-backdrop.dialog-backdrop {
+  background-color: var(--scrim);
+}
+
 :focus-visible {
-  outline: 2px solid var(--highlight);
   border-radius: i.$border-radius-sm;
+  outline: 2px solid var(--outline);
 }
 
 ::selection {
@@ -22,9 +26,10 @@
 
 input, select, option, button {
   font-family: inherit;
-  color: inherit;
-  background-color: inherit;
+  font-size: inherit;
   border: none;
+  background-color: inherit;
+  color: inherit;
   outline: none;
 }
 
@@ -34,20 +39,24 @@ a {
 }
 
 @keyframes out {
+  from {
+    opacity: 1;
+    filter: blur(5px);
+  }
   to {
-    margin-left: 50%;
     opacity: 0;
+    filter: blur(0);
   }
 }
 
 @keyframes in {
   from {
-    margin-left: -50%;
     opacity: 0;
+    filter: blur(5px);
   }
   to {
-    margin-left: 0;
     opacity: 1;
+    filter: blur(0);
   }
 }
 
@@ -61,7 +70,6 @@ a {
 }
 
 .dialog-backdrop {
-  background-color: rgba(0, 0, 0, 0.5);
   transition: i.transition(backdrop-filter);
   backdrop-filter: none;
 
@@ -75,12 +83,14 @@ a {
   animation: pulse i.$duration-xl infinite alternate i.$cubic-in-out;
 }
 
-::view-transition-old(page) {
-  animation: out i.$duration-lg i.$cubic-in-out forwards;
+::view-transition-old(sidebar) {
+  animation-duration: 650ms;
+  animation-name: -ua-view-transition-fade-out, out;
 }
 
-::view-transition-new(page) {
-  animation: in i.$duration-lg i.$cubic-in-out forwards;
+::view-transition-new(sidebar) {
+  animation-duration: i.$duration-lg;
+  animation-name: -ua-view-transition-fade-in, in;
 }
 
 .change-sidebar {
@@ -92,9 +102,9 @@ button {
 }
 
 body {
-  font-family: 'Inter', i.$font-base;
-  background-color: var(--bg);
   height: 100vh;
+  font-family: 'Inter', i.$font-base;
+  background-color: var(--surface-dim);
   color: var(--text);
   overflow-x: hidden;
 }
@@ -108,12 +118,10 @@ ol, ul, menu {
   list-style: none;
 }
 
-app-root {
-  display: block;
-  width: 100%;
-  height: 100%;
+.spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
 }
-
 
 @keyframes spin {
   from {

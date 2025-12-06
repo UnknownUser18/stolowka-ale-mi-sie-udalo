@@ -1,0 +1,25 @@
+<button (click)="setNewMonth(-1)" primary-text>
+  <fa-icon [icon]="faArrowLeft" />
+  {{ previousMonth() | titlecase }}
+</button>
+<button [clickT]="tooltip" [underCursor]="true" secondary-text>{{ currentMonth() | titlecase }}</button>
+<button (click)="setNewMonth(1)" primary-text>{{ nextMonth() | titlecase }}
+  <fa-icon [icon]="faArrowRight" />
+</button>
+
+<app-tooltip #tooltip>
+  <p>Zmień miesiąc na:</p>
+  <form>
+    <label>
+      @let month_title = 'Wybierz miesiąc';
+      <input type="month" [class.invalid]="month.invalid && month.touched" [formControl]="month" placeholder="YYYY-MM" [title]="month_title" [attr.aria-label]="month_title" name="month" pattern="[0-9]{4}-[0-9]{2}" [attr.aria-errormessage]="month.invalid && month.touched ? 'date-error' : null" required>
+      @if (month.invalid && month.touched) {
+        <span id="date-error">Nieprawidłowy format daty. Proszę wpisać w formacie <code>YYYY-MM</code>.</span>
+      }
+    </label>
+    @let reset_title = 'Zresetuj wybór miesiąca';
+    @let change_title = 'Zmień miesiąc na wybrany';
+    <button (click)="month.reset()" [attr.aria-label]="reset_title" [title]="reset_title" button-danger type="reset">Zresetuj</button>
+    <button (click)="changeMonth()" [attr.aria-label]="change_title" [disabled]="month.invalid" [title]="change_title" button-success type="submit">Zmień</button>
+  </form>
+</app-tooltip>

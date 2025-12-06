@@ -1,0 +1,63 @@
+@use 'index' as i;
+
+:host {
+  padding: i.$padding-xs i.$padding-sm;
+  display: flex;
+  gap: i.$margin-2xl;
+  flex-direction: column;
+  grid-row: 1 / -1;
+  background-color: var(--bg-dark);
+  border-right: 1px solid var(--border);
+}
+
+div {
+  height: 100%;
+  overflow-y: auto;
+}
+
+button {
+  transition: i.transition(border-color, i.$duration-sm), i.transition(color, i.$duration-sm), i.transition(background-position, i.$duration-sm) !important;
+  @include i.sidebar-item-layout;
+  @include i.sidebar-item;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: i.$border-radius-full;
+}
+
+img, .placeholder {
+  border-radius: i.$border-radius-full;
+}
+
+.placeholder {
+  width: 50px;
+  min-height: 50px;
+}
+
+.return {
+  width: fit-content;
+  padding: i.$padding-3xs;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  transition: i.transition(color);
+
+  &:hover, &:focus {
+    color: var(--text);
+  }
+
+  &:focus {
+    border-radius: i.$border-radius-sm;
+    outline-offset: -2px;
+  }
+
+  fa-icon {
+    height: 32px;
+  }
+}
+
+.change-sidebar {
+  view-transition-name: sidebar;
+}

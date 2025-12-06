@@ -1,0 +1,136 @@
+<div class="table-container">
+  <div>
+    <button (click)="openWindow('add')" button-primary class="add-price">
+      Dodaj cennik
+      @let add_title = 'Dodaj nowy cennik';
+      <fa-icon [attr.aria-label]="add_title" [icon]="faPlus" [title]="add_title" />
+    </button>
+    <button (click)="fetchPricing()" button-secondary class="refresh-prices">
+      @if (isLoading) {
+        Ładowanie...
+      } @else {
+        Odśwież
+      }
+      @let refresh_title = 'Odśwież cenniki';
+      <fa-icon [attr.aria-label]="refresh_title" [class.spin]="isLoading" [icon]="faArrowsRotate" [title]="refresh_title" />
+    </button>
+    <button button-default class="filter-prices">
+      Filtruj
+      <fa-icon [icon]="faFilter" />
+    </button>
+  </div>
+  <table table-default>
+    <thead>
+    <tr>
+      <th>#</th>
+      <th>Cena</th>
+      <th>Data rozpoczęcia</th>
+      <th>Data zakończenia</th>
+      <th>Wybierz</th>
+    </tr>
+    </thead>
+    <tbody>
+      @defer (when ZPricing) {
+        @for (price of ZPricing; track price.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ price.cena | currency }}</td>
+            <td>{{ price.data_od | date : 'longDate' }}</td>
+            <td>{{ price.data_do | date : 'longDate' }}</td>
+            <td>
+              @if (!(price | isSelectedPrice:selectedPricing())) {
+                <button (click)="selectedPricing.set(price)" button-primary>
+                  Wybierz
+                </button>
+              } @else {
+                <button button-secondary>
+                  Wybrano
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty" colspan="4">Brak dostępnych cenników...</td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+@if (selectedPricing()) {
+  <form [formGroup]="pricingForm" class="pricing-form">
+    <fieldset fieldset-default>
+      <legend>
+        <fa-icon [icon]="faFileInvoiceDollar" />
+        Szczegóły cennika
+      </legend>
+      <label label-default>
+        <span>Cena:</span>
+        <input aria-label="Cena" formControlName="cena" input-default min="0" step="0.01" type="number">
+      </label>
+      <label label-default>
+        <span>Data Rozpoczęcia:</span>
+        <input aria-label="Data rozpoczęcia" formControlName="data_od" input-default type="date">
+      </label>
+      <label label-default>
+        <span>Data Zakończenia:</span>
+        <input aria-label="Data zakończenia" formControlName="data_do" input-default type="date">
+      </label>
+      <div>
+        <button (click)="updatePricing()" button-success type="submit">
+          Prześlij dane
+          <fa-icon [icon]="faPaperPlane" />
+        </button>
+        <button (click)="resetForm()" button-danger type="reset">
+          Resetuj
+          <fa-icon [icon]="faRotate" />
+        </button>
+        <button (click)="openWindow('delete')" button-danger class="delete-pricing">
+          Usuń deklaracje
+          <fa-icon [icon]="faTrash" />
+        </button>
+      </div>
+    </fieldset>
+  </form>
+}
+@if (selectedPricing()) {
+  <app-calendar (hasWrongDays)="hasWrongDays($event)" [elements]="ZPricingWithoutCena!" [selectedElement]="tempSelectedPricing()" />
+}
+@if (showWindow !== '') {
+  <section #filter [class]="{'delete': showWindow === 'delete','add': showWindow === 'add'}" class="window">
+    <div>
+      <fa-icon [icon]="xmarkClose" (click)="closeWindow()" class="close"></fa-icon>
+      <!--      <i class="fa-solid fa-xmark close" ></i>-->
+      @if (showWindow === 'delete') {
+        <h3>Ostrzeżenie</h3>
+        <p>Czy na pewno chcesz usunąć cennik od dnia <b>{{ formatDate(pricingForm.get('data_od')?.value!) }}</b> do dnia <b>{{ formatDate(pricingForm.get('data_do')?.value!) }}</b>?</p>
+        <button type="button" (click)="deletePricing()">Usuń</button>
+        <button type="button" (click)="closeWindow()">Anuluj</button>
+      } @else if (showWindow === 'add') {
+        <h3>Dodaj Cennik</h3>
+        <form (change)="updateCalendar()" [formGroup]="addForm">
+          <fieldset>
+            <legend><i class="fa-solid fa-money-bill"></i> Cena:</legend>
+            <label>
+              <span>Cena:</span>
+              <input type="number" formControlName="cena">
+            </label>
+          </fieldset>
+          <fieldset>
+            <legend><i class="fa-solid fa-calendar"></i> Daty:</legend>
+            <label>
+              <span>Data rozpoczęcia:</span>
+              <input type="date" formControlName="data_od">
+            </label>
+            <label>
+              <span>Data zakończenia:</span>
+              <input type="date" formControlName="data_do">
+            </label>
+          </fieldset>
+          <button type="button" (click)="addPricing()">Dodaj</button>
+        </form>
+      }
+    </div>
+  </section>
+}

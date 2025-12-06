@@ -1,0 +1,123 @@
+@use 'index' as i;
+
+:host {
+  height: 100%;
+  padding: i.$padding-md 0;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: 0.9fr 1fr;
+}
+
+td button {
+  margin: auto;
+}
+
+.table-container {
+  display: flex;
+  flex-direction: column;
+
+  & > div {
+    padding: 0 i.$padding-sm i.$padding-sm i.$padding-sm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  button {
+    font-size: i.$font-size-md;
+  }
+}
+
+
+fieldset {
+  transition: i.transition(border-color);
+
+  &.error {
+    border-color: var(--danger);
+  }
+}
+
+form {
+  display: flex;
+  gap: i.$padding-md;
+  flex-direction: column;
+
+  div {
+    display: flex;
+    gap: i.$padding-sm;
+    justify-content: space-between;
+  }
+
+  button {
+    font-size: i.$font-size-md;
+  }
+
+  @include i.form-buttons;
+}
+
+
+.add-payment-form, .filter-payment-form {
+  max-width: 40vw;
+  display: grid;
+  gap: i.$padding-md;
+
+  fieldset {
+    min-width: 20vw;
+  }
+}
+
+h3 {
+  margin-bottom: i.$padding-sm;
+  font-size: i.$font-size-xl;
+  text-align: center;
+}
+
+.error-message {
+  font-size: i.$font-size-xs;
+  color: var(--danger);
+}
+
+.delete-dialog {
+  max-width: 25vw;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  text-align: center;
+
+  h3 {
+    grid-column: 1 / -1;
+  }
+
+  p {
+    grid-column: 1 / -1;
+    font-size: i.$font-size-md;
+    color: var(--text-muted);
+
+    b {
+      color: var(--text);
+    }
+  }
+
+  button {
+    width: fit-content;
+    font-size: i.$font-size-md;
+
+    &:last-of-type {
+      justify-self: end;
+    }
+  }
+}
+
+.filter-dialog-form {
+  max-width: 30vw;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: repeat(2, 1fr);
+
+  fieldset {
+    min-width: 12vw;
+  }
+
+  @include i.form-buttons;
+}

@@ -5,14 +5,78 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@pipes/*": ["src/app/pipes/*"],
-      "@services/*": ["src/app/services/*"],
-      "@components/*": ["src/app/components/*"],
-      "@database/*": ["src/app/services/database/*"],
-      "@tooltips/*": ["src/app/tooltip-service/*"],
-      "@switch": ["src/app/switch/switch.component"],
-      "@checkbox": ["src/app/checkbox/checkbox.component"],
-      "@calendar": ["src/app/calendar/calendar.component"]
+      "@pipes/*": [
+        "src/app/pipes/*"
+      ],
+      "@services/*": [
+        "src/app/services/*"
+      ],
+      "@components/*": [
+        "src/app/components/*"
+      ],
+      "@database/*": [
+        "src/app/services/database/*"
+      ],
+      "@shared/*": [
+        "src/app/shared/*"
+      ],
+      "@utils/*": [
+        "src/app/utils/*"
+      ],
+      "@environments/*": [
+        "src/environments/*"
+      ],
+      "@modals/*": [
+        "src/app/modals/*"
+      ],
+      "@directives/*": [
+        "src/app/directives/*"
+      ],
+      "%switch": [
+        "src/app/shared/switch/switch.ts"
+      ],
+      "%dropdown": [
+        "src/app/shared/dropdown/dropdown.ts"
+      ],
+      "%checkbox": [
+        "src/app/shared/checkbox/checkbox.ts"
+      ],
+      "%button-primary": [
+        "src/app/shared/button-primary/button-primary.ts"
+      ],
+      "%button-secondary": [
+        "src/app/shared/button-secondary/button-secondary.ts"
+      ],
+      "%button-default": [
+        "src/app/shared/button-default/button-default.ts"
+      ],
+      "%button-danger": [
+        "src/app/shared/button-danger/button-danger.ts"
+      ],
+      "%button-success": [
+        "src/app/shared/button-success/button-success.ts"
+      ],
+      "%primary-text": [
+        "src/app/shared/primary-text/primary-text.ts"
+      ],
+      "%secondary-text": [
+        "src/app/shared/secondary-text/secondary-text.ts"
+      ],
+      "%input": [
+        "src/app/shared/input/input.ts"
+      ],
+      "%fieldset": [
+        "src/app/shared/fieldset/fieldset.ts"
+      ],
+      "%label": [
+        "src/app/shared/label/label.ts"
+      ],
+      "%label-one-line": [
+        "src/app/shared/label-one-line/label-one-line.ts"
+      ],
+      "%table": [
+        "src/app/shared/table/table.ts"
+      ]
     },
     "outDir": "./dist/out-tsc",
     "strict": true,

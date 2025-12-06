@@ -1,0 +1,60 @@
+@use 'index' as i;
+
+form {
+  width: 100%;
+  height: 100%;
+  padding: i.$padding-sm i.$padding-lg;
+  display: grid;
+  gap: i.$padding-md;
+  grid-template-columns: auto auto;
+  grid-template-rows: 1fr 0.15fr;
+
+  @include i.form-buttons;
+}
+
+label {
+  &:focus-within span:not(.error) {
+    border-color: var(--border) !important;
+  }
+
+  &:not([label-one-line]) span:not(.error) {
+    transition: i.transition(border-color, i.$duration-sm);
+    padding-bottom: i.$padding-3xs;
+    border-bottom: i.$base-border var(--border-muted);
+  }
+}
+
+select {
+  @include i.select; // TODO: remove this line when component is migrated to use `Select` component
+}
+
+option {
+  color: var(--text-muted);
+
+  &:hover, &:focus {
+    color: var(--text);
+  }
+}
+
+div {
+  display: flex;
+  gap: i.$padding-xl;
+  align-items: center;
+
+  &:last-of-type {
+    justify-content: flex-end;
+  }
+
+  button {
+    font-size: i.$font-size-lg;
+  }
+}
+
+button fa-icon {
+  display: inline-block;
+}
+
+.error {
+  font-size: i.$font-size-xs;
+  color: var(--danger);
+}

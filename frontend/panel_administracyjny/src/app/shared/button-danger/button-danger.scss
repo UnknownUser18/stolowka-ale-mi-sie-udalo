@@ -1,0 +1,23 @@
+@use 'index' as i;
+
+:host {
+  border: i.$base-border color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
+  background-color: color-mix(in oklch, var(--danger) 20%, var(--bg) 80%);
+  color: var(--danger);
+
+  &:hover {
+    background-color: var(--danger);
+    color: var(--bg);
+    border-color: var(--danger);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
+    color: var(--bg);
+    opacity: 0.6;
+    border-color: color-mix(in oklch, var(--danger) 80%, var(--bg) 20%);
+  }
+
+  @include i.button-layout;
+}

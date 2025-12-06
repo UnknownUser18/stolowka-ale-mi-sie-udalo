@@ -1,0 +1,247 @@
+<div class="table-container">
+  <div>
+    <button [dialog]="addDeclarationDialog" button-primary>
+      Dodaj deklarację
+      <fa-icon [icon]="faPlus" />
+    </button>
+    <button (click)="refreshDeclarations()" button-secondary>
+      @if (isLoading) {
+        Ładowanie...
+      } @else {
+        Odśwież deklaracje
+      }
+      <fa-icon [icon]="faRotate" [class.spin]="isLoading" />
+    </button>
+    <button [dialog]="filterDeclarationsDialog" button-default>
+      Filtruj deklaracje
+      <fa-icon [icon]="faFilter" />
+    </button>
+  </div>
+  <table table-default>
+    <thead>
+    <tr>
+      <th>#</th>
+      <th>Data rozpoczęcia</th>
+      <th>Data zakończenia</th>
+      <th>Wybierz</th>
+    </tr>
+    </thead>
+    <div class="table-body-scroll">
+      <tbody>
+        @for (declaration of shownDeclarations; track declaration.id; let i = $index) {
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ declaration.data_od | date : 'longDate' }}</td>
+            <td>{{ declaration.data_do | date : 'longDate' }}</td>
+            <td>
+              @if (!(declaration | isSelectedDeclaration:selectedDeclaration())) {
+                <button (click)="selectedDeclaration.set(declaration)" button-primary>
+                  Wybierz
+                </button>
+              } @else {
+                <button button-secondary>
+                  Wybrano
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4">Brak dostępnych deklaracji...</td>
+          </tr>
+        }
+      </tbody>
+    </div>
+  </table>
+</div>
+<form [formGroup]="deklaracjaForm" class="declaration-form">
+  @if (selectedDeclaration()) {
+    <fieldset [attr.aria-errormessage]="selectedDateError ? 'error-selected-date' : null" [class.error]="selectedDateError" fieldset-default>
+      <legend>
+        <fa-icon [icon]="faCalendar" />
+        Daty
+      </legend>
+      <label label-default>
+        @let invalidDataOd = !!deklaracjaForm.get('data_od')?.invalid && !!deklaracjaForm.get('data_od')?.touched;
+        <span>Data Rozpoczęcia: </span>
+        <input (change)="updateSelectedDeclaration()" [attr.aria-errormessage]="invalidDataOd ? 'error-data-od' : null" formControlName="data_od" input-default name="data_rozpoczecia" type="date" />
+        @if (invalidDataOd) {
+          <span id="error-data-od" class="error-message">Nieprawidłowa data rozpoczęcia</span>
+        }
+      </label>
+      <label label-default>
+        @let invalidDataDo = !!deklaracjaForm.get('data_do')?.invalid && !!deklaracjaForm.get('data_do')?.touched;
+        <span>Data Zakończenia: </span>
+        <input (change)="updateSelectedDeclaration()" [attr.aria-errormessage]="invalidDataDo ? 'error-data-do' : null" formControlName="data_do" input-default name="data_zakonczenia" type="date" />
+        @if (invalidDataDo) {
+          <span id="error-data-do" class="error-message">Nieprawidłowa data zakończenia</span>
+        }
+      </label>
+      @if (selectedDateError) {
+        <span id="error-selected-date" class="error-message">Data zakończenia musi być późniejsza niż data rozpoczęcia</span>
+      }
+    </fieldset>
+    <fieldset fieldset-default>
+      <legend>
+        <fa-icon [icon]="faCalendarDay" />
+        Dni
+      </legend>
+      @for (dzien of Array.from(dni.entries()); track $index) {
+        <label label-one-line>
+          <span>{{ dzien[1] }}</span>
+          <checkbox formControlName="{{ dzien[0] }}" />
+        </label>
+      }
+    </fieldset>
+    <div>
+      @if (deklaracjaForm.invalid || selectedDateError) {
+        <button (click)="$event.preventDefault()" [delayT]="cantSendTooltip" [delay]="500" button-success disabled type="submit">
+          Prześlij dane
+          <fa-icon [icon]="faPaperPlane" />
+        </button>
+      } @else {
+        <button (click)="updateDeclaration()" button-success type="submit">
+          Prześlij dane
+          <fa-icon [icon]="faPaperPlane" />
+        </button>
+      }
+      <button (click)="resetDeclaration()" button-danger type="reset">
+        Resetuj
+        <fa-icon [icon]="faRotate" />
+      </button>
+      <button [dialog]="deleteDeclarationDialog" button-danger>
+        Usuń deklaracje
+        <fa-icon [icon]="faTrash" />
+      </button>
+    </div>
+  }
+</form>
+@if (selectedDeclaration()) {
+  <app-calendar (hasWrongDays)="isWrong($event, 'edit')" [elements]="dbDeclarations()!" [selectedElement]="tempSelectedDeclaration()" />
+}
+
+<app-dialog #addDeclarationDialog>
+  <h3>Dodaj Deklarację</h3>
+  <form [formGroup]="addForm" class="add-dialog-form" (change)="updateFieldsetAndCalendar()">
+    <fieldset [attr.aria-errormessage]="addDateError ? 'error-date' : null" [class.error]="addDateError" fieldset-default>
+      <legend>
+        <fa-icon [icon]="faCalendar" />
+        Daty
+      </legend>
+      <label label-default>
+        @let addInvalidDataOd = !!addForm.get('data_od')?.invalid && !!addForm.get('data_od')?.touched;
+        <span>Data rozpoczęcia:</span>
+        <input [attr.aria-errormessage]="addInvalidDataOd ? 'error-data-od' : null" aria-label="Data rozpoczęcia" formControlName="data_od" input-default type="date" />
+        @if (addInvalidDataOd) {
+          <span id="error-data-od" class="error-message">Nieprawidłowa data rozpoczęcia</span>
+        }
+      </label>
+      <label label-default>
+        @let addInvalidDataDo = !!addForm.get('data_do')?.invalid && !!addForm.get('data_do')?.touched;
+        <span>Data zakończenia:</span>
+        <input [attr.aria-errormessage]="addInvalidDataDo ? 'error-data-do' : null" aria-label="Data zakończenia" formControlName="data_do" input-default type="date" />
+        @if (addInvalidDataDo) {
+          <span id="error-data-do" class="error-message">Nieprawidłowa data zakończenia</span>
+        }
+      </label>
+      @if (addDateError) {
+        <span id="error-date" class="error-message">Data zakończenia musi być późniejsza niż data rozpoczęcia</span>
+      }
+    </fieldset>
+    <fieldset fieldset-default>
+      <legend>
+        <fa-icon [icon]="faCalendarDay" />
+        Dni
+      </legend>
+      @for (dzien of Array.from(dni.entries()); track $index) {
+        <label label-one-line>
+          <span>{{ dzien[1] }}</span>
+          <checkbox formControlName="{{ dzien[0] }}" />
+        </label>
+      }
+    </fieldset>
+    <app-calendar (hasWrongDays)="isWrong($event, 'add')" [elements]="dbDeclarations()!" [isForNewElement]="true" [selectedElement]="addDeclaration()" />
+    <button button-danger type="reset">
+      <fa-icon [icon]="faRotate" />
+      Resetuj
+    </button>
+    @if (addForm.invalid || addDateError) {
+      <button (click)="$event.preventDefault()" [delayT]="cantSendTooltip" [delay]="500" button-success disabled type="submit">
+        Dodaj
+        <fa-icon [icon]="faPlus" />
+      </button>
+    } @else {
+      <button (click)="addDeclarationToDB()" button-success type="submit">
+        Dodaj
+        <fa-icon [icon]="faPlus" />
+      </button>
+    }
+  </form>
+</app-dialog>
+
+<app-dialog #deleteDeclarationDialog>
+  <div class="delete-dialog">
+    <h3>Ostrzeżenie</h3>
+    @let imie_nazwisko = personS.personZ()?.imie + ' ' + personS.personZ()?.nazwisko;
+    <p>Czy na pewno chcesz usunąć deklarację z dnia <b>{{ selectedDeclaration()?.data_od | date : 'longDate' }}</b> do dnia <b>{{ selectedDeclaration()?.data_do | date : 'longDate' }}</b>?</p>
+    <p>Dla osoby <b>{{ imie_nazwisko }}</b>?</p>
+    <button (click)="deleteDeclaration()" button-danger type="button">
+      Usuń
+    </button>
+    <button (click)="deleteDeclarationDialog.hide()" button-default type="button">
+      Anuluj
+    </button>
+  </div>
+</app-dialog>
+
+<app-dialog #filterDeclarationsDialog>
+  <h3>Filtruj deklaracje</h3>
+  <form [formGroup]="filterForm" class="filter-dialog-form">
+    <fieldset fieldset-default>
+      <legend>
+        <fa-icon [icon]="faCalendar" />
+        Pomiędzy dniami:
+      </legend>
+      <label label-default>
+        @let filterInvalidDataOd = !!filterForm.get('data_od')?.invalid && !!filterForm.get('data_od')?.touched;
+        <span>Data rozpoczęcia:</span>
+        <input [attr.aria-errormessage]="filterInvalidDataOd ? 'error-data-od' : null" aria-label="Data rozpoczęcia" formControlName="data_od" input-default type="date" />
+        @if (filterInvalidDataOd) {
+          <span id="error-data-od" class="error-message">Nieprawidłowa data rozpoczęcia</span>
+        }
+      </label>
+      <label label-default>
+        @let filterInvalidDataDo = !!filterForm.get('data_do')?.invalid && !!filterForm.get('data_do')?.touched;
+        <span>Data zakończenia:</span>
+        <input [attr.aria-errormessage]="filterInvalidDataDo ? 'error-data-do' : null" aria-label="Data zakończenia" formControlName="data_do" input-default type="date" />
+        @if (filterInvalidDataDo) {
+          <span id="error-data-do" class="error-message">Nieprawidłowa data zakończenia</span>
+        }
+      </label>
+    </fieldset>
+    <fieldset fieldset-default>
+      <legend>
+        <fa-icon [icon]="faCalendarDay" />
+        Wybierz dni:
+      </legend>
+      @for (dzien of Array.from(dni.entries()); track $index) {
+        <label label-one-line>
+          <span>{{ dzien[1] }}</span>
+          <checkbox formControlName="{{ dzien[0] }}" />
+        </label>
+      }
+    </fieldset>
+    <button (click)="resetFilter()" button-danger type="reset">
+      Wyczyść
+      <fa-icon [icon]="faRotate" />
+    </button>
+    <button (click)="applyFilter()" button-primary type="submit">
+      Zastosuj
+      <fa-icon [icon]="faFilter" />
+    </button>
+  </form>
+</app-dialog>
+
+<app-tooltip #cantSendTooltip>
+  <p>Nie zgadzają się dni. Zmień daty, jeżeli w kalendarzu pokazują się błędy albo jak dzień początkowy jest później niż dzień końcowy.</p>
+</app-tooltip>
