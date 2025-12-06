@@ -1,0 +1,22 @@
+@use 'index' as i;
+
+fieldset[fieldset-default] {
+  padding: i.$padding-sm i.$padding-md;
+  display: flex;
+  gap: i.$padding-md;
+  flex-direction: column;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-md;
+
+  legend {
+    display: inline-flex;
+    gap: i.$padding-3xs;
+    align-items: center;
+    font-size: i.$font-size-lg;
+    color: var(--text-muted);
+
+    fa-icon {
+      font-size: 0.9em;
+    }
+  }
+}

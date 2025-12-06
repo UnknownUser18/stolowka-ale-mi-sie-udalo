@@ -1,0 +1,9 @@
+@use 'index' as i;
+
+:host {
+  width: fit-content;
+  display: flex;
+  gap: i.$padding-2xs;
+  align-items: center;
+  font-size: i.$font-size-lg;
+}

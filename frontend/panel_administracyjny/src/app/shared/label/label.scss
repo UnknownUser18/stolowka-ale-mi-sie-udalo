@@ -1,0 +1,8 @@
+@use 'index' as i;
+
+:host {
+  display: flex;
+  gap: i.$padding-2xs;
+  flex-direction: column;
+  font-size: i.$font-size-lg;
+}

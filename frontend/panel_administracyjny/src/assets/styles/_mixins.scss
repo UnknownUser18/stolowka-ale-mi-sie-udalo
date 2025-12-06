@@ -7,7 +7,7 @@
   gap: v.$padding-2xs;
   align-items: center;
   border-radius: v.$border-radius-md;
-  transition: f.transition(border-color, v.$duration-sm), f.transition(background-color, v.$duration-sm);
+  transition: f.transition(border-color, v.$duration-sm), f.transition(background-color, v.$duration-sm), f.transition(color, v.$duration-sm);
 }
 
 @mixin button-default {
@@ -187,13 +187,8 @@
   button {
     width: fit-content;
 
-    &[type="reset"] {
-      @include danger-button;
-    }
-
     &[type="submit"] {
       justify-self: end;
-      @include success-button;
     }
   }
 }

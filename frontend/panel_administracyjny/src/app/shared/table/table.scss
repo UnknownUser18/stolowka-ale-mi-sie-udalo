@@ -1,0 +1,46 @@
+@use 'index' as i;
+
+table[table-default] {
+  width: 100%;
+  overflow: auto;
+  display: table;
+  border-spacing: 0;
+
+  .table-body-scroll {
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  thead {
+    width: 100%;
+    display: block;
+  }
+
+  tr {
+    width: 100%;
+    display: table;
+    background-color: var(--surface-container);
+    table-layout: fixed;
+
+    &:nth-child(even) {
+      background-color: var(--surface-container-highest);
+    }
+  }
+
+  th {
+    padding: i.$padding-2xs i.$padding-xs;
+    border: i.$base-border var(--border-muted);
+    background-color: var(--surface-container-high);
+    color: var(--text-muted);
+  }
+
+  td {
+    padding: i.$padding-sm i.$padding-md;
+    font-size: i.$font-size-md;
+    border: i.$base-border var(--border-muted);
+    color: var(--text);
+    text-align: center;
+  }
+}
+
