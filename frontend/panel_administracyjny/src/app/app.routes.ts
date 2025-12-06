@@ -1,51 +1,51 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './login/login.component';
+import { Login } from '@components/login/login';
 import { mainGuard } from './guards/main.guard';
-import { NieczynneComponent } from './nieczynne/nieczynne.component';
-import { RaportsComponent } from './raports/raports.component';
-import { AdministracjaOsobComponent } from './administracja-osob/administracja-osob.component';
-import { CennikComponent } from './cennik/cennik.component';
-import { LayoutComponent } from './layout/layout.component';
+import { Nieczynne } from '@components/nieczynne/nieczynne';
+import { Raports } from '@components/raports/raports';
+import { AdministracjaOsob } from '@components/administracja-osob/administracja-osob';
+import { Cennik } from '@components/cennik/cennik';
+import { Layout } from './layout/layout';
 
 const componentImports : { [key : string] : () => Promise<any> } = {
-  kalendarz : () => import('./users/kalendarz/kalendarz.component').then(m => m.KalendarzComponent),
-  dane : () => import('./users/dane/dane.component').then(m => m.DaneComponent),
-  deklaracje : () => import('./users/deklaracje/deklaracje.component').then(m => m.DeklaracjeComponent),
-  karta : () => import('./users/karty/karty.component').then(m => m.KartyComponent),
-  platnosci : () => import('./users/platnosci/platnosci.component').then(m => m.PlatnosciComponent),
+  kalendarz  : () => import('@components/people-tab/kalendarz/kalendarz').then(m => m.Kalendarz),
+  dane       : () => import('@components/people-tab/dane/dane').then(m => m.Dane),
+  deklaracje : () => import('@components/people-tab/deklaracje/deklaracje').then(m => m.Deklaracje),
+  karta      : () => import('@components/people-tab/karty/karty').then(m => m.Karty),
+  platnosci  : () => import('@components/people-tab/platnosci/platnosci').then(m => m.Platnosci),
 };
 
 export const routes : Routes = [
   {
     path : '',
     canActivateChild : [mainGuard],
-    component : LayoutComponent,
+    component : Layout,
     children : [
       {
         path : '',
-        loadComponent : () => import('./home/home.component').then(m => m.HomeComponent),
+        loadComponent : () => import('@components/home/home').then(m => m.Home),
         data : { sidebar : 'home-nav', title : 'Panel Administracyjny' },
       },
       {
         path : 'osoby',
-        loadComponent : () => import('./users/osoby/osoby.component').then(m => m.OsobyComponent),
+        loadComponent : () => import('@components/people-tab/osoby/osoby').then(m => m.Osoby),
         data : { sidebar : 'osoby-nav', title : 'Osoby' },
         children : [
           {
             path : 'zsti',
-            loadComponent : () => import('./users/zsti/zsti.component').then(m => m.ZstiComponent),
+            loadComponent : () => import('@components/people-tab/zsti/zsti').then(m => m.Zsti),
             data : { title : 'Osoby - ZSTI' }
           },
           {
             path : 'internat',
-            loadComponent : () => import('./users/zsti/zsti.component').then(m => m.ZstiComponent) // TODO: Add internat component, defaulting to ZstiComponent for now
+            loadComponent : () => import('@components/people-tab/zsti/zsti').then(m => m.Zsti) // TODO: Add internat component, defaulting to Zsti for now
           }
         ]
       },
       {
         path : 'osoba',
-        loadComponent : () => import('./users/osoba/osoba.component').then(m => m.OsobaComponent),
+        loadComponent : () => import('@components/people-tab/osoba/osoba').then(m => m.Osoba),
         data : { sidebar : 'osoby-nav', title : 'Osoba' },
         children : [
           {
@@ -73,42 +73,42 @@ export const routes : Routes = [
       },
       {
         path : 'cennik',
-        loadComponent : () => import('./cennik/cennik.component').then(m => m.CennikComponent),
+        loadComponent : () => import('@components/cennik/cennik').then(m => m.Cennik),
         data: {title: 'Cennik'},
         children : [
-          { path : 'zsti', component : CennikComponent, data: {title : 'Cennik - ZSTI' } },
+          { path : 'zsti', component : Cennik, data : { title : 'Cennik - ZSTI' } },
         ]
       },
       {
         path : 'nieczynne',
-        loadComponent : () => import('./nieczynne/nieczynne.component').then(m => m.NieczynneComponent),
+        loadComponent : () => import('@components/nieczynne/nieczynne').then(m => m.Nieczynne),
         data: {title : 'Dni Nieczynne' },
         children : [
-          { path : 'zsti', component : NieczynneComponent, data: { title : 'Dni Nieczynne - ZSTI' } },
+          { path : 'zsti', component : Nieczynne, data : { title : 'Dni Nieczynne - ZSTI' } },
         ]
       },
       {
         path : 'raporty',
-        loadComponent : () => import('./raports/raports.component').then(m => m.RaportsComponent),
+        loadComponent : () => import('@components/raports/raports').then(m => m.Raports),
         children : [
-          { path : 'korekty', component : RaportsComponent },
-          { path : 'obecnosci', component : RaportsComponent },
-          { path : 'platnosci', component : RaportsComponent },
+          { path : 'korekty', component : Raports },
+          { path : 'obecnosci', component : Raports },
+          { path : 'platnosci', component : Raports },
         ]
       },
       {
         path : 'administracja',
-        loadComponent : () => import('./administracja-osob/administracja-osob.component').then(m => m.AdministracjaOsobComponent),
+        loadComponent : () => import('@components/administracja-osob/administracja-osob').then(m => m.AdministracjaOsob),
         children : [
-          { path : 'users', component : AdministracjaOsobComponent },
-          { path : 'klasy', component : AdministracjaOsobComponent },
-          { path : 'dodaj-osobe', component : AdministracjaOsobComponent },
+          { path : 'users', component : AdministracjaOsob },
+          { path : 'klasy', component : AdministracjaOsob },
+          { path : 'dodaj-osobe', component : AdministracjaOsob },
         ]
       }
     ]
   },
 
-  { path : 'login', component : LoginComponent },
+  { path : 'login', component : Login },
   { path : '**', redirectTo : '' }
 ];
 

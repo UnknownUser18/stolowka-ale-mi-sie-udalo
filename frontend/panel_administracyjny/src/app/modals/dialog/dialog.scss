@@ -1,0 +1,27 @@
+@use 'assets/styles/index' as i;
+
+.dialog-panel {
+  position: relative;
+  padding: i.$padding-sm i.$padding-xs;
+  border: i.$base-border var(--border-muted);
+  border-radius: i.$border-radius-lg;
+  background-color: var(--bg);
+  transition: i.transition(opacity);
+  opacity: 0;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
+.close-button {
+  position: absolute;
+  color: var(--text-muted);
+  transition: i.transition(color, i.$duration-sm);
+  top: i.$padding-xs;
+  right: i.$padding-xs;
+
+  &:hover, &:focus {
+    color: var(--text);
+  }
+}

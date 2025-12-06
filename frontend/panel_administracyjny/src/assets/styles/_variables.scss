@@ -44,7 +44,7 @@ $border-radius-3xl: 1.5rem; // 24px
 $border-radius-full: 9999px; // Full border radius for circular elements
 
 
-// Colors
+// Root colors
 :root {
   --bg-dark: oklch(0.1 0.01 282);
   --bg: oklch(0.15 0.01 282);
@@ -60,6 +60,66 @@ $border-radius-full: 9999px; // Full border radius for circular elements
   --warning: oklch(0.7 0.05 100);
   --success: oklch(0.7 0.05 160);
   --info: oklch(0.699 0.05 261.286);
+}
+
+// Component colors
+:root {
+  // Surface colors
+  --surface-dim: var(--bg-dark);
+  --surface: var(--bg);
+  --surface-bright: var(--bg-light);
+  --surface-container-lowest: oklch(0.09 0.01 282);
+  --surface-container-low: oklch(0.13 0.01 282);
+  --surface-container: oklch(0.17 0.01 282);
+  --surface-container-high: oklch(0.19 0.01 282);
+  --surface-container-highest: oklch(0.21 0.01 282);
+  --on-surface: var(--text);
+  --on-surface-variant: var(--text-muted);
+
+  // Primary colors
+  --on-primary: oklch(0.98 0.05 282);
+  --primary-container: oklch(0.34 0.07 282);
+  --on-primary-container: oklch(0.95 0.03 282);
+
+  // Secondary colors
+  --secondary: oklch(0.76 0.1 102);
+  --on-secondary: oklch(0.98 0.05 102);
+  --secondary-container: oklch(0.34 0.05 102);
+  --on-secondary-container: oklch(0.96 0.03 102);
+
+  // Error colors
+  --error: var(--danger);
+  --on-error: oklch(0.98 0.03 30);
+  --error-container: oklch(0.32 0.05 30);
+  --on-error-container: oklch(0.96 0.03 30);
+
+  // Warning colors
+  --warning: var(--warning);
+  --on-warning: oklch(0.98 0.03 100);
+  --warning-container: oklch(0.34 0.04 100);
+  --on-warning-container: oklch(0.96 0.03 100);
+
+  // Success colors
+  --on-success: oklch(0.98 0.03 160);
+  --success-container: oklch(0.34 0.04 160);
+  --on-success-container: oklch(0.96 0.03 160);
+
+  // Info colors
+  --on-info: oklch(0.98 0.03 261);
+  --info-container: oklch(0.34 0.03 261);
+  --on-info-container: oklch(0.96 0.03 261);
+
+  // Outline colors
+  --outline: var(--border);
+  --outline-variant: var(--border-muted);
+
+  // Inverse colors
+  --inverse-surface: oklch(0.92 0.02 282);
+  --inverse-on-surface: oklch(0.11 0.01 282);
+  --inverse-primary: oklch(0.32 0.1 282);
+
+  // Other colors
+  --scrim: rgba(0, 0, 0, 0.5);
 }
 
 // Breakpoints
