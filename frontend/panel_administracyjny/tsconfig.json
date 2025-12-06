@@ -5,14 +5,42 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@pipes/*": ["src/app/pipes/*"],
-      "@services/*": ["src/app/services/*"],
-      "@components/*": ["src/app/components/*"],
-      "@database/*": ["src/app/services/database/*"],
-      "@tooltips/*": ["src/app/tooltip-service/*"],
-      "@switch": ["src/app/switch/switch.component"],
-      "@checkbox": ["src/app/checkbox/checkbox.component"],
-      "@calendar": ["src/app/calendar/calendar.component"]
+      "@pipes/*": [
+        "src/app/pipes/*"
+      ],
+      "@services/*": [
+        "src/app/services/*"
+      ],
+      "@components/*": [
+        "src/app/components/*"
+      ],
+      "@database/*": [
+        "src/app/services/database/*"
+      ],
+      "@shared/*": [
+        "src/app/shared/*"
+      ],
+      "@utils/*": [
+        "src/app/utils/*"
+      ],
+      "@environments/*": [
+        "src/environments/*"
+      ],
+      "@modals/*": [
+        "src/app/modals/*"
+      ],
+      "@directives/*": [
+        "src/app/directives/*"
+      ],
+      "%switch": [
+        "src/app/shared/switch/switch.ts"
+      ],
+      "%dropdown": [
+        "src/app/shared/dropdown/dropdown.ts"
+      ],
+      "%checkbox": [
+        "src/app/shared/checkbox/checkbox.ts"
+      ]
     },
     "outDir": "./dist/out-tsc",
     "strict": true,
