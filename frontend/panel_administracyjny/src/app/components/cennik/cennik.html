@@ -1,11 +1,11 @@
 <div class="table-container">
   <div>
-    <button (click)="openWindow('add')" class="add-price">
+    <button (click)="openWindow('add')" button-primary class="add-price">
       Dodaj cennik
       @let add_title = 'Dodaj nowy cennik';
       <fa-icon [attr.aria-label]="add_title" [icon]="faPlus" [title]="add_title" />
     </button>
-    <button (click)="fetchPricing()" class="refresh-prices">
+    <button (click)="fetchPricing()" button-secondary class="refresh-prices">
       @if (isLoading) {
         Ładowanie...
       } @else {
@@ -14,12 +14,12 @@
       @let refresh_title = 'Odśwież cenniki';
       <fa-icon [attr.aria-label]="refresh_title" [class.spin]="isLoading" [icon]="faArrowsRotate" [title]="refresh_title" />
     </button>
-    <button class="filter-prices">
+    <button button-default class="filter-prices">
       Filtruj
       <fa-icon [icon]="faFilter" />
     </button>
   </div>
-  <table>
+  <table table-default>
     <thead>
     <tr>
       <th>#</th>
@@ -37,14 +37,16 @@
             <td>{{ price.cena | currency }}</td>
             <td>{{ price.data_od | date : 'longDate' }}</td>
             <td>{{ price.data_do | date : 'longDate' }}</td>
-            <td class="td-button">
-              <button (click)="selectedPricing.set(price)" [class.selected]="price | isSelectedPrice:selectedPricing()">
-                @if (price | isSelectedPrice:selectedPricing()) {
-                  Wybrano
-                } @else {
+            <td>
+              @if (!(price | isSelectedPrice:selectedPricing())) {
+                <button (click)="selectedPricing.set(price)" button-primary>
                   Wybierz
-                }
-              </button>
+                </button>
+              } @else {
+                <button button-secondary>
+                  Wybrano
+                </button>
+              }
             </td>
           </tr>
         } @empty {
@@ -58,33 +60,33 @@
 </div>
 @if (selectedPricing()) {
   <form [formGroup]="pricingForm" class="pricing-form">
-    <fieldset>
+    <fieldset fieldset-default>
       <legend>
         <fa-icon [icon]="faFileInvoiceDollar" />
         Szczegóły cennika
       </legend>
-      <label>
+      <label label-default>
         <span>Cena:</span>
-        <input aria-label="Cena" formControlName="cena" min="0" step="0.01" type="number">
+        <input aria-label="Cena" formControlName="cena" input-default min="0" step="0.01" type="number">
       </label>
-      <label>
+      <label label-default>
         <span>Data Rozpoczęcia:</span>
-        <input aria-label="Data rozpoczęcia" formControlName="data_od" type="date">
+        <input aria-label="Data rozpoczęcia" formControlName="data_od" input-default type="date">
       </label>
-      <label>
+      <label label-default>
         <span>Data Zakończenia:</span>
-        <input aria-label="Data zakończenia" formControlName="data_do" type="date">
+        <input aria-label="Data zakończenia" formControlName="data_do" input-default type="date">
       </label>
       <div>
-        <button (click)="updatePricing()" type="submit">
+        <button (click)="updatePricing()" button-success type="submit">
           Prześlij dane
           <fa-icon [icon]="faPaperPlane" />
         </button>
-        <button (click)="resetForm()" type="reset">
+        <button (click)="resetForm()" button-danger type="reset">
           Resetuj
           <fa-icon [icon]="faRotate" />
         </button>
-        <button (click)="openWindow('delete')" class="delete-pricing">
+        <button (click)="openWindow('delete')" button-danger class="delete-pricing">
           Usuń deklaracje
           <fa-icon [icon]="faTrash" />
         </button>

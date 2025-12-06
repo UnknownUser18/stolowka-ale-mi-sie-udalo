@@ -11,16 +11,34 @@ import { Notifications } from '@services/notifications';
 import { Prices, ZPricing } from "@database/prices/prices";
 import { IsSelectedPricePipe } from "@pipes/isSelectedPrice/is-selected-price.pipe";
 import { Calendar } from "@utils/calendar/calendar";
+import { ButtonPrimary } from "%button-primary";
+import { ButtonSecondary } from "%button-secondary";
+import { ButtonDefault } from "%button-default";
+import { Fieldset } from "%fieldset";
+import { Label } from "%label";
+import { Input } from "%input";
+import { ButtonSuccess } from "%button-success";
+import { ButtonDanger } from "%button-danger";
+import { Table } from "%table";
 
 @Component({
   selector : 'app-cennik',
-  imports   : [
+  imports : [
     ReactiveFormsModule,
     DatePipe,
     CurrencyPipe,
     FaIconComponent,
     IsSelectedPricePipe,
-    Calendar
+    Calendar,
+    ButtonPrimary,
+    ButtonSecondary,
+    ButtonDefault,
+    Fieldset,
+    Label,
+    Input,
+    ButtonSuccess,
+    ButtonDanger,
+    Table
   ],
   providers : [
     { provide : DEFAULT_CURRENCY_CODE, useValue : 'PLN' },

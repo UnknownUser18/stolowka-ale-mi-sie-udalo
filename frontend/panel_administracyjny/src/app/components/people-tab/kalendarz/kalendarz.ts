@@ -9,14 +9,18 @@ import { InDeclarationPipe } from '@pipes/inDeclaration/in-declaration.pipe';
 import { IsAbsencePipe } from '@pipes/isAbsence/is-absence.pipe';
 import { IsWeekendPipe } from '@pipes/isWeekend/is-weekend.pipe';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faCheck, faXmark, faPaperPlane, faArrowsRotate, faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icons';
+import { faArrowsRotate, faCheck, faPaperPlane, faUpRightAndDownLeftFromCenter, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip } from '@utils/tooltip/tooltip';
 import { TooltipDelayTriggerDirective } from '@directives/delayTooltip/tooltip-delay-trigger.directive';
 import { IsEntireRowSelectedPipe } from '@pipes/isEntireRowSelected/is-entire-row-selected.pipe';
-import { forkJoin, firstValueFrom } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 import { IsClosedPipe } from '@pipes/isClosed/is-closed.pipe';
 import { Dialog } from '@modals/dialog/dialog';
 import { DialogTriggerDirective } from '@directives/dialog/dialog-trigger.directive';
+import { ButtonPrimary } from "%button-primary";
+import { ButtonDefault } from "%button-default";
+import { Table } from "%table";
+import { PrimaryText } from "%primary-text";
 
 type notificationFrom = 'declarations' | 'absences' | 'closedDays' | null;
 
@@ -35,6 +39,10 @@ type notificationFrom = 'declarations' | 'absences' | 'closedDays' | null;
     IsClosedPipe,
     Dialog,
     DialogTriggerDirective,
+    ButtonPrimary,
+    ButtonDefault,
+    Table,
+    PrimaryText,
   ],
   templateUrl : './kalendarz.html',
   styleUrl : './kalendarz.scss'

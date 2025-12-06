@@ -13,6 +13,16 @@ import { Dialog } from "@modals/dialog/dialog";
 import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.directive";
 import { Tooltip } from "@utils/tooltip/tooltip";
 import { TooltipDelayTriggerDirective } from "@directives/delayTooltip/tooltip-delay-trigger.directive";
+import { ButtonPrimary } from "%button-primary";
+import { ButtonSecondary } from "%button-secondary";
+import { ButtonDefault } from "%button-default";
+import { Table } from "%table";
+import { Label } from "%label";
+import { Input } from "%input";
+import { Fieldset } from "%fieldset";
+import { ButtonSuccess } from "%button-success";
+import { ButtonDanger } from "%button-danger";
+import { LabelOneLine } from "%label-one-line";
 
 @Component({
   selector : 'app-deklaracje',
@@ -26,7 +36,17 @@ import { TooltipDelayTriggerDirective } from "@directives/delayTooltip/tooltip-d
     Dialog,
     DialogTriggerDirective,
     TooltipDelayTriggerDirective,
-    Tooltip
+    Tooltip,
+    ButtonPrimary,
+    ButtonSecondary,
+    ButtonDefault,
+    Table,
+    Label,
+    Input,
+    Fieldset,
+    ButtonSuccess,
+    ButtonDanger,
+    LabelOneLine
   ],
   templateUrl : './deklaracje.html',
   styleUrl : './deklaracje.scss',

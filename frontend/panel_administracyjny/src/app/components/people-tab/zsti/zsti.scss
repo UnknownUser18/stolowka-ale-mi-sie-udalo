@@ -6,8 +6,6 @@
   height: 100%;
 }
 
-@include i.table;
-
 section {
   width: 100%;
   padding: i.$padding-xs i.$padding-md;
@@ -19,44 +17,9 @@ section {
 
   p {
     margin: 0 auto;
-    font-family: 'Manrope', i.$font-base;
+    font-family: i.$font-interface;
     font-size: i.$font-size-lg;
   }
-
-  button {
-    color: var(--text-muted);
-    transition: i.transition(color, i.$duration-sm);
-
-    &:hover, &:focus {
-      color: var(--text);
-    }
-  }
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-
-.filter-button, .sort-button, .refresh-button {
-  @include i.button-default;
-}
-
-.add-button {
-  @include i.button-layout;
-  border: i.$base-border var(--border-muted);
-  background-color: var(--primary);
-  color: var(--bg) !important;
-
-  &:hover, &:focus {
-    background-color: var(--secondary);
-    color: var(--text);
-    border-color: var(--border);
-  }
-}
-
-button {
-  font-size: inherit;
 }
 
 search {
@@ -150,22 +113,13 @@ select {
     grid-template-columns: auto auto auto;
     align-items: center;
 
-    &:not(.one-line):focus-within span {
+    &:focus-within span {
       border-color: var(--border);
     }
 
-    &.one-line {
-      display: flex;
-      gap: i.$padding-sm;
-      align-items: center;
-
-      span {
-        border-bottom: none;
-      }
-    }
   }
 
-  span {
+  div span {
     grid-column: 1 / -1;
     grid-row: 1;
     transition: i.transition(border-color, i.$duration-sm);
@@ -181,9 +135,6 @@ select {
     grid-column: 2 / span 2;
   }
 
-  input {
-    @include i.input;
-  }
 }
 
 .sort-options {

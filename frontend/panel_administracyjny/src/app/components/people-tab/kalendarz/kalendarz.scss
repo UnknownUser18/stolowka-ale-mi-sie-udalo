@@ -137,20 +137,6 @@ section {
   }
 }
 
-.refresh-data {
-  @include i.button-default;
-}
-
-.send-absence {
-  background-color: var(--primary);
-  color: var(--bg);
-  transition: i.transition(background-color, i.$duration-sm);
-
-  &:hover, &:focus {
-    background-color: var(--secondary);
-  }
-}
-
 .diff {
   display: flex;
   gap: i.$padding-md;
@@ -222,59 +208,7 @@ section {
     text-align: center;
   }
 
-  .table-wrapper {
-    max-height: 50vh;
-    overflow-y: auto;
+  button {
+    font-size: i.$font-size-2xl;
   }
-
-  table {
-    border: i.$base-border var(--border-muted);
-    border-radius: i.$border-radius-md;
-    background-color: var(--bg);
-    text-align: center;
-    table-layout: fixed;
-    border-spacing: 0;
-
-
-    th {
-      padding: i.$padding-3xs;
-      font-family: i.$font-interface;
-      font-size: i.$font-size-lg;
-      font-weight: 500;
-    }
-
-    tr {
-      width: 100%;
-      display: table;
-      table-layout: fixed;
-    }
-
-    td {
-      padding: i.$padding-xs;
-      font-size: i.$font-size-md;
-      border-top: i.$base-border var(--border-muted);
-    }
-
-    button {
-      color: var(--text-muted);
-      transition: i.transition(color, i.$duration-sm);
-
-      &:hover, &:focus {
-        color: var(--text);
-      }
-
-      fa-icon {
-        font-size: i.$font-size-lg;
-      }
-    }
-
-    tr:nth-of-type(even) {
-      background-color: var(--bg-light);
-    }
-  }
-}
-
-.spin {
-  display: inline-block;
-  animation: spin 2s linear infinite;
 }

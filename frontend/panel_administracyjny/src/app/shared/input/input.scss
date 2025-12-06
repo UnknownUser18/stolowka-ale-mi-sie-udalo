@@ -26,6 +26,12 @@
     border-color: var(--border-muted);
   }
 
+  &:read-only {
+    background-color: var(--surface);
+    color: var(--text-muted) !important;
+    border-color: var(--border-muted);
+  }
+
   &:focus {
     outline-color: var(--outline);
   }

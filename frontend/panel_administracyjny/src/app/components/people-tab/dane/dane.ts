@@ -8,6 +8,13 @@ import { Switch } from '%switch';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { Tooltip } from '@utils/tooltip/tooltip';
 import { TooltipDelayTriggerDirective } from '@directives/delayTooltip/tooltip-delay-trigger.directive';
+import { Fieldset } from "%fieldset";
+import { Label } from "%label";
+import { Input } from "%input";
+import { LabelOneLine } from "%label-one-line";
+import { ButtonSecondary } from "%button-secondary";
+import { ButtonPrimary } from "%button-primary";
+import { ButtonDanger } from "%button-danger";
 
 @Component({
   selector : 'app-dane',
@@ -17,7 +24,14 @@ import { TooltipDelayTriggerDirective } from '@directives/delayTooltip/tooltip-d
     Switch,
     FaIconComponent,
     Tooltip,
-    TooltipDelayTriggerDirective
+    TooltipDelayTriggerDirective,
+    Fieldset,
+    Label,
+    Input,
+    LabelOneLine,
+    ButtonSecondary,
+    ButtonPrimary,
+    ButtonDanger,
   ],
   templateUrl : './dane.html',
   styleUrl : './dane.scss'

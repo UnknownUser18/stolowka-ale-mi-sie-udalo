@@ -8,6 +8,13 @@ import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faArrowRight, faBan, faCheck, faIdCard, faPlus, faRotateLeft, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 import { Dialog } from "@modals/dialog/dialog";
 import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.directive";
+import { Fieldset } from "%fieldset";
+import { Label } from "%label";
+import { Input } from "%input";
+import { ButtonDefault } from "%button-default";
+import { ButtonDanger } from "%button-danger";
+import { ButtonPrimary } from "%button-primary";
+import { ButtonSuccess } from "%button-success";
 
 @Component({
   selector : 'app-karty',
@@ -15,7 +22,14 @@ import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.direct
     ReactiveFormsModule,
     FaIconComponent,
     Dialog,
-    DialogTriggerDirective
+    DialogTriggerDirective,
+    Fieldset,
+    Label,
+    Input,
+    ButtonDefault,
+    ButtonDanger,
+    ButtonPrimary,
+    ButtonSuccess
   ],
   templateUrl : './karty.html',
   styleUrl : './karty.scss',

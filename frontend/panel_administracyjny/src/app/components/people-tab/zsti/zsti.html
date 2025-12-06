@@ -8,7 +8,7 @@
     </button>
   </search>
 
-  <button class="filter-button" [dialog]="filterDialog">
+  <button [dialog]="filterDialog" button-default>
     Filtruj
     @let filter_title = 'Otwórz menu filtrów';
     <fa-icon [attr.aria-label]="filter_title" [icon]="faIcons.faFilter" [title]="filter_title" />
@@ -25,26 +25,27 @@
     <p>Znaleziono {{ shownZPersons.length }} {{ osobString(shownZPersons.length) }}</p>
   }
 
-  <button class="sort-button" [tooltip]="usedSortTooltip" [clickT]="sortTooltip" [underCursor]="true" [disabled]="shownZPersons === null || shownZPersons === undefined || shownZPersons.length === 0">
+  @let isPersonsEmpty = shownZPersons === null || shownZPersons === undefined || shownZPersons.length === 0;
+  <button [clickT]="sortTooltip" [disabled]="isPersonsEmpty" [tooltip]="usedSortTooltip" [underCursor]="true" button-default>
     Sortuj
     @let sort_title = 'Sortuj osoby';
     <fa-icon [attr.aria-label]="sort_title" [icon]="faIcons.faArrowUpWideShort" [title]="sort_title" />
   </button>
 
-  <button class="refresh-button" (click)="requestPersons()" [disabled]="isRefreshing()">
+  <button (click)="requestPersons()" [disabled]="isRefreshing()" button-secondary>
     Odśwież
     @let refresh_title = 'Odśwież listę osób';
     <fa-icon [attr.aria-label]="refresh_title" [class.spin]="isRefreshing()" [icon]="faIcons.faArrowsRotate" [title]="refresh_title" />
   </button>
 
-  <button class="add-button">
+  <button button-primary>
     Dodaj osobę
     @let add_title = 'Dodaj nową osobę do stołówki';
     <fa-icon [attr.aria-label]="add_title" [icon]="faIcons.faPlus" [title]="add_title" />
     <!-- This will redirect to another route (DO NOT MAKE A VIEW ON THIS COMPONENT)   -->
   </button>
 </section>
-<table>
+<table table-default>
   <thead>
   <tr>
     <th>#</th>
@@ -63,7 +64,7 @@
             @let full_name = `${ person.nazwisko } ${ person.imie }`;
             @let button_title = `Wybierz osobę ${ full_name }`;
             <td>
-              <button (click)="selectPerson(person)" [title]="button_title" [attr.aria-label]="button_title">{{ full_name }}</button>
+              <button (click)="selectPerson(person)" [attr.aria-label]="button_title" [title]="button_title" primary-text>{{ full_name }}</button>
             </td>
             <td>{{ isTeacher(person) ? 'Nauczyciel' : person.klasa }}</td>
             <td>
@@ -115,7 +116,7 @@
           <!--          </select>-->
         </label>
         <label>
-          <input [field]="filterForm.imie" aria-label="Imię" placeholder="Imię..." type="text" />
+          <input [field]="filterForm.imie" aria-label="Imię" input-default placeholder="Imię..." type="text" />
         </label>
       </div>
       <div>
@@ -129,13 +130,13 @@
           <!--          </select>-->
         </label>
         <label>
-          <input [field]="filterForm.nazwisko" aria-label="Nazwisko" placeholder="Nazwisko..." type="text" />
+          <input [field]="filterForm.nazwisko" aria-label="Nazwisko" input-default placeholder="Nazwisko..." type="text" />
         </label>
       </div>
       <div>
         <span>Klasa:</span>
         <label>
-          <input [delayT]="klasaTooltip" [field]="filterForm.klasa" aria-label="Klasa" placeholder="Klasa..." type="text" />
+          <input [delayT]="klasaTooltip" [field]="filterForm.klasa" aria-label="Klasa" input-default placeholder="Klasa..." type="text" />
         </label>
       </div>
     </fieldset>
@@ -144,28 +145,28 @@
         <fa-icon [icon]="faIcons.faSchool" />
         Dane szkolne
       </legend>
-      <div class="one-line">
+      <label label-one-line>
         <span>Może uczęszczać:</span>
         <switch [field]="filterForm.uczeszcza" [label]="'Może uczęszczać'" [type]="'3-way'" />
-      </div>
-      <div class="one-line">
+      </label>
+      <label label-one-line>
         <span>Opłacany przez miasto:</span>
         <switch [field]="filterForm.miasto" [label]="'Opłacany przez miasto'" [type]="'3-way'" />
-      </div>
-      <div class="one-line">
+      </label>
+      <label label-one-line>
         <span>Typ osoby:</span>
         <select [field]="filterForm.typ_osoby">
           <option [value]="TypOsoby.UCZEN">Uczeń</option>
           <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
           <option [value]="'all'">Wszyscy</option>
         </select>
-      </div>
+      </label>
     </fieldset>
-    <button type="reset">
+    <button button-danger type="reset">
       <fa-icon [icon]="faIcons.faRotateLeft" />
       Resetuj
     </button>
-    <button type="submit" (click)="applyFilters()">
+    <button (click)="applyFilters()" button-success type="submit">
       Zastosuj
       <fa-icon [icon]="faIcons.faCheck" />
     </button>

@@ -46,7 +46,7 @@
     </div>
   }
   <div class="action-buttons">
-    <button (click)="sendAbsence()" class="send-absence">
+    <button (click)="sendAbsence()" button-primary>
       @if (!isSending()) {
         <fa-icon [icon]="faPaperPlane" />
         Prześlij
@@ -55,7 +55,7 @@
         Przesyłanie...
       }
     </button>
-    <button (click)="getData().then()" class="refresh-data">
+    <button (click)="getData().then()" button-default>
       <fa-icon [icon]="faArrowsRotate" [class.spin]="isRefreshing()" />
       @if (!isRefreshing()) {
         Odśwież dane
@@ -140,7 +140,7 @@
 <app-dialog #addedAbsenceDaysDialog>
   <div class="dialog">
     <h2>Dodane nieobecności</h2>
-    <table>
+    <table table-default>
       <thead>
       <tr>
         <th>#</th>
@@ -148,7 +148,7 @@
         <th>Usuń</th>
       </tr>
       </thead>
-      <div class="table-wrapper">
+      <div class="table-body-scroll">
         <tbody>
           @for (day of personS.localAbsenceChanges().added.reverse(); track day; let index = $index) {
             <tr>
@@ -156,7 +156,7 @@
               <td>{{ day | date : 'longDate' }}</td>
               <td>
                 @let remove_title = 'Usuń tę nieobecność z listy dodanych nieobecności';
-                <button (click)="removeAbsence(day)" [title]="remove_title" [attr.aria-label]="remove_title">
+                <button (click)="removeAbsence(day)" [attr.aria-label]="remove_title" [title]="remove_title" primary-text>
                   <fa-icon [icon]="faXmark" />
                 </button>
               </td>
@@ -175,7 +175,7 @@
 <app-dialog #removedAbsenceDaysDialog>
   <div class="dialog">
     <h2>Usunięte nieobecności</h2>
-    <table>
+    <table table-default>
       <thead>
       <tr>
         <th>#</th>
@@ -183,7 +183,7 @@
         <th>Usuń</th>
       </tr>
       </thead>
-      <div class="table-wrapper">
+      <div class="table-body-scroll">
         <tbody>
           @for (day of personS.localAbsenceChanges().removed.reverse(); track day; let index = $index) {
             <tr>
@@ -191,7 +191,7 @@
               <td>{{ day | date : 'longDate' }}</td>
               <td>
                 @let remove_title = 'Usuń tę nieobecność z listy usuniętych nieobecności';
-                <button (click)="removeAbsence(day)" [title]="remove_title" [attr.aria-label]="remove_title">
+                <button (click)="removeAbsence(day)" [attr.aria-label]="remove_title" [title]="remove_title" primary-text>
                   <fa-icon [icon]="faXmark" />
                 </button>
               </td>

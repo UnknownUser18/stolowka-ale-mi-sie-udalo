@@ -14,6 +14,15 @@ import { TooltipTriggerDirective } from '@directives/tooltip/tooltip-trigger.dir
 import { Router } from '@angular/router';
 import { Field, form } from "@angular/forms/signals";
 import { Dropdown } from "@shared/dropdown/dropdown";
+import { ButtonPrimary } from "%button-primary";
+import { ButtonDefault } from "%button-default";
+import { ButtonSecondary } from "%button-secondary";
+import { PrimaryText } from "%primary-text";
+import { Table } from "@shared/table/table";
+import { Input } from "%input";
+import { LabelOneLine } from "%label-one-line";
+import { ButtonDanger } from "%button-danger";
+import { ButtonSuccess } from "%button-success";
 
 type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
 type SortOption = 'surnameAsc' | 'surnameDesc' |
@@ -39,6 +48,15 @@ type SortOption = 'surnameAsc' | 'surnameDesc' |
     TooltipTriggerDirective,
     Field,
     Dropdown,
+    ButtonPrimary,
+    ButtonDefault,
+    ButtonSecondary,
+    PrimaryText,
+    Table,
+    Input,
+    LabelOneLine,
+    ButtonDanger,
+    ButtonSuccess,
   ],
   templateUrl : './zsti.html',
   styleUrl : './zsti.scss'

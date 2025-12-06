@@ -9,38 +9,8 @@
   padding-right: i.$padding-md;
 }
 
-.td-button button {
+td button {
   margin: auto;
-  font-size: i.$font-size-sm;
-
-  &.selected {
-    background-color: var(--secondary);
-
-    &:hover, &:focus {
-      background-color: var(--secondary);
-      color: var(--bg);
-    }
-  }
-
-  @include i.button-primary;
-}
-
-
-label {
-  display: flex;
-  gap: i.$padding-2xs;
-  flex-direction: column;
-  font-size: i.$font-size-lg;
-
-  &.one-line {
-    width: fit-content;
-    align-items: center;
-    flex-direction: row;
-  }
-}
-
-td {
-  font-size: i.$font-size-sm;
 }
 
 .table-container {
@@ -59,23 +29,13 @@ td {
   }
 }
 
-.filter-declaration {
-  @include i.button-default;
-}
-
 fieldset {
-  @include i.fieldset;
   transition: i.transition(border-color);
 
   &.error {
     border-color: var(--danger);
   }
 }
-
-input {
-  @include i.input;
-}
-
 
 form {
   display: flex;
@@ -95,30 +55,11 @@ form {
   @include i.form-buttons;
 }
 
-.remove-declaration {
-  @include i.danger-button;
-}
-
-.add-declaration {
-  height: fit-content;
-  justify-self: center;
-  font-size: i.$font-size-md;
-  @include i.button-primary;
-}
-
 .declaration-form {
   height: fit-content;
   align-self: center;
   grid-column: 2;
   grid-row: 1 / -1;
-}
-
-.refresh-declarations {
-  @include i.button-default;
-
-  fa-icon.spin {
-    animation: spin 2s linear infinite;
-  }
 }
 
 .add-dialog-form {
@@ -168,20 +109,6 @@ h3 {
       color: var(--text);
     }
   }
-
-  button {
-    width: fit-content;
-    font-size: i.$font-size-md;
-
-    &:first-of-type {
-      @include i.danger-button;
-    }
-
-    &:last-of-type {
-      justify-self: end;
-      @include i.button-default;
-    }
-  }
 }
 
 .filter-dialog-form {
@@ -196,5 +123,3 @@ h3 {
 
   @include i.form-buttons;
 }
-
-@include i.table;

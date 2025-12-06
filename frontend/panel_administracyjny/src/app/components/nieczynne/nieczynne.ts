@@ -9,15 +9,21 @@ import { faArrowsRotate, faCircle, faPlus, faXmark } from '@fortawesome/free-sol
 import { ClosedDay, Declarations } from '@database/declarations/declarations';
 import { firstValueFrom } from 'rxjs';
 import { Notifications } from '@services/notifications';
+import { ButtonDefault } from "%button-default";
+import { Table } from "%table";
+import { ButtonPrimary } from "%button-primary";
 
 // import {FaIconComponent} from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector : 'app-nieczynne',
-  imports: [
+  imports : [
     ReactiveFormsModule,
     DatePipe,
     FaIconComponent,
+    ButtonDefault,
+    ButtonPrimary,
+    Table,
   ],
   templateUrl : './nieczynne.html',
   styleUrl    : './nieczynne.scss',

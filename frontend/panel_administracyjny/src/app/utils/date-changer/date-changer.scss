@@ -11,18 +11,6 @@
 
 button {
   color: var(--text-muted);
-  transition: i.transition(color, i.$duration-sm);
-
-  &:nth-of-type(2) {
-    color: var(--text);
-  }
-
-  &:hover, &:focus {
-    color: var(--text);
-  }
-}
-
-button {
   min-width: 30%;
   font-size: i.$font-size-lg;
 }

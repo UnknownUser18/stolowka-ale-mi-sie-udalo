@@ -1,27 +1,27 @@
 <form [formGroup]="cardForm">
-  <fieldset>
+  <fieldset fieldset-default>
     <legend>
       <fa-icon [icon]="faIdCard" />
       Karta
     </legend>
-    <label>
+    <label label-default>
       <span>Numer karty:</span>
-      <input type="text" formControlName="key_card" readonly required aria-label="Numer karty">
+      <input aria-label="Numer karty" formControlName="key_card" input-default readonly required type="text">
     </label>
-    <label>
+    <label label-default>
       <span>Data aktywacji:</span>
-      <input type="date" formControlName="data_wydania" readonly required aria-label="Data aktywacji">
+      <input aria-label="Data aktywacji" formControlName="data_wydania" input-default readonly required type="date">
     </label>
-    <label>
+    <label label-default>
       <span>Ostatnie użycie:</span>
-      <input type="datetime-local" formControlName="ostatnie_uzycie" readonly required aria-label="Ostatnie użycie">
+      <input aria-label="Ostatnie użycie" formControlName="ostatnie_uzycie" input-default readonly required type="datetime-local">
     </label>
     <div>
-      <button class="warning-button" [dialog]="deleteCardDialog" [disabled]="!cardForm.get('key_card')?.value">
+      <button [dialog]="deleteCardDialog" [disabled]="!cardForm.get('key_card')?.value" button-danger>
         <fa-icon [icon]="faTrashCan" />
         Dezaktywuj kartę
       </button>
-      <button class="success-button" [dialog]="addCardDialog">
+      <button [dialog]="addCardDialog" button-primary>
         Aktywuj nową kartę
         <fa-icon [icon]="faPlus" />
       </button>
@@ -35,11 +35,11 @@
     <p>Aktywacja nowej karty spowoduje dezaktywację obecnej karty przypisanej do tego użytkownika.</p>
     <p>Czy na pewno chcesz aktywować nową kartę?</p>
     <div>
-      <button (click)="addCardDialog.hide()" class="warning-button">
+      <button (click)="addCardDialog.hide()" button-default>
         <fa-icon [icon]="faBan" />
         Anuluj
       </button>
-      <button [dialog]="addCardContinueDialog" (click)="deleteCard(); addCardDialog.hide()" class="success-button">
+      <button (click)="deleteCard(); addCardDialog.hide()" [dialog]="addCardContinueDialog" button-primary>
         Kontynuuj
         <fa-icon [icon]="faArrowRight" />
       </button>
@@ -51,22 +51,22 @@
   <div class="dialog activate-card-dialog">
     <h3>Aktywacja karty</h3>
     <form [formGroup]="addCardForm" class="add-card-form">
-      <fieldset>
+      <fieldset fieldset-default>
         <legend>
           <fa-icon [icon]="faIdCard" />
           Karta
         </legend>
-        <label>
+        <label label-default>
           <span>Numer karty:</span>
-          <input type="text" formControlName="key_card" required>
+          <input formControlName="key_card" input-default required type="text">
         </label>
       </fieldset>
       <div>
-        <button type="reset">
+        <button button-danger type="reset">
           <fa-icon [icon]="faRotateLeft" />
           Resetuj
         </button>
-        <button type="submit" (click)="addCard(); addCardContinueDialog.hide()" [disabled]="addCardForm.invalid" class="success-button">
+        <button (click)="addCard(); addCardContinueDialog.hide()" [disabled]="addCardForm.invalid" button-success type="submit">
           Aktywuj kartę
           <fa-icon [icon]="faCheck" />
         </button>
@@ -77,15 +77,15 @@
 
 <app-dialog #deleteCardDialog>
   <div class="dialog deactivate-card-dialog">
-    <h3>Czy na pewno chcesz zdeaktywować kartę?</h3>
+    <h3>Czy na pewno chcesz zdezaktywować kartę?</h3>
     <h4>Co to oznacza?</h4>
     <p>Oznacza to, że ta osoba nie będzie mogła za pomocą karty przychodzić na stołówkę.</p>
     <div>
-      <button (click)="deleteCardDialog.hide()" class="warning-button">
+      <button (click)="deleteCardDialog.hide()" button-default>
         <fa-icon [icon]="faBan" />
         Anuluj
       </button>
-      <button (click)="deleteCard(); deleteCardDialog.hide()" class="success-button">
+      <button (click)="deleteCard(); deleteCardDialog.hide()" button-danger>
         Tak
         <fa-icon [icon]="faCheck" />
       </button>

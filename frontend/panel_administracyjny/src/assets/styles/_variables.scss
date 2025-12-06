@@ -166,11 +166,3 @@ $font-line-heights: (
   $font-size-2xl: 1.2,
   $font-size-3xl: 1.1
 );
-
-// TODO: Remove when migration to new variables is complete
-$short: 200ms;
-$medium: 300ms;
-$long: 500ms;
-$xlong: 750ms;
-$box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-$cubic-bezier: cubic-bezier(0.4, 0, 0.2, 1);

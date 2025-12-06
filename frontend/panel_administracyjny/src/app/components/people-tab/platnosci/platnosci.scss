@@ -2,38 +2,14 @@
 
 :host {
   height: 100%;
+  padding: i.$padding-md 0;
   display: grid;
   gap: i.$padding-md;
   grid-template-columns: 0.9fr 1fr;
-  padding: i.$padding-md 0;
 }
 
-.td-button button {
+td button {
   margin: auto;
-  font-size: i.$font-size-sm;
-
-  &.selected {
-    background-color: var(--secondary);
-
-    &:hover, &:focus {
-      background-color: var(--secondary);
-      color: var(--bg);
-    }
-  }
-
-  @include i.button-primary;
-}
-
-
-label {
-  display: flex;
-  gap: i.$padding-2xs;
-  flex-direction: column;
-  font-size: i.$font-size-lg;
-}
-
-td {
-  font-size: i.$font-size-sm;
 }
 
 .table-container {
@@ -52,23 +28,14 @@ td {
   }
 }
 
-.filter-payment {
-  @include i.button-default;
-}
 
 fieldset {
-  @include i.fieldset;
   transition: i.transition(border-color);
 
   &.error {
     border-color: var(--danger);
   }
 }
-
-input {
-  @include i.input;
-}
-
 
 form {
   display: flex;
@@ -88,24 +55,6 @@ form {
   @include i.form-buttons;
 }
 
-.remove-declaration {
-  @include i.danger-button;
-}
-
-.add-payment {
-  height: fit-content;
-  justify-self: center;
-  font-size: i.$font-size-md;
-  @include i.button-primary;
-}
-
-.refresh-payment {
-  @include i.button-default;
-
-  fa-icon.spin {
-    animation: spin 2s linear infinite;
-  }
-}
 
 .add-payment-form, .filter-payment-form {
   max-width: 40vw;
@@ -126,10 +75,6 @@ h3 {
 .error-message {
   font-size: i.$font-size-xs;
   color: var(--danger);
-}
-
-.delete-payment {
-  @include i.danger-button;
 }
 
 .delete-dialog {
@@ -158,13 +103,8 @@ h3 {
     width: fit-content;
     font-size: i.$font-size-md;
 
-    &:first-of-type {
-      @include i.danger-button;
-    }
-
     &:last-of-type {
       justify-self: end;
-      @include i.button-default;
     }
   }
 }
@@ -181,5 +121,3 @@ h3 {
 
   @include i.form-buttons;
 }
-
-@include i.table;

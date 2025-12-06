@@ -10,67 +10,22 @@ form {
   grid-template-rows: 1fr 0.15fr;
 
   @include i.form-buttons;
-
-  button[type="submit"] {
-    border: none;
-    background-color: var(--primary);
-    color: var(--bg);
-
-    &:hover, &:focus {
-      background-color: var(--secondary);
-      color: var(--bg);
-    }
-  }
-}
-
-fieldset {
-  @include i.fieldset;
 }
 
 label {
-  display: flex;
-  gap: i.$padding-2xs;
-  flex-direction: column;
-  font-size: i.$font-size-lg;
-
-  &.one-line {
-    width: fit-content;
-    align-items: center;
-    flex-direction: row;
-  }
-
-
   &:focus-within span:not(.error) {
     border-color: var(--border) !important;
   }
 
-  &:not(.one-line) span:not(.error) {
+  &:not([label-one-line]) span:not(.error) {
     transition: i.transition(border-color, i.$duration-sm);
     padding-bottom: i.$padding-3xs;
     border-bottom: i.$base-border var(--border-muted);
   }
 }
 
-input {
-  &:disabled {
-    cursor: not-allowed;
-    background-color: var(--bg);
-    color: var(--text-muted);
-
-    border-color: var(--border-muted);
-
-    &:hover, &:focus {
-      background-color: var(--bg);
-      color: var(--text-muted);
-      border-color: var(--border-muted);
-    }
-  }
-
-  @include i.input;
-}
-
 select {
-  @include i.select;
+  @include i.select; // TODO: remove this line when component is migrated to use `Select` component
 }
 
 option {
@@ -81,23 +36,10 @@ option {
   }
 }
 
-
 div {
   display: flex;
   gap: i.$padding-xl;
   align-items: center;
-
-  &:first-of-type button {
-    background-color: color-mix(in oklch, var(--bg-light) 80%, var(--bg) 20%);
-    color: var(--text-muted);
-    border-color: var(--border-muted);
-
-    &:hover, &:focus {
-      background-color: var(--bg-light);
-      color: var(--text);
-      border-color: var(--border);
-    }
-  }
 
   &:last-of-type {
     justify-content: flex-end;
@@ -115,8 +57,4 @@ button fa-icon {
 .error {
   font-size: i.$font-size-xs;
   color: var(--danger);
-}
-
-.spin {
-  animation: spin 2s infinite linear;
 }

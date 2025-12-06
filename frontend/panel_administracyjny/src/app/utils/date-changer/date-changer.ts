@@ -6,6 +6,10 @@ import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip } from '@utils/tooltip/tooltip';
 import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TooltipClickTriggerDirective } from '@directives/clickTooltip/tooltip-click-trigger.directive';
+import { PrimaryText } from "%primary-text";
+import { SecondaryText } from "%secondary-text";
+import { ButtonDanger } from "%button-danger";
+import { ButtonSuccess } from "%button-success";
 
 @Component({
   selector : 'app-date-changer',
@@ -15,7 +19,11 @@ import { TooltipClickTriggerDirective } from '@directives/clickTooltip/tooltip-c
     Tooltip,
     FormsModule,
     TooltipClickTriggerDirective,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    PrimaryText,
+    SecondaryText,
+    ButtonDanger,
+    ButtonSuccess
   ],
   templateUrl : './date-changer.html',
   styleUrl : './date-changer.scss',

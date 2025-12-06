@@ -9,6 +9,15 @@ import { IsSelectedPaymentPipe } from "@pipes/isSelectedPayment/is-selected-paym
 import { Notifications } from "@services/notifications";
 import { Dialog } from "@modals/dialog/dialog";
 import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.directive";
+import { ButtonPrimary } from "%button-primary";
+import { ButtonSecondary } from "%button-secondary";
+import { ButtonDefault } from "%button-default";
+import { Table } from "%table";
+import { Fieldset } from "%fieldset";
+import { Label } from "%label";
+import { Input } from "%input";
+import { ButtonSuccess } from "%button-success";
+import { ButtonDanger } from "%button-danger";
 
 @Component({
   selector : 'app-platnosci',
@@ -19,7 +28,16 @@ import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.direct
     IsSelectedPaymentPipe,
     CurrencyPipe,
     Dialog,
-    DialogTriggerDirective
+    DialogTriggerDirective,
+    ButtonPrimary,
+    ButtonSecondary,
+    ButtonDefault,
+    Table,
+    Fieldset,
+    Label,
+    Input,
+    ButtonSuccess,
+    ButtonDanger
   ],
   providers : [
     { provide : DEFAULT_CURRENCY_CODE, useValue : 'PLN' },

@@ -1,74 +1,74 @@
 @let typOsoby = forms.get('typ_osoby')?.value;
 <form [formGroup]="forms">
-  <fieldset>
+  <fieldset fieldset-default>
     <legend>
       <fa-icon [icon]="faUser" />
       Dane osobowe
     </legend>
-    <label>
+    <label label-default>
       <span>Imię i nazwisko:</span>
-      <input type="text" formControlName="imie_nazwisko" placeholder="Imię i nazwisko..." name="imie_nazwisko" aria-label="Imię i nazwisko" [pattern]="namePattern" required [attr.aria-errormessage]="forms.get('imie_nazwisko')?.invalid ? 'name-error' : null">
+      <input [attr.aria-errormessage]="forms.get('imie_nazwisko')?.invalid ? 'name-error' : null" [pattern]="namePattern" aria-label="Imię i nazwisko" formControlName="imie_nazwisko" input-default name="imie_nazwisko" placeholder="Imię i nazwisko..." required type="text">
       @if (forms.get('imie_nazwisko')?.invalid) {
         <span class="error" id="name-error">Niepoprawne dane wpisano. Proszę wpisać w formacie <code>[imie] [nazwisko]</code>.</span>
       }
     </label>
-    <label>
+    <label label-default>
       <span>Klasa:</span>
       @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
-        <input type="text" formControlName="klasa" placeholder="Nauczyciel..." name="klasa" aria-label="Nauczyciel" [delayT]="disabledTooltip" [delay]="500" />
+        <input [delayT]="disabledTooltip" [delay]="500" aria-label="Nauczyciel" formControlName="klasa" input-default name="klasa" placeholder="Nauczyciel..." type="text" />
       } @else {
-        <input type="text" formControlName="klasa" placeholder="Klasa..." name="klasa" aria-label="Klasa" [attr.required]="typOsoby === TypOsoby.UCZEN">
+        <input [attr.required]="typOsoby === TypOsoby.UCZEN" aria-label="Klasa" formControlName="klasa" input-default name="klasa" placeholder="Klasa..." type="text">
       }
     </label>
-    <label class="one-line">
+    <label label-one-line>
       <span>Typ osoby:</span>
       <select name="typ_osoby" formControlName="typ_osoby" (change)="updateValidators()" aria-label="Typ osoby">
         <option [value]="TypOsoby.UCZEN">Uczeń</option>
         <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
       </select>
     </label>
-    <label class="one-line">
+    <label label-one-line>
       <span>Opłacany przez miasto:</span>
       <switch [label]="'Opłacany przez miasto'" [type]="'2-way'" formControlName="miasto" />
     </label>
-    <label class="one-line">
+    <label label-one-line>
       <span>Uczęszcza:</span>
       <switch [label]="'Uczęszcza'" [type]="'2-way'" formControlName="uczeszcza" />
     </label>
   </fieldset>
-  <fieldset>
+  <fieldset fieldset-default>
     <legend>
       <fa-icon [icon]="faUserShield" />
       Dane opiekuna
     </legend>
-    <label>
+    <label label-default>
       <span>Imię i nazwisko opiekuna:</span>
       @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
-        <input type="text" formControlName="imie_nazwisko_opiekuna" placeholder="Nauczyciel..." name="imie_nazwisko_opiekuna" aria-label="Nauczyciel" [delayT]="disabledTooltip" [delay]="500" />
+        <input [delayT]="disabledTooltip" [delay]="500" aria-label="Nauczyciel" formControlName="imie_nazwisko_opiekuna" input-default name="imie_nazwisko_opiekuna" placeholder="Nauczyciel..." type="text" />
       } @else {
-        <input type="text" formControlName="imie_nazwisko_opiekuna" placeholder="Imię i nazwisko opiekuna..." name="imie_nazwisko_opiekuna" aria-label="Imię i nazwisko opiekuna" [pattern]="namePattern" [attr.required]="typOsoby === TypOsoby.UCZEN" [attr.aria-errormessage]="forms.get('imie_nazwisko_opiekuna')?.invalid ? 'opiekun-error' : null">
+        <input [attr.aria-errormessage]="forms.get('imie_nazwisko_opiekuna')?.invalid ? 'opiekun-error' : null" [attr.required]="typOsoby === TypOsoby.UCZEN" [pattern]="namePattern" aria-label="Imię i nazwisko opiekuna" formControlName="imie_nazwisko_opiekuna" input-default name="imie_nazwisko_opiekuna" placeholder="Imię i nazwisko opiekuna..." type="text">
         @if (forms.get('imie_nazwisko_opiekuna')?.invalid) {
           <span class="error" id="imie_nazwisko_opiekuna">Niepoprawne dane wpisano. Proszę wpisać w formacie <code>[imie] [nazwisko]</code>.</span>
         }
       }
     </label>
-    <label>
+    <label label-default>
       <span>Telefon:</span>
       @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
-        <input type="tel" formControlName="telefon" placeholder="Nauczyciel..." name="telefon" aria-label="Nauczyciel" [delayT]="disabledTooltip" [delay]="500" />
+        <input [delayT]="disabledTooltip" [delay]="500" aria-label="Nauczyciel" formControlName="telefon" input-default name="telefon" placeholder="Nauczyciel..." type="tel" />
       } @else {
-        <input type="tel" formControlName="telefon" placeholder="Telefon..." name="telefon" aria-label="Telefon" [pattern]="phonePattern" required [attr.aria-errormessage]="forms.get('telefon')?.invalid ? 'phone-error' : null">
+        <input [attr.aria-errormessage]="forms.get('telefon')?.invalid ? 'phone-error' : null" [pattern]="phonePattern" aria-label="Telefon" formControlName="telefon" input-default name="telefon" placeholder="Telefon..." required type="tel">
         @if (forms.get('telefon')?.invalid) {
           <span class="error" id="phone-error">Niepoprawny numer telefonu. Proszę wpisać w formacie <code>+48 123456789</code>.</span>
         }
       }
     </label>
-    <label>
+    <label label-default>
       <span>Email:</span>
       @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
-        <input type="email" formControlName="email" placeholder="Nauczyciel..." name="email" aria-label="Nauczyciel" [delayT]="disabledTooltip" [delay]="500" />
+        <input [delayT]="disabledTooltip" [delay]="500" aria-label="Nauczyciel" formControlName="email" input-default name="email" placeholder="Nauczyciel..." type="email" />
       } @else {
-        <input type="email" formControlName="email" placeholder="Email..." name="email" aria-label="Email" [attr.required]="typOsoby === TypOsoby.UCZEN" [attr.aria-errormessage]="forms.get('email')?.invalid ? 'email-error' : null">
+        <input [attr.aria-errormessage]="forms.get('email')?.invalid ? 'email-error' : null" [attr.required]="typOsoby === TypOsoby.UCZEN" aria-label="Email" formControlName="email" input-default name="email" placeholder="Email..." type="email">
         @if (forms.get('email')?.invalid) {
           <span class="error" id="email-error">Niepoprawny adres email. Proszę wpisać poprawny adres email.</span>
         }
@@ -76,18 +76,18 @@
     </label>
   </fieldset>
   <div>
-    <button>
+    <button button-secondary>
       <fa-icon [icon]="faArrowsRotate" [class.spin]="isRefreshing()" />
       Odśwież dane
     </button>
-    <button>Zarchiwizuj osobę</button>
+    <button button-danger>Zarchiwizuj osobę</button>
   </div>
   <div>
-    <button type="reset" (click)="forms.reset()">
+    <button (click)="forms.reset()" button-danger type="reset">
       Resetuj
       <fa-icon [icon]="faRotateLeft" />
     </button>
-    <button type="submit" (click)="sendChanges()" [class.sending]="isSending()">
+    <button (click)="sendChanges()" [class.sending]="isSending()" button-primary type="submit">
       @if (!isSending()) {
         Prześlij dane
         <fa-icon [icon]="faPaperPlane" />

@@ -1,9 +1,9 @@
-<button (click)="setNewMonth(-1)">
+<button (click)="setNewMonth(-1)" primary-text>
   <fa-icon [icon]="faArrowLeft" />
   {{ previousMonth() | titlecase }}
 </button>
-<button [clickT]="tooltip" [underCursor]="true">{{ currentMonth() | titlecase }}</button>
-<button (click)="setNewMonth(1)">{{ nextMonth() | titlecase }}
+<button [clickT]="tooltip" [underCursor]="true" secondary-text>{{ currentMonth() | titlecase }}</button>
+<button (click)="setNewMonth(1)" primary-text>{{ nextMonth() | titlecase }}
   <fa-icon [icon]="faArrowRight" />
 </button>
 
@@ -19,7 +19,7 @@
     </label>
     @let reset_title = 'Zresetuj wybór miesiąca';
     @let change_title = 'Zmień miesiąc na wybrany';
-    <button [title]="reset_title" [attr.aria-label]="reset_title" type="reset" (click)="month.reset()">Zresetuj</button>
-    <button [disabled]="month.invalid" [title]="change_title" [attr.aria-label]="change_title" (click)="changeMonth()" type="submit">Zmień</button>
+    <button (click)="month.reset()" [attr.aria-label]="reset_title" [title]="reset_title" button-danger type="reset">Zresetuj</button>
+    <button (click)="changeMonth()" [attr.aria-label]="change_title" [disabled]="month.invalid" [title]="change_title" button-success type="submit">Zmień</button>
   </form>
 </app-tooltip>

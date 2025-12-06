@@ -12,11 +12,11 @@
   background-color: var(--bg);
 
   &.fade-out {
-    animation: out i.$duration-lg i.$cubic-bezier forwards;
+    animation: out i.$duration-lg i.$cubic-in-out forwards;
   }
 
   &.fade-in {
-    animation: in i.$duration-md i.$cubic-bezier forwards;
+    animation: in i.$duration-md i.$cubic-in-out forwards;
   }
 
   &.success > .type {

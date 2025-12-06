@@ -5,7 +5,6 @@
   display: block;
 }
 
-
 .dropdown-toggle {
   padding: i.$padding-xs i.$padding-xs i.$padding-xs i.$padding-sm;
   display: flex;
@@ -34,7 +33,6 @@
   border: i.$base-border var(--border);
   border-radius: i.$border-radius-lg;
   background-color: var(--bg-light);
-  box-shadow: i.$box-shadow;
   top: 100%;
   left: 0;
   z-index: 2;
@@ -68,7 +66,7 @@
 
 fa-icon {
   transform: rotate(0deg);
-  transition: i.transition(transform, i.$duration-sm, i.$cubic-bezier);
+  transition: i.transition(transform, i.$duration-sm, i.$cubic-in-out);
 
   &.open {
     transform: rotate(-180deg);

@@ -26,34 +26,11 @@ form {
   @include i.form-buttons;
 }
 
-fieldset {
-  @include i.fieldset;
-}
-
-label {
-  display: flex;
-  gap: i.$padding-2xs;
-  flex-direction: column;
-  font-size: i.$font-size-lg;
-}
-
-input {
-  @include i.input;
-}
-
-.success-button {
-  @include i.success-button;
-}
-
-.warning-button {
-  @include i.danger-button;
-}
-
 .dialog {
   max-width: 20vw;
   display: flex;
-  flex-direction: column;
   gap: i.$padding-md;
+  flex-direction: column;
 
   h3 {
     font-size: i.$font-size-xl;

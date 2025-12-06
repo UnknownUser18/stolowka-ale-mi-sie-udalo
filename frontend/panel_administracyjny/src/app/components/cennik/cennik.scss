@@ -10,22 +10,9 @@
   padding-right: i.$padding-md;
 }
 
-.td-button button {
+td button {
   margin: auto;
-  font-size: i.$font-size-sm;
-
-  &.selected {
-    background-color: var(--secondary);
-
-    &:hover, &:focus {
-      background-color: var(--secondary);
-      color: var(--bg);
-    }
-  }
-
-  @include i.button-primary;
 }
-
 
 label {
   display: flex;
@@ -54,19 +41,6 @@ td {
   }
 }
 
-.filter-prices {
-  @include i.button-default;
-}
-
-fieldset {
-  @include i.fieldset;
-}
-
-input {
-  @include i.input;
-}
-
-
 form {
   display: flex;
   gap: i.$padding-md;
@@ -81,23 +55,12 @@ form {
   button {
     font-size: i.$font-size-md;
   }
-
-  @include i.form-buttons;
-}
-
-.remove-declaration {
-  @include i.danger-button;
 }
 
 .add-price {
   height: fit-content;
   justify-self: center;
   font-size: i.$font-size-md;
-  @include i.button-primary;
-}
-
-.delete-pricing {
-  @include i.danger-button;
 }
 
 .pricing-form {
@@ -105,13 +68,9 @@ form {
   align-self: center;
   grid-column: 2;
   grid-row: 1 / -1;
-}
 
-.refresh-prices {
-  @include i.button-default;
-
-  fa-icon.spin {
-    animation: spin 2s linear infinite;
+  fieldset {
+    background-color: var(--surface);
   }
 }
 
@@ -190,5 +149,3 @@ h3 {
 
   @include i.form-buttons;
 }
-
-@include i.table;
