@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ButtonSuccess } from '%button-success';
+import { ButtonSuccess } from '@ui';
 
 describe('ButtonSuccess', () => {
   let component : ButtonSuccess;

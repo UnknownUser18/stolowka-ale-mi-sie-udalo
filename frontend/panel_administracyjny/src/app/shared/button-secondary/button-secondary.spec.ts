@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ButtonSecondary } from '%button-secondary';
+import { ButtonSecondary } from '@ui';
 
 describe('ButtonSecondary', () => {
   let component : ButtonSecondary;

@@ -15,18 +15,14 @@ import { TooltipDelayTriggerDirective } from '@directives/delayTooltip/tooltip-d
 import { IsEntireRowSelectedPipe } from '@pipes/isEntireRowSelected/is-entire-row-selected.pipe';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { IsClosedPipe } from '@pipes/isClosed/is-closed.pipe';
-import { Dialog } from '@modals/dialog/dialog';
 import { DialogTriggerDirective } from '@directives/dialog/dialog-trigger.directive';
-import { ButtonPrimary } from "%button-primary";
-import { ButtonDefault } from "%button-default";
-import { Table } from "%table";
-import { PrimaryText } from "%primary-text";
+import { ButtonDefault, ButtonPrimary, Dialog, PrimaryText, Table } from '@ui';
 
 type notificationFrom = 'declarations' | 'absences' | 'closedDays' | null;
 
 @Component({
   selector : 'app-kalendarz',
-  imports : [
+  imports  : [
     DateChanger,
     DatePipe,
     InDeclarationPipe,

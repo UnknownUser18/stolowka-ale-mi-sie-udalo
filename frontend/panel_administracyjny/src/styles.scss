@@ -1,6 +1,7 @@
 @use 'assets/font/inter/inter.css';
 @use 'assets/font/manrope/manrope.css';
 @use 'index' as i;
+@use 'sass:map';
 
 * {
   box-sizing: border-box;
@@ -38,37 +39,6 @@ a {
   text-decoration: none;
 }
 
-@keyframes out {
-  from {
-    opacity: 1;
-    filter: blur(5px);
-  }
-  to {
-    opacity: 0;
-    filter: blur(0);
-  }
-}
-
-@keyframes in {
-  from {
-    opacity: 0;
-    filter: blur(5px);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-  }
-}
-
-@keyframes pulse {
-  from {
-    opacity: 0.5;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .dialog-backdrop {
   transition: i.transition(backdrop-filter);
   backdrop-filter: none;
@@ -103,14 +73,14 @@ button {
 
 body {
   height: 100vh;
-  font-family: 'Inter', i.$font-base;
+  font-family: i.$font-text;
   background-color: var(--surface-dim);
   color: var(--text);
   overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Manrope', i.$font-base;
+  font-family: i.$font-interface;
   color: var(--text);
 }
 
@@ -123,11 +93,49 @@ ol, ul, menu {
   animation: spin 1s linear infinite;
 }
 
+.error-message {
+  margin: i.$margin-2xs 0;
+  font-size: i.$font-size-xs;
+  color: var(--error);
+  line-height: map.get(i.$font-line-heights, i.$font-size-xs);
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes out {
+  from {
+    opacity: 1;
+    filter: blur(5px);
+  }
+  to {
+    opacity: 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes in {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
   }
 }

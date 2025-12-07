@@ -9,24 +9,13 @@ import { faCalendar, faCalendarDay, faFilter, faPaperPlane, faPlus, faRotate, fa
 import { Checkbox } from '@shared/checkbox/checkbox';
 import { Calendar } from '@utils/calendar/calendar';
 import { IsSelectedDeclarationPipe } from "@pipes/isSelectedDeclaration/is-selected-declaration.pipe";
-import { Dialog } from "@modals/dialog/dialog";
 import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.directive";
-import { Tooltip } from "@utils/tooltip/tooltip";
 import { TooltipDelayTriggerDirective } from "@directives/delayTooltip/tooltip-delay-trigger.directive";
-import { ButtonPrimary } from "%button-primary";
-import { ButtonSecondary } from "%button-secondary";
-import { ButtonDefault } from "%button-default";
-import { Table } from "%table";
-import { Label } from "%label";
-import { Input } from "%input";
-import { Fieldset } from "%fieldset";
-import { ButtonSuccess } from "%button-success";
-import { ButtonDanger } from "%button-danger";
-import { LabelOneLine } from "%label-one-line";
+import { ButtonDanger, ButtonDefault, ButtonPrimary, ButtonSecondary, ButtonSuccess, Dialog, Fieldset, Input, Label, LabelOneLine, Table, Tooltip } from '@ui';
 
 @Component({
-  selector : 'app-deklaracje',
-  imports : [
+  selector  : 'app-deklaracje',
+  imports   : [
     ReactiveFormsModule,
     DatePipe,
     FaIconComponent,
@@ -49,7 +38,7 @@ import { LabelOneLine } from "%label-one-line";
     LabelOneLine
   ],
   templateUrl : './deklaracje.html',
-  styleUrl : './deklaracje.scss',
+  styleUrl  : './deklaracje.scss',
   providers : [DatePipe],
 })
 export class Deklaracje {
@@ -80,28 +69,28 @@ export class Deklaracje {
     data_od : new FormControl<string | null>(null, Validators.required),
     data_do : new FormControl<string | null>(null, Validators.required),
     pon : new FormControl(true),
-    wt : new FormControl(true),
-    sr : new FormControl(true),
+    wt  : new FormControl(true),
+    sr  : new FormControl(true),
     czw : new FormControl(true),
-    pt : new FormControl(true),
+    pt  : new FormControl(true),
   });
   protected addForm = new FormGroup({
     data_od : new FormControl<string | null>(null, Validators.required),
     data_do : new FormControl<string | null>(null, Validators.required),
     pon : new FormControl(true),
-    wt : new FormControl(true),
-    sr : new FormControl(true),
+    wt  : new FormControl(true),
+    sr  : new FormControl(true),
     czw : new FormControl(true),
-    pt : new FormControl(true),
+    pt  : new FormControl(true),
   });
   protected filterForm = new FormGroup({
     data_od : new FormControl<string | null>(null),
     data_do : new FormControl<string | null>(null),
     pon : new FormControl(true),
-    wt : new FormControl(true),
-    sr : new FormControl(true),
+    wt  : new FormControl(true),
+    sr  : new FormControl(true),
     czw : new FormControl(true),
-    pt : new FormControl(true),
+    pt  : new FormControl(true),
   });
 
   protected readonly faCalendar = faCalendar;
@@ -141,15 +130,62 @@ export class Deklaracje {
     });
   }
 
-  private patchForm(declaration : ZDeclaration) {
-    this.deklaracjaForm.patchValue({
-      data_od : this.datePipe.transform(declaration.data_od, 'yyyy-MM-dd') ?? null,
-      data_do : this.datePipe.transform(declaration.data_do, 'yyyy-MM-dd') ?? null,
-      pon : this.isValidDay(0, declaration),
-      wt : this.isValidDay(1, declaration),
-      sr : this.isValidDay(2, declaration),
-      czw : this.isValidDay(3, declaration),
-      pt : this.isValidDay(4, declaration),
+  protected addDeclarationToDB() {
+    if (this.addForm.invalid) {
+      this.notificationsS.createErrorNotification('Formularz zawiera błędy.', 5);
+      return;
+    }
+
+    const { data_od, data_do, pon, wt, sr, czw, pt } = this.addForm.value;
+    if (!data_od || !data_do) return;
+
+    let data_odD = new Date(data_od);
+    let data_doD = new Date(data_do);
+    data_odD.setHours(0, 0, 0, 0);
+    data_doD.setHours(0, 0, 0, 0);
+
+    if (data_odD > data_doD) {
+      this.notificationsS.createErrorNotification('Data "od" nie może być późniejsza niż data "do".', 5);
+      return;
+    }
+
+    const dni = `${ pon ? '1' : '0' }${ wt ? '1' : '0' }${ sr ? '1' : '0' }${ czw ? '1' : '0' }${ pt ? '1' : '0' }` as `${ '0' | '1' }${ '0' | '1' }${ '0' | '1' }${ '0' | '1' }${ '0' | '1' }`;
+
+    const personId = this.personS.personZ()?.id;
+    if (!personId) {
+      this.notificationsS.createErrorNotification('Nie znaleziono osoby, do której ma zostać dodana deklaracja.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+      return;
+    }
+
+    const newDeclaration : Omit<ZDeclaration, 'id'> = {
+      id_osoby : personId,
+      data_od : data_odD,
+      data_do : data_doD,
+      dni     : dni,
+    };
+
+    this.declarationsS.addZDeclaration(newDeclaration).subscribe((result) => {
+      if (!result) {
+        this.notificationsS.createErrorNotification('Nie udało się dodać deklaracji.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+        return;
+      }
+      this.notificationsS.createSuccessNotification('Pomyślnie dodano deklarację.', 5);
+      const newDeclarationWithId : ZDeclaration = { ...newDeclaration, id : result };
+      this.declarations = [
+        ...(this.declarations ?? []),
+        newDeclarationWithId
+      ];
+      this.dbDeclarations.set(this.declarations);
+      this.addForm.reset({
+        data_od : null,
+        data_do : null,
+        pon : true,
+        wt  : true,
+        sr  : true,
+        czw : true,
+        pt  : true,
+      });
+      this.addDeclaration.set(null);
     });
   }
 
@@ -278,63 +314,17 @@ export class Deklaracje {
     });
   }
 
-  protected addDeclarationToDB() {
-    if (this.addForm.invalid) {
-      this.notificationsS.createErrorNotification('Formularz zawiera błędy.', 5);
-      return;
-    }
-
-    const { data_od, data_do, pon, wt, sr, czw, pt } = this.addForm.value;
-    if (!data_od || !data_do) return;
-
-    let data_odD = new Date(data_od);
-    let data_doD = new Date(data_do);
-    data_odD.setHours(0, 0, 0, 0);
-    data_doD.setHours(0, 0, 0, 0);
-
-    if (data_odD > data_doD) {
-      this.notificationsS.createErrorNotification('Data "od" nie może być późniejsza niż data "do".', 5);
-      return;
-    }
-
-    const dni = `${ pon ? '1' : '0' }${ wt ? '1' : '0' }${ sr ? '1' : '0' }${ czw ? '1' : '0' }${ pt ? '1' : '0' }` as `${ '0' | '1' }${ '0' | '1' }${ '0' | '1' }${ '0' | '1' }${ '0' | '1' }`;
-
-    const personId = this.personS.personZ()?.id;
-    if (!personId) {
-      this.notificationsS.createErrorNotification('Nie znaleziono osoby, do której ma zostać dodana deklaracja.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
-      return;
-    }
-
-    const newDeclaration : Omit<ZDeclaration, 'id'> = {
-      id_osoby : personId,
-      data_od : data_odD,
-      data_do : data_doD,
-      dni : dni,
-    };
-
-    this.declarationsS.addZDeclaration(newDeclaration).subscribe((result) => {
-      if (!result) {
-        this.notificationsS.createErrorNotification('Nie udało się dodać deklaracji.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
-        return;
-      }
-      this.notificationsS.createSuccessNotification('Pomyślnie dodano deklarację.', 5);
-      const newDeclarationWithId : ZDeclaration = { ...newDeclaration, id : result };
-      this.declarations = [
-        ...(this.declarations ?? []),
-        newDeclarationWithId
-      ];
-      this.dbDeclarations.set(this.declarations);
-      this.addForm.reset({
-        data_od : null,
-        data_do : null,
-        pon : true,
-        wt : true,
-        sr : true,
-        czw : true,
-        pt : true,
-      });
-      this.addDeclaration.set(null);
+  protected resetFilter() {
+    this.filterForm.reset({
+      data_od : null,
+      data_do : null,
+      pon : true,
+      wt  : true,
+      sr  : true,
+      czw : true,
+      pt  : true,
     });
+    this.shownDeclarations = this.declarations;
   }
 
   protected isWrong(event : boolean, forForm : 'add' | 'edit') {
@@ -411,17 +401,16 @@ export class Deklaracje {
     this.filterDialog().hide();
   }
 
-  protected resetFilter() {
-    this.filterForm.reset({
-      data_od : null,
-      data_do : null,
-      pon : true,
-      wt : true,
-      sr : true,
-      czw : true,
-      pt : true,
+  private patchForm(declaration : ZDeclaration) {
+    this.deklaracjaForm.patchValue({
+      data_od : this.datePipe.transform(declaration.data_od, 'yyyy-MM-dd') ?? null,
+      data_do : this.datePipe.transform(declaration.data_do, 'yyyy-MM-dd') ?? null,
+      pon : this.isValidDay(0, declaration),
+      wt  : this.isValidDay(1, declaration),
+      sr  : this.isValidDay(2, declaration),
+      czw : this.isValidDay(3, declaration),
+      pt  : this.isValidDay(4, declaration),
     });
-    this.shownDeclarations = this.declarations;
   }
 
   protected refreshDeclarations() {

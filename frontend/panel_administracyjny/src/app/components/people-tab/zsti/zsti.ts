@@ -4,25 +4,14 @@ import { Persons, TypOsoby, ZPerson } from '@database/persons/persons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faArrowsRotate, faArrowUpWideShort, faCheck, faCircle, faFilter, faMagnifyingGlass, faPlus, faRotateLeft, faSchool, faUser, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { Notifications } from '@services/notifications';
-import { Dialog } from '@modals/dialog/dialog';
 import { DialogTriggerDirective } from '@directives/dialog/dialog-trigger.directive';
-import { Tooltip } from '@utils/tooltip/tooltip';
 import { TooltipDelayTriggerDirective } from '@directives/delayTooltip/tooltip-delay-trigger.directive';
-import { State, Switch } from '%switch';
+import { ButtonDanger, ButtonDefault, ButtonPrimary, ButtonSecondary, ButtonSuccess, Dialog, Dropdown, Input, LabelOneLine, PrimaryText, Switch, Table, Tooltip } from '@ui';
+import { State } from '@shared/switch/switch';
 import { TooltipClickTriggerDirective } from '@directives/clickTooltip/tooltip-click-trigger.directive';
 import { TooltipTriggerDirective } from '@directives/tooltip/tooltip-trigger.directive';
 import { Router } from '@angular/router';
 import { Field, form } from "@angular/forms/signals";
-import { Dropdown } from "@shared/dropdown/dropdown";
-import { ButtonPrimary } from "%button-primary";
-import { ButtonDefault } from "%button-default";
-import { ButtonSecondary } from "%button-secondary";
-import { PrimaryText } from "%primary-text";
-import { Table } from "@shared/table/table";
-import { Input } from "%input";
-import { LabelOneLine } from "%label-one-line";
-import { ButtonDanger } from "%button-danger";
-import { ButtonSuccess } from "%button-success";
 
 type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
 type SortOption = 'surnameAsc' | 'surnameDesc' |
@@ -35,7 +24,7 @@ type SortOption = 'surnameAsc' | 'surnameDesc' |
 
 @Component({
   selector : 'app-zsti',
-  imports : [
+  imports  : [
     FormsModule,
     ReactiveFormsModule,
     FaIconComponent,

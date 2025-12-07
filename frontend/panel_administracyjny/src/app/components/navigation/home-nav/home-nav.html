@@ -6,27 +6,27 @@
   @let administracja_title = "Przejdź do sekcji Administracja osób";
   @let ustawienia_title = "Przejdź do sekcji Ustawienia";
   <li><a routerLink="osoby" [attr.aria-label]="osoby_title" [title]="osoby_title">
-    <fa-icon [icon]="faUser" />
+    <fa-icon [icon]="icons.faUser" />
     Osoby
   </a></li>
   <li><a routerLink="raporty" [attr.aria-label]="raporty_title" [title]="raporty_title">
-    <fa-icon [icon]="faTableColumns" />
+    <fa-icon [icon]="icons.faTableColumns" />
     Raporty
   </a></li>
   <li><a routerLink="cennik" [attr.aria-label]="cennik_title" [title]="cennik_title">
-    <fa-icon [icon]="faMoneyBills" />
+    <fa-icon [icon]="icons.faMoneyBills" />
     Cennik
   </a></li>
   <li><a routerLink="nieczynne" [attr.aria-label]="nieczynne_title" [title]="nieczynne_title">
-    <fa-icon [icon]="faCalendar" />
+    <fa-icon [icon]="icons.faCalendar" />
     Dni nieczynne
   </a></li>
   <li><a routerLink="administracja" [attr.aria-label]="administracja_title" [title]="administracja_title">
-    <fa-icon [icon]="faLock" />
+    <fa-icon [icon]="icons.faLock" />
     Administracja osób
   </a></li>
   <li><a routerLink="ustawienia" [attr.aria-label]="ustawienia_title" [title]="ustawienia_title">
-    <fa-icon [icon]="faGear" />
+    <fa-icon [icon]="icons.faGear" />
     Ustawienia
   </a></li>
 </ul>

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LabelOneLine } from '%label-one-line';
+import { LabelOneLine } from '@ui';
 
 describe('LabelOneLine', () => {
   let component : LabelOneLine;

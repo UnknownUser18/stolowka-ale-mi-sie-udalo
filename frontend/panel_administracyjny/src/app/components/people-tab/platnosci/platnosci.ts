@@ -7,21 +7,12 @@ import { faFileInvoiceDollar, faFilter, faPaperPlane, faPlus, faRotate, faTrash 
 import { Payments, ZPayment } from "@database/payments/payments";
 import { IsSelectedPaymentPipe } from "@pipes/isSelectedPayment/is-selected-payment.pipe";
 import { Notifications } from "@services/notifications";
-import { Dialog } from "@modals/dialog/dialog";
 import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.directive";
-import { ButtonPrimary } from "%button-primary";
-import { ButtonSecondary } from "%button-secondary";
-import { ButtonDefault } from "%button-default";
-import { Table } from "%table";
-import { Fieldset } from "%fieldset";
-import { Label } from "%label";
-import { Input } from "%input";
-import { ButtonSuccess } from "%button-success";
-import { ButtonDanger } from "%button-danger";
+import { ButtonDanger, ButtonDefault, ButtonPrimary, ButtonSecondary, ButtonSuccess, Dialog, Fieldset, Input, Label, Table } from '@ui';
 
 @Component({
-  selector : 'app-platnosci',
-  imports : [
+  selector  : 'app-platnosci',
+  imports   : [
     ReactiveFormsModule,
     DatePipe,
     FaIconComponent,
@@ -44,7 +35,7 @@ import { ButtonDanger } from "%button-danger";
     DatePipe
   ],
   templateUrl : './platnosci.html',
-  styleUrl : './platnosci.scss'
+  styleUrl  : './platnosci.scss'
 })
 export class Platnosci {
   private payments : ZPayment[] | null = null;
@@ -61,22 +52,22 @@ export class Platnosci {
   protected platnosciForm = new FormGroup({
     miesiac_rok : new FormControl('', [Validators.required, Validators.pattern(this.miesiac_rok_pattern)]),
     platnosc : new FormControl('', [Validators.required, Validators.min(0), Validators.pattern(this.platnosc_pattern)]),
-    data : new FormControl('', [Validators.required, Validators.pattern(this.data_pattern)]),
-    opis : new FormControl('', [Validators.maxLength(200)])
+    data     : new FormControl('', [Validators.required, Validators.pattern(this.data_pattern)]),
+    opis     : new FormControl('', [Validators.maxLength(200)])
   });
 
   protected addForm = new FormGroup({
     miesiac_rok : new FormControl('', [Validators.required, Validators.pattern(this.miesiac_rok_pattern)]),
     platnosc : new FormControl('', [Validators.required, Validators.min(0), Validators.pattern(this.platnosc_pattern)]),
-    data : new FormControl('', [Validators.required, Validators.pattern(this.data_pattern)]),
-    opis : new FormControl('', [Validators.maxLength(200)])
+    data     : new FormControl('', [Validators.required, Validators.pattern(this.data_pattern)]),
+    opis     : new FormControl('', [Validators.maxLength(200)])
   });
 
   protected filterForm = new FormGroup({
     miesiac_rok : new FormControl('', [Validators.pattern(this.miesiac_rok_pattern)]),
     platnosc : new FormControl('', [Validators.min(0), Validators.pattern(this.platnosc_pattern)]),
-    data : new FormControl('', [Validators.pattern(this.data_pattern)]),
-    opis : new FormControl('', [Validators.maxLength(200)])
+    data     : new FormControl('', [Validators.pattern(this.data_pattern)]),
+    opis     : new FormControl('', [Validators.maxLength(200)])
   });
 
   protected readonly faPlus = faPlus;
@@ -158,16 +149,16 @@ export class Platnosci {
     return { month, year, kwota, data_platnosci : dataPlatnosci, opis : opisTrimmed };
   }
 
-  private setFormValues() {
-    const payment = this.selectedPayment();
-    if (!payment) return;
+  protected formatDate(date : string) : string {
+    if (/^\d{2}-\d{4}$/.test(date)) {
+      const [month, year] = date.split('-');
+      return `${ new Date(Number(year), Number(month) - 1).toLocaleString('pl-PL', { month : 'long' }) } ${ year }`;
+    }
 
-
-    this.platnosciForm.patchValue({
-      miesiac_rok : this.datePipe.transform(payment.rok + '-' + payment.miesiac, 'yyyy-MM'),
-      platnosc : payment.platnosc.toString(),
-      data : this.datePipe.transform(payment.data_platnosci, 'yyyy-MM-dd'),
-      opis : payment.opis,
+    return new Date(date).toLocaleDateString('pl-PL', {
+      year : 'numeric',
+      month : 'long',
+      day  : 'numeric'
     });
   }
 
@@ -185,19 +176,6 @@ export class Platnosci {
 
       this.isLoading = false;
       this.shownPayments = this.payments = payments;
-    });
-  }
-
-  protected formatDate(date : string) : string {
-    if (/^\d{2}-\d{4}$/.test(date)) {
-      const [month, year] = date.split('-');
-      return `${ new Date(Number(year), Number(month) - 1).toLocaleString('pl-PL', { month : 'long' }) } ${ year }`;
-    }
-
-    return new Date(date).toLocaleDateString('pl-PL', {
-      year : 'numeric',
-      month : 'long',
-      day : 'numeric'
     });
   }
 
@@ -220,11 +198,11 @@ export class Platnosci {
 
     const updatedPayment : ZPayment = {
       ...payment,
-      miesiac : month,
-      rok : year,
+      miesiac  : month,
+      rok      : year,
       platnosc : kwota,
       data_platnosci : data_platnosci,
-      opis : opis,
+      opis     : opis,
     };
 
     this.paymentsS.updateZPayment(updatedPayment).subscribe((success) => {
@@ -235,22 +213,6 @@ export class Platnosci {
 
       this.notificationsS.createSuccessNotification('Pomyślnie zaktualizowano płatność.');
       this.selectedPayment.set(updatedPayment);
-      this.refreshPayments();
-    })
-  }
-
-  protected deletePayment() {
-    const payment = this.selectedPayment();
-    if (!payment) return;
-
-    this.paymentsS.deleteZPayment(payment.id).subscribe((success) => {
-      if (!success) {
-        this.notificationsS.createErrorNotification('Nie udało się usunąć płatności.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
-        return;
-      }
-
-      this.notificationsS.createSuccessNotification('Pomyślnie usunięto płatność.');
-      this.selectedPayment.set(null);
       this.refreshPayments();
     })
   }
@@ -276,11 +238,11 @@ export class Platnosci {
 
     const newPayment : Omit<ZPayment, 'id'> = {
       id_ucznia : person.id,
-      miesiac : month,
-      rok : year,
-      platnosc : kwota,
+      miesiac   : month,
+      rok       : year,
+      platnosc  : kwota,
       data_platnosci : data_platnosci,
-      opis : opis,
+      opis      : opis,
     };
 
     this.paymentsS.addZPayment(newPayment).subscribe((insertId) => {
@@ -293,6 +255,35 @@ export class Platnosci {
       this.addForm.reset();
       this.refreshPayments();
     })
+  }
+
+  protected deletePayment() {
+    const payment = this.selectedPayment();
+    if (!payment) return;
+
+    this.paymentsS.deleteZPayment(payment.id).subscribe((success) => {
+      if (!success) {
+        this.notificationsS.createErrorNotification('Nie udało się usunąć płatności.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+        return;
+      }
+
+      this.notificationsS.createSuccessNotification('Pomyślnie usunięto płatność.');
+      this.selectedPayment.set(null);
+      this.refreshPayments();
+    })
+  }
+
+  protected resetPayment() {
+    const payment = this.selectedPayment();
+
+    if (!payment) return;
+
+    this.platnosciForm.reset({
+      miesiac_rok : this.datePipe.transform(`${ payment.rok }-${ payment.miesiac }`, 'yyyy-MM'),
+      platnosc : payment.platnosc.toString(),
+      data     : this.datePipe.transform(payment.data_platnosci, 'yyyy-MM-dd'),
+      opis     : payment.opis,
+    });
   }
 
   protected applyFilter() {
@@ -339,16 +330,16 @@ export class Platnosci {
     this.fetchData;
   }
 
-  protected resetPayment() {
+  private setFormValues() {
     const payment = this.selectedPayment();
-
     if (!payment) return;
 
-    this.platnosciForm.reset({
-      miesiac_rok : this.datePipe.transform(`${ payment.rok }-${ payment.miesiac }`, 'yyyy-MM'),
+
+    this.platnosciForm.patchValue({
+      miesiac_rok : this.datePipe.transform(payment.rok + '-' + payment.miesiac, 'yyyy-MM'),
       platnosc : payment.platnosc.toString(),
-      data : this.datePipe.transform(payment.data_platnosci, 'yyyy-MM-dd'),
-      opis : payment.opis,
+      data     : this.datePipe.transform(payment.data_platnosci, 'yyyy-MM-dd'),
+      opis     : payment.opis,
     });
   }
 }

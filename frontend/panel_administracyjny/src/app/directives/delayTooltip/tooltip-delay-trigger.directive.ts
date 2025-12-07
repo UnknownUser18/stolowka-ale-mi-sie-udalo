@@ -14,7 +14,7 @@ export class TooltipDelayTriggerDirective {
    * @required
    * @description The tooltip component to be triggered.
    */
-  public tooltip = input.required<Tooltip>({ alias : 'delayT' });
+  public tooltip = input<Tooltip>(undefined, { alias : 'delayT' });
 
   /**
    * @optional
@@ -36,6 +36,8 @@ export class TooltipDelayTriggerDirective {
   public onEnter(event : MouseEvent) {
     this.cancelShowTimeout();
     this.showTimeout = setTimeout(() => {
+      if (!this.tooltip())
+        return;
       this.tooltip()?.createInfoTooltip(event);
       this.showTimeout = null;
     }, this.delay() ?? 300);

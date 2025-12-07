@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Checkbox } from '%checkbox';
+import { Checkbox } from '@ui';
 
 describe('Checkbox', () => {
   let component : Checkbox;

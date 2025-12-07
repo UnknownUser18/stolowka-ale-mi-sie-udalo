@@ -6,19 +6,12 @@ import { Persons } from "@database/persons/persons";
 import { Notifications } from "@services/notifications";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faArrowRight, faBan, faCheck, faIdCard, faPlus, faRotateLeft, faTrashCan } from "@fortawesome/free-solid-svg-icons";
-import { Dialog } from "@modals/dialog/dialog";
 import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.directive";
-import { Fieldset } from "%fieldset";
-import { Label } from "%label";
-import { Input } from "%input";
-import { ButtonDefault } from "%button-default";
-import { ButtonDanger } from "%button-danger";
-import { ButtonPrimary } from "%button-primary";
-import { ButtonSuccess } from "%button-success";
+import { ButtonDanger, ButtonDefault, ButtonPrimary, ButtonSuccess, Dialog, Fieldset, Input, Label } from '@ui';
 
 @Component({
-  selector : 'app-karty',
-  imports : [
+  selector  : 'app-karty',
+  imports   : [
     ReactiveFormsModule,
     FaIconComponent,
     Dialog,
@@ -32,7 +25,7 @@ import { ButtonSuccess } from "%button-success";
     ButtonSuccess
   ],
   templateUrl : './karty.html',
-  styleUrl : './karty.scss',
+  styleUrl  : './karty.scss',
   providers : [DatePipe]
 })
 export class Karty {
@@ -42,7 +35,7 @@ export class Karty {
   protected showWindow : '' | 'remove' | 'add' | 'add-continue' = '';
 
   protected cardForm = new FormGroup({
-    key_card : new FormControl('', [Validators.required, Validators.pattern('^[0-9]+$')]),
+    key_card     : new FormControl('', [Validators.required, Validators.pattern('^[0-9]+$')]),
     data_wydania : new FormControl('', [Validators.required]),
     ostatnie_uzycie : new FormControl('', [Validators.required]),
   });
@@ -82,7 +75,7 @@ export class Karty {
       }
       this.card = card;
       this.cardForm.setValue({
-        key_card : String(card.key_card),
+        key_card     : String(card.key_card),
         data_wydania : this.datePipe.transform(card.data_wydania, 'yyyy-MM-dd') || '',
         ostatnie_uzycie : this.datePipe.transform(card.ostatnie_uzycie, 'yyyy-MM-dd') || '',
       });
@@ -121,7 +114,7 @@ export class Karty {
 
     const newCard : Omit<ZCard, 'id' | 'ostatnie_uzycie'> = {
       id_ucznia : person.id,
-      key_card : Number(this.addCardForm.value.key_card),
+      key_card  : Number(this.addCardForm.value.key_card),
       data_wydania : new Date(),
     };
 

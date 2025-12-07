@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Switch } from '%switch';
+import { Switch } from '@ui';
 
 describe('SwitchComponent', () => {
   let component : Switch;

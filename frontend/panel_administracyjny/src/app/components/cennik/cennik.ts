@@ -1,7 +1,5 @@
-import { ChangeDetectorRef, Component, DEFAULT_CURRENCY_CODE, effect, ElementRef, NgZone, signal, ViewChild } from '@angular/core';
-import { GlobalInfoService, NotificationType } from '@services/global-info.service';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TransitionService } from '@services/transition.service';
+import { Component, DEFAULT_CURRENCY_CODE, effect, ElementRef, signal, ViewChild } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { faArrowsRotate, faFileInvoiceDollar, faFilter, faPaperPlane, faPlus, faRotate, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
@@ -10,19 +8,17 @@ import { Declarations } from '@database/declarations/declarations';
 import { Notifications } from '@services/notifications';
 import { Prices, ZPricing } from "@database/prices/prices";
 import { IsSelectedPricePipe } from "@pipes/isSelectedPrice/is-selected-price.pipe";
-import { Calendar } from "@utils/calendar/calendar";
-import { ButtonPrimary } from "%button-primary";
-import { ButtonSecondary } from "%button-secondary";
-import { ButtonDefault } from "%button-default";
-import { Fieldset } from "%fieldset";
-import { Label } from "%label";
-import { Input } from "%input";
-import { ButtonSuccess } from "%button-success";
-import { ButtonDanger } from "%button-danger";
-import { Table } from "%table";
+import { ButtonDanger, ButtonDefault, ButtonPrimary, ButtonSecondary, ButtonSuccess, Calendar, Fieldset, Input, Label, Table } from "@ui";
+import { Field, form, min, required } from "@angular/forms/signals";
+
+interface ZPricingForm {
+  cena : number;
+  data_od : string;
+  data_do : string;
+}
 
 @Component({
-  selector : 'app-cennik',
+  selector  : 'app-cennik',
   imports : [
     ReactiveFormsModule,
     DatePipe,
@@ -38,16 +34,35 @@ import { Table } from "%table";
     Input,
     ButtonSuccess,
     ButtonDanger,
-    Table
+    Table,
+    Field
   ],
   providers : [
     { provide : DEFAULT_CURRENCY_CODE, useValue : 'PLN' },
     DatePipe
   ],
   templateUrl : './cennik.html',
-  styleUrl : './cennik.scss'
+  styleUrl  : './cennik.scss'
 })
 export class Cennik {
+  // TODO: Fix this component to use new signal-based forms properly and clean up the code
+
+  protected readonly icons = {
+    faXmark,
+    faArrowsRotate,
+    faPlus,
+    faFilter,
+    faFileInvoiceDollar,
+    faPaperPlane,
+    faRotate,
+    faTrash
+  }
+  private pricing = signal<ZPricingForm>({
+    cena    : 0,
+    data_od : '',
+    data_do : '',
+  });
+
   protected ZPricing : ZPricing[] | null = null;
   protected wrongDaysInCalendar = false;
 
@@ -57,39 +72,31 @@ export class Cennik {
 
   protected readonly selectedPricing = signal<ZPricing | null>(null);
   protected readonly tempSelectedPricing = signal<ZPricing | null>(null);
+  protected pricingForm = form(this.pricing, (schemaPath) => {
+    required(schemaPath.cena, { message : 'Cena jest wymagana.' });
+    min(schemaPath.cena, 0, { message : 'Cena musi być większa lub równa 0.' });
+    required(schemaPath.data_od, { message : 'Data od jest wymagana.' });
+    required(schemaPath.data_do, { message : 'Data do jest wymagana.' });
+  });
+  private add = signal<ZPricingForm>({
+    cena    : 0,
+    data_od : '',
+    data_do : '',
+  });
 
   protected isLoading = false;
-
-  protected pricingForm : FormGroup = new FormGroup({
-    cena    : new FormControl('', [Validators.required, Validators.min(0)]),
-    data_od : new FormControl('', Validators.required),
-    data_do : new FormControl('', Validators.required),
+  protected addForm = form(this.add, (schemaPath) => {
+    required(schemaPath.cena, { message : 'Cena jest wymagana.' });
+    min(schemaPath.cena, 0, { message : 'Cena musi być większa lub równa 0.' });
+    required(schemaPath.data_od, { message : 'Data od jest wymagana.' });
+    required(schemaPath.data_do, { message : 'Data do jest wymagana.' });
   });
-
-  protected addForm : FormGroup = new FormGroup({
-    cena    : new FormControl('', [Validators.required, Validators.min(0)]),
-    data_od : new FormControl('', Validators.required),
-    data_do : new FormControl('', Validators.required),
-  });
-
-  protected readonly xmarkClose = faXmark
-  protected readonly faArrowsRotate = faArrowsRotate;
-  protected readonly faPlus = faPlus;
-  protected readonly faFilter = faFilter;
-  protected readonly faFileInvoiceDollar = faFileInvoiceDollar;
-  protected readonly faPaperPlane = faPaperPlane;
-  protected readonly faRotate = faRotate;
-  protected readonly faTrash = faTrash;
 
   @ViewChild('filter') filter! : ElementRef;
 
   constructor(
     private pricesS : Prices,
     private datePipe : DatePipe,
-    private infoService : GlobalInfoService,
-    private transition : TransitionService,
-    private cdr : ChangeDetectorRef,
-    private zone : NgZone,
     private declarationS : Declarations,
     private notificationS : Notifications
   ) {
@@ -101,11 +108,11 @@ export class Cennik {
       const selected = this.selectedPricing();
       if (!selected) return;
 
-      this.pricingForm.setValue({
+      this.pricingForm().setControlValue({
         cena    : selected.cena,
-        data_od : this.datePipe.transform(selected.data_od, 'yyyy-MM-dd'),
-        data_do : this.datePipe.transform(selected.data_do, 'yyyy-MM-dd'),
-      });
+        data_od : this.datePipe.transform(selected.data_od, 'yyyy-MM-dd') || '',
+        data_do : this.datePipe.transform(selected.data_do, 'yyyy-MM-dd') || '',
+      })
 
       this.updateCalendar();
     });
@@ -116,12 +123,10 @@ export class Cennik {
   }
 
   protected updateCalendar() {
-    const { cena, data_od, data_do } = this.pricingForm.value;
+    const { cena, data_od, data_do } = this.pricingForm().value();
 
     if (!this.selectedPricing()) return;
 
-    if (!cena || !data_od || !data_do || data_od === '' || data_do === '') {
-    }
 
     this.tempSelectedPricing.set({
       ...this.selectedPricing()!,
@@ -151,7 +156,7 @@ export class Cennik {
 
   protected formatDate(date : string) : string {
     return new Date(date).toLocaleDateString('pl-PL', {
-      day : 'numeric',
+      day  : 'numeric',
       month : 'long',
       year : 'numeric',
     });
@@ -172,11 +177,10 @@ export class Cennik {
   protected async updatePricing() {
     if (!this.ZPricing)
       return;
-    if (this.pricingForm.invalid) {
-      this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
+    if (this.pricingForm().invalid()) {
       return;
     }
-    const formValue = this.pricingForm.value;
+    const formValue = this.pricingForm().value();
     const pricing : any = { // TODO: Define proper type for pricing
       // id : this.id,
       data_od : formValue.data_od!,
@@ -221,25 +225,13 @@ export class Cennik {
     });
   }
 
-  protected closeWindow() : void {
-    this.transition.applyAnimation(this.filter.nativeElement, false, this.zone).then(() => {
-      this.showWindow = '';
-    });
-  }
-
-  protected openWindow(type : 'delete' | 'add') : void {
-    this.showWindow = type;
-    this.cdr.detectChanges();
-    this.transition.applyAnimation(this.filter.nativeElement, true, this.zone).then();
-  }
-
   protected addPricing() : void {
-    if (this.addForm.invalid) {
+    if (this.addForm().invalid()) {
       this.notificationS.createErrorNotification('Proszę poprawić błędy w formularzu.', 3)
       // this.infoService.generateNotification(NotificationType.ERROR, 'Proszę poprawić błędy w formularzu.');
       return;
     }
-    const formValue = this.addForm.value;
+    const formValue = this.addForm().value();
     const pricing : ZPricing = {
       cena : formValue.cena!,
       data_od : formValue.data_od!,
@@ -252,22 +244,17 @@ export class Cennik {
       return;
     }
     // const method = pricing.data_do ? `zsti.pricing.add` : `zsti.pricing.addWOdatado`;
-    firstValueFrom(this.declarationS.addPricing(pricing.data_od, pricing.data_do, pricing.cena)).then(payload => {
-      this.closeWindow()
-      if (!payload) {
-        this.notificationS.createErrorNotification('Nie udało się dodać cennika.', 3)
-        // this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać cennika.');
-        return;
-      }
-
-      this.notificationS.createSuccessNotification('Cennik został dodany.', 2)
-      this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został dodany.');
-      this.fetchPricing();
-    })
-  }
-
-  protected resetForm() {
-
+    // firstValueFrom(this.declarationS.addPricing(pricing.data_od, pricing.data_do, pricing.cena)).then(payload => {
+    //   if (!payload) {
+    //     this.notificationS.createErrorNotification('Nie udało się dodać cennika.', 3)
+    //     this.infoService.generateNotification(NotificationType.ERROR, 'Nie udało się dodać cennika.');
+    // return;
+    // }
+    //
+    // this.notificationS.createSuccessNotification('Cennik został dodany.', 2)
+    // this.infoService.generateNotification(NotificationType.SUCCESS, 'Cennik został dodany.');
+    // this.fetchPricing();
+    // })
   }
 
 }

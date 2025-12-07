@@ -21,7 +21,7 @@
 
   &:disabled {
     cursor: not-allowed;
-    background-color: var(--surface-dim);
+    background-color: var(--surface-dim) !important;
     color: var(--text-muted);
     border-color: var(--border-muted);
   }
