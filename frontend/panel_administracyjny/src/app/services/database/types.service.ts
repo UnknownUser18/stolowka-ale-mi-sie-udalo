@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment.development';
 
 export enum StatusCodes {
   'OK' = 200,
@@ -48,7 +49,7 @@ export class ErrorPacket extends Packet {
 })
 export abstract class TypesService {
   protected http = inject(HttpClient);
-  protected readonly api = 'http://localhost:9000/api/';
+  protected readonly api = environment.apiUrl;
 
   protected isArray(res : Packet) : boolean {
     return [StatusCodes.OK, StatusCodes.Updated, StatusCodes.Inserted].includes(res.status) && Array.isArray(res.data);
