@@ -1,15 +1,15 @@
 <section>
   <h2>Lista dni nieczynnych:</h2>
-  <button (click)="openWindow('add')" button-primary>
+  <button button-primary>
     Dodaj dzień nieczynny
     @let add_title = 'Dodaj nowy dzień nieczynne';
-    <fa-icon [icon]="faPlus" [title]="add_title" [attr.aria-label]="add_title" />
+    <fa-icon [attr.aria-label]="add_title" [icon]="icons.faPlus" [title]="add_title" />
   </button>
 
   <button (click)="reloadPricing()" button-default>
     Odśwież
     @let refresh_title = 'Odśwież dni nieczynne';
-    <fa-icon [icon]="faArrowsRotate" [title]="refresh_title" [attr.aria-label]="refresh_title" />
+    <fa-icon [attr.aria-label]="refresh_title" [icon]="icons.faArrowsRotate" [title]="refresh_title" />
   </button>
 </section>
 <table table-default>
@@ -53,19 +53,19 @@
       <span>Data dnia nieczynnego </span>
       <input type="date" formControlName="dzien" [disabled]="true">
     </label>
-    <button type="button" (click)="openWindow('delete')">Usuń dzień nieczynny</button>
+    <button type="button">Usuń dzień nieczynny</button>
   </form>
 }
 <!--<button (click)="openWindow('add')">Dodaj dzień nieczynny</button>-->
 @if (showWindow !== '') {
   <section #filter [class]="{'delete': showWindow === 'delete','add': showWindow === 'add'}" class="window">
     <div>
-      <fa-icon [icon]="xmarkClose" class="close" (click)="closeWindow()"></fa-icon>
+      <fa-icon [icon]="icons.faXmark" class="close" />
       @if (showWindow === 'delete') {
         <h3>Ostrzeżenie</h3>
         <p>Czy na pewno chcesz usunąć dzień nieczynny z dnia: <b>{{ pricingForm.get('dzien')?.value | date : 'longDate' }}</b> ?</p>
         <button type="button" (click)="deletePricing()">Usuń</button>
-        <button type="button" (click)="closeWindow()">Anuluj</button>
+        <button type="button">Anuluj</button>
       } @else if (showWindow === 'add') {
         <h3>Dodaj Dzień Nieczynny</h3>
         <form [formGroup]="addForm">

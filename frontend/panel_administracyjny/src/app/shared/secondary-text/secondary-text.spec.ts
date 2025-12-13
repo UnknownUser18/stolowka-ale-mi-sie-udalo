@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SecondaryText } from '%secondary-text';
+import { SecondaryText } from '@ui';
 
 describe('SecondaryText', () => {
   let component : SecondaryText;

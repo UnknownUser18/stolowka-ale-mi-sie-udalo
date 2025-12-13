@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { PrimaryText } from '%primary-text';
+import { PrimaryText } from '@ui';
 
 describe('PrimaryText', () => {
   let component : PrimaryText;

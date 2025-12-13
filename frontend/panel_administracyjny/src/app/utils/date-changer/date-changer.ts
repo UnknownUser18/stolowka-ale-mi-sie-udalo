@@ -1,18 +1,20 @@
-import { Component, viewChild } from '@angular/core';
+import { Component, signal, viewChild } from '@angular/core';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { Info } from '@services/info';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { Tooltip } from '@utils/tooltip/tooltip';
-import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TooltipClickTriggerDirective } from '@directives/clickTooltip/tooltip-click-trigger.directive';
-import { PrimaryText } from "%primary-text";
-import { SecondaryText } from "%secondary-text";
-import { ButtonDanger } from "%button-danger";
-import { ButtonSuccess } from "%button-success";
+import { ButtonDanger, ButtonSuccess, PrimaryText, SecondaryText } from '@ui';
+import { Field, form, maxLength, minLength, pattern, required } from "@angular/forms/signals";
+
+interface MonthForm {
+  month : string;
+}
 
 @Component({
-  selector : 'app-date-changer',
+  selector  : 'app-date-changer',
   imports : [
     TitleCasePipe,
     FaIconComponent,
@@ -23,22 +25,31 @@ import { ButtonSuccess } from "%button-success";
     PrimaryText,
     SecondaryText,
     ButtonDanger,
-    ButtonSuccess
+    ButtonSuccess,
+    Field
   ],
   templateUrl : './date-changer.html',
-  styleUrl : './date-changer.scss',
+  styleUrl  : './date-changer.scss',
   providers : [DatePipe]
 })
 export class DateChanger {
   private tooltip = viewChild.required<Tooltip>('tooltip');
+  protected icons = {
+    faArrowLeft,
+    faArrowRight,
+  };
+  private month = signal<MonthForm>({
+    month : ''
+  });
+  protected monthForm = form(this.month, (schemaPath) => {
+    required(schemaPath.month, { message : 'Miesiąc jest wymagany.' });
+    minLength(schemaPath.month, 7, { message : 'Proszę wpisać 7 znaków.' });
+    maxLength(schemaPath.month, 7, { message : 'Proszę wpisać 7 znaków.' });
+    pattern(schemaPath.month, /^\d{4}-(0[1-9]|1[0-2])$/, { message : 'Nieprawidłowy format miesiąca, proszę wpisać w formie YYYY-MM.' });
 
-  protected month = new FormControl('', { nonNullable : true, validators : [Validators.required, Validators.maxLength(7), Validators.minLength(7), Validators.pattern('[0-9]{4}-[0-9]{2}')] });
+  });
 
-  protected readonly faArrowRight = faArrowRight;
-  protected readonly faArrowLeft = faArrowLeft;
-
-  constructor(private datePipe : DatePipe, private infoS : Info) {
-  }
+  constructor(private datePipe : DatePipe, private infoS : Info) {}
 
   private formatMonth(date : Date) : string {
     return this.datePipe.transform(date, 'LLLL yyyy') || '';
@@ -66,7 +77,7 @@ export class DateChanger {
   }
 
   protected changeMonth() {
-    const month = this.month.value.trim()
+    const month = this.monthForm().value().month;
     if (!month) return;
 
     const [year, monthNumber] = month.split('-').map(Number);
@@ -74,6 +85,6 @@ export class DateChanger {
 
     this.infoS.setDate(new Date(year, monthNumber - 1, 1));
     this.tooltip().hide();
-    this.month.setValue('');
+    this.monthForm().reset();
   }
 }

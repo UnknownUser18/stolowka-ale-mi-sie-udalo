@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Fieldset } from '%fieldset';
+import { Fieldset } from '@ui';
 
 describe('Fieldset', () => {
   let component : Fieldset;

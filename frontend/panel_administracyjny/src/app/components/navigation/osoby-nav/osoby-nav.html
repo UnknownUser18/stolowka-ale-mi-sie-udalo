@@ -6,7 +6,7 @@
     <h3>Wybrana osoba ZSTI:</h3>
     <p><a [routerLink]="['osoba/zsti/', person?.id, 'kalendarz']">{{ nazwisko_imie }} <i>({{ isTeacher(person) ? 'n.' : person?.klasa }})</i></a></p>
     <button (click)="deselectPerson()" [title]="deselect_title" [attr.aria-label]="deselect_title">
-      <fa-icon [icon]="faTimes" />
+      <fa-icon [icon]="icons.faTimes" />
       Odznacz
     </button>
   </section>
@@ -22,13 +22,13 @@
     <h2>
       @let zsti_title = "Przejdź do listy osób ZSTI";
       <a routerLink="osoby/zsti" (focus)="ZheaderFocused.set(true)" (blur)="ZheaderFocused.set(false)" [title]="zsti_title" [attr.aria-label]="zsti_title">
-        <fa-icon [icon]="faGraduationCap" />
+        <fa-icon [icon]="icons.faGraduationCap" />
         ZSTI
       </a>
     </h2>
     @let refresh_title = "Odśwież listę osób ZSTI";
     <button (click)="requestPersonsZ()" [class.spin]="loadingPersonsZ()" [title]="refresh_title" [attr.aria-label]="refresh_title">
-      <fa-icon [icon]="faRefresh" [size]="'lg'" />
+      <fa-icon [icon]="icons.faRefresh" [size]="'lg'" />
     </button>
   </div>
   <ol>

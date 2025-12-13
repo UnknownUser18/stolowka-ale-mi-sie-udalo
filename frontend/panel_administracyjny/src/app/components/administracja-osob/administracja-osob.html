@@ -23,7 +23,7 @@
                 <td>{{ user.nazwisko }}</td>
                 <td>{{ user.klasa ? user.klasa : 'Nauczyciel' }}</td>
                 <td>{{ user.typ_osoby_id === 1 ? 'Uczeń' : 'Nauczyciel' }}</td>
-                <td><button (click)="openUser(user.id)">Wybierz</button></td>
+                <!--                <td><button (click)="openUser(user.id)">Wybierz</button></td>-->
               </tr>
             } @empty {
               <td colspan="4">Brak osób...</td>
@@ -37,7 +37,7 @@
       <form [formGroup]="osobaForm">
         <label>
           <span>Imię i nazwisko:</span>
-          <input type="text" formControlName="imie_nazwisko" placeholder="Imię i nazwisko..." name="imie_nazwisko" id="imie_nazwisko" required>
+          <!--          <input type="text" formControlName="imie_nazwisko" placeholder="Imię i nazwisko..." name="imie_nazwisko" id="imie_nazwisko" required>-->
         </label>
         <label>
           <span>Imię i nazwisko opiekuna:</span>
@@ -49,52 +49,52 @@
         </label>
         <label>
           <span>Telefon:</span>
-          <input type="text" formControlName="telefon" placeholder="Telefon..." name="telefon" id="telefon" required>
+          <!--          <input type="text" formControlName="telefon" placeholder="Telefon..." name="telefon" id="telefon" required>-->
         </label>
         <label>
           <span>Opłacany przez miasto:</span>
-          <select name="miasto" id="miasto" formControlName="miasto" required>
-            <option [value]="0">Nie</option>
-            <option [value]="1">Tak</option>
-          </select>
+          <!--          <select name="miasto" id="miasto" formControlName="miasto" required>-->
+          <!--            <option [value]="0">Nie</option>-->
+          <!--            <option [value]="1">Tak</option>-->
+          <!--          </select>-->
         </label>
         <label>
           <span>Nr kierunkowy:</span>
-          <input type="text" formControlName="nr_kierunkowy" placeholder="Nr Kierunkowy..." name="kierunkowy" id="kierunkowy" required>
+          <!--          <input type="text" formControlName="nr_kierunkowy" placeholder="Nr Kierunkowy..." name="kierunkowy" id="kierunkowy" required>-->
         </label>
         <label>
           <span>Email:</span>
-          <input type="email" formControlName="email" placeholder="Email..." name="email" id="email" required>
+          <!--          <input type="email" formControlName="email" placeholder="Email..." name="email" id="email" required>-->
         </label>
         <label>
           <span>Typ osoby:</span>
-          <select name="typ_osoby" id="typ_osoby" formControlName="typ_osoby" (change)="onTypOsobyChange()" required>
+          <!--          <select name="typ_osoby" id="typ_osoby" formControlName="typ_osoby" (change)="onTypOsobyChange()" required>-->
 <!--            <option [value]="TypOsoby.UCZEN">Uczeń</option>-->
 <!--            <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>-->
-          </select>
+          <!--          </select>-->
         </label>
         <label>
           <span>Uczęszcza:</span>
-          <select name="uczeszcza" id="uczeszcza" formControlName="uczeszcza" required>
-            <option [value]="1">Tak</option>
-            <option [value]="0">Nie</option>
-          </select>
+          <!--          <select name="uczeszcza" id="uczeszcza" formControlName="uczeszcza" required>-->
+          <!--            <option [value]="1">Tak</option>-->
+          <!--            <option [value]="0">Nie</option>-->
+          <!--          </select>-->
         </label>
         <button type="submit" (click)="sendChanges()">Prześlij dane</button>
       </form>
     }
   </main>
 }
-@if (showWindow !== '') {
-  <section #window>
-    <div>
-      <i class="fa-solid fa-xmark close" (click)="closeWindow()"></i>
-      @if (showWindow === 'restore') {
-        <h3>Przywróć osobę</h3>
-        <p>Czy na pewno chcesz przywrócić osobę <b>{{ selectedUser?.imie }} {{ selectedUser?.nazwisko }}</b>?</p>
-        <button (click)="closeWindow()">Anuluj</button>
-        <button (click)="restoreUser()">Przywróć</button>
-      }
-    </div>
-  </section>
-}
+<!--@if (showWindow !== '') {-->
+<!--  <section #window>-->
+<!--    <div>-->
+<!--      <i class="fa-solid fa-xmark close" (click)="closeWindow()"></i>-->
+<!--      @if (showWindow === 'restore') {-->
+<!--        <h3>Przywróć osobę</h3>-->
+<!--        <p>Czy na pewno chcesz przywrócić osobę <b>{{ selectedUser?.imie }} {{ selectedUser?.nazwisko }}</b>?</p>-->
+<!--        <button (click)="closeWindow()">Anuluj</button>-->
+<!--        <button (click)="restoreUser()">Przywróć</button>-->
+<!--      }-->
+<!--    </div>-->
+<!--  </section>-->
+<!--}-->

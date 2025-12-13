@@ -21,15 +21,17 @@
 
   &:disabled {
     cursor: not-allowed;
-    background-color: var(--surface-dim);
+    background-color: var(--surface-dim) !important;
     color: var(--text-muted);
     border-color: var(--border-muted);
   }
 
   &:read-only {
+    cursor: default;
     background-color: var(--surface);
     color: var(--text-muted) !important;
     border-color: var(--border-muted);
+    outline: none;
   }
 
   &:focus {

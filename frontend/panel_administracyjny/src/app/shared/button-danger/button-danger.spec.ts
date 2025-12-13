@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ButtonDanger } from '%button-danger';
+import { ButtonDanger } from '@ui';
 
 describe('ButtonDanger', () => {
   let component : ButtonDanger;

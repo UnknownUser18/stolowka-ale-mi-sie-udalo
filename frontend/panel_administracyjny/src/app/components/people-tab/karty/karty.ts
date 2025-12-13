@@ -1,25 +1,23 @@
-import { Component, effect } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, effect, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Cards, ZCard } from "@database/cards/cards";
 import { Persons } from "@database/persons/persons";
 import { Notifications } from "@services/notifications";
 import { FaIconComponent } from "@fortawesome/angular-fontawesome";
 import { faArrowRight, faBan, faCheck, faIdCard, faPlus, faRotateLeft, faTrashCan } from "@fortawesome/free-solid-svg-icons";
-import { Dialog } from "@modals/dialog/dialog";
 import { DialogTriggerDirective } from "@directives/dialog/dialog-trigger.directive";
-import { Fieldset } from "%fieldset";
-import { Label } from "%label";
-import { Input } from "%input";
-import { ButtonDefault } from "%button-default";
-import { ButtonDanger } from "%button-danger";
-import { ButtonPrimary } from "%button-primary";
-import { ButtonSuccess } from "%button-success";
+import { ButtonDanger, ButtonDefault, ButtonPrimary, ButtonSuccess, Dialog, Fieldset, Input, Label } from '@ui';
+import { Field, form, pattern, readonly, required } from "@angular/forms/signals";
+
+interface CardForm {
+  key_card : string;
+  data_wydania : string;
+  ostatnie_uzycie : string;
+}
 
 @Component({
-  selector : 'app-karty',
-  imports : [
-    ReactiveFormsModule,
+  selector  : 'app-karty',
+  imports   : [
     FaIconComponent,
     Dialog,
     DialogTriggerDirective,
@@ -29,35 +27,44 @@ import { ButtonSuccess } from "%button-success";
     ButtonDefault,
     ButtonDanger,
     ButtonPrimary,
-    ButtonSuccess
+    ButtonSuccess,
+    Field
   ],
   templateUrl : './karty.html',
-  styleUrl : './karty.scss',
+  styleUrl  : './karty.scss',
   providers : [DatePipe]
 })
 export class Karty {
-  private card : ZCard | null = null;
-
-
-  protected showWindow : '' | 'remove' | 'add' | 'add-continue' = '';
-
-  protected cardForm = new FormGroup({
-    key_card : new FormControl('', [Validators.required, Validators.pattern('^[0-9]+$')]),
-    data_wydania : new FormControl('', [Validators.required]),
-    ostatnie_uzycie : new FormControl('', [Validators.required]),
+  protected icons = {
+    faIdCard,
+    faTrashCan,
+    faPlus,
+    faBan,
+    faArrowRight,
+    faRotateLeft,
+    faCheck,
+  }
+  private card = signal<CardForm>({
+    key_card        : '',
+    data_wydania    : '',
+    ostatnie_uzycie : '',
   });
-
-  protected addCardForm = new FormGroup({
-    key_card : new FormControl('', Validators.required),
+  protected cardForm = form(this.card, (schemaPath) => {
+    required(schemaPath.key_card, { message : 'Numer karty jest wymagany.' });
+    pattern(schemaPath.key_card, /^[0-9]+$/, { message : 'Numer karty musi składać się wyłącznie z cyfr.' });
+    readonly(schemaPath.key_card, () => true)
+    required(schemaPath.data_wydania, { message : 'Data wydania jest wymagana.' });
+    readonly(schemaPath.data_wydania, () => true)
+    required(schemaPath.ostatnie_uzycie, { message : 'Ostatnie użycie jest wymagane.' });
+    readonly(schemaPath.ostatnie_uzycie, () => true)
   });
-
-  protected readonly faIdCard = faIdCard;
-  protected readonly faTrashCan = faTrashCan;
-  protected readonly faPlus = faPlus;
-  protected readonly faBan = faBan;
-  protected readonly faArrowRight = faArrowRight;
-  protected readonly faRotateLeft = faRotateLeft;
-  protected readonly faCheck = faCheck;
+  private addCard = signal<Omit<CardForm, 'data_wydania' | 'ostatnie_uzycie'>>({
+    key_card : '',
+  });
+  protected addCardForm = form(this.addCard, (schemaPath) => {
+    required(schemaPath.key_card, { message : 'Numer karty jest wymagany.' });
+  });
+  private cardData = signal<ZCard | null>(null);
 
   constructor(
     private cardS : Cards,
@@ -80,25 +87,26 @@ export class Karty {
         this.notificationsS.createWarningNotification('Nie znaleziono karty przypisanej do tego ucznia.', 5);
         return;
       }
-      this.card = card;
-      this.cardForm.setValue({
-        key_card : String(card.key_card),
+
+      const cardForm : CardForm = {
+        key_card     : String(card.key_card),
         data_wydania : this.datePipe.transform(card.data_wydania, 'yyyy-MM-dd') || '',
         ostatnie_uzycie : this.datePipe.transform(card.ostatnie_uzycie, 'yyyy-MM-dd') || '',
-      });
+      };
 
-      this.cardForm.disable();
+      this.cardData.set(card);
+      this.cardForm().setControlValue(cardForm);
     });
   }
 
 
   protected deleteCard() : void {
-    if (!this.card) {
+    if (!this.cardData()) {
       this.notificationsS.createErrorNotification('Brak karty do usunięcia.', 5);
       return;
     }
 
-    this.cardS.deleteZCard(this.card.id).subscribe((result) => {
+    this.cardS.deleteZCard(this.cardData()!.id).subscribe((result) => {
       if (!result) {
         this.notificationsS.createErrorNotification('Nie udało się usunąć karty.', 5);
         return;
@@ -107,11 +115,8 @@ export class Karty {
     });
   }
 
-  protected addCard() : void {
-    if (this.addCardForm.invalid) {
-      this.notificationsS.createErrorNotification('Formularz zawiera błędy.', 5);
-      return;
-    }
+  protected addCardToDB() : void {
+    if (this.addCardForm().invalid()) return;
 
     const person = this.personsS.personZ();
     if (!person) {
@@ -121,7 +126,7 @@ export class Karty {
 
     const newCard : Omit<ZCard, 'id' | 'ostatnie_uzycie'> = {
       id_ucznia : person.id,
-      key_card : Number(this.addCardForm.value.key_card),
+      key_card  : Number(this.addCardForm.key_card().value()),
       data_wydania : new Date(),
     };
 
@@ -132,19 +137,19 @@ export class Karty {
       }
       this.notificationsS.createSuccessNotification('Karta została pomyślnie dodana.');
 
-      this.card = {
+      this.cardData.set({
         ...newCard,
         id : result,
         ostatnie_uzycie : new Date(),
-      };
-
-      this.cardForm.patchValue({
-        key_card : String(this.card.key_card),
-        data_wydania : this.datePipe.transform(this.card.data_wydania, 'yyyy-MM-dd') || '',
       });
 
-      this.cardForm.disable();
-      this.addCardForm.reset();
+      this.cardForm().setControlValue({
+        key_card        : String(this.card().key_card),
+        data_wydania    : this.datePipe.transform(this.card().data_wydania, 'yyyy-MM-dd') || '',
+        ostatnie_uzycie : this.datePipe.transform(this.card().ostatnie_uzycie, 'yyyy-MM-dd') || '',
+      });
+
+      this.addCardForm().reset();
     });
   }
 }

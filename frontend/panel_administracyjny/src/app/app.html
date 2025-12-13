@@ -4,11 +4,11 @@
     @for (notification of notifications(); track notification.id) {
       <app-notification [notification]="notification" (dismiss)="dismissNotification(notification.id)" />
     }
-    @if (notificationsQueueLength > 0) {
+    @if (notificationsQueueLength() > 0) {
       <div class="queue-info">
         <fa-icon [icon]="faEllipsis" />
-        <span>+{{ notificationsQueueLength }}
-          @switch (notificationsQueueLength) {
+        <span>+{{ notificationsQueueLength() }}
+          @switch (notificationsQueueLength()) {
             @case (1) {
               powiadomienie
             }

@@ -12,8 +12,8 @@ import { TooltipDelayTriggerDirective } from "@directives/delayTooltip/tooltip-d
 import { ZPricing } from "@database/prices/prices";
 
 @Component({
-  selector : 'app-calendar',
-  imports : [
+  selector  : 'app-calendar',
+  imports   : [
     IsWeekendPipe,
     InDeclarationPipe,
     FaIconComponent,
@@ -25,17 +25,28 @@ import { ZPricing } from "@database/prices/prices";
   ],
   providers : [DayInMoreDeclarationsPipe],
   templateUrl : './calendar.html',
-  styleUrl : './calendar.scss',
+  styleUrl  : './calendar.scss',
 })
 export class Calendar {
   protected weeks : { days : (Date | null)[] }[] = [];
+  /**
+   * List of declarations or pricing's to check for conflicts
+   */
   public readonly elements = input.required<ZDeclaration[] | Omit<ZPricing, 'cena'>[] | undefined>();
 
   protected readonly faArrowLeft = faArrowLeft;
   protected readonly faArrowRight = faArrowRight;
 
   protected readonly date = signal(new Date());
+  /**
+   * Selected declaration or pricing to check for conflicts
+   * @default null
+   */
   public readonly selectedElement = input<ZDeclaration | Omit<ZPricing, 'cena'> | null>(null);
+  /**
+   * If true, the selectedElement is considered as a new element (not in the elements list)
+   * @default false
+   */
   public readonly isForNewElement = input<boolean>(false);
   protected declarations : ZDeclaration[] | Omit<ZPricing, 'cena'>[] | null = null;
   public readonly hasWrongDays = output<boolean>();
@@ -43,6 +54,7 @@ export class Calendar {
   constructor(
     private dayinMoreDeclarations : DayInMoreDeclarationsPipe,
   ) {
+
     effect(() => {
       this.date();
       this.generateWeeks();
@@ -55,8 +67,16 @@ export class Calendar {
         const selected = this.selectedElement() as ZDeclaration | ZPricing;
         if (!this.elements()?.some(d => d === selected))
           this.declarations = [selected, ...(this.elements() ?? [])];
-      } else
-        this.declarations = this.elements() ?? [];
+      } else {
+        // this.declarations = this.elements() ?? [];
+        const selectedDeclaration = this.selectedElement();
+        if (!selectedDeclaration) return;
+        let declarations = this.elements() ?? [];
+
+        declarations = declarations.filter(d => d.id !== selectedDeclaration.id);
+        declarations.push(selectedDeclaration);
+        this.declarations = declarations;
+      }
 
       this.generateWeeks();
     });

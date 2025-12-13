@@ -1,4 +1,4 @@
-import { Component, effect, Inject, PLATFORM_ID, signal } from '@angular/core';
+import { Component, effect, inject, PLATFORM_ID, signal } from '@angular/core';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faGraduationCap, faRefresh, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Router, RouterLink } from '@angular/router';
@@ -8,49 +8,54 @@ import { Notifications } from '@services/notifications';
 
 @Component({
   selector : 'app-osoby-nav',
-  imports : [
+  imports  : [
     FaIconComponent,
     RouterLink
   ],
   templateUrl : './osoby-nav.html',
   styleUrl    : './osoby-nav.scss',
-  host : {
+  host     : {
     'aria-label' : 'Nawigacja - Osoby',
     'role' : 'navigation',
   }
 })
 export class OsobyNav {
+  protected readonly icons = {
+    faGraduationCap,
+    faTimes,
+    faRefresh
+  };
+
   protected personsZ : ZPerson[] | null | undefined;
   protected readonly loadingPersonsZ = signal(false);
   protected readonly ZheaderFocused = signal(false);
-
-  protected readonly faGraduationCap = faGraduationCap;
-  protected readonly faTimes = faTimes;
-  protected readonly faRefresh = faRefresh;
+  private platformId = inject(PLATFORM_ID);
 
   constructor(
-    @Inject(PLATFORM_ID) private platform : object,
     private notificationsS : Notifications,
     private router : Router,
     protected userS : Persons) {
-
-    if (isPlatformBrowser(this.platform)) {
-      const sessionPersons = sessionStorage.getItem('persons');
-      if (sessionPersons) {
-        this.personsZ = JSON.parse(sessionPersons) as ZPerson[];
-        this.notificationsS.createInfoNotification('Pobrano listę osób z pamięci podręcznej.', 3);
-        return;
-      }
-    }
-    this.requestPersonsZ();
-
     effect(() => {
       if (this.userS.personZ()) {
         const isInList = this.personsZ?.some((p) => p.id === this.userS.personZ()!.id);
         if (isInList)
           this.requestPersonsZ();
       }
-    })
+    });
+
+    if (!isPlatformBrowser(this.platformId)) {
+      this.requestPersonsZ();
+      return;
+    }
+
+    const sessionPersons = sessionStorage.getItem('persons');
+    if (!sessionPersons) {
+      this.requestPersonsZ();
+      return;
+    }
+
+    this.personsZ = JSON.parse(sessionPersons) as ZPerson[];
+    this.notificationsS.createInfoNotification('Pobrano listę osób z pamięci podręcznej.', 3);
   }
 
   protected selectPerson(person : ZPerson) : void {
@@ -73,7 +78,7 @@ export class OsobyNav {
       else
         this.notificationsS.createSuccessNotification('Pobrano listę osób z serwera.', 2);
 
-      if (isPlatformBrowser(this.platform) && persons)
+      if (isPlatformBrowser(this.platformId) && persons)
         sessionStorage.setItem('persons', JSON.stringify(persons));
     });
   }

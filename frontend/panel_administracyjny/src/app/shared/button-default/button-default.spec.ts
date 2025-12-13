@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ButtonDefault } from '%button-default';
+import { ButtonDefault } from '@ui';
 
 describe('ButtonTertiary', () => {
   let component : ButtonDefault;

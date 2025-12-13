@@ -1,105 +1,133 @@
-@let typOsoby = forms.get('typ_osoby')?.value;
-<form [formGroup]="forms">
+@let isStudent = Number(ZPersonForm.typ_osoby().value()) === TypOsoby.UCZEN;
+<form>
   <fieldset fieldset-default>
     <legend>
-      <fa-icon [icon]="faUser" />
+      <fa-icon [icon]="icons.faUser" />
       Dane osobowe
     </legend>
     <label label-default>
+      @let imie_nazwisko_errors = ZPersonForm.imie_nazwisko().errors();
+
       <span>Imię i nazwisko:</span>
-      <input [attr.aria-errormessage]="forms.get('imie_nazwisko')?.invalid ? 'name-error' : null" [pattern]="namePattern" aria-label="Imię i nazwisko" formControlName="imie_nazwisko" input-default name="imie_nazwisko" placeholder="Imię i nazwisko..." required type="text">
-      @if (forms.get('imie_nazwisko')?.invalid) {
-        <span class="error" id="name-error">Niepoprawne dane wpisano. Proszę wpisać w formacie <code>[imie] [nazwisko]</code>.</span>
+      <input [field]="ZPersonForm.imie_nazwisko" aria-label="Imię i nazwisko" input-default placeholder="Imię i nazwisko..." type="text">
+      @if (imie_nazwisko_errors.length > 0 && ZPersonForm.imie_nazwisko().touched()) {
+        @for (error of imie_nazwisko_errors; track error) {
+          <span class="error-message">{{ error.message }}</span>
+        }
       }
     </label>
     <label label-default>
+      @let klasa_errors = ZPersonForm.klasa().errors();
+
       <span>Klasa:</span>
-      @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
-        <input [delayT]="disabledTooltip" [delay]="500" aria-label="Nauczyciel" formControlName="klasa" input-default name="klasa" placeholder="Nauczyciel..." type="text" />
-      } @else {
-        <input [attr.required]="typOsoby === TypOsoby.UCZEN" aria-label="Klasa" formControlName="klasa" input-default name="klasa" placeholder="Klasa..." type="text">
+      <input [delayT]="!isStudent ? disabledTooltip : undefined" [delay]="500" [field]="asStringField(ZPersonForm.klasa)" [placeholder]="isStudent ? 'Klasa...' : 'Nauczyciel...'" aria-label="Klasa" input-default type="text">
+      @if (klasa_errors.length > 0 && ZPersonForm.klasa().touched()) {
+        @for (error of klasa_errors; track error) {
+          <span class="error-message">{{ error.message }}</span>
+        }
       }
     </label>
     <label label-one-line>
+      @let typ_osoby_errors = ZPersonForm.typ_osoby().errors();
+
       <span>Typ osoby:</span>
-      <select name="typ_osoby" formControlName="typ_osoby" (change)="updateValidators()" aria-label="Typ osoby">
+      <select (change)="updateOnTypOsobyChange()" [field]="ZPersonForm.typ_osoby" aria-label="Typ osoby">
         <option [value]="TypOsoby.UCZEN">Uczeń</option>
         <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
       </select>
+      @if (typ_osoby_errors.length > 0 && ZPersonForm.typ_osoby().touched()) {
+        @for (error of typ_osoby_errors; track error) {
+          <span class="error-message">{{ error.message }}</span>
+        }
+      }
     </label>
     <label label-one-line>
+      @let miasto_errors = ZPersonForm.miasto().errors();
+
       <span>Opłacany przez miasto:</span>
-      <switch [label]="'Opłacany przez miasto'" [type]="'2-way'" formControlName="miasto" />
+      <switch [field]="ZPersonForm.miasto" [label]="'Opłacany przez miasto'" [type]="'2-way'" />
+      @if (miasto_errors.length > 0 && ZPersonForm.miasto().touched()) {
+        @for (error of miasto_errors; track error) {
+          <span class="error-message">{{ error.message }}</span>
+        }
+      }
     </label>
     <label label-one-line>
+      @let uczeszcza_errors = ZPersonForm.uczeszcza().errors();
+
       <span>Uczęszcza:</span>
-      <switch [label]="'Uczęszcza'" [type]="'2-way'" formControlName="uczeszcza" />
+      <switch [field]="ZPersonForm.uczeszcza" [label]="'Uczęszcza'" [type]="'2-way'" />
+      @if (uczeszcza_errors.length > 0 && ZPersonForm.uczeszcza().touched()) {
+        @for (error of uczeszcza_errors; track error) {
+          <span class="error-message">{{ error.message }}</span>
+        }
+      }
     </label>
   </fieldset>
   <fieldset fieldset-default>
     <legend>
-      <fa-icon [icon]="faUserShield" />
+      <fa-icon [icon]="icons.faUserShield" />
       Dane opiekuna
     </legend>
     <label label-default>
+      @let imie_nazwisko_opiekuna_errors = ZPersonForm.imie_nazwisko_opiekuna().errors();
+
       <span>Imię i nazwisko opiekuna:</span>
-      @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
-        <input [delayT]="disabledTooltip" [delay]="500" aria-label="Nauczyciel" formControlName="imie_nazwisko_opiekuna" input-default name="imie_nazwisko_opiekuna" placeholder="Nauczyciel..." type="text" />
-      } @else {
-        <input [attr.aria-errormessage]="forms.get('imie_nazwisko_opiekuna')?.invalid ? 'opiekun-error' : null" [attr.required]="typOsoby === TypOsoby.UCZEN" [pattern]="namePattern" aria-label="Imię i nazwisko opiekuna" formControlName="imie_nazwisko_opiekuna" input-default name="imie_nazwisko_opiekuna" placeholder="Imię i nazwisko opiekuna..." type="text">
-        @if (forms.get('imie_nazwisko_opiekuna')?.invalid) {
-          <span class="error" id="imie_nazwisko_opiekuna">Niepoprawne dane wpisano. Proszę wpisać w formacie <code>[imie] [nazwisko]</code>.</span>
+      <input [delayT]="!isStudent ? disabledTooltip : undefined" [delay]="500" [field]="asStringField(ZPersonForm.imie_nazwisko_opiekuna)" [placeholder]="isStudent ? 'Imię i nazwisko opiekuna...' : 'Nauczyciel...'" aria-label="Imię i nazwisko opiekuna" input-default type="text">
+      @if (imie_nazwisko_opiekuna_errors.length > 0 && ZPersonForm.imie_nazwisko_opiekuna().touched()) {
+        @for (error of imie_nazwisko_opiekuna_errors; track error) {
+          <span class="error-message">{{ error.message }}</span>
         }
       }
     </label>
     <label label-default>
+      @let telefon_errors = ZPersonForm.telefon().errors();
+
       <span>Telefon:</span>
-      @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
-        <input [delayT]="disabledTooltip" [delay]="500" aria-label="Nauczyciel" formControlName="telefon" input-default name="telefon" placeholder="Nauczyciel..." type="tel" />
-      } @else {
-        <input [attr.aria-errormessage]="forms.get('telefon')?.invalid ? 'phone-error' : null" [pattern]="phonePattern" aria-label="Telefon" formControlName="telefon" input-default name="telefon" placeholder="Telefon..." required type="tel">
-        @if (forms.get('telefon')?.invalid) {
-          <span class="error" id="phone-error">Niepoprawny numer telefonu. Proszę wpisać w formacie <code>+48 123456789</code>.</span>
+      <input [delayT]="!isStudent ? disabledTooltip : undefined" [delay]="500" [field]="asStringField(ZPersonForm.telefon)" [placeholder]="isStudent ? 'Telefon...' : 'Nauczyciel...'" aria-label="Telefon" input-default type="tel">
+      @if (telefon_errors.length > 0 && ZPersonForm.telefon().touched()) {
+        @for (error of telefon_errors; track error) {
+          <span class="error-message">{{ error.message }}</span>
         }
       }
     </label>
     <label label-default>
+      @let email_errors = ZPersonForm.email().errors();
+
       <span>Email:</span>
-      @if (Number(typOsoby) === TypOsoby.NAUCZYCIEL) {
-        <input [delayT]="disabledTooltip" [delay]="500" aria-label="Nauczyciel" formControlName="email" input-default name="email" placeholder="Nauczyciel..." type="email" />
-      } @else {
-        <input [attr.aria-errormessage]="forms.get('email')?.invalid ? 'email-error' : null" [attr.required]="typOsoby === TypOsoby.UCZEN" aria-label="Email" formControlName="email" input-default name="email" placeholder="Email..." type="email">
-        @if (forms.get('email')?.invalid) {
-          <span class="error" id="email-error">Niepoprawny adres email. Proszę wpisać poprawny adres email.</span>
+      <input [delayT]="!isStudent ? disabledTooltip : undefined" [delay]="500" [field]="asStringField(ZPersonForm.email)" [placeholder]="isStudent ? 'Email...' : 'Nauczyciel...'" aria-label="Email" input-default type="email">
+      @if (email_errors.length > 0 && ZPersonForm.email().touched()) {
+        @for (error of email_errors; track error) {
+          <span class="error-message">{{ error.message }}</span>
         }
       }
     </label>
   </fieldset>
   <div>
     <button button-secondary>
-      <fa-icon [icon]="faArrowsRotate" [class.spin]="isRefreshing()" />
+      <fa-icon [class.spin]="isRefreshing()" [icon]="icons.faArrowsRotate" />
       Odśwież dane
     </button>
     <button button-danger>Zarchiwizuj osobę</button>
   </div>
   <div>
-    <button (click)="forms.reset()" button-danger type="reset">
+    <button (click)="ZPersonForm().reset()" button-danger type="reset">
       Resetuj
-      <fa-icon [icon]="faRotateLeft" />
+      <fa-icon [icon]="icons.faRotateLeft" />
     </button>
     <button (click)="sendChanges()" [class.sending]="isSending()" button-primary type="submit">
       @if (!isSending()) {
         Prześlij dane
-        <fa-icon [icon]="faPaperPlane" />
+        <fa-icon [icon]="icons.faPaperPlane" />
       } @else {
         Przesyłanie...
-        <fa-icon [icon]="faArrowsRotate" class="spin" />
+        <fa-icon [icon]="icons.faArrowsRotate" class="spin" />
       }
     </button>
   </div>
 </form>
 
 <app-tooltip #disabledTooltip [horizontal]="true">
-  <fa-icon [icon]="faCircleInfo" />
+  <fa-icon [icon]="icons.faCircleInfo" />
   <p>Nie można edytować tego pola, ponieważ jest osoba jest zaznaczona jako <b>nauczyciel</b>.</p>
 </app-tooltip>

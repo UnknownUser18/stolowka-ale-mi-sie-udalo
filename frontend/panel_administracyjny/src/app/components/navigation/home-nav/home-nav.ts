@@ -4,20 +4,21 @@ import { faCalendar, faGear, faLock, faMoneyBills, faTableColumns, faUser } from
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-home-nav',
-  imports : [
+  selector : 'app-home-nav',
+  imports  : [
     FaIconComponent,
     RouterLink
   ],
   templateUrl : './home-nav.html',
-  styleUrl: '../nav.scss',
+  styleUrl : '../nav.scss',
 })
 export class HomeNav {
-
-  protected readonly faUser = faUser;
-  protected readonly faTableColumns = faTableColumns;
-  protected readonly faMoneyBills = faMoneyBills;
-  protected readonly faCalendar = faCalendar;
-  protected readonly faLock = faLock;
-  protected readonly faGear = faGear;
+  protected readonly icons = {
+    faUser,
+    faTableColumns,
+    faMoneyBills,
+    faCalendar,
+    faLock,
+    faGear
+  };
 }

@@ -2,7 +2,7 @@
   <div>
     <button [dialog]="addPaymentDialog" button-primary>
       Dodaj płatność
-      <fa-icon [icon]="faPlus" />
+      <fa-icon [icon]="icons.faPlus" />
     </button>
     <button (click)="refreshPayments()" [disabled]="isLoading" button-secondary>
       @if (isLoading) {
@@ -10,11 +10,11 @@
       } @else {
         Odśwież płatności
       }
-      <fa-icon [icon]="faRotate" [class.spin]="isLoading" />
+      <fa-icon [class.spin]="isLoading" [icon]="icons.faRotate" />
     </button>
     <button [dialog]="filterDialog" button-default>
       Filtruj płatności
-      <fa-icon [icon]="faFilter" />
+      <fa-icon [icon]="icons.faFilter" />
     </button>
   </div>
   <table table-default>
@@ -28,7 +28,7 @@
     </thead>
     <div class="table-body-scroll">
       <tbody>
-        @for (payment of shownPayments; track payment.id; let i = $index) {
+        @for (payment of shownPayments(); track payment.id; let i = $index) {
           <tr>
             @let year_month = (payment.rok + '-' + payment.miesiac.toString().padStart(2, '0')) | date : 'LLLL yyyy';
             <td>{{ i + 1 }}</td>
@@ -65,64 +65,72 @@
 @let amountPlaceholder = 'Wprowadź kwotę...';
 @let descriptionPlaceholder = 'Wprowadź opis płatności...';
 
-<form [formGroup]="platnosciForm">
+<form (submit)="$event.preventDefault()">
   @if (selectedPayment()) {
     <fieldset fieldset-default>
       <legend>
-        <fa-icon [icon]="faFileInvoiceDollar" />
+        <fa-icon [icon]="icons.faFileInvoiceDollar" />
         Szczegóły płatności
       </legend>
       <label label-default>
-        @let selectedMonthYearInvalid = platnosciForm.get('miesiac_rok')?.invalid && platnosciForm.get('miesiac_rok')?.touched;
+        @let selectedMonthYear_errors = platnosciForm.miesiac_rok().errors();
         <span>Objęty rok i miesiąc:</span>
-        <input [attr.aria-errormessage]="selectedMonthYearInvalid ? 'error-month' :  null" [attr.aria-label]="monthYearLabel" [attr.pattern]="miesiac_rok_pattern" [placeholder]="monthYearPlaceholder" formControlName="miesiac_rok" input-default type="month">
-        @if (selectedMonthYearInvalid) {
-          <span class="error-message" id="error-month">Proszę wpisać poprawną datę w formacie <code>YYYY-MD</code>.</span>
+        <input [attr.aria-label]="monthYearLabel" [field]="platnosciForm.miesiac_rok" [placeholder]="monthYearPlaceholder" input-default type="month">
+        @if (selectedMonthYear_errors.length > 0) {
+          @for (error of selectedMonthYear_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let selectedAmountInvalid = platnosciForm.get('platnosc')?.invalid && platnosciForm.get('platnosc')?.touched;
+        @let selectedAmount_errors = platnosciForm.platnosc().errors();
         <span>Kwota:</span>
-        <input [attr.aria-errormessage]="selectedAmountInvalid ? 'error-amount' :  null" [attr.aria-label]="amountLabel" [placeholder]="amountPlaceholder" formControlName="platnosc" input-default min="0" step="0.01" type="number">
-        @if (selectedAmountInvalid) {
-          <span class="error-message" id="error-amount">Proszę wpisać poprawną kwotę (większą lub równą 0).</span>
+        <input [attr.aria-label]="amountLabel" [field]="platnosciForm.platnosc" [placeholder]="amountPlaceholder" input-default step="0.1" type="number">
+        @if (selectedAmount_errors.length > 0) {
+          @for (error of selectedAmount_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let selectedDateInvalid = platnosciForm.get('data')?.invalid && platnosciForm.get('data')?.touched;
+        @let selectedDate_errors = platnosciForm.data().errors();
         <span>Dzień zapłaty:</span>
-        <input [attr.aria-errormessage]="selectedDateInvalid ? 'error-date' :  null" [attr.aria-label]="dateLabel" [attr.pattern]="data_pattern" [placeholder]="datePlaceholder" formControlName="data" input-default type="date">
-        @if (selectedDateInvalid) {
-          <span class="error-message" id="error-date">Proszę wpisać poprawną datę w formacie <code>YYYY-MM-DD</code>.</span>
+        <input [attr.aria-label]="dateLabel" [field]="platnosciForm.data" [placeholder]="datePlaceholder" input-default type="date">
+        @if (selectedDate_errors.length > 0) {
+          @for (error of selectedDate_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let selectedDescriptionInvalid = platnosciForm.get('opis')?.invalid && platnosciForm.get('opis')?.touched;
+        @let selectedDescription_errors = platnosciForm.opis().errors();
         <span>Opis:</span>
-        <input [attr.aria-errormessage]="selectedDescriptionInvalid ? 'error-description' :  null" [attr.aria-label]="descriptionLabel" [placeholder]="descriptionPlaceholder" formControlName="opis" input-default maxlength="200" type="text">
-        @if (selectedDescriptionInvalid) {
-          <span class="error-message" id="error-description">Opis nie może przekraczać 200 znaków.</span>
+        <input [attr.aria-label]="descriptionLabel" [field]="platnosciForm.opis" [placeholder]="descriptionPlaceholder" input-default type="text">
+        @if (selectedDescription_errors.length > 0) {
+          @for (error of selectedDescription_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <div>
-        @if (platnosciForm.invalid) {
+        @if (platnosciForm().invalid()) {
           <button button-success disabled type="submit">
             Prześlij dane
-            <fa-icon [icon]="faPaperPlane" />
+            <fa-icon [icon]="icons.faPaperPlane" />
           </button>
         } @else {
           <button (click)="updatePayment()" button-success type="submit">
             Prześlij dane
-            <fa-icon [icon]="faPaperPlane" />
+            <fa-icon [icon]="icons.faPaperPlane" />
           </button>
         }
         <button (click)="resetPayment()" button-danger type="reset">
           Resetuj
-          <fa-icon [icon]="faRotate" />
+          <fa-icon [icon]="icons.faRotate" />
         </button>
-        <button [dialog]="deletePaymentDialog" button-danger class="delete-payment">
+        <button [dialog]="deletePaymentDialog" button-danger>
           Usuń płatność
-          <fa-icon [icon]="faTrash" />
+          <fa-icon [icon]="icons.faTrash" />
         </button>
       </div>
     </fieldset>
@@ -132,9 +140,9 @@
 <app-dialog #deletePaymentDialog>
   <div class="delete-dialog">
     @if (selectedPayment() !== null) {
-      @let paymentYearMonth = platnosciForm.get('miesiac_rok')?.value;
-      @let paymentDate = platnosciForm.get('data')?.value;
-      @let originalYearMonth = selectedPayment()!.rok + '-' + selectedPayment()!.miesiac.toString().padStart(2, '0');
+      @let paymentYearMonth = platnosciForm.miesiac_rok().value();
+      @let paymentDate = platnosciForm.data().value();
+      @let originalYearMonth = `${ selectedPayment()!.rok }-${ selectedPayment()!.miesiac.toString().padStart(2, '0') }`;
       @let originalDate = selectedPayment()!.data_platnosci;
       <h3>Ostrzeżenie</h3>
       <p>Czy na pewno chcesz usunąć płatność, która obejmuje <b>{{ paymentYearMonth | date : 'LLLL yyyy' }}</b>?</p>
@@ -157,53 +165,61 @@
 
 <app-dialog #addPaymentDialog>
   <h3>Dodaj płatność</h3>
-  <form [formGroup]="addForm" class="add-payment-form">
+  <form (submit)="$event.preventDefault()" class="add-payment-form">
     <fieldset fieldset-default>
       <legend>
-        <fa-icon [icon]="faFileInvoiceDollar" />
+        <fa-icon [icon]="icons.faFileInvoiceDollar" />
         Szczegóły płatności
       </legend>
       <label label-default>
-        @let addMonthYearInvalid = addForm.get('miesiac_rok')?.invalid && addForm.get('miesiac_rok')?.touched;
+        @let addMonthYear_errors = addForm.miesiac_rok().errors();
         <span>Objęty rok i miesiąc:</span>
-        <input [attr.aria-errormessage]="addMonthYearInvalid ? 'error-add-month' :  null" [attr.aria-label]="monthYearLabel" [attr.pattern]="miesiac_rok_pattern" [placeholder]="monthYearPlaceholder" formControlName="miesiac_rok" input-default type="month">
-        @if (addMonthYearInvalid) {
-          <span class="error-message" id="error-add-month">Proszę wpisać poprawną datę w formacie <code>YYYY-MM</code>.</span>
+        <input [attr.aria-label]="monthYearLabel" [field]="addForm.miesiac_rok" [placeholder]="monthYearPlaceholder" input-default type="month">
+        @if (addMonthYear_errors.length > 0 && addForm.miesiac_rok().touched()) {
+          @for (error of addMonthYear_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let addDateInvalid = addForm.get('dzien_zaplaty')?.invalid && addForm.get('dzien_zaplaty')?.touched;
+        @let addDateInvalid_errors = addForm.data().errors();
         <span>Dzień zapłaty:</span>
-        <input [attr.aria-errormessage]="addDateInvalid ? 'error-add-date' :  null" [attr.aria-label]="dateLabel" [attr.pattern]="data_pattern" [placeholder]="datePlaceholder" formControlName="data" input-default type="date">
-        @if (addDateInvalid) {
-          <span class="error-message" id="error-add-date">Proszę wpisać poprawną datę w formacie <code>YYYY-MM-DD</code>.</span>
+        <input [attr.aria-label]="dateLabel" [field]="addForm.data" [placeholder]="datePlaceholder" input-default type="date">
+        @if (addDateInvalid_errors.length > 0 && addForm.data().touched()) {
+          @for (error of addDateInvalid_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let addAmountInvalid = addForm.get('platnosc')?.invalid && addForm.get('platnosc')?.touched;
+        @let addAmount_errors = addForm.platnosc().errors();
         <span>Kwota:</span>
-        <input [attr.aria-errormessage]="addAmountInvalid ? 'error-add-amount' :  null" [attr.aria-label]="amountLabel" [placeholder]="amountPlaceholder" formControlName="platnosc" input-default min="0" step="0.01" type="number">
-        @if (addAmountInvalid) {
-          <span class="error-message" id="error-add-amount">Proszę wpisać poprawną kwotę (większą lub równą 0).</span>
+        <input [attr.aria-label]="amountLabel" [field]="addForm.platnosc" [placeholder]="amountPlaceholder" input-default step="0.1" type="number">
+        @if (addAmount_errors.length > 0 && addForm.platnosc().touched()) {
+          @for (error of addAmount_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let addDescriptionInvalid = addForm.get('opis')?.invalid && addForm.get('opis')?.touched;
+        @let addDescription_errors = addForm.opis().errors();
         <span>Opis:</span>
-        <input [attr.aria-errormessage]="addDescriptionInvalid ? 'error-add-description' :  null" [attr.aria-label]="descriptionLabel" [placeholder]="descriptionPlaceholder" formControlName="opis" input-default maxlength="200" type="text">
-        @if (addDescriptionInvalid) {
-          <span class="error-message" id="error-add-description">Opis nie może przekraczać 200 znaków.</span>
+        <input [attr.aria-label]="descriptionLabel" [field]="addForm.opis" [placeholder]="descriptionPlaceholder" input-default type="text">
+        @if (addDescription_errors.length > 0 && addForm.opis().touched()) {
+          @for (error of addDescription_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
     </fieldset>
     <div>
-      <button (click)="addForm.reset()" button-danger type="reset">
-        <fa-icon [icon]="faRotate" />
+      <button (click)="addForm().reset()" button-danger type="reset">
+        <fa-icon [icon]="icons.faRotate" />
         Resetuj
       </button>
       <button (click)="addPaymentToDB()" button-success type="submit">
         Dodaj płatność
-        <fa-icon [icon]="faPlus" />
+        <fa-icon [icon]="icons.faPlus" />
       </button>
     </div>
   </form>
@@ -211,53 +227,61 @@
 
 <app-dialog #filterDialog>
   <h3>Filtry</h3>
-  <form [formGroup]="filterForm" class="filter-payment-form">
+  <form (submit)="$event.preventDefault()" class="filter-payment-form">
     <fieldset fieldset-default>
       <legend>
-        <fa-icon [icon]="faFileInvoiceDollar" />
+        <fa-icon [icon]="icons.faFileInvoiceDollar" />
         Szczegóły płatności
       </legend>
       <label label-default>
-        @let filterMonthYearInvalid = filterForm.get('miesiac_rok')?.invalid && filterForm.get('miesiac_rok')?.touched;
+        @let filterMonthYear_errors = filterForm.miesiac_rok().errors();
         <span>Objęty rok i miesiąc:</span>
-        <input [attr.aria-errormessage]="filterMonthYearInvalid ? 'error-filter-month' :  null" [attr.aria-label]="monthYearLabel" [attr.pattern]="miesiac_rok_pattern" [placeholder]="monthYearPlaceholder" formControlName="miesiac_rok" input-default type="month">
-        @if (filterMonthYearInvalid) {
-          <span class="error-message" id="error-filter-month">Proszę wpisać poprawną datę w formacie <code>YYYY-MM</code>.</span>
+        <input [attr.aria-label]="monthYearLabel" [field]="filterForm.miesiac_rok" [placeholder]="monthYearPlaceholder" input-default type="month">
+        @if (filterMonthYear_errors.length > 0 && filterForm.miesiac_rok().touched()) {
+          @for (error of filterMonthYear_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let filterDateInvalid = filterForm.get('dzien_zaplaty')?.invalid && filterForm.get('dzien_zaplaty')?.touched;
+        @let filterDate_errors = filterForm.data().errors();
         <span>Dzień zapłaty:</span>
-        <input [attr.aria-errormessage]="filterDateInvalid ? 'error-filter-date' :  null" [attr.aria-label]="dateLabel" [attr.pattern]="data_pattern" [placeholder]="datePlaceholder" formControlName="data" input-default type="date">
-        @if (filterDateInvalid) {
-          <span class="error-message" id="error-filter-date">Proszę wpisać poprawną datę w formacie <code>YYYY-MM-DD</code>.</span>
+        <input [attr.aria-label]="dateLabel" [field]="filterForm.data" [placeholder]="datePlaceholder" input-default type="date">
+        @if (filterDate_errors.length > 0 && filterForm.data().touched()) {
+          @for (error of filterDate_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let filterAmountInvalid = filterForm.get('platnosc')?.invalid && filterForm.get('platnosc')?.touched;
+        @let filterAmount_errors = filterForm.platnosc().errors();
         <span>Kwota:</span>
-        <input [attr.aria-errormessage]="filterAmountInvalid ? 'error-filter-amount' :  null" [attr.aria-label]="amountLabel" [placeholder]="amountPlaceholder" formControlName="platnosc" input-default min="0" step="0.01" type="number">
-        @if (filterAmountInvalid) {
-          <span class="error-message" id="error-filter-amount">Proszę wpisać poprawną kwotę (większą lub równą 0).</span>
+        <input [attr.aria-label]="amountLabel" [field]="filterForm.platnosc" [placeholder]="amountPlaceholder" input-default step="0.1" type="number">
+        @if (filterAmount_errors.length > 0 && filterForm.platnosc().touched()) {
+          @for (error of filterAmount_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
       <label label-default>
-        @let filterDescriptionInvalid = filterForm.get('opis')?.invalid && filterForm.get('opis')?.touched;
+        @let filterDescription_errors = filterForm.opis().errors();
         <span>Opis:</span>
-        <input [attr.aria-errormessage]="filterDescriptionInvalid ? 'error-filter-description' :  null" [attr.aria-label]="descriptionLabel" [placeholder]="descriptionPlaceholder" formControlName="opis" input-default maxlength="200" type="text">
-        @if (filterDescriptionInvalid) {
-          <span class="error-message" id="error-filter-description">Opis nie może przekraczać 200 znaków.</span>
+        <input [attr.aria-label]="descriptionLabel" [field]="filterForm.opis" [placeholder]="descriptionPlaceholder" input-default type="text">
+        @if (filterDescription_errors.length > 0 && filterForm.opis().touched()) {
+          @for (error of filterDescription_errors; track error) {
+            <span class="error-message">{{ error.message }}</span>
+          }
         }
       </label>
     </fieldset>
     <div>
       <button (click)="resetFilters()" button-danger type="reset">
-        <fa-icon [icon]="faRotate" />
+        <fa-icon [icon]="icons.faRotate" />
         Wyczyść
       </button>
       <button (click)="applyFilter(); filterDialog.hide();" button-success type="submit">
         Zastosuj
-        <fa-icon [icon]="faFilter" />
+        <fa-icon [icon]="icons.faFilter" />
       </button>
     </div>
   </form>
