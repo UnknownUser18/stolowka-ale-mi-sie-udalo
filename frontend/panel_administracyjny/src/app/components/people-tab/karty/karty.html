@@ -1,29 +1,29 @@
-<form [formGroup]="cardForm">
+<form (submit)="$event.preventDefault()">
   <fieldset fieldset-default>
     <legend>
-      <fa-icon [icon]="faIdCard" />
+      <fa-icon [icon]="icons.faIdCard" />
       Karta
     </legend>
     <label label-default>
       <span>Numer karty:</span>
-      <input aria-label="Numer karty" formControlName="key_card" input-default readonly required type="text">
+      <input [field]="cardForm.key_card" aria-label="Numer karty" input-default type="text">
     </label>
     <label label-default>
       <span>Data aktywacji:</span>
-      <input aria-label="Data aktywacji" formControlName="data_wydania" input-default readonly required type="date">
+      <input [field]="cardForm.data_wydania" aria-label="Data aktywacji" input-default type="date">
     </label>
     <label label-default>
       <span>Ostatnie użycie:</span>
-      <input aria-label="Ostatnie użycie" formControlName="ostatnie_uzycie" input-default readonly required type="datetime-local">
+      <input [field]="cardForm.ostatnie_uzycie" aria-label="Ostatnie użycie" input-default type="datetime-local">
     </label>
     <div>
-      <button [dialog]="deleteCardDialog" [disabled]="!cardForm.get('key_card')?.value" button-danger>
-        <fa-icon [icon]="faTrashCan" />
+      <button [dialog]="deleteCardDialog" [disabled]="cardForm.key_card().value() === ''" button-danger>
+        <fa-icon [icon]="icons.faTrashCan" />
         Dezaktywuj kartę
       </button>
       <button [dialog]="addCardDialog" button-primary>
         Aktywuj nową kartę
-        <fa-icon [icon]="faPlus" />
+        <fa-icon [icon]="icons.faPlus" />
       </button>
     </div>
   </fieldset>
@@ -36,12 +36,12 @@
     <p>Czy na pewno chcesz aktywować nową kartę?</p>
     <div>
       <button (click)="addCardDialog.hide()" button-default>
-        <fa-icon [icon]="faBan" />
+        <fa-icon [icon]="icons.faBan" />
         Anuluj
       </button>
       <button (click)="deleteCard(); addCardDialog.hide()" [dialog]="addCardContinueDialog" button-primary>
         Kontynuuj
-        <fa-icon [icon]="faArrowRight" />
+        <fa-icon [icon]="icons.faArrowRight" />
       </button>
     </div>
   </div>
@@ -50,25 +50,25 @@
 <app-dialog #addCardContinueDialog>
   <div class="dialog activate-card-dialog">
     <h3>Aktywacja karty</h3>
-    <form [formGroup]="addCardForm" class="add-card-form">
+    <form (submit)="$event.preventDefault()" class="add-card-form">
       <fieldset fieldset-default>
         <legend>
-          <fa-icon [icon]="faIdCard" />
+          <fa-icon [icon]="icons.faIdCard" />
           Karta
         </legend>
         <label label-default>
           <span>Numer karty:</span>
-          <input formControlName="key_card" input-default required type="text">
+          <input [field]="addCardForm.key_card" input-default type="text">
         </label>
       </fieldset>
       <div>
         <button button-danger type="reset">
-          <fa-icon [icon]="faRotateLeft" />
+          <fa-icon [icon]="icons.faRotateLeft" />
           Resetuj
         </button>
-        <button (click)="addCard(); addCardContinueDialog.hide()" [disabled]="addCardForm.invalid" button-success type="submit">
+        <button (click)="addCardToDB(); addCardContinueDialog.hide()" [disabled]="addCardForm().invalid()" button-success type="submit">
           Aktywuj kartę
-          <fa-icon [icon]="faCheck" />
+          <fa-icon [icon]="icons.faCheck" />
         </button>
       </div>
     </form>
@@ -82,12 +82,12 @@
     <p>Oznacza to, że ta osoba nie będzie mogła za pomocą karty przychodzić na stołówkę.</p>
     <div>
       <button (click)="deleteCardDialog.hide()" button-default>
-        <fa-icon [icon]="faBan" />
+        <fa-icon [icon]="icons.faBan" />
         Anuluj
       </button>
       <button (click)="deleteCard(); deleteCardDialog.hide()" button-danger>
         Tak
-        <fa-icon [icon]="faCheck" />
+        <fa-icon [icon]="icons.faCheck" />
       </button>
     </div>
   </div>

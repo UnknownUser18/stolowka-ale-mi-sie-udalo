@@ -52,7 +52,16 @@ type SortOption = 'surnameAsc' | 'surnameDesc' |
 })
 export class Zsti {
   private ZPersons : ZPerson[] | null = [];
-
+  private filterModel = signal({
+    imie            : '',
+    imie_filter     : 'contains' as FilteringOption,
+    nazwisko        : '',
+    nazwisko_filter : 'contains' as FilteringOption,
+    klasa           : '',
+    uczeszcza       : 'all' as State,
+    miasto          : 'all' as State,
+    typ_osoby       : 'all' as string,
+  });
 
   protected readonly dialog = viewChild.required<Dialog>('filterDialog');
   protected readonly isRefreshing = signal(false);
@@ -100,16 +109,6 @@ export class Zsti {
   protected search = '';
   protected shownZPersons : ZPerson[] | null | undefined;
   protected readonly TypOsoby = TypOsoby;
-  private filterModel = signal({
-    imie            : '',
-    imie_filter     : 'contains' as FilteringOption,
-    nazwisko        : '',
-    nazwisko_filter : 'contains' as FilteringOption,
-    klasa           : '',
-    uczeszcza       : 'all' as State,
-    miasto          : 'all' as State,
-    typ_osoby       : 'all' as string,
-  });
   protected filterForm = form(this.filterModel);
 
 

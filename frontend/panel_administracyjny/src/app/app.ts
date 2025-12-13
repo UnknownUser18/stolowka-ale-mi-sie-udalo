@@ -16,7 +16,7 @@ import { filter } from "rxjs";
 })
 export class App {
   protected readonly notifications = signal<CNotification[]>([]);
-  protected notificationsQueueLength = 0;
+  protected notificationsQueueLength = signal(0);
 
   protected readonly faEllipsis = faEllipsis;
   protected readonly faTrash = faTrash;
@@ -39,7 +39,7 @@ export class App {
     });
 
     this.notificationsS.getQueueNotifications.subscribe(notifications => {
-      this.notificationsQueueLength = notifications.length;
+      this.notificationsQueueLength.set(notifications.length);
     });
 
     this.router.events.pipe(

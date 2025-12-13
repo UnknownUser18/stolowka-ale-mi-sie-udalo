@@ -2,6 +2,7 @@ import { Component, effect, signal } from '@angular/core';
 import { DateChanger } from '@utils/date-changer/date-changer';
 import { DatePipe } from '@angular/common';
 import { Info } from '@services/info';
+import { Info as InfoEnum } from '@shared/info';
 import { ClosedDay, Declarations, LocalAbsenceChanges, ZAbsenceDay, ZDeclaration } from '@database/declarations/declarations';
 import { Persons } from '@database/persons/persons';
 import { Notifications } from '@services/notifications';
@@ -18,7 +19,7 @@ import { IsClosedPipe } from '@pipes/isClosed/is-closed.pipe';
 import { DialogTriggerDirective } from '@directives/dialog/dialog-trigger.directive';
 import { ButtonDefault, ButtonPrimary, Dialog, PrimaryText, Table } from '@ui';
 
-type notificationFrom = 'declarations' | 'absences' | 'closedDays' | null;
+type NotificationFrom = 'declarations' | 'absences' | 'closedDays' | null;
 
 @Component({
   selector : 'app-kalendarz',
@@ -44,22 +45,22 @@ type notificationFrom = 'declarations' | 'absences' | 'closedDays' | null;
   styleUrl : './kalendarz.scss'
 })
 export class Kalendarz {
-  private notification : notificationFrom = null;
-
-  protected absenceDays : ZAbsenceDay[] | null | undefined;
-  protected declarationZ : ZDeclaration[] | null | undefined;
-  protected closedDays : ClosedDay[] | null | undefined;
+  protected absenceDays = signal<ZAbsenceDay[] | null>(null);
+  protected declarations = signal<ZDeclaration[] | null>(null);
+  protected closedDays = signal<ClosedDay[] | null>(null);
+  protected readonly icons = {
+    faPaperPlane,
+    faCheck,
+    faXmark,
+    faArrowsRotate,
+    faUpRightAndDownLeftFromCenter
+  };
 
   protected weeks : { days : (Date | null)[] }[] = [];
 
   protected readonly isSending = signal<boolean>(false);
   protected readonly isRefreshing = signal<boolean>(false);
-
-  protected readonly faPaperPlane = faPaperPlane;
-  protected readonly faCheck = faCheck;
-  protected readonly faXmark = faXmark;
-  protected readonly faArrowsRotate = faArrowsRotate;
-  protected readonly faUpRightAndDownLeftFromCenter = faUpRightAndDownLeftFromCenter;
+  private notification : NotificationFrom = null;
 
   constructor(
     private infoS : Info,
@@ -79,41 +80,109 @@ export class Kalendarz {
     });
   }
 
-  private isDayInDeclaration(day : Date) : boolean {
-    if (!this.declarationZ) return false;
+  protected deleteAbsence(date : Date) : void {
+    const localChanges = this.personS.localAbsenceChanges();
+    const isInLocalAdded = localChanges.findAdded(date);
+    const isInLocalRemoved = localChanges.findRemoved(date);
 
-    return this.declarationZ.some(declaration => {
-      const day_date = day.getDay();
-      if (day_date === 0 || day_date === 6) return false;
+    if (isInLocalAdded)
+      localChanges.removeAdded(date);
+    else if (!isInLocalRemoved)
+      localChanges.pushRemoved(date);
 
-      const bit = declaration.dni.charAt(day_date - 1);
-      if (bit !== '1') return false;
+    this.personS.localAbsenceChanges.set(Object.assign(new LocalAbsenceChanges(), localChanges));
+  }
 
-      return day >= declaration.data_od && day <= declaration.data_do;
+  protected async getData() {
+    const id = this.personS.personZ()?.id;
+    if (!id) {
+      this.notificationS.createErrorNotification('Nie można znaleźć użytkownika.', 5, InfoEnum.CONTACT_ADMIN);
+      return;
+    }
+    this.isRefreshing.set(true);
+
+    await this.getDeclarations(id);
+    await this.getZAbsenceDays(id);
+    await this.getClosedDays();
+
+    if (!this.notification) {
+      this.notificationS.createSuccessNotification('Pomyślnie załadowano dane.', 3);
+    } else {
+      let detailedMessage : string;
+      switch (this.notification) {
+        case 'declarations':
+          detailedMessage = 'Nie udało się pobrać deklaracji z serwera.';
+          break;
+        case 'absences':
+          detailedMessage = 'Nie udało się pobrać dni nieobecności z serwera.';
+          break;
+        case 'closedDays':
+          detailedMessage = 'Nie udało się pobrać dni zamkniętych z serwera.';
+          break;
+        default:
+          detailedMessage = 'Nieznany błąd.';
+      }
+      this.notificationS.createErrorNotification('Wystąpił błąd podczas pobierania danych.', 10, detailedMessage);
+    }
+    this.isRefreshing.set(false);
+  }
+
+  protected toggleSelect(day : Date) {
+    const localAdded = this.personS.localAbsenceChanges();
+    const isAbsence = !!this.absenceDays()?.some(d => d.dzien_wypisania.toDateString() === day.toDateString());
+    const isClosed = !!this.closedDays()?.some(d => d.dzien.toDateString() === day.toDateString());
+    if (!this.isDayInDeclaration(day) || isClosed) return;
+
+    if (!isAbsence) {
+      const isDay = localAdded.findAdded(day);
+      isDay ? localAdded.removeAdded(day) : localAdded.pushAdded(day);
+    } else {
+      const isDay = localAdded.findRemoved(day);
+      isDay ? localAdded.removeRemoved(day) : localAdded.pushRemoved(day);
+    }
+
+    this.personS.localAbsenceChanges.set(Object.assign(new LocalAbsenceChanges(), localAdded));
+
+    // Update the week's days array to trigger change detection
+    const week = this.weeks.find(week =>
+      week.days.some(d => d && day && d.toDateString() === day.toDateString())
+    );
+    if (week)
+      week.days = [...week.days];
+  }
+
+  protected sendAbsence() {
+    this.isSending.set(true);
+    const localChanges = this.personS.localAbsenceChanges();
+
+    if (localChanges.isEmpty()) {
+      this.notificationS.createInfoNotification('Brak zmian do zapisania.', 3);
+      this.isSending.set(false);
+      return;
+    }
+
+    const id = this.personS.personZ()?.id;
+
+    if (!id) {
+      this.notificationS.createErrorNotification('Nie można znaleźć użytkownika.', 5, InfoEnum.CONTACT_ADMIN);
+      this.isSending.set(false);
+      return;
+    }
+
+    const addRequests = localChanges.added.map(date => this.declarationS.addZAbsenceDay(id, date));
+    const removeRequests = localChanges.removed.map(date => this.declarationS.removeZAbsenceDay(id, date));
+
+    forkJoin([...addRequests, ...removeRequests]).subscribe(results => {
+      this.isSending.set(false);
+      const failedRequests = results.filter(res => !res);
+      if (failedRequests.length > 0) {
+        this.notificationS.createErrorNotification('Wystąpił błąd podczas zapisywania zmian.', 10, `Nie udało się zapisać ${ failedRequests.length } z ${ results.length } zmian.`);
+      } else {
+        this.notificationS.createSuccessNotification('Pomyślnie zapisano zmiany.', 5);
+        this.personS.localAbsenceChanges.set(new LocalAbsenceChanges());
+        this.getData().then();
+      }
     });
-  }
-
-  private async getDeclarations(id : number) : Promise<void> {
-    const declarations = await firstValueFrom(this.declarationS.getZDeclarationsPerson(id));
-    if (!declarations && !this.notification)
-      this.notification = 'declarations';
-    else if (declarations?.length === 0)
-      this.notificationS.createWarningNotification('Nie znaleziono deklaracji dla tego użytkownika.', 5);
-    this.declarationZ = declarations;
-  }
-
-  private async getZAbsenceDays(id : number) : Promise<void> {
-    const absenceDays = await firstValueFrom(this.declarationS.getZAbsenceDaysPerson(id));
-    if (!absenceDays && !this.notification)
-      this.notification = 'absences';
-    this.absenceDays = absenceDays;
-  }
-
-  private async getClosedDays() : Promise<void> {
-    const closedDays = await firstValueFrom(this.declarationS.getClosedDays);
-    if (!closedDays && !this.notification)
-      this.notification = 'closedDays';
-    this.closedDays = closedDays;
   }
 
   private get getWeekOffset() {
@@ -149,58 +218,36 @@ export class Kalendarz {
     }
   }
 
-  private isDaySelected(date : Date) : boolean {
-    const isLocallyAdded = this.personS.localAbsenceChanges().findAdded(date)
-    const isInDatabase = !!this.absenceDays?.some(d => d.dzien_wypisania.toDateString() === date.toDateString());
-    const isLocallyRemoved = this.personS.localAbsenceChanges().findRemoved(date);
-    return isLocallyAdded || (isInDatabase && !isLocallyRemoved);
+  private isDayInDeclaration(day : Date) : boolean {
+    const declarations = this.declarations();
+
+    if (!declarations) return false;
+
+    return declarations.some(declaration => {
+      const day_date = day.getDay();
+      if (day_date === 0 || day_date === 6) return false;
+
+      const bit = declaration.dni.charAt(day_date - 1);
+      if (bit !== '1') return false;
+
+      return day >= declaration.data_od && day <= declaration.data_do;
+    });
   }
 
-  protected removeAbsence(date : Date) : void {
-    const localChanges = this.personS.localAbsenceChanges();
-    const isInLocalAdded = localChanges.findAdded(date);
-    const isInLocalRemoved = localChanges.findRemoved(date);
-
-    if (isInLocalAdded)
-      localChanges.removeAdded(date);
-    else if (!isInLocalRemoved)
-      localChanges.pushRemoved(date);
-
-    this.personS.localAbsenceChanges.set(Object.assign(new LocalAbsenceChanges(), localChanges));
+  private async getDeclarations(id : number) {
+    const declarations = await firstValueFrom(this.declarationS.getZDeclarationsPerson(id));
+    if (!declarations && !this.notification)
+      this.notification = 'declarations';
+    else if (declarations?.length === 0)
+      this.notificationS.createWarningNotification('Nie znaleziono deklaracji dla tego użytkownika.', 5);
+    this.declarations.set(declarations);
   }
 
-  protected async getData() {
-    const id = this.personS.personZ()?.id;
-    if (!id) {
-      this.notificationS.createErrorNotification('Nie można znaleźć użytkownika.', 5, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
-      return;
-    }
-    this.isRefreshing.set(true);
-
-    await this.getDeclarations(id);
-    await this.getZAbsenceDays(id);
-    await this.getClosedDays();
-
-    if (!this.notification) {
-      this.notificationS.createSuccessNotification('Pomyślnie załadowano dane.', 3);
-    } else {
-      let detailedMessage : string;
-      switch (this.notification) {
-        case 'declarations':
-          detailedMessage = 'Nie udało się pobrać deklaracji z serwera.';
-          break;
-        case 'absences':
-          detailedMessage = 'Nie udało się pobrać dni nieobecności z serwera.';
-          break;
-        case 'closedDays':
-          detailedMessage = 'Nie udało się pobrać dni zamkniętych z serwera.';
-          break;
-        default:
-          detailedMessage = 'Nieznany błąd.';
-      }
-      this.notificationS.createErrorNotification('Wystąpił błąd podczas pobierania danych.', 10, detailedMessage);
-    }
-    this.isRefreshing.set(false);
+  private async getZAbsenceDays(id : number) {
+    const absenceDays = await firstValueFrom(this.declarationS.getZAbsenceDaysPerson(id));
+    if (!absenceDays && !this.notification)
+      this.notification = 'absences';
+    this.absenceDays.set(absenceDays);
   }
 
   protected getDaysInWeek(weekIndex : number) : (Date | null)[] {
@@ -248,28 +295,12 @@ export class Kalendarz {
       unselectedDays.forEach(day => this.toggleSelect(day));
   }
 
-  protected toggleSelect(day : Date) {
-    const localAdded = this.personS.localAbsenceChanges();
-    const isAbsence = !!this.absenceDays?.some(d => d.dzien_wypisania.toDateString() === day.toDateString());
-    const isClosed = !!this.closedDays?.some(d => d.dzien.toDateString() === day.toDateString());
-    if (!this.isDayInDeclaration(day) || isClosed) return;
+  private async getClosedDays() {
 
-    if (!isAbsence) {
-      const isDay = localAdded.findAdded(day);
-      isDay ? localAdded.removeAdded(day) : localAdded.pushAdded(day);
-    } else {
-      const isDay = localAdded.findRemoved(day);
-      isDay ? localAdded.removeRemoved(day) : localAdded.pushRemoved(day);
-    }
-
-    this.personS.localAbsenceChanges.set(Object.assign(new LocalAbsenceChanges(), localAdded));
-
-    // Update the week's days array to trigger change detection
-    const week = this.weeks.find(week =>
-      week.days.some(d => d && day && d.toDateString() === day.toDateString())
-    );
-    if (week)
-      week.days = [...week.days];
+    const closedDays = await firstValueFrom(this.declarationS.getClosedDays);
+    if (!closedDays && !this.notification)
+      this.notification = 'closedDays';
+    this.closedDays.set(closedDays);
   }
 
   protected selectColumn(dayOfWeek : number) {
@@ -297,38 +328,10 @@ export class Kalendarz {
       unselectedDays.forEach(day => this.toggleSelect(day));
   }
 
-  protected sendAbsence() {
-    this.isSending.set(true);
-    const localChanges = this.personS.localAbsenceChanges();
-
-    if (localChanges.isEmpty()) {
-      this.notificationS.createInfoNotification('Brak zmian do zapisania.', 3);
-      this.isSending.set(false);
-      return;
-    }
-
-    const id = this.personS.personZ()?.id;
-
-    if (!id) {
-      this.notificationS.createErrorNotification('Nie można znaleźć użytkownika.', 5, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
-      this.isSending.set(false);
-      return;
-    }
-
-    const addRequests = localChanges.added.map(date => this.declarationS.addZAbsenceDay(id, date));
-    const removeRequests = localChanges.removed.map(date => this.declarationS.removeZAbsenceDay(id, date));
-
-    forkJoin([...addRequests, ...removeRequests]).subscribe(results => {
-      this.isSending.set(false);
-      const failedRequests = results.filter(res => !res);
-      if (failedRequests.length > 0) {
-        this.notificationS.createErrorNotification('Wystąpił błąd podczas zapisywania zmian.', 10, `Nie udało się zapisać ${ failedRequests.length } z ${ results.length } zmian.`);
-      } else {
-        this.notificationS.createSuccessNotification('Pomyślnie zapisano zmiany.', 5);
-        this.personS.localAbsenceChanges.set(new LocalAbsenceChanges());
-        this.getData().then();
-      }
-    });
+  private isDaySelected(date : Date) : boolean {
+    const isLocallyAdded = this.personS.localAbsenceChanges().findAdded(date)
+    const isInDatabase = !!this.absenceDays()?.some(d => d.dzien_wypisania.toDateString() === date.toDateString());
+    const isLocallyRemoved = this.personS.localAbsenceChanges().findRemoved(date);
+    return isLocallyAdded || (isInDatabase && !isLocallyRemoved);
   }
-
 }

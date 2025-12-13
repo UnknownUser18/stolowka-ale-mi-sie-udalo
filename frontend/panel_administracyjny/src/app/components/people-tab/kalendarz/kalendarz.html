@@ -1,13 +1,13 @@
 <app-date-changer />
 <section>
-  @if (declarationZ === null) {
+  @if (declarations() === null) {
     Nie udało się załadować deklaracji. Spróbuj ponownie później.
   } @else {
     <div class="calendar-view">
       @for (_ of weeks; track $index; let i = $index) {
         @let select_row_title = 'Zaznacz/odznacz cały tydzień';
         <button class="select-button" (click)="selectRow(i)" (auxclick)="forceSelectRow(i)" (contextmenu)="$event.preventDefault()" [title]="select_row_title" [attr.aria-label]="select_row_title" [delayT]="selectTooltip" [delay]="1500">
-          <fa-icon [icon]="(weeks[i].days | isEntireRowSelected:absenceDays:declarationZ:closedDays) ? faCheck : faXmark" [size]="'lg'" />
+          <fa-icon [icon]="(weeks[i].days | isEntireRowSelected:absenceDays():declarations():closedDays()) ? icons.faCheck : icons.faXmark" [size]="'lg'" />
         </button>
       }
       @for (i of ['Pon', 'Wto', 'Śro', 'Czw', 'Pią', 'Sob', 'Nie']; track i; let index = $index) {
@@ -27,16 +27,16 @@
               <div class="day-static weekend" [delayT]="weekendTooltip" [delay]="1500">
                 {{ date }}
               </div>
-            } @else if (!(day | inDeclaration:declarationZ:true)) {
+            } @else if (!(day | inDeclaration:declarations():true)) {
               <div class="day-static no-declaration" [delayT]="notInDeclarationTooltip" [delay]="1500">
                 {{ date }}
               </div>
-            } @else if (day | isClosed:closedDays) {
+            } @else if (day | isClosed:closedDays()) {
               <div class="day-static closed-day" [delayT]="closedDayTooltip" [delay]="1500">
                 {{ date }}
               </div>
             } @else {
-              <button class="day-static day" [class.selected]="day | isAbsence:absenceDays:personS.localAbsenceChanges()" (click)="toggleSelect(day)">
+              <button (click)="toggleSelect(day)" [class.selected]="day | isAbsence:absenceDays():personS.localAbsenceChanges()" class="day-static day">
                 {{ date }}
               </button>
             }
@@ -48,15 +48,15 @@
   <div class="action-buttons">
     <button (click)="sendAbsence()" button-primary>
       @if (!isSending()) {
-        <fa-icon [icon]="faPaperPlane" />
+        <fa-icon [icon]="icons.faPaperPlane" />
         Prześlij
       } @else {
-        <fa-icon [icon]="faArrowsRotate" class="spin" />
+        <fa-icon [icon]="icons.faArrowsRotate" class="spin" />
         Przesyłanie...
       }
     </button>
     <button (click)="getData().then()" button-default>
-      <fa-icon [icon]="faArrowsRotate" [class.spin]="isRefreshing()" />
+      <fa-icon [class.spin]="isRefreshing()" [icon]="icons.faArrowsRotate" />
       @if (!isRefreshing()) {
         Odśwież dane
       } @else {
@@ -71,7 +71,7 @@
         <th>Dodane nieobecności:
           @let added_title = 'Zobacz wszystkie dodane nieobecności';
           <button [dialog]="addedAbsenceDaysDialog" [title]="added_title" [attr.aria-label]="added_title">
-            <fa-icon [icon]="faUpRightAndDownLeftFromCenter" />
+            <fa-icon [icon]="icons.faUpRightAndDownLeftFromCenter" />
           </button>
         </th>
       </tr>
@@ -97,7 +97,7 @@
         <th>Usunięte nieobecności:
           @let removed_title = 'Zobacz wszystkie usunięte nieobecności';
           <button [dialog]="removedAbsenceDaysDialog" [title]="removed_title" [attr.aria-label]="removed_title">
-            <fa-icon [icon]="faUpRightAndDownLeftFromCenter" />
+            <fa-icon [icon]="icons.faUpRightAndDownLeftFromCenter" />
           </button>
         </th>
       </tr>
@@ -156,8 +156,8 @@
               <td>{{ day | date : 'longDate' }}</td>
               <td>
                 @let remove_title = 'Usuń tę nieobecność z listy dodanych nieobecności';
-                <button (click)="removeAbsence(day)" [attr.aria-label]="remove_title" [title]="remove_title" primary-text>
-                  <fa-icon [icon]="faXmark" />
+                <button (click)="deleteAbsence(day)" [attr.aria-label]="remove_title" [title]="remove_title" primary-text>
+                  <fa-icon [icon]="icons.faXmark" />
                 </button>
               </td>
             </tr>
@@ -191,8 +191,8 @@
               <td>{{ day | date : 'longDate' }}</td>
               <td>
                 @let remove_title = 'Usuń tę nieobecność z listy usuniętych nieobecności';
-                <button (click)="removeAbsence(day)" [attr.aria-label]="remove_title" [title]="remove_title" primary-text>
-                  <fa-icon [icon]="faXmark" />
+                <button (click)="deleteAbsence(day)" [attr.aria-label]="remove_title" [title]="remove_title" primary-text>
+                  <fa-icon [icon]="icons.faXmark" />
                 </button>
               </td>
             </tr>

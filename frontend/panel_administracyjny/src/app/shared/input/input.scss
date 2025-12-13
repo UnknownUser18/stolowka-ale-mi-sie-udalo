@@ -27,9 +27,11 @@
   }
 
   &:read-only {
+    cursor: default;
     background-color: var(--surface);
     color: var(--text-muted) !important;
     border-color: var(--border-muted);
+    outline: none;
   }
 
   &:focus {
