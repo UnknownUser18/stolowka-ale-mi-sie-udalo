@@ -1,10 +1,20 @@
-import {AfterViewInit, Component, effect, ElementRef, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  effect,
+  ElementRef,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {AsyncPipe} from '@angular/common';
 import {MatAutocomplete, MatAutocompleteTrigger, MatOption} from '@angular/material/autocomplete';
 import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
-import {firstValueFrom, map, Observable, startWith} from 'rxjs';
-import {CardDetails, DataService} from '../data.service';
+import {map, Observable, startWith} from 'rxjs';
+import {CardDetails} from '../data.service';
 import {DbService} from '../db.service';
 
 @Component({
@@ -23,7 +33,7 @@ import {DbService} from '../db.service';
   standalone: true,
   styleUrl: './nfc-scan.component.scss'
 })
-export class NfcScanComponent implements AfterViewInit, OnInit {
+export class NfcScanComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('nfc_input') nfc_input: ElementRef | undefined;
   @ViewChild(MatAutocompleteTrigger) autocompleteTrigger!: MatAutocompleteTrigger;
 
@@ -33,12 +43,19 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
   options: CardDetails[] = [];
   filteredOptions: Observable<CardDetails[]> = new Observable<CardDetails[]>();
 
+  focusInterval: ReturnType<typeof setInterval> | null = null;
+
   ngAfterViewInit() {
     console.log(this.nfc_input?.nativeElement);
-    setInterval(() => this.focusInput(), 1000)
+    this.focusInterval = setInterval(() => this.focusInput(), 1000)
     this.focusInput()
   }
 
+  ngOnDestroy() {
+    if (this.focusInterval) {
+      clearInterval(this.focusInterval);
+    }
+  }
   ngOnInit() {
     this.filteredOptions = this.control.valueChanges.pipe(
       startWith(''),
@@ -46,7 +63,6 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
     );
 
     this.control.valueChanges
-      .pipe(debounceTime(30))
       .subscribe(value => this.handleInput(value));
   }
 
@@ -58,13 +74,7 @@ export class NfcScanComponent implements AfterViewInit, OnInit {
     }
   }
 
-  constructor(private dataService: DataService, private database: DbService) {
-    // this.database.ZCardsWDetails
-    // this.dataService.dataChange.subscribe(key => {
-    //   if(key === 'cardDetailsList')
-    //     this.updateOptions()
-    // })
-    firstValueFrom(this.database.getZCardsWithDetails()).then(val => console.table(val))
+  constructor(private database: DbService) {
     effect(() => {
       this.database.ZCardsWDetails()
       this.updateOptions().then()

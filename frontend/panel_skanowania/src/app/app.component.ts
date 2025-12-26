@@ -3,17 +3,16 @@ import {NfcScanComponent} from './nfc-scan/nfc-scan.component';
 import {ClockComponent} from './clock/clock.component';
 import {UserDataDisplayComponent} from './user-data-display/user-data-display.component';
 import {RestartComponent} from './restart/restart.component';
-import {AbsenceDay, CardDetails, DataService, Declaration, ZPayment, Scan} from './data.service';
+import {CardDetails, DataService, ZPayment} from './data.service';
 import {NgOptimizedImage} from '@angular/common';
 import {DbService, ZAbsenceDay, ZDeclaration, ZScan} from './db.service';
 import {firstValueFrom} from 'rxjs';
+import {environment} from '../environments/environment.development';
 
 export interface affirmationInfo{
   message: string;
   isAbleToEnter: boolean;
 }
-
-
 
 @Component({
   selector: 'app-root',
@@ -37,138 +36,182 @@ export class AppComponent {
   today: Date = new Date();
 
   constructor(private dataService: DataService, private database: DbService) {
-    // this.dataService.WS_OPENED.subscribe(async () => {await this.fetchInitialData()})
-  }
-
-  private async fetchInitialData(): Promise<void> {
-    await this.dataService.request('zsti.payment.get', {}, 'paymentList');
-    await this.dataService.request('zsti.scan.get', {}, 'scanList');
-    await this.dataService.request('zsti.absence.get', {}, 'absenceDayList');
-    await this.dataService.request('zsti.declaration.get', {}, 'declarationList');
-    await this.dataService.request('zsti.card.getWithDetails', {}, "cardDetailsList")
-    // alert('All initial data is fetched!')
   }
 
   public unloadUser(): void {
     this.loadedUser = false;
-    console.log('loadedUser');
   }
 
   public async loadNfcOutput(input: string) {
-    console.log(input);
-    this.user = this.findUser(await this.getCardsWithDetails(), input)
-    console.log(this.user);
-    if (!this.user) {
-      this.noUserFound();
-      return;
+    try {
+      const cards = await this.getCardsWithDetails();
+      this.user = this.findUser(cards, input);
+
+      if (!this.user) {
+        this.noUserFound();
+        return;
+      }
+
+      const [declaration, absences, payments, scans] = await Promise.all([
+        this.getDeclarationForUser(this.user),
+        this.getAbsenceForUser(this.user),
+        this.getPaymentsForUser(this.user),
+        this.getScansForUser(this.user)
+      ]);
+
+      this.enterInfo = this.parseUserData(declaration, absences, payments, scans, this.user);
+      this.loadedUser = true;
+
+      if (this.enterInfo.isAbleToEnter) {
+        await this.scanUser(this.user);
+      }
+    } catch (error) {
+      console.error('Błąd podczas ładowania danych użytkownika:', error);
+      this.enterInfo = {message: 'Wystąpił błąd podczas pobierania danych', isAbleToEnter: false};
+      this.loadedUser = true;
     }
-    const [declaration, absences, payments, scans] =
-      [await this.getDeclarationForUser(this.user),
-        await this.getAbsenceForUser(this.user),
-        await this.getPaymentsForUser(this.user),
-        await this.getScansForUser(this.user)];
-    this.enterInfo = this.parseUserData(declaration, absences, payments, scans)
-    this.loadedUser = true;
-    console.log(this.user, this.enterInfo);
-    if(this.enterInfo.isAbleToEnter)
-      this.scanUser(this.user)
   }
 
   private dateToDBDate(date: Date): string {
-    // return date.toISOString();
-    return `${date.getFullYear().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 
   private async scanUser(user: CardDetails) {
-    // this.dataService.request('zsti.scan.add', {
-    //  id_karty: user.id,
-    //   czas: this.dateToDBDate(new Date())
-    // })
-    console.log(`Scanning user of card id: ${user.id}`)
-    this.database.addZScansPerson(user.id, this.dateToDBDate(new Date())).subscribe((res) => {
-      console.log(res);
-
-    })
-      // .then(() => {
-    //   console.log('promise resolved')
-    //   return this.dataService.request('zsti.scan.get', {}, 'scanList');
-    // })
+    try {
+      this.database.addZScansPerson(user.id, this.dateToDBDate(new Date())).subscribe({
+        next: (res) => console.log('Skan zapisany:', res),
+        error: (err) => console.error('Błąd podczas zapisywania skanu:', err)
+      });
+    } catch (error) {
+      console.error('Błąd podczas skanowania użytkownika:', error);
+    }
   }
 
-  private formatAbsence(date: Date): string{
-    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+  private formatDate(date: Date): string {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 
   private checkAbsences(absences: ZAbsenceDay[] | null): boolean {
-    if(!absences) return true;
-    return !absences.find((absence: ZAbsenceDay) =>
-      (this.formatAbsence(new Date(absence.dzien_wypisania)) === this.formatAbsence(this.today))
-    )
+    if (!absences || absences.length === 0) return true;
+
+    const todayFormatted = this.formatDate(this.today);
+    return !absences.some((absence: ZAbsenceDay) =>
+      this.formatDate(new Date(absence.dzien_wypisania)) === todayFormatted
+    );
   }
 
   private checkDeclaration(declaration: ZDeclaration): boolean {
     const day = this.today.getDay();
-    if([0, 6].includes(day)) return true;
+
+    if (day === 0 || day === 6) return false;
+
     return declaration.dni[day - 1] === '1';
   }
 
   private checkPayments(payments: ZPayment[] | null, user: CardDetails): boolean {
-    if(user.miasto) return true;
-    if(!payments) return false
-    return !payments.find((payment: ZPayment) => (payment.miesiac === (this.today.getMonth() + 1)));
+    // Uczniowie opłacani przez miasto zawsze mogą korzystać z obiadów
+    if (user.miasto) return true;
+
+    if (!payments || payments.length === 0) return false;
+
+    const currentMonth = this.today.getMonth() + 1;
+    const currentYear = this.today.getFullYear();
+
+    return payments.some((payment: ZPayment) =>
+      payment.miesiac === currentMonth && payment.rok === currentYear
+    );
   }
 
-  private checkScans(scans: ZScan[] | null){
-    console.table(scans);
-    if(!scans)
-      return true
-    return !scans.find((scan: ZScan) =>
-      (this.formatAbsence(scan.czas) === this.formatAbsence(this.today))
-    )
+  private checkScans(scans: ZScan[] | null): boolean {
+    if (!scans || scans.length === 0) return true;
+
+    const todayFormatted = this.formatDate(this.today);
+    return !scans.some((scan: ZScan) =>
+      this.formatDate(new Date(scan.czas)) === todayFormatted
+    );
   }
 
-  private checkDate(){
-    const date = new Date();
-    const start = (new Date());
-    start.setHours(12, 0, 0, 0);
-    const end = (new Date());
-    end.setHours(24, 0, 0,0);
-    return (start <= date) && (date <= end);
+  private checkDate(): boolean {
+    const now = new Date();
+    const start = new Date();
+    start.setHours(environment.obiadConfig.startHour, 0, 0, 0);
+    const end = new Date();
+    end.setHours(environment.obiadConfig.endHour, 0, 0, 0);
+
+    return now >= start && now <= end;
   }
 
-  private parseUserData(declaration?: ZDeclaration[] | null, absences: ZAbsenceDay[] | null = null, payments: ZPayment[] | null = null, scans: ZScan[] | null = null): affirmationInfo {
-    let info: affirmationInfo = {message: "Uczeń może wejść", isAbleToEnter: true};
-    console.group("Dane o uczniu")
-    console.table(declaration);
-    console.table(payments);
-    console.table(absences);
-    console.table(scans);
-    console.groupEnd()
-    if (!declaration || declaration.length === 0)
+  private parseUserData(
+    declaration: ZDeclaration[] | null,
+    absences: ZAbsenceDay[] | null,
+    payments: ZPayment[] | null,
+    scans: ZScan[] | null,
+    user: CardDetails
+  ): affirmationInfo {
+    // Sprawdzenie, czy jest godzina obiadowa
+    if (!this.checkDate()) {
+      return {message: `Poza godzinami obiadowymi (${environment.obiadConfig.startHour}:00 - ${environment.obiadConfig.endHour}:00)`, isAbleToEnter: false};
+    }
+
+    // Czy istnieje deklaracja
+    if (!declaration || declaration.length === 0) {
       return {message: 'Uczeń nie posiada deklaracji', isAbleToEnter: false};
-    if(!this.checkScans(scans))
-      info = {message: 'Uczeń już odebrał obiad w dniu dzisiejszym', isAbleToEnter: false};
-    if(!this.checkPayments(payments, this.user!))
-      info = {message: 'Uczeń nie zapłacił za obiad w dniu dzisiejszym', isAbleToEnter: false};
-    if(!this.checkAbsences(absences))
-      info = {message: 'Uczeń jest zwolniony z obiadów w dniu dzisiejszym', isAbleToEnter: false};
-    if(!this.checkDeclaration(declaration[0]))
-      info = {message: 'Uczeń nie je obiadów w ten dzień tygodnia', isAbleToEnter: false};
-    if(!this.checkDate())
-      info = {message: 'Poza godzinami obiadowymi', isAbleToEnter: false};
-    return info;
+    }
+
+    // Deklaracje ucznia-czy je obiady w ten dzień
+    if (!this.checkDeclaration(declaration[0])) {
+      return {message: 'Uczeń nie je obiadów w ten dzień tygodnia', isAbleToEnter: false};
+    }
+
+    // Zgłoszone nieobecności na obiedzie
+    if (!this.checkAbsences(absences)) {
+      return {message: 'Uczeń jest zwolniony z obiadów w dniu dzisiejszym', isAbleToEnter: false};
+    }
+
+    // Płatności ucznia na ten miesiąc
+    if (!this.checkPayments(payments, user)) {
+      return {message: 'Uczeń nie zapłacił za obiad w bieżącym miesiącu', isAbleToEnter: false};
+    }
+
+    // Skany z dzisiaj-czy już odebrał
+    if (!this.checkScans(scans)) {
+      return {message: 'Uczeń już odebrał obiad w dniu dzisiejszym', isAbleToEnter: false};
+    }
+
+    // Oki olo
+    return {message: "Uczeń może wejść", isAbleToEnter: true};
   }
 
   noUserFound() {
-    this.user = {id: 0, imie: 'Nie znaleziono', nazwisko: 'ucznia :/', uczeszcza: false, typ_osoby_id: 0, id_ucznia: 0, klasa: '', ostatnie_uzycie: this.today, data_wydania: this.today, key_card: 0, miasto: false}
+    this.user = {
+      id: 0,
+      imie: 'Nie znaleziono',
+      nazwisko: 'ucznia :/',
+      uczeszcza: false,
+      typ_osoby_id: 0,
+      id_ucznia: 0,
+      klasa: '',
+      ostatnie_uzycie: this.today,
+      data_wydania: this.today,
+      key_card: 0,
+      miasto: false
+    };
     this.enterInfo = {message: 'Wprowadzono złe ID lub napotkano nieznany błąd', isAbleToEnter: false};
     this.loadedUser = true;
   }
 
   public findUser(list: CardDetails[] | null, input: string): CardDetails | undefined {
-    console.table(list);
-    if(!list)
-      return undefined;
+    if (!list || list.length === 0) return undefined;
     return list.find((userCard: CardDetails) => userCard.key_card.toString() === input);
   }
 

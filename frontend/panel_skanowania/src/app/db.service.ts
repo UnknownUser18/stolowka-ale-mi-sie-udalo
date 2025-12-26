@@ -1,8 +1,8 @@
 import {inject, Injectable, signal} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {catchError, map, Observable, of} from 'rxjs';
 import {environment} from '../environments/environment';
-import {Card, CardDetails, ZPayment} from './data.service';
+import {CardDetails, ZPayment} from './data.service';
 
 export enum StatusCodes {
   'OK' = 200,
