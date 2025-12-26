@@ -28,31 +28,30 @@ import { ZPricing } from "@database/prices/prices";
   styleUrl  : './calendar.scss',
 })
 export class Calendar {
-  protected weeks : { days : (Date | null)[] }[] = [];
+  protected readonly date = signal(new Date());
   /**
-   * List of declarations or pricing's to check for conflicts
+   * If true, the selectedElement is considered as a new element (not in the elements list)
+   * @default false
    */
   public readonly elements = input.required<ZDeclaration[] | Omit<ZPricing, 'cena'>[] | undefined>();
+  public readonly focusOnDate = input<Date | null>(null);
+  protected declarations : ZDeclaration[] | Omit<ZPricing, 'cena'>[] | null = null;
 
-  protected readonly faArrowLeft = faArrowLeft;
-  protected readonly faArrowRight = faArrowRight;
-
-  protected readonly date = signal(new Date());
   /**
    * Selected declaration or pricing to check for conflicts
    * @default null
    */
   public readonly selectedElement = input<ZDeclaration | Omit<ZPricing, 'cena'> | null>(null);
-  /**
-   * If true, the selectedElement is considered as a new element (not in the elements list)
-   * @default false
-   */
+  protected weeks : { days : (Date | null)[] }[] = [];
+  protected readonly icons = {
+    faArrowLeft,
+    faArrowRight
+  };
   public readonly isForNewElement = input<boolean>(false);
-  protected declarations : ZDeclaration[] | Omit<ZPricing, 'cena'>[] | null = null;
   public readonly hasWrongDays = output<boolean>();
 
   constructor(
-    private dayinMoreDeclarations : DayInMoreDeclarationsPipe,
+    private dayInMoreDeclarations : DayInMoreDeclarationsPipe,
   ) {
 
     effect(() => {
@@ -81,6 +80,16 @@ export class Calendar {
       this.generateWeeks();
     });
 
+    effect(() => {
+      const month = this.focusOnDate();
+      if (!month) return;
+
+      const currentDate = this.date();
+      if (month.getFullYear() === currentDate.getFullYear() && month.getMonth() === currentDate.getMonth())
+        return;
+
+      this.date.set(new Date(month.getFullYear(), month.getMonth(), 1));
+    });
   }
 
   private getDaysInWeek(weekIndex : number) : (Date | null)[] {
@@ -135,29 +144,31 @@ export class Calendar {
     this.hasWrongDays.emit(this.checkWrongDays());
   }
 
+  protected changeMonth(offset : 'previous' | 'next') : void {
+    const date = this.date();
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const isFirstMonth = month === 0;
+    const isLastMonth = month === 11;
+
+    if (offset === 'previous') {
+      this.date.set(new Date(isFirstMonth ? year - 1 : year, isFirstMonth ? 11 : month - 1, 1));
+    } else {
+      this.date.set(new Date(isLastMonth ? year + 1 : year, isLastMonth ? 0 : month + 1, 1));
+    }
+  }
+
   private checkWrongDays() : boolean {
     const declaration = this.selectedElement();
     if (!declaration) return false;
 
     for (const week of this.weeks) {
       for (const day of week.days) {
-        if (day && this.dayinMoreDeclarations.transform(day, this.declarations))
+        if (day && this.dayInMoreDeclarations.transform(day, this.declarations))
           return true;
       }
     }
 
     return false;
-  }
-
-  protected changeMonth(offset : 'previous' | 'next') : void {
-    const date = this.date();
-    const year = date.getFullYear();
-    const month = date.getMonth();
-
-    if (offset === 'previous') {
-      this.date.set(new Date(month === 0 ? year - 1 : year, month === 0 ? 11 : month - 1, 1));
-    } else {
-      this.date.set(new Date(month === 11 ? year + 1 : year, month === 11 ? 0 : month + 1, 1));
-    }
   }
 }

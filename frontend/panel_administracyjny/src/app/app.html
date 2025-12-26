@@ -1,38 +1,36 @@
 <router-outlet />
-@if (notifications().length > 0) {
-  <div class="notifications">
-    @for (notification of notifications(); track notification.id) {
-      <app-notification [notification]="notification" (dismiss)="dismissNotification(notification.id)" />
-    }
-    @if (notificationsQueueLength() > 0) {
-      <div class="queue-info">
-        <fa-icon [icon]="faEllipsis" />
-        <span>+{{ notificationsQueueLength() }}
-          @switch (notificationsQueueLength()) {
-            @case (1) {
-              powiadomienie
-            }
-            @case (2) {
-              powiadomienia
-            }
-            @case (3) {
-              powiadomienia
-            }
-            @case (4) {
-              powiadomienia
-            }
-            @default {
-              powiadomień
-            }
-          } w kolejce</span>
-        @let clear_title = 'Wyczyść powiadomienia z kolejki';
-        <button (click)="clearNotifications()" [title]="clear_title" [attr.aria-label]="clear_title">
-          <fa-icon [icon]="faTrash" />
-        </button>
-      </div>
-    }
-  </div>
-}
+<div [attr.aria-hidden]="notifications().length === 0" class="notifications">
+  @for (notification of notifications(); track notification.id) {
+    <app-notification [notification]="notification" animate.enter="notificationEnter" animate.leave="notificationLeave" />
+  }
+  @if (notificationsQueueLength() > 0) {
+    <div class="queue-info">
+      <fa-icon [icon]="faEllipsis" />
+      <span>+{{ notificationsQueueLength() }}
+        @switch (notificationsQueueLength()) {
+          @case (1) {
+            powiadomienie
+          }
+          @case (2) {
+            powiadomienia
+          }
+          @case (3) {
+            powiadomienia
+          }
+          @case (4) {
+            powiadomienia
+          }
+          @default {
+            powiadomień
+          }
+        } w kolejce</span>
+      @let clear_title = 'Wyczyść powiadomienia z kolejki';
+      <button (click)="clearNotifications()" [attr.aria-label]="clear_title" [title]="clear_title">
+        <fa-icon [icon]="faTrash" />
+      </button>
+    </div>
+  }
+</div>
 
 <!--      } @else if (router.url.includes('/raporty')) {-->
 <!--        <div class="raporty all">-->

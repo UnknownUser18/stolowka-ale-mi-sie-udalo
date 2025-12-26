@@ -8,14 +8,14 @@ import DailyRotateFile from "winston-daily-rotate-file";
 export function configureConsoleOutput(app : Express, debugMode : boolean) {
   morgan.token('method', (req) => {
     const types : Record<string, string> = {
-      'GET' : chalk.green('GET'),
-      'POST' : chalk.blue('POST'),
-      'PUT' : chalk.yellow('PUT'),
+      'GET'    : chalk.green('GET'),
+      'POST'   : chalk.blue('POST'),
+      'PUT'    : chalk.yellow('PUT'),
       'DELETE' : chalk.red('DELETE'),
-      'PATCH' : chalk.magenta('PATCH'),
-      'HEAD' : chalk.cyan('HEAD'),
+      'PATCH'  : chalk.magenta('PATCH'),
+      'HEAD'   : chalk.cyan('HEAD'),
       'OPTIONS' : chalk.gray('OPTIONS'),
-      'TRACE' : chalk.white('TRACE'),
+      'TRACE'  : chalk.white('TRACE'),
       'CONNECT' : chalk.whiteBright('CONNECT'),
     }
     return types[req.method!] || chalk.white(req.method);
@@ -38,6 +38,19 @@ export function configureConsoleOutput(app : Express, debugMode : boolean) {
     return chalk.white(status);
   })
 
+  app.use((req, res, next) => {
+    res.on('finish', () => {
+      const logMessage = `${ req.method } ${ req.originalUrl } ${ res.statusCode } ${ res.getHeader('X-Response-Time') || '' }`.trim();
+      if (res.statusCode >= 500)
+        logger.error(logMessage);
+      else if (res.statusCode >= 400)
+        logger.warn(logMessage);
+      else
+        logger.info(logMessage);
+    });
+    next();
+  })
+
   if (debugMode)
     app.use(morgan(':method :url :status :response-time ms', {
       stream : {
@@ -48,23 +61,23 @@ export function configureConsoleOutput(app : Express, debugMode : boolean) {
     }));
   else
     app.use(morgan(':method :url :status :response-time ms', {
-      skip : (_req, res) => res.statusCode < 400,
       stream : {
         write : (message) => {
           Errors(message.trim());
         }
-      }
+      },
+      skip   : (_req, res) => res.statusCode < 400
     }));
 }
 
 export const logger = winston.createLogger({
-  levels : {
+  levels     : {
     error : 0,
     warn : 1,
     info : 2,
     debug : 3,
   },
-  format : winston.format.combine(
+  format     : winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(({ timestamp, level, message }) => {
       return `${ timestamp } ${ level }: ${ message }`;
@@ -72,11 +85,11 @@ export const logger = winston.createLogger({
   ),
   transports : [
     new DailyRotateFile({
-      filename : 'logs/%DATE%.log',
+      filename    : 'logs/%DATE%.log',
       datePattern : 'YYYY-MM-DD',
       zippedArchive : true,
-      maxSize : '20m',
-      maxFiles : '14d'
+      maxSize     : '20m',
+      maxFiles    : '14d'
     }),
   ],
 });

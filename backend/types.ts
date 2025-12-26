@@ -47,7 +47,6 @@ export class ErrorPacket extends Packet {
     super(status);
     this.data = null;
   }
-
 }
 
 
@@ -71,17 +70,17 @@ export enum StatusCodes {
 }
 
 export const mysqlErrorMap = {
-  1062 : 701, // ER_DUP_ENTRY
-  1054 : 702, // ER_BAD_FIELD_ERROR
-  1064 : 703, // ER_PARSE_ERROR
-  1146 : 704, // ER_NO_SUCH_TABLE
-  1045 : 705, // ER_ACCESS_DENIED_ERROR
-  1044 : 706, // ER_DBACCESS_DENIED_ERROR
-  1451 : 707, // ER_ROW_IS_REFERENCED_2
-  1452 : 708, // ER_NO_REFERENCED_ROW_2
-  1406 : 709, // ER_DATA_TOO_LONG
-  1366 : 710, // ER_TRUNCATED_WRONG_VALUE
-  1048 : 711, // ER_BAD_NULL_ERROR
+  1062           : 701, // ER_DUP_ENTRY
+  1054           : 702, // ER_BAD_FIELD_ERROR
+  1064           : 703, // ER_PARSE_ERROR
+  1146           : 704, // ER_NO_SUCH_TABLE
+  1045           : 705, // ER_ACCESS_DENIED_ERROR
+  1044           : 706, // ER_DBACCESS_DENIED_ERROR
+  1451           : 707, // ER_ROW_IS_REFERENCED_2
+  1452           : 708, // ER_NO_REFERENCED_ROW_2
+  1406           : 709, // ER_DATA_TOO_LONG
+  1366           : 710, // ER_TRUNCATED_WRONG_VALUE
+  1048           : 711, // ER_BAD_NULL_ERROR
   'PROTOCOL_CONNECTION_LOST' : 700,
   'ECONNREFUSED' : 700
 };
@@ -91,10 +90,10 @@ function getTimestamp() : string {
   if (!showTimestamps) return '';
   const date = new Date();
   return chalk.dim(`(${ date.toLocaleTimeString(undefined, {
-    day : '2-digit',
+    day   : '2-digit',
     month : '2-digit',
-    year : '2-digit',
-    hour : '2-digit',
+    year  : '2-digit',
+    hour  : '2-digit',
     minute : '2-digit',
     second : '2-digit',
   }).replaceAll('.', '-').replace(',', '') }:${ date.getMilliseconds() })`);

@@ -8,6 +8,10 @@
   transform: translateX(-50%);
   bottom: 1rem;
   left: 50%;
+
+  &[aria-hidden='true'] {
+    pointer-events: none;
+  }
 }
 
 .queue-info {

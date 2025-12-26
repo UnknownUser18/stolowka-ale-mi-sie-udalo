@@ -2,7 +2,7 @@
   @let person = userS.personZ()!;
   <section class="selected-person">
     @let nazwisko_imie = person?.nazwisko + ' ' + person?.imie;
-    @let deselect_title = `Odznacz osobę ${nazwisko_imie}`;
+    @let deselect_title = `Odznacz osobę ${ nazwisko_imie }`;
     <h3>Wybrana osoba ZSTI:</h3>
     <p><a [routerLink]="['osoba/zsti/', person?.id, 'kalendarz']">{{ nazwisko_imie }} <i>({{ isTeacher(person) ? 'n.' : person?.klasa }})</i></a></p>
     <button (click)="deselectPerson()" [title]="deselect_title" [attr.aria-label]="deselect_title">
@@ -11,47 +11,25 @@
     </button>
   </section>
 }
-
-
-<section [class]="{
-  'focused': ZheaderFocused(),
-  'error': personsZ === null,
-  'warning': personsZ !== null && personsZ?.length === 0
-}">
-  <div (mouseenter)="ZheaderFocused.set(true)" (mouseleave)="ZheaderFocused.set(false)">
-    <h2>
-      @let zsti_title = "Przejdź do listy osób ZSTI";
-      <a routerLink="osoby/zsti" (focus)="ZheaderFocused.set(true)" (blur)="ZheaderFocused.set(false)" [title]="zsti_title" [attr.aria-label]="zsti_title">
-        <fa-icon [icon]="icons.faGraduationCap" />
-        ZSTI
-      </a>
-    </h2>
-    @let refresh_title = "Odśwież listę osób ZSTI";
-    <button (click)="requestPersonsZ()" [class.spin]="loadingPersonsZ()" [title]="refresh_title" [attr.aria-label]="refresh_title">
-      <fa-icon [icon]="icons.faRefresh" [size]="'lg'" />
-    </button>
-  </div>
+<section [class.focused]="ZheaderFocused()">
+  <h2 (mouseenter)="ZheaderFocused.set(true)" (mouseleave)="ZheaderFocused.set(false)">
+    @let zsti_title = "Przejdź do listy osób ZSTI";
+    <a (blur)="ZheaderFocused.set(false)" (focus)="ZheaderFocused.set(true)" [attr.aria-label]="zsti_title" [title]="zsti_title" routerLink="osoby/zsti">
+      <fa-icon [icon]="icons.faGraduationCap" />
+      ZSTI
+    </a>
+  </h2>
   <ol>
-    @defer (when personsZ !== undefined) {
-      @if (personsZ === null) {
-        <li class="error"><h3>Brak połączenia z serwerem. Spróbuj ponownie.</h3></li>
-      } @else {
-        @for (person of personsZ; track person.id) {
-          @let select_title = `Wybierz osobę ${person.nazwisko} ${person.imie}`;
-          <li>
-            <button (click)="selectPerson(person)" [title]="select_title" [attr.aria-label]="select_title">
-              {{ person.nazwisko }} {{ person.imie[0] }}.
-              <i>({{ isTeacher(person) ? 'n.' : person.klasa }})</i>
-            </button>
-          </li>
-        } @empty {
-          <li class="warning"><h3>Brak osób w bazie danych.</h3></li>
-        }
-      }
-    } @placeholder (minimum 500ms) {
-      @for (i of [0, 1, 2, 3, 4]; track i) {
-        <li class="placeholder"></li>
-      }
+    @for (person of personsZ; track person.id) {
+      @let select_title = `Wybierz osobę ${ person.nazwisko } ${ person.imie }`;
+      <li>
+        <button (click)="selectPerson(person)" [attr.aria-label]="select_title" [title]="select_title">
+          {{ person.nazwisko }} {{ person.imie[0] }}.
+          <i>({{ isTeacher(person) ? 'n.' : person.klasa }})</i>
+        </button>
+      </li>
+    } @empty {
+      <li class="empty">Nie znaleziono ostatnich odwiedzonych użytkowników.</li>
     }
   </ol>
 </section>

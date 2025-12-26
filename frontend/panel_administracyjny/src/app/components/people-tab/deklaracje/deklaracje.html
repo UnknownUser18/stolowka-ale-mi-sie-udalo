@@ -63,8 +63,8 @@
       </legend>
       <label label-default>
         @let data_od_errors = deklaracjaForm.data_od().errors();
-        <span>Data Rozpoczęcia: </span>
-        <input [field]="deklaracjaForm.data_od" input-default type="date">
+        <span>Data Rozpoczęcia:</span>
+        <input (change)="updateSelectedDate('declaration','data_od')" [field]="deklaracjaForm.data_od" input-default type="date">
         @if (data_od_errors.length > 0) {
           @for (error of data_od_errors; track error) {
             <span class="error-message">{{ error.message }}</span>
@@ -73,8 +73,8 @@
       </label>
       <label label-default>
         @let data_do_errors = deklaracjaForm.data_do().errors();
-        <span>Data Zakończenia: </span>
-        <input [field]="deklaracjaForm.data_do" input-default type="date">
+        <span>Data Zakończenia:</span>
+        <input (change)="updateSelectedDate('declaration','data_do')" [field]="deklaracjaForm.data_do" input-default type="date">
         @if (data_do_errors.length > 0) {
           @for (error of data_do_errors; track error) {
             <span class="error-message">{{ error.message }}</span>
@@ -96,6 +96,20 @@
           <checkbox [field]="getFieldFromDay(dzien[0], 'declaration')!" />
         </label>
       }
+    </fieldset>
+    <fieldset fieldset-default>
+      <legend>
+        <fa-icon [icon]="icons.faBowlFood" />
+        Posiłki
+      </legend>
+      <label label-one-line>
+        <span>Śniadanie</span>
+        <checkbox [field]="deklaracjaForm.sniadanie" />
+      </label>
+      <label label-one-line>
+        <span>Obiad</span>
+        <checkbox [field]="deklaracjaForm.obiad" />
+      </label>
     </fieldset>
     <div>
       @if (deklaracjaForm().invalid() || selectedDateError || hasWrongDays()) {
@@ -121,12 +135,12 @@
   }
 </form>
 @if (selectedDeclaration()) {
-  <app-calendar (hasWrongDays)="hasWrongDays.set($event)" [elements]="declarations()!" [selectedElement]="selectedDeclarationComputed()" />
+  <app-calendar (hasWrongDays)="hasWrongDays.set($event)" [elements]="declarations()!" [focusOnDate]="selectedDeclarationDate()" [selectedElement]="selectedDeclarationComputed()" />
 }
 
 <app-dialog #addDeclarationDialog>
   <h3>Dodaj Deklarację</h3>
-  <form (submit)="$event.preventDefault()" class="add-dialog-form"> <!-- when clicking on the calendar, it sends data this is to fix this. -->
+  <form (submit)="$event.preventDefault()" class="add-dialog-form">
     <fieldset [attr.aria-errormessage]="addDateError ? 'error-date' : null" [class.error]="addDateError" fieldset-default>
       <legend>
         <fa-icon [icon]="icons.faCalendar" />
@@ -135,8 +149,8 @@
       <label label-default>
         @let add_data_od_errors = addForm.data_od().errors();
         <span>Data rozpoczęcia:</span>
-        <input [field]="addForm.data_od" aria-label="Data rozpoczęcia" input-default type="date">
-        @if (add_data_od_errors.length > 0) {
+        <input (change)="updateSelectedDate('add','data_od')" [field]="addForm.data_od" aria-label="Data rozpoczęcia" input-default type="date">
+        @if (add_data_od_errors.length > 0 && addForm.data_od().touched()) {
           @for (error of add_data_od_errors; track error) {
             <span class="error-message">{{ error.message }}</span>
           }
@@ -145,8 +159,8 @@
       <label label-default>
         @let add_data_do_errors = addForm.data_do().errors();
         <span>Data zakończenia:</span>
-        <input [field]="addForm.data_do" aria-label="Data zakończenia" input-default type="date">
-        @if (add_data_do_errors.length > 0) {
+        <input (change)="updateSelectedDate('add','data_do')" [field]="addForm.data_do" aria-label="Data zakończenia" input-default type="date">
+        @if (add_data_do_errors.length > 0 && addForm.data_do().touched()) {
           @for (error of add_data_do_errors; track error) {
             <span class="error-message">{{ error.message }}</span>
           }
@@ -168,7 +182,7 @@
         </label>
       }
     </fieldset>
-    <app-calendar (hasWrongDays)="addHasWrongDays.set($event)" [elements]="declarations()!" [isForNewElement]="true" [selectedElement]="addDeclarationComputed()" />
+    <app-calendar (hasWrongDays)="addHasWrongDays.set($event)" [elements]="declarations()!" [focusOnDate]="addDeclarationDate()" [isForNewElement]="true" [selectedElement]="addDeclarationComputed()" />
     <button button-danger type="reset">
       <fa-icon [icon]="icons.faRotate" />
       Resetuj
