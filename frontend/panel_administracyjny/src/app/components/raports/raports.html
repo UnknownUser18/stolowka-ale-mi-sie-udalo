@@ -35,7 +35,7 @@
         <span>Miesiąc opłacony</span>
         <input type="month" formControlName="miesiac" placeholder="YYYY-MM">
       </label>
-      <button type="submit" (click)="generatePlatnosciReport()">Generuj raport</button>
+      <button type="submit">Generuj raport</button>
     </form>
   }
   <main [class.table]="result && result.length > 0">
@@ -47,7 +47,7 @@
             <div></div>
             <span>Włącz tryb skondensowany</span>
           </label>
-          <button (click)="exportRaport()">Pobierz raport</button>
+          <button>Pobierz raport</button>
         </div>
       }
       @if (router.url === '/raporty/korekty') {
@@ -75,9 +75,9 @@
                   <td>{{ korekta.imie }}</td>
                   <td>
                     @if (Array.isArray(korekta.dni)) {
-                      {{ formatDni(korekta.dni, 'shortDate') }}
+                      <!--                      {{ formatDni(korekta.dni, 'shortDate') }}-->
                     } @else {
-                      {{ korekta.dni | date:'fullDate' }}
+                      <!--                      {{ korekta.dni | date:'fullDate' }}-->
                     }
                   </td>
                 </tr>
@@ -108,7 +108,7 @@
                 <tr>
                   <td>{{ obecnosc.nazwisko }}</td>
                   <td>{{ obecnosc.imie }}</td>
-                  <td>{{ formatDni(obecnosc.dni, 'short') }}
+                  <!--                  <td>{{ formatDni(obecnosc.dni, 'short') }}-->
                 </tr>
               }
             }
@@ -117,7 +117,7 @@
       } @else if (router.url === '/raporty/platnosci') {
         <div>
           <div></div>
-          <button (click)="exportRaport()">Pobierz raport</button>
+          <button>Pobierz raport</button>
         </div>
         <table #table>
           <thead>
