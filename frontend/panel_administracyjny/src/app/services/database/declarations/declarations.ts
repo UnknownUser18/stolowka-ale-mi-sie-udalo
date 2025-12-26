@@ -12,6 +12,8 @@ export interface ZDeclaration {
   data_od : Date;
   data_do : Date;
   dni : DniCode;
+  obiad : boolean;
+  sniadanie : boolean;
 }
 
 interface ZDeclarationDB {
@@ -19,6 +21,8 @@ interface ZDeclarationDB {
   id_osoby : number;
   data_od : string;
   data_do : string;
+  sniadanie : boolean;
+  obiad : boolean;
   dni : DniCode;
 }
 
@@ -191,6 +195,7 @@ export class Declarations extends Types {
     )
 
   }
+
   public addPricing(date_start : Date, date_end : Date, price : number) : Observable<boolean | null> {
     return this.http.post<Packet>(`${ this.api }zsti/pricing/add`, { date_start : this.convertToDBDate(date_start), date_end : this.convertToDBDate(date_end), price }).pipe(
       map((res) => {
@@ -204,6 +209,7 @@ export class Declarations extends Types {
     )
 
   }
+
   public updatePricing(id : number, date_start : Date, date_end : Date, price : number) : Observable<boolean | null> {
     console.log(`${ this.api }zsti/pricing/update/${ id }`, { body : { date_start : this.convertToDBDate(date_start), date_end : this.convertToDBDate(date_end), price } })
     return this.http.put<Packet>(`${ this.api }zsti/pricing/update/${ id }`, { date_start : this.convertToDBDate(date_start), date_end : this.convertToDBDate(date_end), price }).pipe(
@@ -234,9 +240,11 @@ export class Declarations extends Types {
 
   public updateZDeclaration(declaration : ZDeclaration) : Observable<boolean> {
     return this.http.put<Packet>(`${ this.api }zsti/declaration/${ declaration.id }/update`, {
-      data_od : this.convertToDBDate(declaration.data_od),
-      data_do : this.convertToDBDate(declaration.data_do),
-      dni : declaration.dni
+      data_od   : this.convertToDBDate(declaration.data_od),
+      data_do   : this.convertToDBDate(declaration.data_do),
+      dni       : declaration.dni,
+      sniadanie : declaration.sniadanie,
+      obiad     : declaration.obiad
     }).pipe(
       map((res) => {
         if (res.status !== 202) {
@@ -267,7 +275,7 @@ export class Declarations extends Types {
       id_osoby : declaration.id_osoby,
       data_od : this.convertToDBDate(declaration.data_od),
       data_do : this.convertToDBDate(declaration.data_do),
-      dni : declaration.dni
+      dni     : declaration.dni
     }).pipe(
       map((res) => {
         if (res.status !== 201) {

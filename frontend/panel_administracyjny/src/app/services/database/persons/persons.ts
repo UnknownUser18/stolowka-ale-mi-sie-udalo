@@ -33,27 +33,24 @@ export class Persons extends Types {
   public personZ = signal<ZPerson | null>(null);
   public localAbsenceChanges = signal(new LocalAbsenceChanges());
 
-  private requestPersons(limit? : number) : Observable<Packet | null> {
-    if (limit && (!Number.isInteger(limit) || limit < 1))
-      throw new Error('Limit musi być liczbą całkowitą dodatnią.');
+  public getZPersonsData(...ids : ZPerson['id'][]) : Observable<ZPerson[] | null> {
+    return this.requestPersons(...ids).pipe(
+      map((res) => {
+        return res ? res.data as ZPerson[] : null;
+      })
+    );
+  }
 
+  private requestPersons(...ids : number[]) : Observable<Packet | null> {
     let params = new HttpParams();
-    if (limit)
-      params = params.set('limit', limit.toString());
+    if (ids.length > 0)
+      params = params.set('ids', ids.join(','));
 
     return this.http.get<Packet>(`${ this.api }zsti/person`, { params }).pipe(
       map((res) => {
         return res.status === 200 ? res : null;
       }),
       catchError(() => of(null))
-    );
-  }
-
-  public getZPersonsLimit(limit : number) : Observable<ZPerson[] | null> {
-    return this.requestPersons(limit).pipe(
-      map((res) => {
-        return res ? res.data as ZPerson[] : null;
-      })
     );
   }
 

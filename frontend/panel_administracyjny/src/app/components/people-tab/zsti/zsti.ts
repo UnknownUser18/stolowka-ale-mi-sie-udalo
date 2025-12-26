@@ -12,6 +12,7 @@ import { TooltipClickTriggerDirective } from '@directives/clickTooltip/tooltip-c
 import { TooltipTriggerDirective } from '@directives/tooltip/tooltip-trigger.directive';
 import { Router } from '@angular/router';
 import { Field, form } from "@angular/forms/signals";
+import { LastPersons } from "@services/last-persons";
 
 type FilteringOption = 'match' | 'startsWith' | 'endsWith' | 'contains' | 'excludes';
 type SortOption = 'surnameAsc' | 'surnameDesc' |
@@ -115,13 +116,13 @@ export class Zsti {
   constructor(
     private personS : Persons,
     private notificationsS : Notifications,
+    private lastPersonsS : LastPersons,
     private router : Router) {
     this.requestPersons();
   }
 
   private filterByOption(input : string, object : string, option : FilteringOption,) : boolean {
     const filterQuery = input.toLowerCase();
-
 
     switch (option) {
       case 'match':
@@ -295,7 +296,7 @@ export class Zsti {
 
   protected selectPerson(person : ZPerson) {
     this.personS.selectZPerson(person);
+    this.lastPersonsS.pushZPerson(person.id);
     this.router.navigate(['/osoba/zsti', person.id]).then();
   }
-
 }

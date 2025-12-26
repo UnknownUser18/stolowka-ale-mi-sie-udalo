@@ -1,5 +1,5 @@
-import { Component, input, OnInit, output, signal } from '@angular/core';
-import { CNotification } from '@services/notifications';
+import { Component, input, OnInit, signal } from '@angular/core';
+import { CNotification, Notifications } from '@services/notifications';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { faCheck, faInfinity, faInfo, faWarning, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { DatePipe } from '@angular/common';
@@ -24,29 +24,24 @@ import { TooltipDelayTriggerDirective } from "@directives/delayTooltip/tooltip-d
     "[class.success]" : "notification()?.type === 'success'",
     "[class.error]" : "notification()?.type === 'error'",
     "[class.warning]" : "notification()?.type === 'warning'",
-    "[class.fade-out]" : "isClosing()",
-    "[class.fade-in]" : "isOpening()",
-    '(animationend)' : "animationEnd($event)"
   }
 })
 export class Notification implements OnInit {
-  protected isOpening = signal(false);
-  protected isClosing = signal(false);
   protected timeLeft = signal(0);
 
+  protected readonly icons = {
+    faInfo,
+    faCheck,
+    faWarning,
+    faXmark,
+    faInfinity
+  };
   protected readonly Infinity = Infinity;
-  protected readonly faInfo = faInfo;
-  protected readonly faCheck = faCheck;
-  protected readonly faWarning = faWarning;
-  protected readonly faXmark = faXmark
-  protected readonly faInfinity = faInfinity;
-
 
   public notification = input<CNotification>();
-  public dismiss = output();
 
 
-  constructor() {
+  constructor(private notificationS : Notifications) {
   }
 
   protected formatDate(date : number) {
@@ -65,8 +60,6 @@ export class Notification implements OnInit {
   }
 
   public ngOnInit() {
-    this.isOpening.set(true);
-
     setInterval(() => {
       this.timeLeft.set(this.notification()?.duration! - (Date.now() - this.notification()?.timestamp!.getTime()!));
     }, 100)
@@ -75,14 +68,11 @@ export class Notification implements OnInit {
       return;
 
     setTimeout(() => {
-      this.isClosing.set(true);
+      this.dismiss();
     }, this.notification()?.duration)
   }
 
-  protected animationEnd(animation : AnimationEvent) {
-    if (animation.animationName.endsWith('out'))
-      this.dismiss.emit();
-    else if (animation.animationName.endsWith('in'))
-      this.isOpening.set(false);
+  protected dismiss() {
+    this.notificationS.dismissNotification(this.notification()?.id!);
   }
 }

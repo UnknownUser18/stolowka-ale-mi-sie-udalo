@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { Debug, ErrorPacket, Packet, StatusCodes } from "./types";
-import { sendResponse, db, executeQuery, createPacket } from "./index";
+import { Debug, ErrorPacket, StatusCodes } from "./types";
+import { createPacket, executeQuery, sendResponse } from "./index";
 
 const router = Router({
   caseSensitive : true,
@@ -8,11 +8,8 @@ const router = Router({
 });
 
 router.get('/health', (_req, res) => {
-  db.getConnection().then((connection) => {
-    const packet = connection
-      ? new Packet(StatusCodes.OK, 'Server is healthy')
-      : new Packet(StatusCodes["Internal Server Error"], 'No database connection');
-    if (connection) connection.release(); // Release the connection back to the pool
+  executeQuery('SELECT 1').then((connection) => {
+    const packet = createPacket(connection, StatusCodes.OK);
     return sendResponse(res, packet);
   }).catch(() => {
     const packet = new ErrorPacket(StatusCodes["Internal Server Error"]);

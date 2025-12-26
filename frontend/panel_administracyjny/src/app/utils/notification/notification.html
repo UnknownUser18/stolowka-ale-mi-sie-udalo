@@ -1,23 +1,23 @@
 <div class="type">
   @switch (notification()?.type) {
     @case ('info') {
-      <fa-icon [icon]="faInfo" /> Informacja
+      <fa-icon [icon]="icons.faInfo" /> Informacja
     }
     @case ('success') {
-      <fa-icon [icon]="faCheck" /> Sukces
+      <fa-icon [icon]="icons.faCheck" /> Sukces
     }
     @case ('warning') {
-      <fa-icon [icon]="faWarning" /> Ostrzeżenie
+      <fa-icon [icon]="icons.faWarning" /> Ostrzeżenie
     }
     @case ('error') {
-      <fa-icon [icon]="faXmark" /> Błąd
+      <fa-icon [icon]="icons.faXmark" /> Błąd
     }
   }
 </div>
 <p [tooltip]="tooltip">{{ notification()?.message }}</p>
 @let dismiss_title = 'Zamknij powiadomienie';
-<button (click)="isClosing.set(true);" [title]="dismiss_title" [attr.aria-label]="dismiss_title">
-  <fa-icon [icon]="faXmark" />
+<button (click)="dismiss()" [attr.aria-label]="dismiss_title" [title]="dismiss_title">
+  <fa-icon [icon]="icons.faXmark" />
   Zamknij
 </button>
 
@@ -29,7 +29,7 @@
 
 <time class="timeleft" [title]="timeleft_title" [attr.aria-label]="timeleft_title">
   @if (timeLeft() === Infinity) {
-    <fa-icon [icon]="faInfinity" />
+    <fa-icon [icon]="icons.faInfinity" />
   } @else {
     {{ formatDate(timeLeft()) }}
   }

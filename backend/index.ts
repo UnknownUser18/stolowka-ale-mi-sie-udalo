@@ -1,15 +1,14 @@
 import express from 'express';
 import 'dotenv/config';
 import * as dbConstructor from 'mysql2/promise';
-import { Debug, Errors, getStatusCodeByCode, Info, StatusCodes, Warning, Packet, ErrorPacket } from './types';
+import { Connection, QueryError, QueryResult } from 'mysql2/promise';
+import { Debug, ErrorPacket, Errors, getStatusCodeByCode, Info, Packet, StatusCodes, Warning } from './types';
 import { configureConsoleOutput } from './config';
-import { Connection, QueryError, QueryResult } from "mysql2/promise";
-import zstiRoutes from './zsti';
+import zstiRoutes from './zsti/zsti';
 import infoRoutes from './info';
 import cors from 'cors';
 
 const env = process.env;
-
 
 if (env.DEBUG_MODE === undefined)
   Warning('DEBUG_MODE is not set, defaulting to false');
@@ -35,22 +34,20 @@ if (!env.PORT || isNaN(parseInt(env.PORT, 10))) {
 }
 
 const pool = dbConstructor.createPool({
-  host : env.DB_HOST,
-  port : parseInt(env.DB_PORT, 10),
-  user : env.DB_USER,
-  password : env.DB_PASSWORD,
-  database : env.DB_NAME,
-  namedPlaceholders : true,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  host               : env.DB_HOST,
+  port               : parseInt(env.DB_PORT, 10),
+  user               : env.DB_USER,
+  password           : env.DB_PASSWORD,
+  database           : env.DB_NAME,
+  namedPlaceholders  : true,
+  waitForConnections : true,
+  connectionLimit    : 10,
+  queueLimit         : 0
 });
 
-pool.on('connection', (conn: Connection) => {
+pool.on('connection', (conn : Connection) => {
   Info('New database connection established with ID', conn.threadId);
-})
-
-export const db = pool;
+});
 
 app.listen(env.PORT, () => {
   Info('Server is running on port', env.PORT);
@@ -66,7 +63,7 @@ app.listen(env.PORT, () => {
  */
 export async function executeQuery(query : string, params? : {}) : Promise<QueryResult | QueryError | null> {
   try {
-    const result = await db.query(query, params);
+    const result = await pool.query(query, params);
     if (env.DEBUG_MODE === 'true')
       Debug('Query executed successfully', query, params);
     return result[0]; // MySQL2 returns an array with results and fields
@@ -96,13 +93,13 @@ export function sendResponse(res : express.Response, packet : Packet) : express.
   const httpStatusCode = !isError ? (responseStatus.get(statusCode) || 200) : 500; // Default to 500 for errors
 
   res.status(httpStatusCode)
-    .contentType('application/json')
-    .setHeader('Access-Control-Allow-Origin', '*');
+  .contentType('application/json')
+  .setHeader('Access-Control-Allow-Origin', `http://localhost:4200`);
   return res.send({
-    status : statusCode,
+    status    : statusCode,
     statusMessage : packet.statusMessage,
     timestamp : packet.timestamp,
-    data : !(packet.data) || packet.data[0] || null,
+    data      : !(packet.data) || packet.data[0] || null,
   });
 }
 
@@ -121,4 +118,34 @@ export function createPacket(data : QueryResult | QueryError | null, successfulS
     packet = new ErrorPacket(getStatusCodeByCode(parseInt((data as QueryError).code)));
 
   return packet;
+}
+
+/**
+ * @function getData
+ * @description Extracts the primary data from a Packet or ErrorPacket.
+ * @notes You have to destructure the result to the expected type after calling this function.
+ * @param packet - The Packet or ErrorPacket from which to extract data.
+ * @returns The primary data contained in the packet, or null if no data is present.
+ * @example
+ * ```typescript
+ * const packet = createPacket(someQueryResult, StatusCodes.OK);
+ * packet.data = [getData(packet).map((declaration : any) => {
+ *     declaration.sniadanie = declaration.sniadanie === 1;
+ *     declaration.obiad = declaration.obiad === 1;
+ *     return declaration;
+ *   })]
+ * ```
+ */
+export function getData(packet : Packet | ErrorPacket) : any | null {
+  return (packet.data as any)[0] || null;
+}
+
+/**
+ * @function sendIncorrectDataValueResponse
+ * @description Sends a standardized response indicating incorrect data value.
+ * @param res
+ */
+export function sendIncorrectDataValueResponse(res : express.Response) : express.Response {
+  const packet = new ErrorPacket(StatusCodes["Incorrect data value"]);
+  return sendResponse(res, packet);
 }

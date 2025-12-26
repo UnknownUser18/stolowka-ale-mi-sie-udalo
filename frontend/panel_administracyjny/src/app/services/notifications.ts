@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 type NotificationType = 'success' | 'error' | 'info' | 'warning';
@@ -34,8 +34,7 @@ export class Notifications {
   private visibleSubject = new BehaviorSubject<CNotification[]>([]);
   private maxVisible = 3;
 
-  constructor() {
-  }
+  constructor() {}
 
   private showNext() {
     while (this.visible.length < this.maxVisible && this.queue.length > 0) {
@@ -71,11 +70,11 @@ export class Notifications {
     this.createNotification(message, 'warning', detailedMessage, duration);
   }
 
-  get getVisibleNotifications() : Observable<CNotification[]> {
+  public get getVisibleNotifications() : Observable<CNotification[]> {
     return this.visibleSubject.asObservable();
   }
 
-  get getQueueNotifications() : Observable<CNotification[]> {
+  public get getQueueNotifications() : Observable<CNotification[]> {
     return this.queueSubject.asObservable();
   }
 

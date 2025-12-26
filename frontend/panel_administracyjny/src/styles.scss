@@ -100,6 +100,32 @@ ol, ul, menu {
   line-height: map.get(i.$font-line-heights, i.$font-size-xs);
 }
 
+.notificationEnter {
+  animation: notificationEnter i.$duration-lg i.$cubic-in-out;
+}
+
+.notificationLeave {
+  animation: notificationLeave i.$duration-lg i.$cubic-in-out;
+}
+
+@keyframes notificationEnter {
+  from {
+    margin-bottom: -50%;
+    opacity: 0;
+  }
+  to {
+    margin-bottom: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes notificationLeave {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -112,7 +138,7 @@ ol, ul, menu {
 @keyframes out {
   from {
     opacity: 1;
-    filter: blur(5px);
+    filter: blur(3px);
   }
   to {
     opacity: 0;
@@ -123,7 +149,7 @@ ol, ul, menu {
 @keyframes in {
   from {
     opacity: 0;
-    filter: blur(5px);
+    filter: blur(3px);
   }
   to {
     opacity: 1;

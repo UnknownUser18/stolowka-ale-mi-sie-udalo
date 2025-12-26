@@ -1,5 +1,5 @@
 <button (click)="changeMonth('previous')">
-  <fa-icon [icon]="faArrowLeft" />
+  <fa-icon [icon]="icons.faArrowLeft" />
 </button>
 <h2>{{
     date().toLocaleDateString(undefined, {
@@ -8,7 +8,7 @@
     }) | titlecase
   }}</h2>
 <button (click)="changeMonth('next')">
-  <fa-icon [icon]="faArrowRight" />
+  <fa-icon [icon]="icons.faArrowRight" />
 </button>
 <table>
   <tr>
