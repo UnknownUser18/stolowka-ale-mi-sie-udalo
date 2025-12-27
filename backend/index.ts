@@ -5,6 +5,7 @@ import { Connection, QueryError, QueryResult } from 'mysql2/promise';
 import { Debug, ErrorPacket, Errors, getStatusCodeByCode, Info, Packet, StatusCodes, Warning } from './types';
 import { configureConsoleOutput } from './config';
 import zstiRoutes from './zsti/zsti';
+import internatRoutes from './internat/internat';
 import infoRoutes from './info';
 import cors from 'cors';
 
@@ -20,7 +21,8 @@ configureConsoleOutput(app, env.DEBUG_MODE === 'true');
 app.use(cors());
 app.use(express.json());
 app.use('/api/zsti', zstiRoutes);
-app.use('/api/info', infoRoutes)
+app.use('/api/info', infoRoutes);
+app.use('/api/internat', internatRoutes);
 
 
 if (!env.DB_HOST || !env.DB_USER || env.DB_PASSWORD === undefined || !env.DB_NAME || !env.DB_PORT) {
@@ -148,4 +150,28 @@ export function getData(packet : Packet | ErrorPacket) : any | null {
 export function sendIncorrectDataValueResponse(res : express.Response) : express.Response {
   const packet = new ErrorPacket(StatusCodes["Incorrect data value"]);
   return sendResponse(res, packet);
+}
+
+export function isID(id : any) : boolean {
+  return !(!Number.isInteger(id) || id < 1);
+}
+
+export function isString(value : any, maxLength? : number) : boolean {
+  return typeof value === 'string' && value.length <= (maxLength || Infinity);
+}
+
+export function isNumber(value : any) : boolean {
+  return typeof value === 'number' && !isNaN(value) && isFinite(value);
+}
+
+export function isBoolean(value : any) : boolean {
+  return typeof value === 'boolean';
+}
+
+export function isDateString(value : any) : boolean {
+  return typeof value === 'string' && !isNaN(Date.parse(value));
+}
+
+export function isMonth(value : any) : boolean {
+  return Number.isInteger(value) && value >= 1 && value <= 12;
 }

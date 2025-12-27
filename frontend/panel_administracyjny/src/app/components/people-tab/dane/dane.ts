@@ -2,14 +2,15 @@ import { Component, effect, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Persons, TypOsoby, ZPerson } from '@database/persons/persons';
 import { faArrowsRotate, faCircleInfo, faPaperPlane, faRotateLeft, faUser, faUserShield } from '@fortawesome/free-solid-svg-icons';
-import { Guardians, ZGuardian } from '@database/guardians/guardians';
+import { Guardians, ZGuardian, ZGuardianAdult } from '@database/guardians/guardians';
 import { Notifications } from '@services/notifications';
-import { ButtonDanger, ButtonPrimary, ButtonSecondary, Fieldset, Input, Label, LabelOneLine, Switch } from '@ui';
+import { ButtonDanger, ButtonPrimary, ButtonSecondary, Dropdown, Fieldset, Input, Label, LabelOneLine, Switch } from '@ui';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { Tooltip } from '@utils/tooltip/tooltip';
 import { TooltipDelayTriggerDirective } from '@directives/delayTooltip/tooltip-delay-trigger.directive';
 import { disabled, Field, FieldTree, form, PathKind, pattern, required, SchemaPath } from "@angular/forms/signals";
 import { State } from "@shared/switch/switch";
+import { Info } from "@shared/info";
 import Child = PathKind.Child;
 
 type TypOsobyString = `${ TypOsoby }`;
@@ -42,6 +43,7 @@ interface ZPersonForm {
     ButtonPrimary,
     ButtonDanger,
     Field,
+    Dropdown,
   ],
   templateUrl : './dane.html',
   styleUrl : './dane.scss'
@@ -74,6 +76,14 @@ export class Dane {
     email                  : null,
     uczeszcza              : 'off',
   });
+
+  protected typOsobyValues : Map<string, string> = new Map<string, string>([
+    [`${ TypOsoby.UCZEN }`, 'Uczeń'],
+    [`${ TypOsoby.NAUCZYCIEL }`, 'Nauczyciel'],
+    [`${ TypOsoby.PELNOLETNI_UCZEN }`, 'Pełnoletni uczeń']
+  ]);
+
+
   protected ZPersonForm = form(this.ZPersonSignal, (schemaPath) => {
     required(schemaPath.imie_nazwisko, { message : 'Imię i nazwisko jest wymagane.' });
     pattern(schemaPath.imie_nazwisko, this.namePattern, { message : 'Imię i nazwisko musi zawierać imię i nazwisko oddzielone spacją, składające się tylko z liter.' });
@@ -93,7 +103,7 @@ export class Dane {
       when    : ({ valueOf }) => this.toTypOsoby(valueOf(schemaPath.typ_osoby)) === TypOsoby.UCZEN
     });
     pattern(schemaPath.imie_nazwisko_opiekuna as SchemaPath<string, 1, Child>, this.namePattern, { message : 'Imię i nazwisko opiekuna musi zawierać imię i nazwisko oddzielone spacją, składające się tylko z liter.', });
-    disabled(schemaPath.imie_nazwisko_opiekuna, ({ valueOf }) => this.toTypOsoby(valueOf(schemaPath.typ_osoby)) === TypOsoby.NAUCZYCIEL);
+    disabled(schemaPath.imie_nazwisko_opiekuna, ({ valueOf }) => this.toTypOsoby(valueOf(schemaPath.typ_osoby)) === TypOsoby.NAUCZYCIEL || this.toTypOsoby(valueOf(schemaPath.typ_osoby)) === TypOsoby.PELNOLETNI_UCZEN);
 
     required(schemaPath.telefon, {
       message : 'Telefon jest wymagany.',
@@ -131,53 +141,114 @@ export class Dane {
     return value as FieldTree<string, string>;
   }
 
+  private get getData() : void {
+    const person = this.personsS.personZ();
+    if (!person) {
+      this.notificationsS.createErrorNotification('Nie udało się pobrać danych osoby.', 10, Info.CONTACT_ADMIN);
+      return;
+    }
+
+    if (person.opiekun_id) {
+      this.guardiansS.getZGuardian(person.id).subscribe((guardian) => {
+        if (!guardian)
+          this.notificationsS.createErrorNotification('Nie udało się pobrać danych opiekuna.', 10, Info.CONTACT_ADMIN);
+
+        this.guardian = guardian;
+
+        if (!person.typ_osoby_id) throw new Error('Brak typu osoby dla osoby posiadającej opiekuna / będąca pełnoletnia.');
+
+        this.setForm(person.typ_osoby_id, guardian);
+      });
+    } else {
+      this.setForm(TypOsoby.NAUCZYCIEL);
+      this.guardian = null;
+    }
+  }
+
   protected sendChanges() {
     const user = this.personsS.personZ();
     if (!user) return;
+
 
     const { imie_nazwisko, klasa, miasto, typ_osoby, imie_nazwisko_opiekuna, telefon, email, uczeszcza } = this.ZPersonForm().value();
     const typOsobyValue = this.toTypOsoby(typ_osoby);
     if (this.ZPersonForm().invalid()) return;
     this.isSending.set(true);
 
-    const guardianData : ZGuardian | null = typOsobyValue === TypOsoby.UCZEN ? {
-      id_opiekun    : user.opiekun_id!,
-      imie_opiekuna : imie_nazwisko_opiekuna!.split(' ')[0],
-      nazwisko_opiekuna : imie_nazwisko_opiekuna!.split(' ')[1],
-      nr_kierunkowy : Number(telefon!.split(' ')[0].replace('+', '')),
-      telefon       : Number(telefon!.split(' ')[1]),
-      email         : email!,
-    } : null;
+
+    const isStudent = typOsobyValue === TypOsoby.UCZEN;
+    const isAdultStudent = typOsobyValue === TypOsoby.PELNOLETNI_UCZEN;
+    const isTeacher = typOsobyValue === TypOsoby.NAUCZYCIEL;
+
+    let guardianData : ZGuardian | ZGuardianAdult | null = null;
+
+    if (!isTeacher) {
+      if (!telefon || !email) {
+        this.notificationsS.createErrorNotification('Nie udało sie zaktualizować danych opiekuna.', 10, 'Brak wymaganych danych. Zabrakło numeru telefonu lub emaila.');
+        this.isSending.set(false);
+        return;
+      }
+
+      if (isStudent) {
+        if (!imie_nazwisko_opiekuna) {
+          this.notificationsS.createErrorNotification('Nie udało sie zaktualizować danych opiekuna.', 10, 'Brak wymaganych danych. Zabrakło imienia i nazwiska opiekuna.');
+          this.isSending.set(false);
+          return;
+        }
+
+        const splitGuardianName = imie_nazwisko_opiekuna.split(' ');
+        guardianData = {
+          id_opiekun        : user.opiekun_id!,
+          imie_opiekuna     : splitGuardianName[0],
+          nazwisko_opiekuna : splitGuardianName[1],
+          nr_kierunkowy     : Number(telefon.split(' ')[0].replace('+', '')),
+          telefon           : Number(telefon.split(' ')[1]),
+          email             : email,
+        } as ZGuardian;
+      } else if (isAdultStudent) {
+        guardianData = {
+          id_opiekun        : user.opiekun_id!,
+          imie_opiekuna     : null,
+          nazwisko_opiekuna : null,
+          nr_kierunkowy     : Number(telefon.split(' ')[0].replace('+', '')),
+          telefon           : Number(telefon.split(' ')[1]),
+          email             : email,
+        } as ZGuardianAdult;
+      } else {
+        throw new Error('Nieobsługiwany typ osoby przy tworzeniu danych opiekuna.');
+      }
+    }
 
     const person : ZPerson = {
       id           : user.id,
       imie         : imie_nazwisko.split(' ')[0],
       nazwisko     : imie_nazwisko.split(' ')[1],
-      klasa        : typOsobyValue === TypOsoby.UCZEN ? klasa! : undefined,
+      klasa : !isTeacher ? klasa! : undefined,
       miasto       : miasto === 'on',
       uczeszcza    : uczeszcza === 'on',
       typ_osoby_id : typOsobyValue,
     }
 
-    if (typOsobyValue === TypOsoby.UCZEN) {
+    if (typOsobyValue === TypOsoby.UCZEN || typOsobyValue === TypOsoby.PELNOLETNI_UCZEN) {
       if (!guardianData) {
-        this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych opiekuna.', 10, 'Nie znaleziono danych opiekuna. To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+        this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych opiekuna.', 10, `Nie znaleziono danych opiekuna. ${ Info.CONTACT_ADMIN }`);
         this.isSending.set(false);
         return;
       }
 
       this.guardiansS.updateZGuardian(user.id, guardianData).subscribe((guardian_id) => {
         if (!guardian_id) {
-          this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych opiekuna.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+          this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych opiekuna.', 10, Info.CONTACT_ADMIN);
           this.isSending.set(false);
           return;
         }
 
         person.opiekun_id = guardian_id;
 
+
         this.personsS.updateZPerson(person).subscribe((success) => {
           if (!success) {
-            this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych osoby.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+            this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych osoby.', 10, Info.CONTACT_ADMIN);
             this.isSending.set(false);
             return;
           }
@@ -193,7 +264,7 @@ export class Dane {
     } else if (typOsobyValue === TypOsoby.NAUCZYCIEL) {
       this.personsS.updateZPerson(person).subscribe((success) => {
         if (!success) {
-          this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych osoby.', 10, 'Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
+          this.notificationsS.createErrorNotification('Nie udało się zaktualizować danych osoby.', 10, Info.CONTACT_ADMIN);
           this.isSending.set(false);
           return;
         }
@@ -216,27 +287,8 @@ export class Dane {
       this.setForm(TypOsoby.UCZEN, this.guardian ?? undefined);
     } else if (typOsobyValue === TypOsoby.NAUCZYCIEL) {
       this.setForm(TypOsoby.NAUCZYCIEL);
-    }
-  }
-
-  private get getData() : void {
-    const person = this.personsS.personZ();
-    if (!person) {
-      this.notificationsS.createErrorNotification('Nie udało się pobrać danych osoby.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
-      return;
-    }
-
-    if (person.opiekun_id) {
-      this.guardiansS.getZGuardian(person.id).subscribe((guardian) => {
-        if (!guardian)
-          this.notificationsS.createErrorNotification('Nie udało się pobrać danych opiekuna.', 10, 'To nie powinno się wydarzyć. Jeśli problem będzie się powtarzał, skontaktuj się z administratorem.');
-
-        this.guardian = guardian;
-        this.setForm(TypOsoby.UCZEN, guardian);
-      });
-    } else {
-      this.setForm(TypOsoby.NAUCZYCIEL);
-      this.guardian = null;
+    } else if (typOsobyValue === TypOsoby.PELNOLETNI_UCZEN) {
+      this.setForm(TypOsoby.PELNOLETNI_UCZEN, this.guardian ?? undefined);
     }
   }
 
@@ -275,13 +327,28 @@ export class Dane {
         email         : null,
         uczeszcza     : uczeszcza ? 'on' : 'off',
       });
+    } else if (type === TypOsoby.PELNOLETNI_UCZEN) {
+      if (!guardian)
+        throw new Error('Osoba jest pełnoletnim uczniem, ale nie posiada danych wymaganych.');
+
+      const { nr_kierunkowy, telefon, email } = guardian;
+
+      this.ZPersonForm().setControlValue({
+        imie_nazwisko          : `${ imie } ${ nazwisko }`,
+        klasa                  : klasa!,
+        miasto                 : miasto ? 'on' : 'off',
+        typ_osoby              : `${ type }`,
+        imie_nazwisko_opiekuna : null,
+        telefon                : `+${ nr_kierunkowy } ${ telefon! }`,
+        email                  : email,
+        uczeszcza              : uczeszcza ? 'on' : 'off',
+      });
     }
   }
 
   /**
    * @deprecated Temporary workaround for a typing issue. Remove when fixed in Angular.
    */
-  //! Temporary workaround for a typing issue. Remove when fixed in Angular.
   private toTypOsoby(value : TypOsobyString | TypOsoby) : TypOsoby {
     return typeof value === 'number' ? value : Number(value) as TypOsoby;
   }

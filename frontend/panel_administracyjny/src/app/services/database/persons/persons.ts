@@ -8,6 +8,7 @@ import { LocalAbsenceChanges } from '../declarations/declarations';
 export enum TypOsoby {
   UCZEN = 1,
   NAUCZYCIEL = 2,
+  PELNOLETNI_UCZEN = 3
 }
 
 export interface ZPerson {
@@ -84,5 +85,4 @@ export class Persons extends Types {
   public isTeacher(person : ZPerson) : boolean {
     return person.typ_osoby_id === TypOsoby.NAUCZYCIEL;
   }
-
 }

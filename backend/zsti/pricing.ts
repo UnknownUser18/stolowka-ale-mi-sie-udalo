@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { createPacket, executeQuery, sendIncorrectDataValueResponse, sendResponse } from "../index";
+import { createPacket, executeQuery, isDateString, isID, isNumber, sendIncorrectDataValueResponse, sendResponse } from "../index";
 import { StatusCodes } from "../types";
-import { isDateString, isID, isNumber } from "./zsti";
 
 const router = Router({
   strict        : true,

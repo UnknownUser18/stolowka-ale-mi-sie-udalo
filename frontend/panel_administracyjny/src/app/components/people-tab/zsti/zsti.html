@@ -109,6 +109,7 @@
       <div>
         <span>Imię:</span>
         <label>
+          <dropdown [delayT]="filterTooltip" [delay]="1500" [field]="filterForm.imie_filter" [values]="filteringOptions" aria-label="Filtr imienia" />
           <!--          <select [delayT]="filterTooltip" [delay]="1000" [field]="filterForm.imie_filter" aria-label="Filtr imienia">-->
           <!--            @for (option of filteringOptions; track option[0]) {-->
           <!--              <option [value]="option[0]">{{ option[1] }}</option>-->
@@ -122,7 +123,7 @@
       <div>
         <span>Nazwisko:</span>
         <label>
-          <dropdown [delayT]="filterTooltip" [delay]="2500" [field]="filterForm.nazwisko_filter" [values]="filteringOptions" aria-label="Filtr nazwiska" />
+          <dropdown [delayT]="filterTooltip" [delay]="1500" [field]="filterForm.nazwisko_filter" [values]="filteringOptions" aria-label="Filtr nazwiska" />
           <!--          <select [delayT]="filterTooltip" [delay]="1000" [field]="filterForm.nazwisko_filter" aria-label="Filtr nazwiska">-->
           <!--            @for (option of filteringOptions; track option[0]) {-->
           <!--              <option [value]="option[0]">{{ option[1] }}</option>-->
@@ -155,11 +156,7 @@
       </label>
       <label label-one-line>
         <span>Typ osoby:</span>
-        <select [field]="filterForm.typ_osoby">
-          <option [value]="TypOsoby.UCZEN">Uczeń</option>
-          <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
-          <option [value]="'all'">Wszyscy</option>
-        </select>
+        <dropdown [field]="filterForm.typ_osoby" [values]="typOsobyOptions" aria-label="Typ osoby" />
       </label>
     </fieldset>
     <button button-danger type="reset">

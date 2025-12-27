@@ -76,6 +76,14 @@ export class Zsti {
     ['excludes', 'Nie zawiera'],
   ]);
 
+  protected readonly typOsobyOptions : Map<string, string> = new Map([
+    ['all', 'Wszyscy'],
+    [TypOsoby.UCZEN.toString(), 'Uczeń'],
+    [TypOsoby.NAUCZYCIEL.toString(), 'Nauczyciel'],
+    [TypOsoby.PELNOLETNI_UCZEN.toString(), 'Pełnoletni uczeń'],
+  ]);
+
+
   protected readonly sortOptions : Map<SortOption, string> = new Map([
     ['nameAsc', 'Imię rosnąco'],
     ['nameDesc', 'Imię malejąco'],

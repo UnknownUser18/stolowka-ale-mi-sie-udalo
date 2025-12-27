@@ -13,6 +13,11 @@ export interface ZGuardian {
   email : string,
 }
 
+export interface ZGuardianAdult extends Omit<ZGuardian, 'imie_opiekuna' | 'nazwisko_opiekuna'> {
+  imie_opiekuna : null;
+  nazwisko_opiekuna : null;
+}
+
 @Injectable({
   providedIn : 'root'
 })
@@ -36,7 +41,7 @@ export class Guardians extends Types {
     );
   }
 
-  public updateZGuardian(id_person : ZPerson["opiekun_id"], guardian : ZGuardian) : Observable<ZGuardian["id_opiekun"] | null> {
+  public updateZGuardian(id_person : ZPerson["opiekun_id"], guardian : ZGuardian | ZGuardianAdult) : Observable<ZGuardian["id_opiekun"] | null> {
     if (!id_person)
       throw new Error('Osoba nie posiada przypisanego opiekuna.');
     else if (id_person <= 0)
@@ -49,7 +54,7 @@ export class Guardians extends Types {
     return this.http.put<Packet>(`${ this.api }zsti/guardian/${ id_person }/update`, body).pipe(
       map((res) => {
         if (!this.isArray(res)) return null;
-        return res.status === StatusCodes.Updated ? res.data![0] as ZGuardian["id_opiekun"] : null;
+        return res.status === StatusCodes.Updated ? res.data![0].id_opiekun as ZGuardian["id_opiekun"] : null;
       }),
       catchError(() => of(null))
     );

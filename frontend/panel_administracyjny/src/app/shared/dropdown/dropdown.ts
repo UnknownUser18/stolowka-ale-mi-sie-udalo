@@ -12,9 +12,6 @@ import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
   styleUrl    : './dropdown.scss',
 })
 export class Dropdown implements FormValueControl<string> {
-  public readonly values = input.required<Map<string, string>>();
-  public readonly defaultValue = input<string>('');
-  public readonly value = model<string>(this.defaultValue());
   protected readonly isOpen = signal(false);
   protected readonly displayValue = computed(() => {
     const val = this.value();
@@ -22,6 +19,10 @@ export class Dropdown implements FormValueControl<string> {
   });
   protected readonly faChevronDown = faChevronDown;
   protected readonly Array = Array;
+
+  public readonly values = input.required<Map<string, string>>();
+  public readonly defaultValue = input<string>('');
+  public readonly value = model<string>(this.defaultValue());
 
   constructor() {}
 

@@ -6,19 +6,21 @@
 }
 
 .dropdown-toggle {
-  padding: i.$padding-xs i.$padding-xs i.$padding-xs i.$padding-sm;
+  padding: i.$padding-2xs;
   display: flex;
   gap: i.$padding-2xs;
   justify-content: space-between;
   align-items: center;
+  font-size: i.$font-size-xs;
   border: i.$base-border var(--border);
-  border-radius: i.$border-radius-lg;
-  background-color: var(--bg-light);
-  color: var(--text);
-  transition: i.transition(background-color, i.$duration-sm);
+  border-radius: i.$border-radius-md;
+  background-color: var(--surface-container);
+  color: var(--on-surface-variant);
+  transition: i.transition(background-color, i.$duration-sm), i.transition(color, i.$duration-sm);
 
   &:hover {
-    background-color: var(--highlight);
+    background-color: var(--surface-container-high);
+    color: var(--on-surface);
   }
 }
 

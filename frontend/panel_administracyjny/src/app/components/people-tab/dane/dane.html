@@ -1,4 +1,5 @@
 @let isStudent = Number(ZPersonForm.typ_osoby().value()) === TypOsoby.UCZEN;
+@let isAdult = Number(ZPersonForm.typ_osoby().value()) === TypOsoby.PELNOLETNI_UCZEN;
 <form>
   <fieldset fieldset-default>
     <legend>
@@ -31,10 +32,7 @@
       @let typ_osoby_errors = ZPersonForm.typ_osoby().errors();
 
       <span>Typ osoby:</span>
-      <select (change)="updateOnTypOsobyChange()" [field]="ZPersonForm.typ_osoby" aria-label="Typ osoby">
-        <option [value]="TypOsoby.UCZEN">Uczeń</option>
-        <option [value]="TypOsoby.NAUCZYCIEL">Nauczyciel</option>
-      </select>
+      <dropdown (change)="updateOnTypOsobyChange()" [field]="ZPersonForm.typ_osoby" [values]="typOsobyValues" aria-label="Typ osoby" />
       @if (typ_osoby_errors.length > 0 && ZPersonForm.typ_osoby().touched()) {
         @for (error of typ_osoby_errors; track error) {
           <span class="error-message">{{ error.message }}</span>
@@ -73,7 +71,7 @@
       @let imie_nazwisko_opiekuna_errors = ZPersonForm.imie_nazwisko_opiekuna().errors();
 
       <span>Imię i nazwisko opiekuna:</span>
-      <input [delayT]="!isStudent ? disabledTooltip : undefined" [delay]="500" [field]="asStringField(ZPersonForm.imie_nazwisko_opiekuna)" [placeholder]="isStudent ? 'Imię i nazwisko opiekuna...' : 'Nauczyciel...'" aria-label="Imię i nazwisko opiekuna" input-default type="text">
+      <input [delayT]="isAdult ? disabledAdultTooltip : !isStudent ? disabledTooltip : undefined" [delay]="500" [field]="asStringField(ZPersonForm.imie_nazwisko_opiekuna)" [placeholder]="isStudent ? 'Imię i nazwisko opiekuna...' : isAdult ? 'Pełnoletni uczeń...' : 'Nauczyciel...'" aria-label="Imię i nazwisko opiekuna" input-default type="text">
       @if (imie_nazwisko_opiekuna_errors.length > 0 && ZPersonForm.imie_nazwisko_opiekuna().touched()) {
         @for (error of imie_nazwisko_opiekuna_errors; track error) {
           <span class="error-message">{{ error.message }}</span>
@@ -130,4 +128,9 @@
 <app-tooltip #disabledTooltip [horizontal]="true">
   <fa-icon [icon]="icons.faCircleInfo" />
   <p>Nie można edytować tego pola, ponieważ jest osoba jest zaznaczona jako <b>nauczyciel</b>.</p>
+</app-tooltip>
+
+<app-tooltip #disabledAdultTooltip [horizontal]="true">
+  <fa-icon [icon]="icons.faCircleInfo" />
+  <p>Nie można edytować tego pola, ponieważ jest osoba jest zaznaczona jako <b>pełnoletni uczeń</b>.</p>
 </app-tooltip>
